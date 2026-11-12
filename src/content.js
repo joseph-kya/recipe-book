@@ -12,6 +12,17 @@ const pdfFiles = import.meta.glob('/content/pdfs/*.pdf', {
   import: 'default',
 });
 
+// Photos of the finished bake, from each recipe's source page (content/photos.json).
+// Paths resolve against the site base, so they work under /recipe-book/ too.
+import photoIndex from '../content/photos.json';
+
+function photoFor(slug) {
+  const p = photoIndex[slug];
+  if (!p?.photo) return null;
+  const base = `${import.meta.env.BASE_URL}${p.photo}`;
+  return { small: `${base}-400.webp`, large: `${base}-800.webp`, credit: p.credit };
+}
+
 function pdfFor(slug) {
   return pdfFiles[`/content/pdfs/${slug}.pdf`] ?? null;
 }
@@ -22,6 +33,8 @@ export const recipes = Object.values(recipeFiles)
     // Short route from the optional "route" field, else the slug itself.
     route: r.route || r.slug,
     pdf: pdfFor(r.slug),
+    photo: photoFor(r.slug),
+    photoCredit: photoFor(r.slug)?.credit ?? null,
     gramsPdf: pdfFor(`${r.slug}.grams`),
   }))
   .sort((a, b) => a.number - b.number)

@@ -1,0 +1,57 @@
+/* "How it'll look": a small framed diner print at the end of the recipe.
+   Cream mat, choc rule, hard shadow, a slight tilt like the tip cards.
+   --photo-h (set per page by the paginator) caps the picture's height. */
+
+.photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--sp-5) 0 0;
+}
+
+.photo-label {
+  margin-bottom: var(--sp-2);
+  font-family: var(--hand);
+  font-size: var(--fs-s);
+  line-height: 1.2;
+  color: var(--choc-soft);
+  transform: rotate(-1.5deg);
+}
+
+.photo-mat {
+  /* the picture is 4:3; its width follows from the height it may take */
+  width: min(100%, calc(var(--photo-h, 270px) * 4 / 3 + 2 * (var(--sp-2) + var(--rule))));
+  padding: var(--sp-2);
+  background: var(--cream);
+  border: var(--rule) solid var(--choc);
+  border-radius: var(--r-s);
+  box-shadow: 4px 4px 0 var(--choc);
+  transform: rotate(-1deg);
+}
+
+.photo-mat img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--mint);
+}
+
+.photo-credit {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+  color: var(--choc-soft);
+}
+
+/* a 44px tall tap target without growing the type */
+.photo-credit a {
+  display: inline-block;
+  padding: 0.85rem 0;
+  font-weight: 700;
+  color: var(--cherry);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}

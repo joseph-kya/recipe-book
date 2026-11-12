@@ -288,7 +288,7 @@ function balance(root, src, pageHeight) {
   }
   // Measure the ornament with the exact closing-page styles; a percentage of
   // unused space alone cannot guarantee that it fits on a short desktop.
-  return best.pages.map((segs, i) => {
+  const pages = best.pages.map((segs, i) => {
     if (i === 0 || !isClosing(segs)) return segs;
     const box = newPageBox(root, src, i, 0);
     box.pad.parentElement.classList.add('page-body--closing');
@@ -307,12 +307,40 @@ function balance(root, src, pageHeight) {
     box.face.remove();
     return ornament && fits ? [{ kind: 'ornament' }, ...segs] : segs;
   });
+  return placePhoto(root, src, pages, best.used, pageHeight);
+}
+
+// The finished-bake photo is optional: it goes at the end of the last page
+// only when at least PHOTO_MIN px of picture fits there (up to 42% of the
+// page), else on the blank facing page a recipe ending on a left page already
+// has; otherwise it is left out. It never adds a page.
+const PHOTO_MIN = 160;
+function placePhoto(root, src, pages, used, pageHeight) {
+  const figure = src.querySelector('[data-unit="photo"]');
+  if (!figure) return pages;
+  const max = Math.round(pageHeight * 0.42);
+  // Everything around the picture (label, mat, credit, margin), measured once.
+  const box = newPageBox(root, src, 1, 0);
+  const probe = figure.cloneNode(true);
+  probe.style.setProperty('--photo-h', `${PHOTO_MIN}px`);
+  box.pad.append(probe);
+  const img = probe.querySelector('img');
+  const chrome = probe.getBoundingClientRect().height - img.getBoundingClientRect().height + parseFloat(getComputedStyle(probe).marginTop);
+  box.face.remove();
+  const last = pages.length - 1;
+  const room = (1 - used[last]) * pageHeight - 12 - chrome;
+  if (room >= PHOTO_MIN) {
+    const h = Math.floor(Math.min(max, room));
+    return [...pages.slice(0, last), [...pages[last].filter((seg) => seg.kind !== 'ornament'), { kind: 'photo', h }]];
+  }
+  if (last > 0 && pages.length % 2 === 1) return [...pages, [{ kind: 'photo', h: max }]];
+  return pages;
 }
 
 // A closing page holds only tips and/or the credits: it is composed on purpose
 // (see .page-pad--closing), so it may be short.
 export const isClosing = (segs) =>
-  segs.length > 0 && segs.every((seg) => seg.kind === 'tips' || seg.kind === 'credits' || seg.kind === 'ornament');
+  segs.length > 0 && segs.every((seg) => ['tips', 'credits', 'ornament', 'photo'].includes(seg.kind));
 
 // Widows and orphans in a split card: an ingredient piece on either side of a
 // page break must carry at least 3 rows (or all that remain, if fewer). The

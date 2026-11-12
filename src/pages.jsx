@@ -7,6 +7,7 @@ import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import Scaler from './Scaler.jsx';
+import Photo from './Photo.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
@@ -406,6 +407,7 @@ function RecipeFull({ recipe, lang, units }) {
         <Method recipe={recipe} lang={lang} />
         <Tips recipe={recipe} lang={lang} />
         <Credits recipe={recipe} lang={lang} units={units} />
+        <Photo recipe={recipe} lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -415,6 +417,8 @@ function RecipeFull({ recipe, lang, units }) {
 // Wide: one fixed-height book page holding the segments the paginator gave it.
 function RecipePage({ recipe, lang, units, segs, first }) {
   const closing = !first && isClosing(segs);
+  // the photo, when the paginator found room for it, stands in for the cupcake
+  const hasPhoto = segs.some((seg) => seg.kind === 'photo');
   return (
     <div className={`page-body recipe${closing ? ' page-body--closing' : ''}`}>
       <Checkers tone="choc" edge="top" />
@@ -426,7 +430,8 @@ function RecipePage({ recipe, lang, units, segs, first }) {
           if (seg.kind === 'menu') return <Ingredients key={i} {...props} units={units} items={seg.items} cont={seg.cont} />;
           if (seg.kind === 'ticket') return <Method key={i} {...props} steps={seg.items} cont={seg.cont} />;
           if (seg.kind === 'tips') return <Tips key={i} {...props} items={seg.items} />;
-          if (seg.kind === 'ornament') return <Cupcake key={i} className="closing-cupcake" />;
+          if (seg.kind === 'ornament') return hasPhoto ? null : <Cupcake key={i} className="closing-cupcake" />;
+          if (seg.kind === 'photo') return <Photo key={i} {...props} height={seg.h} />;
           return <Credits key={i} {...props} units={units} />;
         })}
       </div>
@@ -457,6 +462,7 @@ export function RecipeMeasure({ recipe, lang, units }) {
       <Tips recipe={recipe} lang={lang} />
       <Credits recipe={recipe} lang={lang} units={units} />
       <Cupcake className="closing-cupcake" />
+      <Photo recipe={recipe} lang={lang} height={160} />
     </div>
   );
 }

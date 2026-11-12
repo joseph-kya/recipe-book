@@ -1,1 +1,1156 @@
-body { margin: 0; }
+/* Bread Pitt's Recipe Book: Retro Diner, translated from design-ref/diner.html. */
+
+/* ---------- fonts: self-hosted, OFL, no network ---------- */
+@font-face {
+  font-family: 'Shrikhand';
+  src: url('../assets/fonts/Shrikhand-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lilita One';
+  src: url('../assets/fonts/LilitaOne-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Kalam';
+  src: url('../assets/fonts/Kalam-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Kalam';
+  src: url('../assets/fonts/Kalam-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('../assets/fonts/Nunito-VariableFont_wght.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('../assets/fonts/Nunito-Italic-VariableFont_wght.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ---------- tokens ---------- */
+:root {
+  --cherry: #c8233a;
+  --cherry-ink: #a11b2e; /* cherry deep enough for text on mint (5:1) */
+  --mint: #a8dccb;
+  --mustard: #f2b134;
+  --choc: #3a2216;
+  --cream: #fff4df;
+  --pink: #f7c9cf;
+  --cue: #6b4a36;
+  --choc-soft: #4a3022;
+
+  --display: 'Shrikhand', 'Georgia', serif;
+  --badge: 'Lilita One', 'Arial Rounded MT Bold', sans-serif;
+  --hand: 'Kalam', 'Comic Sans MS', cursive;
+  --body: 'Nunito', system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --press: 160ms;
+  --rule: 3px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--choc);
+  font: 400 1rem/1.55 var(--body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--choc);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- the stage and the book ---------- */
+.app,
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.book {
+  position: absolute;
+  touch-action: pan-y;
+}
+
+.book.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.face {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--cream);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.face--front,
+.face--back {
+  z-index: 3;
+  will-change: transform;
+}
+
+.face--fading {
+  z-index: 5;
+  animation: fade-out 200ms var(--ease-out) forwards;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.face-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(58, 34, 22, 0.35) transparent;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.face--R .shade {
+  background: linear-gradient(to right, rgba(40, 20, 10, 0.65), rgba(40, 20, 10, 0.12) 70%);
+}
+
+.face--L .shade {
+  background: linear-gradient(to left, rgba(40, 20, 10, 0.65), rgba(40, 20, 10, 0.12) 70%);
+}
+
+/* Phone: one page, the spine is the left edge of the screen. */
+.book--narrow {
+  inset: 0;
+  overflow: hidden;
+  perspective: 1400px;
+}
+
+.book--narrow .face {
+  left: 0;
+  width: 100%;
+  transform-origin: left center;
+}
+
+/* Wide: an open book on a diner-tile table. */
+.stage--wide {
+  background-color: var(--choc);
+  background-image: repeating-conic-gradient(#43291c 0 25%, var(--choc) 0 50%);
+  background-size: 64px 64px;
+}
+
+.stage--wide {
+  --ph: min(calc(100dvh - 8.5rem), 60rem);
+  --pw: min(calc(var(--ph) * 0.74), calc(50vw - 6.5rem));
+}
+
+.book--wide {
+  width: calc(var(--pw) * 2);
+  height: var(--ph);
+  left: calc(50% - var(--pw));
+  top: calc(50% - var(--ph) / 2 - 1.75rem);
+  perspective: 2600px;
+}
+
+.book--wide .face {
+  width: 50%;
+}
+
+.book--wide .face--L {
+  left: 0;
+  transform-origin: right center;
+  border-radius: 14px 0 0 14px;
+  box-shadow: inset -22px 0 26px -18px rgba(58, 34, 22, 0.35);
+}
+
+.book--wide .face--R {
+  left: 50%;
+  transform-origin: left center;
+  border-radius: 0 14px 14px 0;
+  box-shadow: inset 22px 0 26px -18px rgba(58, 34, 22, 0.35);
+}
+
+/* ---------- shared bits ---------- */
+.page-body {
+  position: relative;
+  min-height: 100%;
+}
+
+.page-pad {
+  padding: 1.5rem 1.125rem calc(6.5rem + env(safe-area-inset-bottom));
+}
+
+.book--wide .page-pad {
+  padding: 2rem 2.25rem 3rem;
+}
+
+.checkers {
+  height: 14px;
+  background: repeating-conic-gradient(var(--c) 0 25%, var(--cream) 0 50%) 0 0 / 14px 14px;
+}
+
+.checkers--choc {
+  --c: var(--choc);
+}
+
+.checkers--cherry {
+  --c: var(--cherry);
+}
+
+.checkers--bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.eyebrow {
+  font-family: var(--badge);
+  color: var(--cherry);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+}
+
+/* Buttons: hard choc shadow; the face presses into it. */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.4rem;
+  border: var(--rule) solid var(--choc);
+  border-radius: 999px;
+  font-family: var(--badge);
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--press) var(--ease-out);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--rule) * -1);
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--choc);
+  transform: translate(4px, 4px);
+  transition: transform var(--press) var(--ease-out);
+}
+
+.btn--cherry {
+  background: var(--cherry);
+  color: var(--cream);
+}
+
+.btn--cream {
+  background: var(--cream);
+  color: var(--choc);
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+}
+
+.btn:active::before {
+  transform: translate(1px, 1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translate(-1px, -1px);
+  }
+  .btn:hover::before {
+    transform: translate(5px, 5px);
+  }
+  .btn:active {
+    transform: translate(3px, 3px);
+  }
+  .btn:active::before {
+    transform: translate(1px, 1px);
+  }
+}
+
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Starburst sticker. Floats so the title wraps around it. */
+.burst {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+}
+
+.burst svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.burst polygon {
+  fill: var(--mustard);
+  stroke: var(--choc);
+  stroke-width: 2.5;
+}
+
+.burst-text {
+  position: relative;
+  max-width: 76%;
+  font-family: var(--badge);
+  font-size: 0.85rem;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--choc);
+  transform: rotate(-8deg);
+}
+
+.burst-second {
+  display: block;
+  color: var(--cherry-ink);
+}
+
+.cupcake {
+  display: block;
+}
+
+/* ---------- cover ---------- */
+.cover {
+  display: flex;
+  flex-direction: column;
+  background: var(--cherry);
+  color: var(--cream);
+}
+
+.cover .checkers {
+  --c: var(--choc);
+  background: repeating-conic-gradient(var(--c) 0 25%, var(--cream) 0 50%) 0 0 / 14px 14px;
+  flex: none;
+}
+
+.cover .checkers--bottom {
+  position: static;
+}
+
+.cover-inner {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem calc(6.5rem + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.book--wide .cover-inner {
+  padding: 3rem 2.5rem;
+}
+
+.cover-eyebrow {
+  color: var(--cream);
+}
+
+.cover-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(3rem, 15vw, 4.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+  text-shadow: 4px 4px 0 var(--choc);
+}
+
+.book--wide .cover-title {
+  font-size: calc(var(--pw) * 0.135);
+}
+
+.cover-title span {
+  display: block;
+}
+
+.cover-cupcake {
+  width: 6.5rem;
+  transform: rotate(-8deg);
+}
+
+.cover-cupcake .cupcake-cup {
+  fill: var(--mustard);
+}
+
+.cover-burst {
+  position: absolute;
+  top: 1.75rem;
+  right: 0.75rem;
+  width: 6.25rem;
+}
+
+.book--wide .cover-burst {
+  top: 2.25rem;
+  right: 1.5rem;
+  width: 7.5rem;
+}
+
+.cover-burst .burst-text {
+  font-size: 1rem;
+}
+
+.cover-note {
+  max-width: 18rem;
+  font-family: var(--hand);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  transform: rotate(-1.5deg);
+}
+
+.cover :focus-visible {
+  outline-color: var(--cream);
+}
+
+/* The book's one entrance: the cover title stamps in, the sticker lands after it. */
+@media (prefers-reduced-motion: no-preference) {
+  .cover-title span {
+    animation: stamp 560ms var(--ease-out) both;
+  }
+  .cover-title span + span {
+    animation-delay: 90ms;
+  }
+  .cover-burst {
+    animation: sticker 520ms var(--ease-out) 260ms both;
+  }
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.96);
+    }
+  }
+  @keyframes sticker {
+    from {
+      opacity: 0;
+      transform: rotate(-30deg) scale(0.9);
+    }
+  }
+}
+
+/* ---------- contents ---------- */
+.contents-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 3rem;
+  line-height: 1.05;
+  color: var(--cherry);
+  margin: 0.25rem 0 1.25rem;
+}
+
+.toc li + li {
+  border-top: 2px dotted rgba(58, 34, 22, 0.5);
+}
+
+.toc-link {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  min-height: 4.5rem;
+  padding: 0.75rem 0;
+  text-decoration: none;
+}
+
+.toc-no {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--mustard);
+  border: var(--rule) solid var(--choc);
+  font-family: var(--badge);
+  font-size: 1.2rem;
+  transition: transform var(--press) var(--ease-out);
+}
+
+.toc-text {
+  display: block;
+  min-width: 0;
+  transition: transform 200ms var(--ease-out);
+}
+
+.toc-title {
+  display: block;
+  font-family: var(--badge);
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.toc-tag {
+  display: block;
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: var(--cue);
+}
+
+.toc-link:active .toc-no {
+  transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .toc-link:hover .toc-title {
+    color: var(--cherry);
+  }
+  .toc-link:hover .toc-text {
+    transform: translateX(4px);
+  }
+}
+
+.how {
+  font-size: 1.05rem;
+}
+
+.how-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 2.4rem;
+  line-height: 1.08;
+  color: var(--cherry);
+  margin-bottom: 1.25rem;
+}
+
+.how p + p {
+  margin-top: 1rem;
+}
+
+.how-cupcake {
+  width: 5.5rem;
+  margin: 0.5rem 0 1.5rem;
+  transform: rotate(-8deg);
+}
+
+.how-cups {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.how-demo {
+  flex: none;
+  display: grid;
+  justify-items: end;
+  padding: 0.55rem 0.8rem;
+  background: var(--mint);
+  border: var(--rule) solid var(--choc);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--choc);
+}
+
+.how-demo-cups {
+  font-family: var(--badge);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  color: var(--cherry-ink);
+}
+
+.how-demo-metric {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--choc-soft);
+}
+
+.how--compact {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+}
+
+/* ---------- recipe: hero ---------- */
+.hero {
+  display: flow-root;
+}
+
+.hero-burst-wrap {
+  float: right;
+  width: 6rem;
+  margin: 0.4rem -0.25rem 0.5rem 0.5rem;
+  shape-outside: circle(50%);
+}
+
+.hero-burst {
+  transform: rotate(6deg);
+}
+
+.book--wide .hero-burst-wrap {
+  width: 7.25rem;
+}
+
+.recipe-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 11vw, 3rem);
+  line-height: 1.02;
+  color: var(--cherry);
+  margin-top: 0.35rem;
+  overflow-wrap: break-word;
+}
+
+.book--wide .recipe-title {
+  font-size: calc(var(--pw) * 0.085);
+}
+
+.recipe-title span {
+  display: block;
+}
+
+.tagline {
+  font-family: var(--hand);
+  font-size: 1.3rem;
+  line-height: 1.3;
+  margin-top: 0.5rem;
+  transform: rotate(-1.5deg);
+  transform-origin: left center;
+}
+
+.fallback-note {
+  clear: both;
+  margin-top: 1rem;
+  padding: 0.6rem 0.85rem;
+  border: 2px dashed var(--choc);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.stats {
+  clear: both;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding-top: 1.1rem;
+}
+
+.stats li {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: var(--choc);
+  color: var(--cream);
+  font-family: var(--badge);
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.stats b {
+  font-weight: 400;
+  color: var(--mustard);
+}
+
+.intro {
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
+  max-width: 34rem;
+}
+
+/* ---------- recipe: the mint menu card ---------- */
+.menu {
+  margin: 1.75rem 6px 0 0;
+  padding: 1.25rem 1.1rem 0.75rem;
+  background: var(--mint);
+  border: var(--rule) solid var(--choc);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--choc);
+}
+
+.menu-title {
+  font-family: var(--badge);
+  font-weight: 400;
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.menu-sub {
+  font-family: var(--hand);
+  font-size: 1rem;
+  margin: 0.25rem 0 0.4rem;
+}
+
+.ing-group-title {
+  font-family: var(--badge);
+  font-weight: 400;
+  font-size: 1.15rem;
+  color: var(--cherry-ink);
+  padding: 0.85rem 0 0.2rem;
+  border-bottom: var(--rule) solid var(--choc);
+}
+
+.ing {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+}
+
+.ing + .ing {
+  border-top: 2px dotted rgba(58, 34, 22, 0.55);
+}
+
+.ing-what {
+  flex: 1 1 55%;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.ing-name {
+  display: block;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.ing-note {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--choc-soft);
+}
+
+.ing-how {
+  flex: 0 1 auto;
+  max-width: 50%;
+  text-align: right;
+  overflow-wrap: break-word;
+}
+
+/* Cups and spoons are the number you read. Metric is the footnote. */
+.ing-amount {
+  display: block;
+  font-family: var(--badge);
+  font-size: 1.3rem;
+  line-height: 1.15;
+  color: var(--cherry-ink);
+}
+
+.amt-part {
+  white-space: nowrap;
+}
+
+.ing-metric {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--choc-soft);
+}
+
+/* ---------- recipe: the method ticket ---------- */
+.ticket {
+  margin-top: 2rem;
+  padding: 1.25rem 1.1rem 0.5rem;
+  background: #fff;
+  border: var(--rule) solid var(--choc);
+  border-radius: 8px;
+}
+
+.book--wide .ticket {
+  margin-top: 0;
+}
+
+.ticket-title {
+  font-family: var(--badge);
+  font-weight: 400;
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.equipment {
+  margin: 0.6rem 0 1.1rem;
+  font-size: 0.92rem;
+}
+
+.equipment b {
+  font-weight: 800;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 0.8rem;
+  padding-bottom: 1.1rem;
+}
+
+.step-dot {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--mustard);
+  border: 2.5px solid var(--choc);
+  font-family: var(--badge);
+  font-size: 1.2rem;
+}
+
+.step-body {
+  min-width: 0;
+}
+
+.step-title {
+  font-family: var(--badge);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--cherry);
+  padding-top: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.cue {
+  margin-top: 0.3rem;
+  font-family: var(--hand);
+  font-size: 1.1rem;
+  line-height: 1.35;
+  color: var(--cue);
+}
+
+/* ---------- recipe: tips ---------- */
+.tips {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: 1.75rem;
+}
+
+.book--wide .tips {
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+}
+
+.tip {
+  padding: 0.9rem 1rem;
+  background: var(--mustard);
+  border: 2.5px solid var(--choc);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transform: rotate(-1deg);
+}
+
+.tip + .tip {
+  background: var(--pink);
+  transform: rotate(1deg);
+}
+
+.tip-title {
+  font-family: var(--badge);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  margin-bottom: 0.3rem;
+}
+
+/* ---------- recipe: credits + the PDF ---------- */
+.credits {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: var(--rule) solid var(--choc);
+}
+
+.source {
+  margin-top: 1.25rem;
+  font-size: 0.92rem;
+}
+
+.source a,
+.small-credit a {
+  font-weight: 800;
+  color: var(--cherry);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.source a {
+  display: inline-block;
+  padding: 0.7rem 0;
+}
+
+.small-credit {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--choc-soft);
+}
+
+/* ---------- controls ---------- */
+.ctl {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ctl--turn {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--mustard);
+  border: var(--rule) solid var(--choc);
+  color: var(--choc);
+  transition: transform var(--press) var(--ease-out), opacity 200ms ease;
+}
+
+.ctl--turn:active {
+  transform: scale(0.94);
+}
+
+.ctl--turn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ctl--turn:disabled:active {
+  transform: none;
+}
+
+.arrow-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.ctl-middle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ctl--contents {
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  font-family: var(--badge);
+  font-size: 1.05rem;
+}
+
+.ctl-count {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 0.95rem;
+  min-width: 2.2rem;
+  text-align: center;
+}
+
+.lang {
+  display: flex;
+  padding: 2px;
+  border: 2px solid var(--choc);
+  border-radius: 999px;
+}
+
+.lang-btn {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-family: var(--badge);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--press) var(--ease-out);
+}
+
+.lang-btn:active {
+  transform: scale(0.95);
+}
+
+.lang-btn[aria-pressed='true'] {
+  background: var(--choc);
+  color: var(--cream);
+}
+
+/* Phone: a floating bar of translucent menu-card. */
+.controls--narrow {
+  position: fixed;
+  z-index: 20;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  background: rgba(255, 244, 223, 0.86);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: var(--rule) solid var(--choc);
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 var(--choc);
+}
+
+.controls--narrow .lang {
+  height: 3rem;
+  padding: 0;
+  border-width: 2px;
+}
+
+.controls--narrow .lang-btn {
+  min-height: 100%;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .controls--narrow {
+    background: var(--cream);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Wide: arrows beside the book, the rest on the table below it. */
+.controls--wide {
+  color: var(--cream);
+}
+
+.controls--wide .ctl--turn {
+  position: fixed;
+  z-index: 20;
+  top: calc(50% - 1.75rem - 1.5rem);
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.controls--wide .ctl--prev {
+  left: calc(50% - var(--pw) - 5.25rem);
+}
+
+.controls--wide .ctl--next {
+  right: calc(50% - var(--pw) - 5.25rem);
+}
+
+.controls--wide .ctl-middle {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  gap: 0.75rem;
+}
+
+.controls--wide .lang {
+  border-color: var(--cream);
+}
+
+.controls--wide .lang-btn[aria-pressed='true'] {
+  background: var(--cream);
+  color: var(--choc);
+}
+
+.controls--wide :focus-visible {
+  outline-color: var(--mustard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ctl--turn:not(:disabled):hover {
+    transform: scale(1.06);
+  }
+  .ctl--turn:not(:disabled):active {
+    transform: scale(0.94);
+  }
+  .ctl--contents:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+}
+
+/* Reduced motion: no flips anywhere, only the 200 ms crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  .face--front,
+  .face--back {
+    transform: none !important;
+  }
+  .btn,
+  .btn::before,
+  .toc-text,
+  .ctl--turn {
+    transition-duration: 0ms;
+  }
+}

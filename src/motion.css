@@ -42,12 +42,12 @@
   position: absolute;
   inset: 0;
   display: flex;
-  padding: 2px;
+  padding: var(--seg-inset);
   border-radius: inherit;
   pointer-events: none;
   background: var(--choc);
   color: var(--cream);
-  clip-path: inset(2px var(--seg-right, 100%) 2px var(--seg-left, 0px) round var(--r-pill));
+  clip-path: inset(var(--seg-inset) var(--seg-right, 100%) var(--seg-inset) var(--seg-left, 0px) round var(--r-pill));
   /* Measured clipping changes at once; only press transforms animate. */
   visibility: hidden;
 }

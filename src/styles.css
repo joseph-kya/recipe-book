@@ -1326,11 +1326,12 @@ button {
 }
 
 .seg {
+  --seg-inset: 3px;
   position: relative;
   isolation: isolate;
   flex: 0 0 auto;
   display: flex;
-  padding: 2px;
+  padding: var(--seg-inset);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
 }
@@ -1343,7 +1344,7 @@ button {
   white-space: nowrap;
   min-width: 3rem;
   min-height: 3rem;
-  padding: 0 var(--sp-3);
+  padding: 0 12px;
   border: 0;
   border-radius: var(--r-pill);
   background: none;
@@ -1442,15 +1443,25 @@ button {
     width: 44px;
     height: 44px;
   }
-  .controls--narrow .seg { padding: 0; }
   .controls--narrow .seg-btn,
   .controls--narrow .seg-indicator > span {
     min-width: 44px;
     min-height: 44px;
-    padding-inline: var(--sp-1);
     font-size: 0.875rem;
   }
-  .controls--narrow .seg-indicator { padding: 0; }
+}
+
+/* Keep label breathing room at the tightest one-row widths. Spend the space
+   on the seven 44px targets rather than gaps or the outer card's padding. */
+@media (min-width: 360px) and (max-width: 389px) {
+  .controls--narrow {
+    left: 2px;
+    right: 2px;
+    gap: 0;
+    padding: 0;
+  }
+  .controls--narrow .ctl-middle { gap: 0; }
+  .controls--narrow .arrow-icon { width: 1.25rem; height: 1.25rem; }
 }
 
 /* Compact phones: arrows and Contents on one row, the two toggles on the next. */
@@ -1493,6 +1504,19 @@ button {
 /* Wide: arrows beside the book, the rest on the table below it. */
 .controls--wide {
   color: var(--cream);
+}
+
+.controls--wide :is(.ctl--contents, .ctl-count, .seg-btn, .seg-indicator > span) {
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  font-weight: 400;
+  line-height: 1;
+  min-height: 3rem;
+}
+
+.controls--wide .ctl-count {
+  display: grid;
+  place-items: center;
 }
 
 .controls--wide .ctl--turn {

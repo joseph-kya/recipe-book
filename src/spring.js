@@ -8,14 +8,17 @@ export function makeSpring({ response = 0.42, damping = 1 } = {}) {
   return { k, c };
 }
 
-export function animateSpring({ from, to, velocity = 0, spring, onUpdate, onDone }) {
+export function animateSpring({ from, to, velocity = 0, spring, onUpdate, onDone,
+  restDelta = 0.004, restSpeed = 0.05 }) {
   let x = from;
   let v = velocity;
   let last = performance.now();
   let raf = 0;
+  let stopped = false;
   const STEP = 1 / 240;
 
   const frame = (now) => {
+    if (stopped) return;
     let dt = Math.min((now - last) / 1000, 1 / 20);
     last = now;
     while (dt > 0) {
@@ -26,18 +29,21 @@ export function animateSpring({ from, to, velocity = 0, spring, onUpdate, onDone
       dt -= h;
     }
     // 0.4% of a turn is under one degree: invisible, so stop there rather than idle in the tail.
-    if (Math.abs(x - to) < 0.004 && Math.abs(v) < 0.05) {
+    if (Math.abs(x - to) < restDelta && Math.abs(v) < restSpeed) {
+      x = to;
+      v = 0;
       onUpdate(to);
-      onDone();
+      if (!stopped) onDone();
       return;
     }
     onUpdate(x);
-    raf = requestAnimationFrame(frame);
+    if (!stopped) raf = requestAnimationFrame(frame);
   };
   raf = requestAnimationFrame(frame);
 
   return {
     stop() {
+      stopped = true;
       cancelAnimationFrame(raf);
       return { value: x, velocity: v };
     },

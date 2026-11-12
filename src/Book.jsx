@@ -6,13 +6,14 @@ import { paginate } from './paginate.js';
 import { RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband } from './spring.js';
 import Controls from './Controls.jsx';
+import { transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
-// response 0.42 s, critically damped: a full turn settles in about 450 ms.
-const TURN_RESPONSE = 0.42;
+// A button turn settles in ~280 ms; gesture releases retain their own momentum.
+const TURN_RESPONSE = 0.3;
 const TURN_SPRING = makeSpring({ response: TURN_RESPONSE, damping: 1 });
-// A button or key turn starts at the spring's natural velocity. From rest a
+// A button turn starts at the spring's natural velocity. From rest a
 // critically damped spring is an S-curve (it creeps first, like ease-in); with
 // v0 = ω·distance it becomes x(t) = 1 − e^(−ωt), a pure ease-out with the same settle.
 const TURN_OMEGA = (2 * Math.PI) / TURN_RESPONSE;
@@ -75,17 +76,17 @@ export default function Book({ lang, setLang }) {
   const paint = useCallback(() => {
     const book = bookRef.current;
     if (!book) return;
-    const p = s.p;
+    const p = clamp(s.p, 0, 1);
     const maxDeg = s.wide ? 180 : NARROW_MAX_DEG;
     for (const el of faceEls.current.values()) {
       const role = el.dataset.role;
       const shade = el.lastElementChild;
       if (role === 'front') {
         el.style.transform = `rotateY(${-maxDeg * p}deg)`;
-        shade.style.opacity = String(0.5 * p);
+        shade.style.opacity = String(0.32 * Math.sin(Math.PI * p));
       } else if (role === 'back') {
         el.style.transform = `rotateY(${180 - 180 * p}deg)`;
-        shade.style.opacity = String(0.5 * (1 - p));
+        shade.style.opacity = String(0.32 * Math.sin(Math.PI * p));
       } else if (role === 'under-r') {
         el.style.transform = '';
         shade.style.opacity = String(0.4 * (1 - p));
@@ -173,6 +174,7 @@ export default function Book({ lang, setLang }) {
   /* ---------- navigation: every route into the book ends here ---------- */
 
   const finishNow = useCallback(() => {
+    s.pendingTarget = null;
     if (!s.turn) return;
     if (s.anim) s.anim.stop();
     s.anim = null;
@@ -182,9 +184,23 @@ export default function Book({ lang, setLang }) {
   }, [s]);
 
   const navigate = useCallback(
-    (to) => {
+    (to, { instant = false, connected = false } = {}) => {
       const t = clamp(to, 0, s.spreads.length - 1);
       if (s.drag?.decided) return;
+
+      if (instant || (connected && !s.reduce)) {
+        if (t === destination()) return;
+        const update = () => {
+          finishNow();
+          // Retain a short crossfade on browsers without snapshot transitions.
+          setFade(connected && !instant && !document.startViewTransition
+            ? { from: s.index, key: performance.now() } : null);
+          settle(t);
+        };
+        if (instant) update();
+        else transition(update);
+        return;
+      }
 
       if (s.reduce) {
         finishNow();
@@ -215,7 +231,7 @@ export default function Book({ lang, setLang }) {
       setIndex(k);
       setTurn({ ...s.turn });
     },
-    [s, finishNow, runSpring, syncHash, announceFor],
+    [s, finishNow, runSpring, syncHash, announceFor, settle],
   );
 
   /* ---------- pagination (wide) ---------- */
@@ -260,6 +276,9 @@ export default function Book({ lang, setLang }) {
     const oldIndex = destination();
     if (s.anim) s.anim.stop();
     s.anim = null;
+    s.pendingTarget = null;
+    s.drag = null;
+    bookRef.current?.classList.remove('is-dragging');
     s.turn = null;
     s.p = 0;
     const was = old[oldIndex] || old[0];
@@ -310,10 +329,10 @@ export default function Book({ lang, setLang }) {
       if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        navigate(destination() + 1);
+        navigate(destination() + 1, { instant: true });
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        navigate(destination() - 1);
+        navigate(destination() - 1, { instant: true });
       }
     };
     addEventListener('keydown', onKey);
@@ -329,8 +348,7 @@ export default function Book({ lang, setLang }) {
   };
 
   // Progress from finger travel. The free edge of the page follows the finger.
-  const progressFor = (pStart, dx) => {
-    const W = pageWidth();
+  const progressFor = (pStart, dx, W = pageWidth()) => {
     const A = s.wide ? Math.PI : (NARROW_MAX_DEG * Math.PI) / 180;
     const e0 = Math.cos(A * pStart);
     const e = clamp(e0 + dx / W, Math.cos(A), 1);
@@ -376,7 +394,9 @@ export default function Book({ lang, setLang }) {
     if (!s.wide && e.clientY > innerHeight - 96) setBarAway(false);
     if (!e.isPrimary || e.button !== 0 || s.drag) return;
     s.didDrag = false;
-    s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0, decided: false, samples: [] };
+    if (e.target.closest?.('button, input, select, textarea, [contenteditable]')) return;
+    s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0,
+      width: pageWidth(), decided: false, samples: [] };
   };
 
   const beginDrag = (dir) => {
@@ -396,6 +416,7 @@ export default function Book({ lang, setLang }) {
       s.anim = null;
       d.mode = 'turn';
       d.pStart = s.p;
+      d.returnTarget = s.target;
       return;
     }
     const k = s.index;
@@ -405,6 +426,7 @@ export default function Book({ lang, setLang }) {
       s.target = s.p;
       d.mode = 'turn';
       d.pStart = s.p;
+      d.returnTarget = s.p;
       setFade(null);
       setTurn({ ...s.turn });
     } else {
@@ -439,10 +461,10 @@ export default function Book({ lang, setLang }) {
     while (d.samples.length > 2 && now - d.samples[0].t > 100) d.samples.shift();
     const dx = e.clientX - d.x0;
     if (d.mode === 'turn') {
-      s.p = progressFor(d.pStart, dx);
+      s.p = progressFor(d.pStart, dx, d.width);
       paint();
     } else if (d.mode === 'edge') {
-      s.rb = rubberband(d.rb0 + dx, pageWidth());
+      s.rb = rubberband(d.rb0 + dx, d.width);
       paint();
     }
   };
@@ -453,13 +475,16 @@ export default function Book({ lang, setLang }) {
     s.drag = null;
     bookRef.current.classList.remove('is-dragging');
     if (!d.decided) return;
+    if (bookRef.current.hasPointerCapture(e.pointerId)) bookRef.current.releasePointerCapture(e.pointerId);
     const sm = d.samples;
     const dt = sm.length > 1 ? (sm[sm.length - 1].t - sm[0].t) / 1000 : 0;
-    const v = e.type === 'pointercancel' || dt === 0 ? 0 : (sm[sm.length - 1].x - sm[0].x) / dt;
+    const cancelled = e.type === 'pointercancel';
+    const stale = !sm.length || performance.now() - sm[sm.length - 1].t > 80;
+    const v = cancelled || stale || dt === 0 ? 0 : (sm[sm.length - 1].x - sm[0].x) / dt;
     const dx = (sm.length ? sm[sm.length - 1].x : d.x0) - d.x0;
 
     if (d.mode === 'fade') {
-      if (Math.abs(dx) > 50 || Math.abs(v) > 300) navigate(s.index - d.dir);
+      if (!cancelled && (Math.abs(dx) > 50 || Math.abs(v) > 300)) navigate(s.index - d.dir);
       return;
     }
     if (d.mode === 'edge') {
@@ -468,6 +493,8 @@ export default function Book({ lang, setLang }) {
         to: 0,
         velocity: 0,
         spring: EDGE_SPRING,
+        restDelta: 0.15,
+        restSpeed: 2,
         onUpdate: (x) => {
           s.rb = x;
           paint();
@@ -479,10 +506,14 @@ export default function Book({ lang, setLang }) {
       return;
     }
     // Throw: project where the finger was heading, and let a fast flick decide on its own.
-    const pProjected = progressFor(d.pStart, dx + project(v));
+    if (cancelled) {
+      runSpring(d.returnTarget, 0);
+      return;
+    }
+    const pProjected = progressFor(d.pStart, dx + project(v), d.width);
     let target = pProjected > 0.5 ? 1 : 0;
     if (Math.abs(v) > 250) target = v < 0 ? 1 : 0;
-    const dpdx = progressFor(d.pStart, dx + 1) - progressFor(d.pStart, dx);
+    const dpdx = (progressFor(d.pStart, dx + 1, d.width) - progressFor(d.pStart, dx - 1, d.width)) / 2;
     runSpring(target, clamp(dpdx * v, -10, 10));
   };
 
@@ -505,8 +536,35 @@ export default function Book({ lang, setLang }) {
       e.preventDefault();
       e.stopPropagation();
       s.didDrag = false;
+      return;
     }
+    const link = e.target.closest?.('.toc-link[href^="#/"]');
+    if (!link || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    navigate(firstIndexFor(s.spreads, routeOfHash(link.hash)), { connected: true, instant: e.detail === 0 });
   };
+
+  // Preference changes and unmounts must not leave a hidden moving leaf behind.
+  useEffect(() => {
+    if (!reduce) return;
+    if (s.turn) {
+      const k = destination();
+      finishNow();
+      settle(k);
+    }
+    s.rbAnim?.stop();
+    s.rbAnim = null;
+    s.rb = 0;
+    s.drag = null;
+    bookRef.current?.classList.remove('is-dragging');
+    paint();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+
+  useEffect(() => () => {
+    s.anim?.stop();
+    s.rbAnim?.stop();
+  }, [s]);
 
   /* ---------- which faces exist right now ---------- */
 

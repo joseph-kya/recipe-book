@@ -1,0 +1,8 @@
+{
+  "_note": "Photos come from each recipe's source page (its og:image), resized to webp. The site adds this file; Bread Pitt's recipe JSONs are unchanged.",
+  "berry-quark-bake": { "photo": "photos/berry-quark-bake", "credit": { "site": "REWE", "url": "https://www.rewe.de/rezepte/suesser-quarkauflauf-beeren-streusel/" } },
+  "best-classic-cinnamon-rolls": { "photo": "photos/best-classic-cinnamon-rolls", "credit": { "site": "Scientifically Sweet", "url": "https://scientificallysweet.com/best-cinnamon-rolls/" } },
+  "fudge-brownies": { "photo": "photos/fudge-brownies", "credit": { "site": "Einfach Backen", "url": "https://www.einfachbacken.de/rezepte/fudge-brownies-so-werden-sie-besonders-saftig" } },
+  "protein-cloud-cheesecake": { "photo": "photos/protein-cloud-cheesecake", "credit": { "site": "LECKER", "url": "https://www.lecker.de/high-protein-cheesecake-backen-mit-nur-100-kalorien-pro-stueck-133500.html" } },
+  "topfenschmarren": { "photo": "photos/topfenschmarren", "credit": { "site": "susannamarie.at", "url": "https://www.susannamarie.at/topfenschmarren/" } }
+}

@@ -221,7 +221,7 @@ function Ingredients({ recipe, lang, items, cont = false, measure = false }) {
     </h2>
   );
   return (
-    <section className="menu" aria-label={t.ingredients} data-card="menu">
+    <section className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
       {measure ? (
         <>
           {normalHead}
@@ -288,7 +288,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
     </h2>
   );
   return (
-    <section className="ticket" aria-label={t.method} data-card="ticket">
+    <section className="ticket" aria-label={cont ? `${t.method} ${t.cont}` : t.method} data-card="ticket">
       {measure ? (
         <>
           {normalHead}
@@ -330,7 +330,7 @@ function Tips({ recipe, lang, items }) {
   if (!r.tips?.length) return null;
   const shown = items || r.tips.map((_, i) => i);
   return (
-    <section className="tips" aria-label={t.tips} lang={textLang} data-card="tips">
+    <section className="tips" aria-label={items && items[0] > 0 ? `${t.tips} ${t.cont}` : t.tips} lang={textLang} data-card="tips">
       {shown.map((i) => (
         <div className="tip" key={i} data-tip={i}>
           <h3 className="tip-title">{r.tips[i].title}</h3>

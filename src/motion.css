@@ -1,6 +1,8 @@
 /* Capture only the reading surface. Controls stay live during a text swap. */
 :root {
   view-transition-name: none;
+  --ease-spring: cubic-bezier(0.32, 1.32, 0.56, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .book:not(.measure) {
@@ -20,19 +22,20 @@
   width: 100%;
   height: 100%;
   mix-blend-mode: normal;
-  animation: content-out 240ms var(--ease-out) both;
+  animation: content-out 200ms var(--ease-out) both;
 }
 
 ::view-transition-new(recipe-content) {
   animation-name: content-in;
+  animation-duration: 220ms;
 }
 
 @keyframes content-out {
-  to { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 0; transform: scale(0.985); }
 }
 
 @keyframes content-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: scale(0.985); }
 }
 
 /* The measured face slides and resizes; labels stay sharp in their buttons.
@@ -46,7 +49,9 @@
   border-radius: var(--r-pill);
   pointer-events: none;
   background: var(--choc);
-  transition: transform 240ms var(--ease-out), width 240ms var(--ease-out);
+  transition:
+    transform 240ms var(--ease-spring),
+    width 220ms var(--ease-out);
   visibility: hidden;
 }
 
@@ -97,23 +102,27 @@
 .controls .ctl--contents,
 .book .toc-link,
 .book [role='group'] > button[aria-pressed] {
-  transition: transform 160ms var(--ease-out);
+  transition: transform 200ms var(--ease-spring);
 }
 
 .controls button:not(:disabled):active,
 .controls .ctl--contents:active,
 .book [role='group'] > button[aria-pressed]:active {
-  transform: scale(0.97);
-  transition-duration: 100ms;
+  transform: scale(0.95);
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 .book .toc-link:active {
   transform: scale(0.98);
-  transition-duration: 100ms;
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 .controls--narrow {
-  transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    transform 260ms var(--ease-drawer),
+    opacity 180ms var(--ease-out);
 }
 
 /* A static gradient paints once; only its opacity follows the moving leaf. */
@@ -129,9 +138,13 @@
   ::view-transition-new(recipe-content) { animation: none; }
 
   .seg-indicator,
+  .scaler-indicator,
+  .scaler-label-active,
   .book .btn,
+  .book .btn-icon,
   .controls button,
   .controls .ctl,
+  .controls .arrow-icon,
   .seg-label-active,
   .book .toc-link,
   .book .toc-no,
@@ -142,7 +155,9 @@
   .scaler-custom { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
+  .book .btn:hover .btn-icon,
   .controls button:not(:disabled):is(:active, :hover),
+  .controls .ctl--turn:not(:disabled):hover .arrow-icon,
   .controls .ctl--contents:active,
   .seg:has(> .seg-btn:active) .seg-label-active,
   .book .toc-link:is(:active, :hover),

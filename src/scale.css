@@ -33,16 +33,50 @@
 }
 
 .scaler {
+  --scaler-inset: 3px;
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex: none;
   gap: 2px;
-  padding: 2px;
+  padding: var(--scaler-inset);
   background: var(--cream);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    2px 2px 0 var(--choc);
+}
+
+.scaler-indicator {
+  position: absolute;
+  top: var(--scaler-inset);
+  bottom: var(--scaler-inset);
+  left: 0;
+  width: 44px;
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  background: var(--choc);
+  visibility: hidden;
+  transition:
+    transform 240ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
+    width 220ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+}
+
+.scaler[data-ready] .scaler-indicator {
+  visibility: visible;
+}
+
+.scaler-indicator[data-hidden='true'] {
+  opacity: 0;
 }
 
 .scaler-chip {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0 var(--sp-2);
@@ -56,23 +90,42 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform var(--press) var(--ease-out),
+    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
     background-color 160ms ease,
     color 160ms ease;
 }
 
-.scaler-chip[aria-pressed='true'] {
+.scaler-label-active {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  color: var(--cream);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms var(--ease-out);
+}
+
+.scaler-chip[aria-pressed='true'] .scaler-label-active {
+  opacity: 1;
+}
+
+.scaler:not([data-ready]) .scaler-chip[aria-pressed='true'],
+.scaler-chip--custom[aria-pressed='true'] {
   background: var(--choc);
   color: var(--cream);
 }
 
 .scaler-chip:active {
-  transform: scale(0.95);
+  transform: scale(0.93);
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-chip:not([aria-pressed='true']):hover {
-    background: color-mix(in srgb, var(--ink) 10%, transparent);
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
 
@@ -82,6 +135,11 @@
   padding: 0 var(--sp-3);
   background: var(--cream);
   border: 2px solid var(--choc);
+  box-shadow: 2px 2px 0 var(--choc);
+}
+
+.scaler-chip--custom[aria-pressed='true'] {
+  box-shadow: 1px 1px 0 var(--choc);
 }
 
 /* the custom stepper: − [field] +, one cream pill like the chips */
@@ -94,13 +152,15 @@
   background: var(--cream);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
-  animation: scaler-pop 160ms var(--ease-out) both;
+  box-shadow: 2px 2px 0 var(--choc);
+  transform-origin: left center;
+  animation: scaler-pop 220ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)) both;
 }
 
 @keyframes scaler-pop {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(3px) scale(0.93);
   }
 }
 
@@ -117,12 +177,14 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform var(--press) var(--ease-out),
+    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
     background-color 160ms ease;
 }
 
 .scaler-step:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(0.92);
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 .scaler-step:disabled {
@@ -174,9 +236,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .scaler-indicator,
+  .scaler-label-active,
   .scaler-chip,
-  .scaler-step {
+  .scaler-step,
+  .scaler-custom {
     transition: none;
+    animation: none;
   }
   .scaler-chip:active,
   .scaler-step:active:not(:disabled) {

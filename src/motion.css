@@ -85,9 +85,11 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .seg-btn:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+  .seg-btn[aria-pressed='false']:hover {
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .controls--wide .seg-btn[aria-pressed='false']:hover {
+    background: color-mix(in srgb, var(--ground) 10%, transparent);
   }
 }
 
@@ -134,7 +136,10 @@
   .book .toc-link,
   .book .toc-no,
   .book .toc-text,
-  .book [role='group'] > button[aria-pressed] { transition: none; }
+  .book [role='group'] > button[aria-pressed],
+  .scaler-chip,
+  .scaler-step,
+  .scaler-custom { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
   .controls button:not(:disabled):is(:active, :hover),
@@ -142,7 +147,9 @@
   .seg:has(> .seg-btn:active) .seg-label-active,
   .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
-  .book [role='group'] > button[aria-pressed]:active { transform: none; }
+  .book [role='group'] > button[aria-pressed]:active,
+  .scaler-chip:active,
+  .scaler-step:active:not(:disabled) { transform: none; }
 
   .controls--narrow { transition: opacity 150ms var(--ease-out); }
 }

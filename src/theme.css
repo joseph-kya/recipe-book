@@ -1,0 +1,88 @@
+/* The cupcake ornament takes its colours from the colourway too
+   (the cover sets its own cup colour, see .cover-cupcake). */
+.cupcake-line {
+  stroke: var(--ink);
+}
+.cupcake-cup,
+.cupcake-cherry {
+  fill: var(--primary);
+}
+.cupcake-cream {
+  fill: var(--ground);
+}
+.cupcake-frosting {
+  fill: var(--frosting);
+}
+
+/* Colourways. src/theme.js is the source; scripts/theme.test.mjs checks that
+   these blocks match it and that every text pairing passes WCAG AA.
+   html[data-theme] is set before first paint by index.html and on change by
+   the cover's picker; Cherry is the default. */
+
+:root {
+  --primary: #c8233a;
+  --primary-ink: #a11b2e;
+  --primary-deep: #8e1626;
+  --card: #a8dccb;
+  --accent: #f2b134;
+  --accent2: #f7c9cf;
+  --ink: #3a2216;
+  --ink-soft: #4a3022;
+  --cue: #6b4a36;
+  --ground: #fff4df;
+  --paper: #fffaf1;
+  --table: #3a2216;
+  --table-tile: #43291c;
+  --frosting: #7a4a35;
+}
+
+html[data-theme='blueplate'] {
+  --primary: #1d5fa8;
+  --primary-ink: #174a85;
+  --primary-deep: #123b6b;
+  --card: #bfe3ef;
+  --accent: #f2b134;
+  --accent2: #f7c9cf;
+  --ink: #1b2340;
+  --ink-soft: #2c3657;
+  --cue: #4a5578;
+  --ground: #fbf4e4;
+  --paper: #fffbf3;
+  --table: #1b2340;
+  --table-tile: #222c4f;
+  --frosting: #7a4a35;
+}
+
+html[data-theme='soda'] {
+  --primary: #1a7356;
+  --primary-ink: #145a43;
+  --primary-deep: #0f4a37;
+  --card: #f9d3da;
+  --accent: #f4c542;
+  --accent2: #cdebdd;
+  --ink: #1f2f27;
+  --ink-soft: #2e4338;
+  --cue: #4f5e52;
+  --ground: #fdf5e6;
+  --paper: #fffbf2;
+  --table: #1f2f27;
+  --table-tile: #263a30;
+  --frosting: #f7c9cf;
+}
+
+html[data-theme='butterscotch'] {
+  --primary: #b04a12;
+  --primary-ink: #8c3a0e;
+  --primary-deep: #6e2c08;
+  --card: #bfe0dc;
+  --accent: #f4c95d;
+  --accent2: #f6d1c1;
+  --ink: #3a2216;
+  --ink-soft: #4a3022;
+  --cue: #6b4a36;
+  --ground: #fff2e0;
+  --paper: #fffaf2;
+  --table: #1f3a3d;
+  --table-tile: #24454a;
+  --frosting: #7a4a35;
+}

@@ -76,20 +76,19 @@
 
 /* ---------- tokens ---------- */
 :root {
-  --cherry: #c8233a;
-  --mint: #a8dccb;
-  --mustard: #f2b134;
-  --choc: #3a2216;
-  --cream: #fff4df;
-
-  /* tints of the palette (no other colours) */
-  --cherry-ink: #a11b2e; /* cherry deep enough for text on mint (5:1) */
-  --cherry-deep: #8e1626; /* cherry for small text on mustard (4.9:1) */
-  --pink: #f7c9cf; /* cherry tint: the second tip card */
-  --paper: #fffaf1; /* cream tint: the method ticket */
-  --cue: #6b4a36; /* choc tint: handwritten cues */
-  --choc-soft: #4a3022; /* choc tint: notes and small credits */
-  --choc-tile: #43291c; /* choc tint: the table's checker tiles */
+  /* The colours come from the active colourway (src/theme.css); these names
+     are the original Cherry palette's, kept as aliases so every rule follows
+     the theme. --paper and --cue are themed directly. */
+  --cherry: var(--primary);
+  --cherry-ink: var(--primary-ink); /* primary text on the card */
+  --cherry-deep: var(--primary-deep); /* small primary text on the accent */
+  --mint: var(--card);
+  --mustard: var(--accent);
+  --pink: var(--accent2);
+  --choc: var(--ink);
+  --choc-soft: var(--ink-soft);
+  --cream: var(--ground);
+  --choc-tile: var(--table-tile);
 
   --display: 'Shrikhand', 'Shrikhand Fallback', serif;
   --badge: 'Lilita One', 'Lilita One Fallback', sans-serif;
@@ -245,7 +244,7 @@ button {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(58, 34, 22, 0.35) transparent;
+  scrollbar-color: color-mix(in srgb, var(--ink) 35%, transparent) transparent;
 }
 
 .shade {
@@ -256,11 +255,11 @@ button {
 }
 
 .face--R .shade {
-  background: linear-gradient(to right, rgba(58, 34, 22, 0.65), rgba(58, 34, 22, 0.12) 70%);
+  background: linear-gradient(to right, color-mix(in srgb, var(--ink) 65%, transparent), color-mix(in srgb, var(--ink) 12%, transparent) 70%);
 }
 
 .face--L .shade {
-  background: linear-gradient(to left, rgba(58, 34, 22, 0.65), rgba(58, 34, 22, 0.12) 70%);
+  background: linear-gradient(to left, color-mix(in srgb, var(--ink) 65%, transparent), color-mix(in srgb, var(--ink) 12%, transparent) 70%);
 }
 
 /* Phone: one page, the spine is the left edge of the screen. */
@@ -278,8 +277,8 @@ button {
 
 /* Wide: an open book on a diner-tile table. */
 .stage--wide {
-  background-color: var(--choc);
-  background-image: repeating-conic-gradient(var(--choc-tile) 0 25%, var(--choc) 0 50%);
+  background-color: var(--table);
+  background-image: repeating-conic-gradient(var(--table-tile) 0 25%, var(--table) 0 50%);
   background-size: 64px 64px;
 }
 
@@ -313,14 +312,14 @@ button {
   left: 0;
   transform-origin: right center;
   border-radius: var(--r-m) 0 0 var(--r-m);
-  box-shadow: inset -22px 0 26px -18px rgba(58, 34, 22, 0.35);
+  box-shadow: inset -22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
 .book--wide .face--R {
   left: 50%;
   transform-origin: left center;
   border-radius: 0 var(--r-m) var(--r-m) 0;
-  box-shadow: inset 22px 0 26px -18px rgba(58, 34, 22, 0.35);
+  box-shadow: inset 22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
 /* ---------- shared bits ---------- */
@@ -671,7 +670,7 @@ button {
 }
 
 .toc li + li {
-  border-top: 2px dotted rgba(58, 34, 22, 0.5);
+  border-top: 2px dotted color-mix(in srgb, var(--ink) 50%, transparent);
 }
 
 /* The whole row is the link: badge, title and tagline, at least 44px tall. */
@@ -690,7 +689,7 @@ button {
 }
 
 .toc-link:active {
-  background-color: rgba(242, 177, 52, 0.28);
+  background-color: color-mix(in srgb, var(--accent) 28%, transparent);
   transform: scale(0.98);
 }
 
@@ -847,7 +846,7 @@ button {
 }
 
 .ing + .ing {
-  border-top: 2px dotted rgba(58, 34, 22, 0.55);
+  border-top: 2px dotted color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .ing-what {
@@ -1310,11 +1309,11 @@ button {
 
 .ctl--contents:active {
   transform: scale(0.96);
-  background-color: rgba(58, 34, 22, 0.1);
+  background-color: color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 .controls--wide .ctl--contents:active {
-  background-color: rgba(255, 244, 223, 0.14);
+  background-color: color-mix(in srgb, var(--ground) 14%, transparent);
 }
 
 .ctl-count {

@@ -117,8 +117,8 @@
 /* A static gradient paints once; only its opacity follows the moving leaf. */
 .book--wide .face--front > .shade,
 .book--wide .face--back > .shade {
-  background: linear-gradient(90deg, rgba(40, 20, 10, 0.5), transparent 24%,
-    rgba(255, 244, 223, 0.18) 78%, rgba(40, 20, 10, 0.16));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
+    color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
 @media (prefers-reduced-motion: reduce) {

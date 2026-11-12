@@ -8,6 +8,7 @@ import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import Scaler from './Scaler.jsx';
 import Photo from './Photo.jsx';
+import ThemePicker from './ThemePicker.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
@@ -35,6 +36,7 @@ export function Cover({ lang }) {
             {t.open}
           </a>
         </div>
+        <ThemePicker lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

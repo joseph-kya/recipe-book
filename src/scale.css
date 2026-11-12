@@ -72,7 +72,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-chip:not([aria-pressed='true']):hover {
-    background: rgba(58, 34, 22, 0.1);
+    background: color-mix(in srgb, var(--ink) 10%, transparent);
   }
 }
 
@@ -124,7 +124,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-step:not(:disabled):hover {
-    background: rgba(58, 34, 22, 0.1);
+    background: color-mix(in srgb, var(--ink) 10%, transparent);
   }
 }
 

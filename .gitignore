@@ -7,3 +7,9 @@ test-results/
 playwright-report/
 shots/
 .taste-skill/
+.worktrees/
+.env*
+*.jsonl
+*.bundle
+BRIEF.md
+HANDOFF.md

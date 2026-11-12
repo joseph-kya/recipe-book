@@ -24,16 +24,23 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: var(--sp-1) 0 0;
   border: 2px solid var(--choc);
+  border-radius: var(--r-m);
   background: var(--cream);
+  box-shadow: 3px 3px 0 var(--choc);
+  overflow: hidden;
 }
 
 .macros-cell {
   min-width: 0;
-  padding: var(--sp-1);
+  padding: var(--sp-2) var(--sp-1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
+}
+
+.macros-cell:first-child {
+  background: color-mix(in srgb, var(--mustard) 28%, var(--cream));
 }
 
 .macros-cell + .macros-cell {

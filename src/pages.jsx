@@ -112,7 +112,7 @@ function FallbackNote({ fallback, t }) {
 
 function ContMark({ t, lang }) {
   return (
-    <span className="cont-mark" lang={lang}>
+    <span className="sr-only" lang={lang}>
       {' '}
       {t.cont}
     </span>
@@ -377,19 +377,18 @@ function Credits({ recipe, lang, units }) {
         <a href={s.url} target="_blank" rel="noopener noreferrer">
           {s.site}
         </a>
+        {/* Keep the amounts attribution intact, alongside the recipe source. */}
+        {credit ? (
+          <>
+            {'; '}
+            <span lang={credit.lang}>{credit.label}: {credit.src}</span>
+          </>
+        ) : recipe.conversions ? (
+          <>
+            {'; '}{t.conversions}: <span lang="en">{recipe.conversions}</span>
+          </>
+        ) : null}
       </p>
-      {/* one conversion credit: the recipe's own amounts note, else its conversions source */}
-      {credit ? (
-        <p className="small-credit" lang={credit.lang}>
-          {credit.label}: {credit.src}
-        </p>
-      ) : (
-        recipe.conversions && (
-          <p className="small-credit">
-            {t.conversions}: <span lang="en">{recipe.conversions}</span>
-          </p>
-        )
-      )}
     </footer>
   );
 }

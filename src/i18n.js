@@ -60,7 +60,7 @@ export const ui = {
     tips: 'Tipps',
     macros: 'Nährwerte',
     macroProtein: 'Eiweiß',
-    macroCarbs: 'Kohlenhydrate',
+    macroCarbs: 'Kohlen\u00ADhydrate',
     macroFat: 'Fett',
     macroPerServing: 'pro Portion',
     macroBasis: { squares: 'pro Stück', rolls: 'pro Schnecke', slices: 'pro Stück' },

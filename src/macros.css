@@ -44,7 +44,7 @@
   font-size: var(--fs-xs);
   font-weight: 800;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  hyphens: manual;
 }
 
 .macros-cell dd {

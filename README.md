@@ -43,7 +43,7 @@ No code or index file needs editing. `src/content.js` picks up both folders with
     "title": "Fudge Brownies",
     "title_lines": ["Fudge", "Brownies"],   // how the display title breaks
     "tagline": "…",
-    "sticker": ["No scale.", "No problem."], // two lines on the starburst
+    "sticker": ["No scale.", "No problem."], // used by the PDF sheet; not shown on the site
     "intro": "…",
     "stats": [{ "value": "30 min", "label": "prep" }],
     "equipment": "…",
@@ -68,7 +68,7 @@ No code or index file needs editing. `src/content.js` picks up both folders with
 
 ## Design
 
-Retro Diner, translated from `design-ref/diner.html` (the print template behind the PDFs): cream pages, chocolate rules, mint menu card with a hard drop shadow, mustard step dots, tilted tip cards, checkers and a starburst sticker. Colours: cherry `#C8233A`, mint `#A8DCCB`, mustard `#F2B134`, choc `#3A2216`, cream `#FFF4DF`. Two darker cherries are used for small text where contrast needs it: `#A11B2E` on mint, `#8E1626` on mustard. Fonts are self-hosted WOFF2 (OFL) from `assets/fonts/`: Shrikhand for display, Lilita One for badges, heads and amounts, Kalam for handwritten lines, Nunito for body text.
+Retro Diner, translated from `design-ref/diner.html` (the print template behind the PDFs): cream pages, chocolate rules, mint menu card with a hard drop shadow, mustard step dots, tilted tip cards and checkers. Colours: cherry `#C8233A`, mint `#A8DCCB`, mustard `#F2B134`, choc `#3A2216`, cream `#FFF4DF`. Two darker cherries are used for small text where contrast needs it: `#A11B2E` on mint, `#8E1626` on mustard. Fonts are self-hosted WOFF2 (OFL) from `assets/fonts/`: Shrikhand for display, Lilita One for badges, heads and amounts, Kalam for handwritten lines, Nunito for body text.
 
 **Reference DESIGN.md:** Starbucks, from the awesome-design-md catalogue. It's a warm food-and-drink brand on a cream ground, with strict colour roles and three type voices that each keep to their own job (it even uses Kalam for handwritten touches), plus a pill button that presses with a scale. I borrowed that discipline and none of the brand.
 

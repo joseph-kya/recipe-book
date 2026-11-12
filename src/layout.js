@@ -11,7 +11,7 @@ export function buildSpreads(wide, plans) {
       kind: 'contents',
       offset: 0,
       L: wide ? { type: 'contentsLeft' } : null,
-      R: { type: 'contentsList', withHow: !wide },
+      R: { type: 'contentsList', withTitle: !wide },
     },
   ];
   for (const recipe of recipes) {

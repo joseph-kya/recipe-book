@@ -1,29 +1,5 @@
 // Small inline SVG ornaments from the Retro Diner sheet. All decorative.
 
-const burstPoints = (() => {
-  const pts = [];
-  for (let i = 0; i < 32; i++) {
-    const a = (i * Math.PI) / 16;
-    const r = i % 2 === 0 ? 48 : 38;
-    pts.push(`${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`);
-  }
-  return pts.join(' ');
-})();
-
-// The sticker's words are real text for screen readers; only the star shape is decorative.
-export function Burst({ lines, className = '' }) {
-  return (
-    <div className={`burst ${className}`}>
-      <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-        <polygon points={burstPoints} />
-      </svg>
-      <p className="burst-text">
-        <span>{lines[0]}</span> <span className="burst-second">{lines[1]}</span>
-      </p>
-    </div>
-  );
-}
-
 export function Cupcake({ className = '' }) {
   return (
     <svg className={`cupcake ${className}`} viewBox="0 0 100 100" aria-hidden="true" focusable="false">

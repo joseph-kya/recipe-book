@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
-import { Burst, Checkers, Cupcake } from './ornaments.jsx';
+import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 
-/* ---------- Cover ---------- */
+/* ---------- Cover: the title, an ornament, Open ---------- */
 
 export function Cover({ lang }) {
   const t = ui[lang];
@@ -12,7 +12,6 @@ export function Cover({ lang }) {
     <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
-        <p className="eyebrow cover-eyebrow">★ {t.coverEyebrow(recipes.length)} ★</p>
         <h1 className="cover-title" data-enter>
           {t.bookTitle.map((line, i) => (
             <span key={i}>
@@ -26,8 +25,6 @@ export function Cover({ lang }) {
           ))}
         </h1>
         <Cupcake className="cover-cupcake" />
-        <Burst lines={t.coverSticker} className="cover-burst" />
-        <p className="cover-note">{t.coverNote}</p>
         <a className="btn btn--cream" href="#/contents">
           {t.open}
         </a>
@@ -37,48 +34,31 @@ export function Cover({ lang }) {
   );
 }
 
-/* ---------- Contents ---------- */
+/* ---------- Contents: numbers and titles ---------- */
 
-function HowItWorks({ lang, compact }) {
-  const t = ui[lang];
-  return (
-    <section className={`how ${compact ? 'how--compact' : ''}`} aria-label={t.howTitle}>
-      {!compact && <h2 className="how-title">{t.howTitle}</h2>}
-      <p className="how-cups">
-        <span className="how-demo" aria-hidden="true">
-          <span className="how-demo-cups">{t.demoCup}</span>
-          <span className="how-demo-metric">240 ml</span>
-        </span>
-        {t.howCups}
-      </p>
-      {!compact && <p>{t.howTurn}</p>}
-      {!compact && <p>{t.howPdf}</p>}
-    </section>
-  );
-}
-
+// Wide: the left page of the contents spread carries its heading and an ornament.
 function ContentsLeft({ lang }) {
+  const t = ui[lang];
   return (
     <div className="page-body contents-left">
       <Checkers tone="choc" edge="top" />
-      <div className="page-pad">
-        <Cupcake className="how-cupcake" />
-        <HowItWorks lang={lang} />
+      <div className="contents-left-inner">
+        <Cupcake className="contents-cupcake" />
+        <h1 className="contents-title">{t.contents}</h1>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
 }
 
-function ContentsList({ lang, withHow = false }) {
+function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
   return (
     <div className="page-body contents">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
-        <p className="eyebrow">★ {t.bookTitleFlat} ★</p>
-        <h1 className="contents-title">{t.contents}</h1>
-        <ol className="toc">
+        {withTitle && <h1 className="contents-title">{t.contents}</h1>}
+        <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);
             return (
@@ -94,16 +74,12 @@ function ContentsList({ lang, withHow = false }) {
                     <span className="toc-title" lang={textLang}>
                       {text.title}
                     </span>
-                    <span className="toc-tag" lang={textLang}>
-                      {text.tagline}
-                    </span>
                   </span>
                 </a>
               </li>
             );
           })}
         </ol>
-        {withHow && <HowItWorks lang={lang} compact />}
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -143,7 +119,7 @@ function RunningHead({ recipe, lang }) {
         {r.title}
       </span>
       <span className="eyebrow">
-        ★ {t.recipeNo} {recipe.no} ★
+        {t.recipeNo} {recipe.no}
       </span>
     </p>
   );
@@ -154,7 +130,7 @@ function RecipeHero({ recipe, lang }) {
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
-        ★ {t.recipeNo} {recipe.no} ★
+        {t.recipeNo} {recipe.no}
       </p>
       <h1 className="recipe-title" lang={textLang}>
         {r.title_lines.map((l, i) => (
@@ -206,14 +182,9 @@ function Ingredients({ recipe, lang, items, cont = false, measure = false }) {
     byGroup.get(gi).push(ii);
   }
   const normalHead = (
-    <>
-      <h2 className="menu-title" lang={textLang} data-head="normal">
-        {r.ingredients_headline}
-      </h2>
-      <p className="menu-sub" data-head="normal">
-        {t.cupsMetric}
-      </p>
-    </>
+    <h2 className="menu-title" lang={textLang} data-head="normal">
+      {r.ingredients_headline}
+    </h2>
   );
   const contHead = (
     <h2 className="menu-title" lang={textLang} data-head="cont">
@@ -369,21 +340,22 @@ function Credits({ recipe, lang }) {
         </a>
       )}
       <p className="source">
-        {t.source}: {s.author} / {s.site}.{' '}
+        {t.source}: {s.author},{' '}
         <a href={s.url} target="_blank" rel="noopener noreferrer">
-          {t.viewSource}
-          <span className="sr-only"> ({s.site})</span>
+          {s.site}
         </a>
       </p>
-      {credit && (
+      {/* one conversion credit: the recipe's own amounts note, else its conversions source */}
+      {credit ? (
         <p className="small-credit" lang={credit.lang}>
           {credit.label}: {credit.src}
         </p>
-      )}
-      {recipe.conversions && (
-        <p className="small-credit">
-          {t.conversions}: <span lang="en">{recipe.conversions}</span>
-        </p>
+      ) : (
+        recipe.conversions && (
+          <p className="small-credit">
+            {t.conversions}: <span lang="en">{recipe.conversions}</span>
+          </p>
+        )
       )}
     </footer>
   );
@@ -466,7 +438,7 @@ export function renderFace(desc, lang) {
     case 'contentsLeft':
       return <ContentsLeft lang={lang} />;
     case 'contentsList':
-      return <ContentsList lang={lang} withHow={desc.withHow} />;
+      return <ContentsList lang={lang} withTitle={desc.withTitle} />;
     case 'recipeFull':
       return <RecipeFull recipe={desc.recipe} lang={lang} />;
     case 'recipePage':

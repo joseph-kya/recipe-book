@@ -112,6 +112,7 @@
   --fs-l: 1.25rem;
   --fs-xl: 1.5rem;
   --fs-2xl: 1.875rem;
+  --fs-3xl: 3rem;
   /* phone control bar: 48px buttons + padding + border + its 8px lift + shadow ≈ 4.75rem,
      plus 2.25rem of air so the last line scrolls fully clear of it */
   --bar-clear: 7rem;
@@ -502,49 +503,13 @@ button {
   height: 1.25rem;
 }
 
-/* Starburst sticker. Floats so the title wraps around it. */
-.burst {
-  position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-}
-
-.burst svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.burst polygon {
-  fill: var(--mustard);
-  stroke: var(--choc);
-  stroke-width: 2.5;
-}
-
-.burst-text {
-  position: relative;
-  max-width: 76%;
-  font-family: var(--badge);
-  font-size: 0.85rem;
-  line-height: 1.05;
-  text-align: center;
-  color: var(--choc);
-  transform: rotate(-8deg);
-}
-
-.burst-second {
-  display: block;
-  color: var(--cherry-deep);
-}
-
 .cupcake {
   display: block;
 }
 
-/* ---------- cover ---------- */
+/* ---------- cover: the title, an ornament, Open ---------- */
 .cover {
+  --ring-out: var(--cream);
   display: flex;
   flex-direction: column;
   background: var(--cherry);
@@ -563,25 +528,19 @@ button {
 
 .cover-inner {
   flex: 1;
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  /* the top padding is the sticker's corner */
-  padding: 6.5rem 1.5rem calc(var(--bar-clear) + env(safe-area-inset-bottom));
+  gap: var(--sp-6);
+  padding: var(--sp-7) var(--sp-5) calc(var(--bar-clear) + env(safe-area-inset-bottom));
   text-align: center;
 }
 
 /* Wide cover scales with the page height so it never outgrows a short book page. */
 .book--wide .cover-inner {
-  gap: calc(var(--ph) * 0.022);
-  padding: calc(var(--ph) * 0.15) 2.5rem calc(var(--ph) * 0.05);
-}
-
-.cover-eyebrow {
-  color: var(--cream);
+  gap: calc(var(--ph) * 0.05);
+  padding: var(--sp-7) var(--sp-6);
 }
 
 .cover-title {
@@ -612,54 +571,20 @@ button {
   font-size: min(13.5vw, 4.75rem);
 }
 
-.book--wide .cover-cupcake {
-  width: calc(var(--ph) * 0.11);
-}
-
 .cover-cupcake {
   width: 6.5rem;
   transform: rotate(-8deg);
+}
+
+.book--wide .cover-cupcake {
+  width: calc(var(--ph) * 0.14);
 }
 
 .cover-cupcake .cupcake-cup {
   fill: var(--mustard);
 }
 
-/* Quiet corner sticker: it sits inside the cover's top padding, never beside the eyebrow. */
-.cover-burst {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.6rem;
-  width: 4.75rem;
-}
-
-.book--wide .cover-burst {
-  top: 1.25rem;
-  right: 1.25rem;
-  width: calc(var(--ph) * 0.11);
-}
-
-.cover-burst .burst-text {
-  font-size: 0.85rem;
-}
-
-.book--wide .cover-burst .burst-text {
-  font-size: 1rem;
-}
-
-.cover-note {
-  max-width: 18rem;
-  font-family: var(--hand);
-  font-size: 1.25rem;
-  line-height: 1.3;
-  transform: rotate(-1.5deg);
-}
-
-.cover {
-  --ring-out: var(--cream);
-}
-
-/* The book's one entrance: the cover title stamps in, the sticker lands after it. */
+/* The book's one entrance: the cover title stamps in, line after line. */
 @media (prefers-reduced-motion: no-preference) {
   .cover-title > span {
     animation: stamp 560ms var(--ease-out) both;
@@ -667,46 +592,65 @@ button {
   .cover-title > span + span {
     animation-delay: 90ms;
   }
-  .cover-burst {
-    animation: sticker 520ms var(--ease-out) 260ms both;
-  }
   @keyframes stamp {
     from {
       opacity: 0;
       transform: translateY(14px) scale(0.96);
     }
   }
-  @keyframes sticker {
-    from {
-      opacity: 0;
-      transform: rotate(-30deg) scale(0.9);
-    }
-  }
 }
 
-/* ---------- contents ---------- */
+/* ---------- contents: numbers and titles ---------- */
 .contents-title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 3rem;
+  font-size: var(--fs-3xl);
   line-height: 1.05;
   color: var(--cherry);
-  margin: 0.25rem 0 1.25rem;
+  margin-bottom: var(--sp-5);
 }
 
-/* Wide contents scale with the page height so five recipes (and more) fit a short page. */
-.book--wide .contents-title {
-  font-size: min(3rem, calc(var(--ph) * 0.06));
-  margin-bottom: calc(var(--ph) * 0.02);
+/* Wide: the contents heading and an ornament hold the left page of the spread. */
+.contents-left {
+  display: flex;
+  flex-direction: column;
 }
+
+.contents-left-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-5);
+  padding: var(--sp-7);
+}
+
+.contents-left .contents-title {
+  margin: 0;
+}
+
+.contents-cupcake {
+  width: 6rem;
+  transform: rotate(-8deg);
+}
+
+.book--wide .contents {
+  display: flex;
+  flex-direction: column;
+}
+
+.book--wide .contents .page-pad {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 
 .book--wide .toc-link {
   min-height: max(2.75rem, calc(var(--ph) * 0.085));
   padding: calc(var(--ph) * 0.01) var(--sp-2);
-}
-
-.book--wide .toc-tag {
-  line-height: 1.2;
 }
 
 .toc li + li {
@@ -758,14 +702,6 @@ button {
   line-height: 1.15;
 }
 
-.toc-tag {
-  display: block;
-  font-family: var(--hand);
-  font-size: 1.05rem;
-  line-height: 1.3;
-  color: var(--cue);
-}
-
 .toc-link:active .toc-no {
   transform: scale(0.94);
 }
@@ -777,64 +713,6 @@ button {
   .toc-link:hover .toc-text {
     transform: translateX(4px);
   }
-}
-
-.how {
-  font-size: 1.05rem;
-}
-
-.how-title {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: 2.4rem;
-  line-height: 1.08;
-  color: var(--cherry);
-  margin-bottom: 1.25rem;
-}
-
-.how p + p {
-  margin-top: 1rem;
-}
-
-.how-cupcake {
-  width: 5.5rem;
-  margin: 0.5rem 0 1.5rem;
-  transform: rotate(-8deg);
-}
-
-.how-cups {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.how-demo {
-  flex: none;
-  display: grid;
-  justify-items: end;
-  padding: 0.55rem 0.8rem;
-  background: var(--mint);
-  border: var(--rule) solid var(--choc);
-  border-radius: 12px;
-  box-shadow: 4px 4px 0 var(--choc);
-}
-
-.how-demo-cups {
-  font-family: var(--badge);
-  font-size: 1.35rem;
-  line-height: 1.1;
-  color: var(--cherry-ink);
-}
-
-.how-demo-metric {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--choc-soft);
-}
-
-.how--compact {
-  margin-top: 1.75rem;
-  font-size: 0.95rem;
 }
 
 /* ---------- recipe: hero ---------- */
@@ -923,12 +801,6 @@ button {
   font-weight: 400;
   font-size: var(--fs-2xl);
   line-height: 1;
-}
-
-.menu-sub {
-  font-family: var(--hand);
-  font-size: var(--fs-s);
-  margin: var(--sp-1) 0 var(--sp-2);
 }
 
 .ing-group-title {
@@ -1040,15 +912,6 @@ button {
 .book--wide .menu-title {
   display: inline;
   font-size: var(--fs-xl);
-}
-
-.book--wide .menu-sub {
-  display: inline;
-  margin: 0 0 0 var(--sp-2);
-}
-
-.book--wide .menu > .ing-group:first-of-type {
-  margin-top: var(--sp-1);
 }
 
 .book--wide .ing-group-title {

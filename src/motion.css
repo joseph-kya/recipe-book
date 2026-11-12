@@ -1,0 +1,131 @@
+/* Capture only the reading surface. Controls stay live during a text swap. */
+:root {
+  view-transition-name: none;
+}
+
+.book:not(.measure) {
+  view-transition-name: recipe-content;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(recipe-content) {
+  animation: none;
+}
+
+::view-transition-old(recipe-content),
+::view-transition-new(recipe-content) {
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: normal;
+  animation: content-out 240ms var(--ease-out) both;
+}
+
+::view-transition-new(recipe-content) {
+  animation-name: content-in;
+}
+
+@keyframes content-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes content-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+/* One indicator for any two-segment pressed-button group, including units.
+   Equal flex bases keep the pill aligned when translated text changes width. */
+[role='group']:has(> button[aria-pressed]:nth-child(2):last-child) {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+}
+
+[role='group']:has(> button[aria-pressed]:nth-child(2):last-child)::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 2px auto 2px 2px;
+  width: calc((100% - 4px) / 2);
+  border-radius: inherit;
+  background: var(--choc);
+  pointer-events: none;
+  transform: translateX(0);
+  transition: transform 240ms var(--ease-out);
+}
+
+[role='group']:has(> button[aria-pressed='true']:nth-child(2):last-child)::before {
+  transform: translateX(100%);
+}
+
+[role='group']:has(> button[aria-pressed]:nth-child(2):last-child) > button[aria-pressed] {
+  flex: 1 1 0;
+  background: transparent;
+}
+
+.controls--wide [role='group']:has(> button[aria-pressed])::before {
+  background: var(--cream);
+}
+
+.controls button:not(:disabled),
+.controls .ctl--contents,
+.book .btn,
+.book .toc-link,
+.book [role='group'] > button[aria-pressed] {
+  transition: transform 160ms var(--ease-out);
+}
+
+.controls button:not(:disabled):active,
+.controls .ctl--contents:active,
+.book .btn:active,
+.book .toc-link:active,
+.book [role='group'] > button[aria-pressed]:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+}
+
+.controls--narrow {
+  transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* A static gradient paints once; only its opacity follows the moving leaf. */
+.book--wide .face--front > .shade,
+.book--wide .face--back > .shade {
+  background: linear-gradient(90deg, rgba(40, 20, 10, 0.5), transparent 24%,
+    rgba(255, 244, 223, 0.18) 78%, rgba(40, 20, 10, 0.16));
+}
+
+/* Keep the existing cover entrance short and let it travel as one object. */
+.book .cover-title > span { animation-duration: 240ms; }
+.book .cover-title > span + span { animation-delay: 0ms; }
+.book .cover-burst { animation-duration: 240ms; animation-delay: 40ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(recipe-content),
+  ::view-transition-old(recipe-content),
+  ::view-transition-new(recipe-content) { animation: none; }
+
+  [role='group']:has(> button[aria-pressed])::before,
+  .controls button,
+  .controls .ctl,
+  .book .btn,
+  .book .btn::before,
+  .book .toc-link,
+  .book .toc-no,
+  .book .toc-text,
+  .book [role='group'] > button[aria-pressed] { transition: none; }
+
+  .controls button:not(:disabled):is(:active, :hover),
+  .controls .ctl--contents:active,
+  .book .btn:active,
+  .book .toc-link:active,
+  .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
+  .book [role='group'] > button[aria-pressed]:active { transform: none; }
+
+  .book .cover-title > span,
+  .book .cover-burst { animation: none; }
+
+  .controls--narrow { transition: opacity 150ms var(--ease-out); }
+}

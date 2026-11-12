@@ -278,6 +278,15 @@ button {
   --pw: min(calc(var(--ph) * 0.74), calc(50vw - 6.5rem));
 }
 
+/* Small laptops: the side arrows move under the book (see controls), so the
+   pages can take the full width and a little more height. */
+@media (max-width: 1279px) {
+  .stage--wide {
+    --ph: min(calc(100dvh - 6.5rem), 60rem);
+    --pw: min(calc(var(--ph) * 0.74), calc(50vw - 1.75rem));
+  }
+}
+
 .book--wide {
   width: calc(var(--pw) * 2);
   height: var(--ph);
@@ -1003,6 +1012,164 @@ button {
   margin-left: var(--sp-2);
 }
 
+/* Wide cookbook spread: header and the whole ingredient card share the left
+   page, so both set a little tighter here (phones keep their roomier sizes). */
+.book--wide .recipe-title {
+  font-size: min(calc(var(--pw) * 0.072), 2.75rem);
+}
+
+.book--wide .tagline {
+  font-size: 1.125rem;
+  margin-top: var(--sp-1);
+}
+
+.book--wide .stats {
+  padding-top: var(--sp-3);
+}
+
+.book--wide .intro {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-s);
+  line-height: 1.5;
+}
+
+.book--wide .menu {
+  margin-top: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4) var(--sp-1);
+}
+
+/* card title and its "cups & spoons" line share one line */
+.book--wide .menu-title {
+  display: inline;
+  font-size: var(--fs-xl);
+}
+
+.book--wide .menu-sub {
+  display: inline;
+  margin: 0 0 0 var(--sp-2);
+}
+
+.book--wide .menu > .ing-group:first-of-type {
+  margin-top: var(--sp-1);
+}
+
+.book--wide .ing-group-title {
+  padding-top: var(--sp-2);
+}
+
+.book--wide .ing {
+  padding: 1px 0;
+}
+
+.book--wide .ing + .ing {
+  border-top: 1px dotted rgba(58, 34, 22, 0.75);
+}
+
+.book--wide .ing-name,
+.book--wide .ing-amount {
+  line-height: 1.15;
+}
+
+/* name and its note share a line where they fit */
+.book--wide .ing-name {
+  display: inline;
+  font-size: var(--fs-s);
+}
+
+.book--wide .ing-note {
+  display: inline;
+  margin-left: var(--sp-1);
+}
+
+.book--wide .ing-amount {
+  font-size: 1.0625rem;
+}
+
+.book--wide .page-pad {
+  padding: 1.75rem 2rem 2.25rem;
+}
+
+.book--wide .stats li {
+  font-size: var(--fs-xs);
+  padding: 2px var(--sp-3);
+}
+
+/* Short screens: header and rows a little closer so the card still fits beside the header. */
+@media (max-height: 820px) {
+  .book--wide .recipe-title {
+    font-size: min(calc(var(--pw) * 0.064), 2.25rem);
+  }
+  .book--wide .tagline {
+    font-size: var(--fs-m);
+  }
+  .book--wide .stats {
+    padding-top: var(--sp-1);
+  }
+  .book--wide .intro {
+    margin-top: var(--sp-1);
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  .book--wide .menu {
+    margin-top: var(--sp-2);
+    padding-top: var(--sp-2);
+  }
+  .book--wide .menu-title {
+    font-size: var(--fs-l);
+  }
+  .book--wide .ing {
+    padding: 1px 0;
+  }
+  .book--wide .page-pad {
+    padding-top: var(--sp-4);
+    padding-bottom: 1.5rem;
+  }
+  .book--wide .ing-group-title {
+    padding-top: var(--sp-1);
+  }
+  .book--wide .menu {
+    padding-bottom: 2px;
+  }
+  .book--wide .ing-name {
+    font-size: 0.875rem;
+  }
+  .book--wide .ing-note,
+  .book--wide .ing-metric {
+    font-size: 0.75rem;
+  }
+  .book--wide .ing-amount {
+    font-size: var(--fs-m);
+  }
+}
+
+/* Small laptop: the book page is narrow, so rows would wrap. Set them closer. */
+@container (max-width: 30rem) {
+  .book--wide .page-pad {
+    padding-left: var(--sp-5);
+    padding-right: var(--sp-5);
+  }
+  .book--wide .menu {
+    padding-left: var(--sp-3);
+    padding-right: var(--sp-3);
+  }
+  .book--wide .ing-name {
+    font-size: 0.875rem;
+  }
+  .book--wide .ing-note,
+  .book--wide .ing-metric {
+    font-size: 0.75rem;
+  }
+  .book--wide .ing-amount {
+    font-size: var(--fs-m);
+  }
+  .book--wide .ing-what {
+    flex-basis: 7rem;
+  }
+  .book--wide .intro {
+    font-size: 0.875rem;
+  }
+}
+
 .ing-metric {
   display: block;
   font-size: var(--fs-xs);
@@ -1340,6 +1507,22 @@ button {
 
 .controls--wide .ctl--next {
   right: calc(50% - var(--pw) - 5.25rem);
+}
+
+@media (max-width: 1279px) {
+  .controls--wide .ctl--turn {
+    top: auto;
+    bottom: 1.25rem;
+  }
+  .controls--wide .ctl--prev {
+    left: calc(50% - 15rem);
+  }
+  .controls--wide .ctl--next {
+    right: calc(50% - 15rem);
+  }
+  .controls--wide .ctl-middle {
+    bottom: 1.5rem;
+  }
 }
 
 .controls--wide .ctl-middle {

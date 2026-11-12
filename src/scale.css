@@ -76,6 +76,85 @@
   }
 }
 
+/* "custom": its own chip after the presets, so the row can wrap it neatly */
+.scaler-chip--custom {
+  flex: none;
+  padding: 0 var(--sp-3);
+  background: var(--cream);
+  border: 2px solid var(--choc);
+}
+
+/* the custom stepper: − [field] +, one cream pill like the chips */
+.scaler-custom {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--cream);
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+}
+
+.scaler-step {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-l);
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 160ms ease;
+}
+
+.scaler-step:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.scaler-step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scaler-step:not(:disabled):hover {
+    background: rgba(58, 34, 22, 0.1);
+  }
+}
+
+.scaler-field {
+  width: 4rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-s);
+  background: transparent;
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-m);
+  text-align: center;
+}
+
+.scaler-field:focus-visible,
+.scaler-field:focus {
+  outline: 3px solid var(--choc);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--mustard);
+}
+
+.scaler-x {
+  padding-right: var(--sp-2);
+  font-family: var(--badge);
+  font-size: var(--fs-m);
+  color: var(--choc);
+}
+
 /* only when scaled: one short line, in the card's handwritten voice */
 .scale-note {
   flex-basis: 100%;
@@ -87,10 +166,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scaler-chip {
+  .scaler-chip,
+  .scaler-step {
     transition: none;
   }
-  .scaler-chip:active {
+  .scaler-chip:active,
+  .scaler-step:active:not(:disabled) {
     transform: none;
   }
 }

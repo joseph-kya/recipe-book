@@ -135,7 +135,7 @@ function RunningHead({ recipe, lang }) {
 
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
-  const [factor] = useScale(recipe);
+  const { factor, custom } = useScale(recipe);
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
@@ -164,7 +164,7 @@ function RecipeHero({ recipe, lang }) {
         {r.stats.map((s, i) => (
           <li key={i}>
             {/* a plain-number yield ("24" squares) follows the portion scale */}
-            <b>{scaleStat(s.value, factor)}</b> {s.label}
+            <b>{scaleStat(s.value, factor, custom, textLang)}</b> {s.label}
           </li>
         ))}
       </ul>
@@ -195,7 +195,7 @@ const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, 
 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  const [factor] = useScale(recipe);
+  const { factor, custom } = useScale(recipe);
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
@@ -208,7 +208,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
       <h2 className="menu-title" lang={textLang}>
         {r.ingredients_headline}
       </h2>
-      <Scaler recipe={recipe} text={r} textLang={textLang} label={t.scale} />
+      <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
       {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
     </div>
   );
@@ -245,8 +245,8 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
                 // display-only: the JSON amounts, scaled in the language they are written in
                 const it = factor === 1 ? raw : {
                   ...raw,
-                  amount: scaleAmount(raw.amount, factor, textLang),
-                  metric: scaleAmount(raw.metric, factor, textLang),
+                  amount: scaleAmount(raw.amount, factor, textLang, custom),
+                  metric: scaleAmount(raw.metric, factor, textLang, custom),
                 };
                 const { primary, secondary, metricFirst } = amountsFor(it, units);
                 return (

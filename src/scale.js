@@ -133,6 +133,17 @@ const decimal = (x, lang) => (lang === 'de' ? String(x).replace('.', ',') : Stri
 // Countables scale to wholes or halves, never below ½.
 const countable = (x) => Math.max(0.5, Math.round(x * 2) / 2);
 
+// Custom amounts (scaled exactly as entered, no feasibility filter) round
+// honestly instead: countables to one decimal (0.6 egg), spoons to the nearest
+// ¼ with anything under ¼ tsp a pinch, grams and ml to whole units.
+export const CUSTOM_MIN = 0.1;
+export const CUSTOM_MAX = 10;
+export const clampFactor = (f) => Math.min(CUSTOM_MAX, Math.max(CUSTOM_MIN, f));
+const oneDecimal = (x, lang) => {
+  const v = Math.max(0.1, Math.round(x * 10) / 10);
+  return decimal(Number.isInteger(v) ? v : v.toFixed(1), lang);
+};
+
 // Teaspoon total of a plain spoon sum, or null (exported for the tests).
 export const spoonTotal = (text) => parseSpoons(String(text).trim())?.total ?? null;
 
@@ -145,7 +156,7 @@ function scaleSameUnit(text, factor) {
   return `${formatNumber(n, unit === 'cup' ? FRIENDLY : QUARTERS)} ${word(l, unit, n)}`;
 }
 
-export function scaleAmount(text, factor, lang = 'en') {
+export function scaleAmount(text, factor, lang = 'en', custom = false) {
   if (factor === 1 || text == null) return text;
   const s = String(text).trim();
   if (!s) return text;
@@ -153,16 +164,20 @@ export function scaleAmount(text, factor, lang = 'en') {
   // ½ cup (8 tbsp): both halves, each in its own unit
   const paren = s.match(/^(.+?) \((.+)\)$/);
   if (paren) {
-    const outer = scaleAmount(paren[1], factor, lang);
+    const outer = scaleAmount(paren[1], factor, lang, custom);
     if (outer === paren[1]) return text;
-    const inner = scaleSameUnit(paren[2], factor) ?? scaleAmount(paren[2], factor, lang);
+    const inner = scaleSameUnit(paren[2], factor) ?? scaleAmount(paren[2], factor, lang, custom);
     // "2 tbsp (2 tbsp)" says nothing twice
     return inner === outer ? outer : `${outer} (${inner})`;
   }
 
   // plain spoon sums
   const spoons = parseSpoons(s);
-  if (spoons) return formatSpoons(spoons.total * factor, spoons.lang);
+  if (spoons) {
+    const tsp = spoons.total * factor;
+    if (custom && tsp < 0.25) return `1 ${word(spoons.lang, 'pinch', 1)}`;
+    return formatSpoons(tsp, spoons.lang);
+  }
 
   // pinch + ¼ tsp: keep the pinch, scale the spoons
   const pinchPlus = s.match(/^(pinch|Prise) \+ (.+)$/);
@@ -172,7 +187,7 @@ export function scaleAmount(text, factor, lang = 'en') {
       const scaled = rest.total * factor;
       const lang2 = rest.lang;
       // the spoon part shrank to a pinch itself: two pinches
-      if (scaled < 0.2) return `2 ${word(lang2, 'pinch', 2)}`;
+      if (scaled < (custom ? 0.25 : 0.2)) return `2 ${word(lang2, 'pinch', 2)}`;
       return `${pinchPlus[1]} + ${formatSpoons(scaled, lang2)}`;
     }
   }
@@ -210,16 +225,19 @@ export function scaleAmount(text, factor, lang = 'en') {
   const count = s.match(new RegExp(`^(${NUM})( large| small| medium| groß| klein)?$`));
   if (count) {
     const n = parseNumber(count[1]);
-    if (n !== null) return `${formatNumber(countable(n * factor), HALVES)}${count[2] || ''}`;
+    if (n !== null) {
+      const shown = custom ? oneDecimal(n * factor, lang) : formatNumber(countable(n * factor), HALVES);
+      return `${shown}${count[2] || ''}`;
+    }
   }
 
   return text;
 }
 
 // A yield stat ("24" squares, "1" portion): only a plain number scales.
-export function scaleStat(value, factor) {
+export function scaleStat(value, factor, custom = false, lang = 'en') {
   if (factor === 1 || !/^\d+$/.test(String(value).trim())) return value;
-  return formatNumber(countable(Number(value) * factor), HALVES);
+  return custom ? oneDecimal(Number(value) * factor, lang) : formatNumber(countable(Number(value) * factor), HALVES);
 }
 
 export const factorLabel = (f) => `${formatNumber(f)}×`;

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import {
   CANDIDATES,
+  clampFactor,
   feasible,
   feasibleFactors,
   formatSpoons,
@@ -218,6 +219,38 @@ test('every offered spoon amount reads back in quarter steps, within 5%', () => 
       }
     }
   }
+});
+
+/* ---------- custom amounts: exact factor, honest rounding ---------- */
+
+test('custom: countables to one decimal (0.6 egg), commas in German', () => {
+  assert.equal(scaleAmount('1', 0.6, 'en', true), '0.6');
+  assert.equal(scaleAmount('1 large', 0.6, 'en', true), '0.6 large');
+  assert.equal(scaleAmount('4', 0.6, 'de', true), '2,4');
+  assert.equal(scaleAmount('4 (size M)', 1.25, 'en', true), '5 (size M)');
+  assert.equal(scaleStat('24', 1.25, true), '30');
+});
+
+test('custom: spoons round to ¼, and under ¼ tsp is a pinch', () => {
+  assert.equal(scaleAmount('¼ tsp', 0.6, 'en', true), '1 pinch');
+  assert.equal(scaleAmount('½ TL', 0.3, 'de', true), '1 Prise');
+  assert.equal(scaleAmount('1 tsp', 0.3, 'en', true), '¼ tsp');
+  // 49.5 tsp × 1.7 = 84.15 tsp: 1¾ cups (84) and the 0.15 left rounds to ¼ tsp
+  assert.equal(scaleAmount('1 cup + 1½ tsp', 1.7, 'en', true), '1¾ cups + ¼ tsp');
+});
+
+test('custom: grams and ml whole at 1.7× (5 g steps from 100)', () => {
+  assert.equal(scaleAmount('13 g', 1.7, 'en', true), '22 g');
+  assert.equal(scaleAmount('1.5 g', 1.7, 'en', true), '3 g');
+  assert.equal(scaleAmount('175 g', 1.7, 'en', true), '300 g');
+  assert.equal(scaleAmount('10–20 ml', 1.7, 'en', true), '17–34 ml');
+});
+
+test('custom: the factor clamps to 0.1–10×, qualifiers stay', () => {
+  assert.equal(clampFactor(0.01), 0.1);
+  assert.equal(clampFactor(25), 10);
+  assert.equal(clampFactor(1.7), 1.7);
+  assert.equal(scaleAmount('1 heaped cup', 1.7, 'en', true), '1¾ heaped cups');
 });
 
 test('feasibility rules on single amounts', () => {

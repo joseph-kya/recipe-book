@@ -13,7 +13,7 @@ export function Cover({ lang }) {
     <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
-        <h1 className="cover-title" data-enter>
+        <h1 className="cover-title">
           {t.bookTitle.map((line, i) => (
             <span key={i}>
               {line.split(' ').map((word, j) => (
@@ -26,9 +26,11 @@ export function Cover({ lang }) {
           ))}
         </h1>
         <Cupcake className="cover-cupcake" />
-        <a className="btn btn--cream" href="#/contents">
-          {t.open}
-        </a>
+        <div className="cover-open">
+          <a className="btn btn--cream" href="#/contents">
+            {t.open}
+          </a>
+        </div>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -44,7 +46,9 @@ function ContentsLeft({ lang }) {
     <div className="page-body contents-left">
       <Checkers tone="choc" edge="top" />
       <div className="contents-left-inner">
-        <Cupcake className="contents-cupcake" />
+        <div className="contents-medallion" aria-hidden="true">
+          <Cupcake className="contents-cupcake" />
+        </div>
         <h1 className="contents-title">{t.contents}</h1>
       </div>
       <Checkers tone="cherry" edge="bottom" />

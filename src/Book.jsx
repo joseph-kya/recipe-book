@@ -4,9 +4,9 @@ import { ui } from './i18n.js';
 import { buildSpreads, firstIndexFor, routeOfHash } from './layout.js';
 import { paginate } from './paginate.js';
 import { RecipeMeasure, renderFace } from './pages.jsx';
-import { animateSpring, makeSpring, project, rubberband } from './spring.js';
+import { animateSpring, makeSpring, project, rubberband, unRubberband, rubberbandVelocity } from './spring.js';
 import Controls from './Controls.jsx';
-import { transition } from './motion.js';
+import { enterPage, transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
@@ -49,6 +49,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const bookRef = useRef(null);
   const measureRef = useRef(null);
   const faceEls = useRef(new Map());
+  const entered = useRef(new Set());
 
   // The engine's live state. React state above only decides which faces exist.
   const s = useRef({
@@ -187,6 +188,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
     (to, { instant = false, connected = false } = {}) => {
       const t = clamp(to, 0, s.spreads.length - 1);
       if (s.drag?.decided) return;
+      s.skipEntrance = instant;
+      s.keyboardNavigation = false;
 
       if (instant || (connected && !s.reduce)) {
         if (t === destination()) return;
@@ -305,6 +308,18 @@ export default function Book({ lang, setLang, units, setUnits }) {
     }
   }, [turn, index, wide, fade, spreads, paint, runSpring, s]);
 
+  // A first entry belongs to the visit, not a language, layout or face mount.
+  // Parent turns finish before the children enter; subsequent visits stay still.
+  useLayoutEffect(() => {
+    if (turn) return;
+    const kind = s.spreads[index]?.kind;
+    if (!['cover', 'contents'].includes(kind) || entered.current.has(kind)) return;
+    entered.current.add(kind);
+    if (reduce || s.skipEntrance) return;
+    const root = bookRef.current?.querySelector(`.face--rest .${kind === 'cover' ? 'cover' : 'contents'}`);
+    return enterPage(root, kind);
+  }, [index, turn, wide, reduce, s]);
+
   // Back / forward and plain #/ links.
   useEffect(() => {
     const onHistory = () => {
@@ -312,7 +327,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const st = history.state;
       const k =
         st && st.key === s.key && s.spreads[st.k]?.route === route ? st.k : firstIndexFor(s.spreads, route);
-      navigate(k);
+      navigate(k, { instant: s.keyboardNavigation });
+      s.keyboardNavigation = false;
     };
     addEventListener('hashchange', onHistory);
     addEventListener('popstate', onHistory);
@@ -396,7 +412,21 @@ export default function Book({ lang, setLang, units, setUnits }) {
     s.didDrag = false;
     if (e.target.closest?.('button, input, select, textarea, [contenteditable]')) return;
     s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0,
-      width: pageWidth(), decided: false, samples: [] };
+      width: pageWidth(), decided: false, samples: [{ x: e.clientX, t: performance.now() }] };
+  };
+
+  const returnEdge = (velocity = 0) => {
+    s.rbAnim?.stop();
+    s.rbAnim = animateSpring({
+      from: s.rb,
+      to: 0,
+      velocity,
+      spring: EDGE_SPRING,
+      restDelta: 0.15,
+      restSpeed: 2,
+      onUpdate: (x) => { s.rb = x; paint(); },
+      onDone: () => { s.rbAnim = null; },
+    });
   };
 
   const beginDrag = (dir) => {
@@ -406,7 +436,9 @@ export default function Book({ lang, setLang, units, setUnits }) {
       d.dir = dir;
       return;
     }
+    let edgeVelocity = 0;
     if (s.rbAnim) {
+      edgeVelocity = s.rbAnim.velocity;
       s.rbAnim.stop();
       s.rbAnim = null;
     }
@@ -421,6 +453,9 @@ export default function Book({ lang, setLang, units, setUnits }) {
     }
     const k = s.index;
     if ((dir < 0 && k < last()) || (dir > 0 && k > 0)) {
+      // A swipe into the book can catch an edge rebound too. Let its remaining
+      // offset settle continuously alongside the newly grabbed leaf.
+      if (s.rb) returnEdge(edgeVelocity);
       s.turn = dir < 0 ? { lo: k, hi: k + 1 } : { lo: k - 1, hi: k };
       s.p = dir < 0 ? 0 : 1;
       s.target = s.p;
@@ -431,7 +466,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
       setTurn({ ...s.turn });
     } else {
       d.mode = 'edge';
-      d.rb0 = s.rb;
+      d.rb0 = unRubberband(s.rb, d.width);
     }
   };
 
@@ -477,32 +512,26 @@ export default function Book({ lang, setLang, units, setUnits }) {
     if (!d.decided) return;
     if (bookRef.current.hasPointerCapture(e.pointerId)) bookRef.current.releasePointerCapture(e.pointerId);
     const sm = d.samples;
-    const dt = sm.length > 1 ? (sm[sm.length - 1].t - sm[0].t) / 1000 : 0;
     const cancelled = e.type === 'pointercancel';
     const stale = !sm.length || performance.now() - sm[sm.length - 1].t > 80;
-    const v = cancelled || stale || dt === 0 ? 0 : (sm[sm.length - 1].x - sm[0].x) / dt;
-    const dx = (sm.length ? sm[sm.length - 1].x : d.x0) - d.x0;
+    // Include release coordinates: even a one-move flick has a useful history.
+    const now = performance.now();
+    if (!cancelled && !stale) sm.push({ x: e.clientX, t: now });
+    while (sm.length > 2 && now - sm[0].t > 100) sm.shift();
+    const elapsed = sm.length > 1 ? (sm.at(-1).t - sm[0].t) / 1000 : 0;
+    const v = cancelled || stale || elapsed === 0 ? 0 : (sm.at(-1).x - sm[0].x) / elapsed;
+    const dx = (cancelled ? (sm.at(-1)?.x ?? d.x0) : e.clientX) - d.x0;
 
     if (d.mode === 'fade') {
-      if (!cancelled && (Math.abs(dx) > 50 || Math.abs(v) > 300)) navigate(s.index - d.dir);
+      if (!cancelled && (Math.abs(dx) > 50 || Math.abs(v) > 300)) {
+        navigate(s.index - (Math.abs(v) > 300 ? Math.sign(v) : Math.sign(dx)));
+      }
       return;
     }
     if (d.mode === 'edge') {
-      s.rbAnim = animateSpring({
-        from: s.rb,
-        to: 0,
-        velocity: 0,
-        spring: EDGE_SPRING,
-        restDelta: 0.15,
-        restSpeed: 2,
-        onUpdate: (x) => {
-          s.rb = x;
-          paint();
-        },
-        onDone: () => {
-          s.rbAnim = null;
-        },
-      });
+      s.rb = rubberband(d.rb0 + dx, d.width);
+      paint();
+      returnEdge(rubberbandVelocity(d.rb0 + dx, v, d.width));
       return;
     }
     // Throw: project where the finger was heading, and let a fast flick decide on its own.
@@ -514,6 +543,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
     let target = pProjected > 0.5 ? 1 : 0;
     if (Math.abs(v) > 250) target = v < 0 ? 1 : 0;
     const dpdx = (progressFor(d.pStart, dx + 1, d.width) - progressFor(d.pStart, dx - 1, d.width)) / 2;
+    s.p = progressFor(d.pStart, dx, d.width);
+    paint();
     runSpring(target, clamp(dpdx * v, -10, 10));
   };
 
@@ -572,7 +603,9 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const add = (idx, side, role) => {
     const sp = spreads[idx];
     const content = sp && renderFace(sp[side], lang, units);
-    if (content) faces.push({ key: `${layoutKey}-${idx}-${side}`, idx, side, role, content });
+    // Repaginating recipes must not remount the fixed opening pages mid-entry.
+    const key = sp?.kind === 'recipe' ? `${layoutKey}-${idx}-${side}` : `${wide}-${sp?.kind}-${side}`;
+    if (content) faces.push({ key, idx, side, role, content });
   };
   if (turn) {
     if (wide) add(turn.lo, 'L', 'under-l');
@@ -594,7 +627,12 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const atRest = !turn;
 
   return (
-    <div className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}>
+    <div
+      className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}
+      onClickCapture={(e) => {
+        if (e.target.closest?.('a[href^="#/"]')) s.keyboardNavigation = e.detail === 0;
+      }}
+    >
       <div
         className={`book ${wide ? 'book--wide' : 'book--narrow'}`}
         ref={bookRef}

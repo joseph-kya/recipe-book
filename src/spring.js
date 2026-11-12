@@ -64,3 +64,16 @@ export function project(velocity, rate = 0.99) {
 export function rubberband(overshoot, dimension, constant = 0.55) {
   return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
 }
+
+// Recover the finger-space displacement when catching a live edge rebound.
+// Applying resistance to the already-resisted screen offset would jump on grab.
+export function unRubberband(offset, dimension, constant = 0.55) {
+  const safeOffset = Math.min(Math.abs(offset), dimension * 0.99);
+  return Math.sign(offset) * safeOffset * dimension / (constant * (dimension - safeOffset));
+}
+
+// The spring moves screen pixels, so pass the finger velocity through the same
+// resistance slope as its position (the derivative of rubberband).
+export function rubberbandVelocity(overshoot, velocity, dimension, constant = 0.55) {
+  return velocity * constant * (dimension / (dimension + constant * Math.abs(overshoot))) ** 2;
+}

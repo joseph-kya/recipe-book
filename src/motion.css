@@ -48,7 +48,7 @@
   background: var(--choc);
   color: var(--cream);
   clip-path: inset(2px var(--seg-right, 100%) 2px var(--seg-left, 0px) round var(--r-pill));
-  transition: clip-path 240ms var(--ease-out);
+  /* Measured clipping changes at once; only press transforms animate. */
   visibility: hidden;
 }
 
@@ -89,9 +89,13 @@
 
 .controls button:not(:disabled):active,
 .controls .ctl--contents:active,
-.book .toc-link:active,
 .book [role='group'] > button[aria-pressed]:active {
   transform: scale(0.97);
+  transition-duration: 100ms;
+}
+
+.book .toc-link:active {
+  transform: scale(0.98);
   transition-duration: 100ms;
 }
 
@@ -105,11 +109,6 @@
   background: linear-gradient(90deg, rgba(40, 20, 10, 0.5), transparent 24%,
     rgba(255, 244, 223, 0.18) 78%, rgba(40, 20, 10, 0.16));
 }
-
-/* Keep the existing cover entrance short and let it travel as one object. */
-.book .cover-title > span { animation-duration: 240ms; }
-.book .cover-title > span + span { animation-delay: 0ms; }
-.book .cover-burst { animation-duration: 240ms; animation-delay: 40ms; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(recipe-content),
@@ -130,12 +129,9 @@
   .controls button:not(:disabled):is(:active, :hover),
   .controls .ctl--contents:active,
   .seg:has(> .seg-btn:active) .seg-indicator > span,
-  .book .toc-link:active,
+  .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
   .book [role='group'] > button[aria-pressed]:active { transform: none; }
-
-  .book .cover-title > span,
-  .book .cover-burst { animation: none; }
 
   .controls--narrow { transition: opacity 150ms var(--ease-out); }
 }
@@ -151,4 +147,22 @@
 }
 ::view-transition-old(book-controls) {
   display: none;
+}
+
+/* Backdrop capture is rectangular by default. Clip the snapshot itself, not
+   the live nav: its keyboard focus rings must remain free to paint outside. */
+@media (max-width: 959px), (max-height: 559px) {
+  ::view-transition-group(book-controls) {
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--choc);
+  }
+  ::view-transition-new(book-controls) {
+    mix-blend-mode: normal;
+  }
+}
+@media (max-width: 359px) {
+  ::view-transition-group(book-controls) {
+    border-radius: var(--r-l);
+  }
 }

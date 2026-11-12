@@ -51,10 +51,10 @@
   --cue: #6b4a36;
   --choc-soft: #4a3022;
 
-  --display: 'Shrikhand', 'Georgia', serif;
-  --badge: 'Lilita One', 'Arial Rounded MT Bold', sans-serif;
-  --hand: 'Kalam', 'Comic Sans MS', cursive;
-  --body: 'Nunito', system-ui, sans-serif;
+  --display: 'Shrikhand', 'Shrikhand Fallback', 'Georgia', serif;
+  --badge: 'Lilita One', 'Lilita One Fallback', 'Arial Rounded MT Bold', sans-serif;
+  --hand: 'Kalam', 'Kalam Fallback', 'Comic Sans MS', cursive;
+  --body: 'Nunito', 'Nunito Fallback', system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press: 160ms;

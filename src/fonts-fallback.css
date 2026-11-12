@@ -1,0 +1,55 @@
+/* Width ratios measured from the shipped fonts against these local faces using
+   an EN/DE alphabet, digits and recipe/UI sample. Vertical metrics come from
+   each target font's hhea (or OS/2 USE_TYPO_METRICS), divided by size-adjust.
+   These reduce swap movement; different glyphs/weights can still wrap differently. */
+@font-face {
+  font-family: 'Shrikhand Fallback';
+  src: local('Georgia Bold'), local('Georgia-Bold');
+  size-adjust: 101.764%;
+  ascent-override: 100.821%;
+  descent-override: 42.451%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Lilita One Fallback';
+  src: local('Arial Black'), local('Arial-Black');
+  size-adjust: 78.367%;
+  ascent-override: 117.779%;
+  descent-override: 28.073%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Kalam Fallback';
+  src: local('Comic Sans MS'), local('ComicSansMS');
+  font-weight: 400;
+  size-adjust: 89.283%;
+  ascent-override: 119.06%;
+  descent-override: 59.474%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Kalam Fallback';
+  src: local('Comic Sans MS Bold'), local('ComicSansMS-Bold');
+  font-weight: 700;
+  size-adjust: 88.947%;
+  ascent-override: 119.509%;
+  descent-override: 59.698%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Nunito Fallback';
+  src: local('Arial'), local('ArialMT');
+  size-adjust: 98.298%;
+  ascent-override: 102.85%;
+  descent-override: 35.911%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Nunito Fallback';
+  src: local('Arial Italic'), local('Arial-ItalicMT');
+  font-style: italic;
+  size-adjust: 98.297%;
+  ascent-override: 102.852%;
+  descent-override: 35.912%;
+  line-gap-override: 0%;
+}

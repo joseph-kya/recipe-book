@@ -10,7 +10,12 @@ import Controls from './Controls.jsx';
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
 // response 0.42 s, critically damped: a full turn settles in about 450 ms.
-const TURN_SPRING = makeSpring({ response: 0.42, damping: 1 });
+const TURN_RESPONSE = 0.42;
+const TURN_SPRING = makeSpring({ response: TURN_RESPONSE, damping: 1 });
+// A button or key turn starts at the spring's natural velocity. From rest a
+// critically damped spring is an S-curve (it creeps first, like ease-in); with
+// v0 = ω·distance it becomes x(t) = 1 − e^(−ωt), a pure ease-out with the same settle.
+const TURN_OMEGA = (2 * Math.PI) / TURN_RESPONSE;
 const EDGE_SPRING = makeSpring({ response: 0.3, damping: 1 });
 const NARROW_MAX_DEG = 115; // past ~95° a phone page is already off-screen
 
@@ -277,7 +282,7 @@ export default function Book({ lang, setLang }) {
     if (s.pendingTarget !== null && s.turn) {
       const target = s.pendingTarget;
       s.pendingTarget = null;
-      runSpring(target, 0);
+      runSpring(target, TURN_OMEGA * (target - s.p));
     }
   }, [turn, index, wide, fade, spreads, paint, runSpring, s]);
 

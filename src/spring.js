@@ -25,7 +25,8 @@ export function animateSpring({ from, to, velocity = 0, spring, onUpdate, onDone
       x += v * h;
       dt -= h;
     }
-    if (Math.abs(x - to) < 0.0015 && Math.abs(v) < 0.02) {
+    // 0.4% of a turn is under one degree: invisible, so stop there rather than idle in the tail.
+    if (Math.abs(x - to) < 0.004 && Math.abs(v) < 0.05) {
       onUpdate(to);
       onDone();
       return;

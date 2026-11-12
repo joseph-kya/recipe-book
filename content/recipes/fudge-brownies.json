@@ -1,5 +1,6 @@
 {
   "slug": "fudge-brownies",
+  "route": "brownies",
   "number": 1,
   "source": {
     "site": "Einfach Backen",

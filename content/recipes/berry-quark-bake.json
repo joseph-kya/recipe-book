@@ -1,5 +1,6 @@
 {
   "slug": "berry-quark-bake",
+  "route": "quark-bake",
   "number": 6,
   "source": {
     "site": "REWE",

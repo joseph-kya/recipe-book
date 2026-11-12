@@ -1,5 +1,6 @@
 {
   "slug": "protein-cloud-cheesecake",
+  "route": "cheesecake",
   "number": 4,
   "source": {
     "site": "LECKER",

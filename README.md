@@ -1,4 +1,4 @@
-# Bread Pitt's Recipe Book
+# Joseph's Recipe Book
 
 Joseph's baking recipes as a book you flip through. Cups and spoons come first, grams sit beside them, and every recipe has a printable PDF sheet. Static site: Vite + React, no backend, no router library, no external requests.
 

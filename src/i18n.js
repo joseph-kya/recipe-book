@@ -3,8 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 // UI chrome only. Recipe text never lives here.
 export const ui = {
   en: {
-    bookTitle: ["Bread Pitt's", 'Recipe Book'],
-    bookTitleFlat: "Bread Pitt's Recipe Book",
+    bookTitle: ["Joseph's", 'Recipe Book'],
+    bookTitleFlat: "Joseph's Recipe Book",
     coverEyebrow: (n) => `${n} recipes from Joseph's oven`,
     coverSticker: ['Cups', 'first!'],
     coverNote: 'Cups and spoons first. The kitchen scale is broken.',
@@ -37,8 +37,8 @@ export const ui = {
     bookLabel: "Recipe book. Swipe or use the arrow keys to turn pages.",
   },
   de: {
-    bookTitle: ['Bread Pitts', 'Rezeptbuch'],
-    bookTitleFlat: 'Bread Pitts Rezeptbuch',
+    bookTitle: ['Josephs', 'Rezeptbuch'],
+    bookTitleFlat: 'Josephs Rezeptbuch',
     coverEyebrow: (n) => `${n} Rezepte aus Josephs Ofen`,
     coverSticker: ['Tassen', 'zuerst!'],
     coverNote: 'Erst Tassen und Löffel. Die Küchenwaage ist kaputt.',

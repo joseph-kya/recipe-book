@@ -39,6 +39,7 @@ export default function Book({ lang, setLang }) {
   const [turn, setTurn] = useState(null); // { lo, hi } while a leaf is moving
   const [fade, setFade] = useState(null); // { from } during a reduced-motion crossfade
   const [announce, setAnnounce] = useState('');
+  const [barAway, setBarAway] = useState(false); // phone: control bar tucked away while reading
   const bookRef = useRef(null);
   const measureRef = useRef(null);
   const faceEls = useRef(new Map());
@@ -331,7 +332,33 @@ export default function Book({ lang, setLang }) {
     return Math.acos(e) / A;
   };
 
+  /* ---------- phone control bar: away while reading down, back on any sign of need ---------- */
+
+  // Every new page starts with the bar in view.
+  useEffect(() => {
+    setBarAway(false);
+    s.scrollMark = 0;
+  }, [index, s]);
+
+  const onFaceScroll = (e) => {
+    const el = e.currentTarget;
+    const y = el.scrollTop;
+    const atEnd = y + el.clientHeight >= el.scrollHeight - 24;
+    if (atEnd || y < 64) {
+      s.scrollMark = y;
+      setBarAway(false);
+      return;
+    }
+    // Only a deliberate move counts: small jitters accumulate until 8px.
+    const dy = y - (s.scrollMark || 0);
+    if (Math.abs(dy) < 8) return;
+    s.scrollMark = y;
+    setBarAway(dy > 0);
+  };
+
   const onPointerDown = (e) => {
+    // A tap near the bottom edge asks for the bar.
+    if (!s.wide && e.clientY > innerHeight - 96) setBarAway(false);
     if (!e.isPrimary || e.button !== 0 || s.drag) return;
     s.didDrag = false;
     s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0, decided: false, samples: [] };
@@ -521,7 +548,12 @@ export default function Book({ lang, setLang }) {
               aria-hidden={!live}
               onAnimationEnd={f.role === 'fading' ? () => setFade(null) : undefined}
             >
-              <div className="face-scroll">{f.content}</div>
+              <div
+                className="face-scroll"
+                onScroll={live && !wide && spreads[f.idx]?.kind === 'recipe' ? onFaceScroll : undefined}
+              >
+                {f.content}
+              </div>
               <div className="shade" aria-hidden="true" />
             </div>
           );
@@ -543,6 +575,8 @@ export default function Book({ lang, setLang }) {
         index={index}
         last={spreads.length - 1}
         wide={wide}
+        away={!wide && barAway}
+        onShow={() => setBarAway(false)}
         onPrev={() => navigate(destination() - 1)}
         onNext={() => navigate(destination() + 1)}
       />

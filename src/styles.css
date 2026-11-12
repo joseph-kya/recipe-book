@@ -1223,6 +1223,13 @@ button {
   border: var(--rule) solid var(--choc);
   border-radius: 999px;
   box-shadow: 4px 4px 0 var(--choc);
+  transition: transform 240ms var(--ease-out), opacity 150ms ease;
+}
+
+/* Reading down a recipe: the bar slides below the screen edge (its own height,
+   its lift, the safe area and its shadow), still focusable and announced. */
+.controls--narrow.controls--away {
+  transform: translateY(calc(100% + 0.5rem + 8px + env(safe-area-inset-bottom)));
 }
 
 .controls--narrow .lang {
@@ -1320,5 +1327,14 @@ button {
   .toc-text,
   .ctl--turn {
     transition-duration: 0ms;
+  }
+  /* the phone bar fades in place instead of sliding */
+  .controls--narrow {
+    transition: opacity 150ms ease;
+  }
+  .controls--narrow.controls--away {
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
   }
 }

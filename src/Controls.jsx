@@ -1,10 +1,15 @@
 import { ui } from './i18n.js';
 import { Arrow } from './ornaments.jsx';
 
-export default function Controls({ lang, setLang, index, last, wide, onPrev, onNext }) {
+export default function Controls({ lang, setLang, index, last, wide, away, onShow, onPrev, onNext }) {
   const t = ui[lang];
   return (
-    <nav className={`controls ${wide ? 'controls--wide' : 'controls--narrow'}`} aria-label={t.bookTitleFlat}>
+    <nav
+      className={`controls ${wide ? 'controls--wide' : 'controls--narrow'}${away ? ' controls--away' : ''}`}
+      aria-label={t.bookTitleFlat}
+      // Tabbing into the bar always brings it back on screen.
+      onFocus={onShow}
+    >
       <button
         type="button"
         className="ctl ctl--turn ctl--prev"

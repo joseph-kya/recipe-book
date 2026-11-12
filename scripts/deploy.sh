@@ -14,7 +14,8 @@ git worktree add -f --detach "$tmp" >/dev/null
   cp -R "$OLDPWD/dist/." .
   git add -A
   git commit -qm "Deploy $(git -C "$OLDPWD" rev-parse --short HEAD)"
-  git push -qf origin HEAD:gh-pages
+  # Use the GitHub CLI login for this push only (no global git config change).
+  git -c credential.helper= -c "credential.helper=!gh auth git-credential" push -qf origin HEAD:gh-pages
 )
 git worktree remove --force "$tmp"
 git branch -D gh-pages-tmp >/dev/null 2>&1 || true

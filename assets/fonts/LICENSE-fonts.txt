@@ -1,0 +1,2 @@
+Shrikhand, Lilita One, Kalam, Nunito: Google Fonts, SIL Open Font License 1.1 (https://openfontlicense.org).
+Converted to WOFF2 and subset to Latin / Latin Extended-A + punctuation/fractions/arrows for self-hosting.

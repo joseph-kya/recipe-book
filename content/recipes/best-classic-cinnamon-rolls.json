@@ -1,0 +1,234 @@
+{
+  "slug": "best-classic-cinnamon-rolls",
+  "number": 3,
+  "source": {
+    "site": "Scientifically Sweet",
+    "author": "Christina Marsigliese",
+    "url": "https://scientificallysweet.com/best-cinnamon-rolls/"
+  },
+  "conversions": "Author's own cup + gram pairings (as published)",
+  "amounts_credit": {
+    "en": {
+      "label": "Amounts",
+      "src": "as published, cups + grams are the author's own"
+    }
+  },
+  "en": {
+    "title": "The BEST Classic Cinnamon Rolls",
+    "title_lines": [
+      "Classic",
+      "Cinnamon Rolls"
+    ],
+    "tagline": "Two food scientists. Twelve fluffy rolls.",
+    "sticker": [
+      "12 rolls.",
+      "Science!"
+    ],
+    "intro": "Feathery, pull-apart rolls with a wet-sand filling that stays put. Just technique.",
+    "stats": [
+      {
+        "value": "1–2 h + 30–60 min",
+        "label": "rising"
+      },
+      {
+        "value": "20–25 min",
+        "label": "bake at 350 °F"
+      },
+      {
+        "value": "12",
+        "label": "rolls"
+      }
+    ],
+    "equipment": "Stand mixer + dough hook, greased 13 × 9-in metal pan, rolling pin, offset spatula, thermometer.",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": "The dough",
+        "items": [
+          {
+            "amount": "4 cups",
+            "metric": "568 g",
+            "name": "unbleached bread flour",
+            "note": "+ more for rolling"
+          },
+          {
+            "amount": "⅓ cup",
+            "metric": "65 g",
+            "name": "granulated sugar",
+            "note": null
+          },
+          {
+            "amount": "3 tsp",
+            "metric": "11 g",
+            "name": "instant dry yeast",
+            "note": null
+          },
+          {
+            "amount": "1¼ tsp",
+            "metric": "10 g",
+            "name": "fine table salt",
+            "note": "kosher: weigh 10 g (about 2 tsp)"
+          },
+          {
+            "amount": "1 large",
+            "metric": "1",
+            "name": "egg",
+            "note": "room temperature"
+          },
+          {
+            "amount": "2 tbsp",
+            "metric": "24 g",
+            "name": "liquid oil",
+            "note": "vegetable, canola, sunflower or olive"
+          },
+          {
+            "amount": "1¼ cups",
+            "metric": "300 ml",
+            "name": "milk",
+            "note": "whole or 2%"
+          },
+          {
+            "amount": "2 tbsp",
+            "metric": "28 g",
+            "name": "unsalted butter",
+            "note": "softened"
+          },
+          {
+            "amount": "as needed",
+            "metric": "10–20 ml",
+            "name": "water",
+            "note": "a splash at a time"
+          }
+        ]
+      },
+      {
+        "title": "The wet-sand filling",
+        "items": [
+          {
+            "amount": "1 cup",
+            "metric": "220 g",
+            "name": "dark brown sugar",
+            "note": "packed"
+          },
+          {
+            "amount": "4 tsp",
+            "metric": "10 g",
+            "name": "ground cinnamon",
+            "note": null
+          },
+          {
+            "amount": "1½ tbsp",
+            "metric": "13 g",
+            "name": "all-purpose flour",
+            "note": null
+          },
+          {
+            "amount": "1½ tbsp",
+            "metric": "22 ml",
+            "name": "water",
+            "note": null
+          },
+          {
+            "amount": "¼ tsp",
+            "metric": "1.5 g",
+            "name": "fine table salt",
+            "note": "added for unsalted butter"
+          },
+          {
+            "amount": "5 tbsp",
+            "metric": "70 g",
+            "name": "unsalted butter",
+            "note": "half-melted, stirred to finish"
+          }
+        ]
+      },
+      {
+        "title": "The icing",
+        "items": [
+          {
+            "amount": "4 oz",
+            "metric": "113 g",
+            "name": "cream cheese",
+            "note": "softened"
+          },
+          {
+            "amount": "2 tbsp",
+            "metric": "28 g",
+            "name": "unsalted butter",
+            "note": "softened"
+          },
+          {
+            "amount": "¾ cup",
+            "metric": "90 g",
+            "name": "powdered sugar",
+            "note": null
+          },
+          {
+            "amount": "½ tsp",
+            "metric": "½ tsp",
+            "name": "pure vanilla extract",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Dry stuff in little piles.",
+        "text": "Put the flour in the mixer bowl. Add sugar, yeast and salt in separate little piles on top.",
+        "cue": "Salt not touching the yeast."
+      },
+      {
+        "title": "Knead it like you mean it.",
+        "text": "Add egg, oil, milk and soft butter. Hook on medium-low, 10–15 min; scrape down after 2 min, then every 3–5. Dry or stiff? Add water, 10 ml at a time.",
+        "cue": "Climbs the hook, then pulls off the bowl; 24–26 °C (75–79 °F)."
+      },
+      {
+        "title": "Stretch + fold.",
+        "text": "Stretch and fold on a lightly floured counter until very smooth. Tuck into a ball, oil lightly, cover in a bowl.",
+        "cue": "The ball's skin pulls smooth without tearing."
+      },
+      {
+        "title": "Big rise, quick chill.",
+        "text": "Rise somewhere warm for 1–2 hours, then chill 15 min (skip in a very cold kitchen).",
+        "cue": "Nearly tripled in size."
+      },
+      {
+        "title": "Pan + wet-sand filling.",
+        "text": "Grease the pan. Mix sugar, cinnamon, flour and salt. Melt butter only halfway, stir till melted, then stir it in with the water.",
+        "cue": "Wet-sand sludge: not hot (oils out), not cold (sets up)."
+      },
+      {
+        "title": "Roll, spread, strip, spiral.",
+        "text": "No more kneading. Roll to 17 × 14 in, long side facing you; spread filling to the edges. Cut 12 strips (~1¼ × 14 in), roll each into a spiral (or roll a log, slice 12).",
+        "cue": "Squared-off rectangle, 12 even strips."
+      },
+      {
+        "title": "Proof shoulder to shoulder.",
+        "text": "Spiral side up, snug, no overlaps. Cover loosely, proof 30–60 min. Preheat to 350 °F / 177 °C.",
+        "cue": "A poke springs back slowly with a slight imprint. Deep dent = over-proofed."
+      },
+      {
+        "title": "Bake to temp.",
+        "text": "Bake 20–25 min. Tent with foil if the tops brown too fast. Cool on a rack 15–20 min.",
+        "cue": "Evenly golden; center roll at 92–94 °C (198–201 °F)."
+      },
+      {
+        "title": "Ice it.",
+        "text": "Beat cream cheese and butter very smooth, then powdered sugar and vanilla. Spread thin over each roll.",
+        "cue": "Smooth, thick and creamy."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Unsalted swap.",
+        "text": "She uses salted butter; this sheet uses unsalted, plus ¼ tsp salt in the filling. Her flour cup is heavy: 4 cups = 568 g."
+      },
+      {
+        "title": "Metal pan, no cream bath.",
+        "text": "Cream bath = mushy rolls; glass needs 5–10 min extra. Tacky dough? Add water, never flour. Overnight: shape, cover, chill, then proof."
+      }
+    ]
+  }
+}

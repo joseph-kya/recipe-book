@@ -1,0 +1,281 @@
+{
+  "slug": "fudge-brownies",
+  "number": 1,
+  "source": {
+    "site": "Einfach Backen",
+    "author": "Franziska Klausmann",
+    "url": "https://www.einfachbacken.de/rezepte/fudge-brownies-so-werden-sie-besonders-saftig"
+  },
+  "conversions": "King Arthur Baking ingredient weight chart",
+  "en": {
+    "title": "Fudge Brownies",
+    "title_lines": [
+      "Fudge",
+      "Brownies"
+    ],
+    "tagline": "Big chocolate energy. Tiny measuring-cup effort.",
+    "sticker": [
+      "No scale.",
+      "No problem."
+    ],
+    "intro": "Dense, glossy, properly fudgy squares from one bowl and a bit of patience. Buttermilk keeps the crumb soft; the chill at the end makes them cut clean.",
+    "stats": [
+      {
+        "value": "30 min",
+        "label": "prep"
+      },
+      {
+        "value": "35 min",
+        "label": "bake"
+      },
+      {
+        "value": "24",
+        "label": "squares, 5 × 5 cm"
+      }
+    ],
+    "equipment": "20 × 30 cm baking frame or tin (or a 26 cm springform), baking paper, heatproof bowl over simmering water, sieve.",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": null,
+        "items": [
+          {
+            "amount": "1 cup + 1½ tsp",
+            "metric": "175 g",
+            "name": "dark couverture chocolate",
+            "note": "finely chopped"
+          },
+          {
+            "amount": "½ cup (8 tbsp)",
+            "metric": "115 g",
+            "name": "unsalted butter",
+            "note": null
+          },
+          {
+            "amount": "¼ cup + 1 tbsp + 2 tsp",
+            "metric": "30 g",
+            "name": "unsweetened cocoa powder",
+            "note": null
+          },
+          {
+            "amount": "2 cups + 1 tbsp + 1 tsp",
+            "metric": "250 g",
+            "name": "plain flour",
+            "note": "Type 405 or all-purpose"
+          },
+          {
+            "amount": "½ tsp",
+            "metric": "½ tsp",
+            "name": "salt",
+            "note": null
+          },
+          {
+            "amount": "4",
+            "metric": "4",
+            "name": "eggs",
+            "note": "European size M"
+          },
+          {
+            "amount": "2 cups",
+            "metric": "400 g",
+            "name": "white granulated sugar",
+            "note": null
+          },
+          {
+            "amount": "1 tsp",
+            "metric": "1 tsp",
+            "name": "vanilla extract",
+            "note": null
+          },
+          {
+            "amount": "¼ cup (4 tbsp)",
+            "metric": "60 ml",
+            "name": "buttermilk",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Heat things up.",
+        "text": "Heat the oven to 180 °C conventional / 160 °C fan. Line a tray with baking paper and set a 20 × 30 cm frame on it (a 26 cm springform works too).",
+        "cue": "Oven fully preheated before the batter goes in."
+      },
+      {
+        "title": "Melt the magic.",
+        "text": "Melt the chopped chocolate and butter over simmering water. Let it cool slightly. Mix cocoa, flour and salt and sift them together.",
+        "cue": "Glossy and smooth, warm but not hot."
+      },
+      {
+        "title": "Bring it together.",
+        "text": "Beat eggs, sugar and vanilla to a cream. Stir in the chocolate butter, then the flour mix in three batches. Pour in the buttermilk slowly at the end.",
+        "cue": "Thick, shiny batter with no dry streaks."
+      },
+      {
+        "title": "Into the oven.",
+        "text": "Spread the batter into the frame and bake for about 35 minutes.",
+        "cue": "Top set and crackly; a skewer comes out with moist crumbs."
+      },
+      {
+        "title": "The hard part: wait.",
+        "text": "Let it cool completely. Chill for 2 more hours if you like a firmer bite, then cut into 5 × 5 cm squares. Keeps up to 3 days airtight.",
+        "cue": "Fully cold = clean cuts."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Scoop smart.",
+        "text": "1 cup ≈ 240 ml · 1 tbsp = 15 ml · 1 tsp = 5 ml. Use measuring cups, not mugs. Spoon flour and cocoa in lightly, then level. Pack butter without air gaps."
+      },
+      {
+        "title": "Chocolate cheat code.",
+        "text": "Chopped chocolate varies by size. For accuracy, use 1¾ bars of 100 g (175 g). All cup conversions are approximate."
+      }
+    ],
+    "tagline_grams": "Big chocolate energy. Measured to the gram.",
+    "sticker_grams": [
+      "By the gram.",
+      "Spot on."
+    ],
+    "tips_grams": [
+      {
+        "title": "Straight from the source.",
+        "text": "All amounts are the original recipe's grams and ml. Spoons: 1 tbsp = 15 ml · 1 tsp = 5 ml. No scale? Grab the cups version."
+      },
+      {
+        "title": "Chocolate cheat code.",
+        "text": "175 g couverture = 1¾ bars of 100 g. Chop it finely so it melts evenly with the butter."
+      }
+    ]
+  },
+  "de": {
+    "title": "Fudge Brownies",
+    "title_lines": [
+      "Fudge",
+      "Brownies"
+    ],
+    "tagline": "Große Schoko-Energie. Winziger Messbecher-Aufwand.",
+    "sticker": [
+      "Keine Waage.",
+      "Kein Problem."
+    ],
+    "intro": "Dichte, glänzende, richtig fudgige Stücke aus einer Schüssel und etwas Geduld. Buttermilch hält die Krume weich, das Kühlen am Ende sorgt für saubere Schnitte.",
+    "stats": [
+      {
+        "value": "30 Min",
+        "label": "Zubereitung"
+      },
+      {
+        "value": "35 Min",
+        "label": "Backen"
+      },
+      {
+        "value": "24",
+        "label": "Stücke, 5 × 5 cm"
+      }
+    ],
+    "equipment": "Backrahmen 20 × 30 cm (oder Springform 26 cm), Backpapier, hitzefeste Schüssel überm Wasserbad, Sieb.",
+    "ingredients_headline": "Das gute Zeug",
+    "groups": [
+      {
+        "title": null,
+        "items": [
+          {
+            "amount": "1 Tasse + 1½ TL",
+            "metric": "175 g",
+            "name": "Zartbitterkuvertüre",
+            "note": "fein gehackt"
+          },
+          {
+            "amount": "½ Tasse (8 EL)",
+            "metric": "115 g",
+            "name": "Butter",
+            "note": null
+          },
+          {
+            "amount": "¼ Tasse + 1 EL + 2 TL",
+            "metric": "30 g",
+            "name": "Backkakao",
+            "note": "ungesüßt"
+          },
+          {
+            "amount": "2 Tassen + 1 EL + 1 TL",
+            "metric": "250 g",
+            "name": "Weizenmehl",
+            "note": "Type 405"
+          },
+          {
+            "amount": "½ TL",
+            "metric": "½ TL",
+            "name": "Salz",
+            "note": null
+          },
+          {
+            "amount": "4",
+            "metric": "4",
+            "name": "Eier",
+            "note": "Größe M"
+          },
+          {
+            "amount": "2 Tassen",
+            "metric": "400 g",
+            "name": "Zucker",
+            "note": null
+          },
+          {
+            "amount": "1 TL",
+            "metric": "1 TL",
+            "name": "Vanilleextrakt",
+            "note": null
+          },
+          {
+            "amount": "¼ Tasse (4 EL)",
+            "metric": "60 ml",
+            "name": "Buttermilch",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Jetzt wird's chaotisch.",
+    "steps": [
+      {
+        "title": "Ofen an.",
+        "text": "Ofen auf 180 °C Ober-/Unterhitze (Umluft 160 °C) vorheizen. Ein Blech mit Backpapier auslegen und den Backrahmen 20 × 30 cm daraufstellen (eine 26-cm-Springform geht auch).",
+        "cue": "Ofen ist voll vorgeheizt, bevor der Teig reinkommt."
+      },
+      {
+        "title": "Schmelz-Magie.",
+        "text": "Gehackte Kuvertüre mit der Butter über dem Wasserbad schmelzen, leicht abkühlen lassen. Kakao, Mehl und Salz mischen und sieben.",
+        "cue": "Glänzend und glatt, warm, aber nicht heiß."
+      },
+      {
+        "title": "Alles zusammen.",
+        "text": "Eier, Zucker und Vanille cremig aufschlagen. Schoko-Butter unterrühren, dann das Mehl in drei Portionen. Zum Schluss die Buttermilch langsam einfließen lassen.",
+        "cue": "Dicker, glänzender Teig ohne Mehlnester."
+      },
+      {
+        "title": "Ab in den Ofen.",
+        "text": "Teig in den Rahmen streichen und ca. 35 Minuten backen.",
+        "cue": "Oberfläche fest und rissig; am Holzstäbchen kleben feuchte Krümel."
+      },
+      {
+        "title": "Der schwerste Teil: warten.",
+        "text": "Komplett auskühlen lassen. Wer's fester mag, noch 2 Stunden kühlen, dann in 5 × 5 cm große Stücke schneiden. Luftdicht bis zu 3 Tage haltbar.",
+        "cue": "Ganz kalt = saubere Schnitte."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Clever schöpfen.",
+        "text": "1 Tasse ≈ 240 ml · 1 EL = 15 ml · 1 TL = 5 ml. Echte Messbecher statt Kaffeetassen. Mehl und Kakao locker einlöffeln, dann glatt streichen. Butter ohne Luftlöcher eindrücken."
+      },
+      {
+        "title": "Schoko-Cheat-Code.",
+        "text": "Gehackte Schokolade fällt unterschiedlich aus. Genauer: 1¾ Tafeln à 100 g (175 g). Alle Tassen-Angaben sind Näherungswerte."
+      }
+    ]
+  }
+}

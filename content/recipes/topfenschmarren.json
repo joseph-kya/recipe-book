@@ -1,0 +1,160 @@
+{
+  "slug": "topfenschmarren",
+  "number": 5,
+  "source": {
+    "site": "susannamarie.at",
+    "author": "Susanna Marie",
+    "url": "https://www.susannamarie.at/topfenschmarren/"
+  },
+  "conversions": "approx. cups; Topfen ~240 g/cup, flour ~120 g/cup",
+  "amounts_credit": {
+    "en": {
+      "label": "Cup conversions",
+      "src": "approx. (Topfen ~240 g/cup, flour ~120 g/cup)"
+    }
+  },
+  "en": {
+    "title": "Topfenschmarren",
+    "title_lines": [
+      "Topfen-",
+      "schmarren"
+    ],
+    "tagline": "Kaiserschmarrn's lighter, protein-packed cousin.",
+    "sticker": [
+      "1 big",
+      "plate!"
+    ],
+    "intro": "Magertopfen and whipped egg whites, pan-fried low and slow, torn into fluffy chunks.",
+    "stats": [
+      {
+        "value": "5 + 5 + 5 min",
+        "label": "in the pan"
+      },
+      {
+        "value": "1",
+        "label": "big portion"
+      },
+      {
+        "value": "470 kcal · 48 g protein",
+        "label": "(source's estimate)"
+      }
+    ],
+    "equipment": "Non-stick pan with a lid, two bowls, whisk or hand mixer, spatula.",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": "The batter",
+        "items": [
+          {
+            "amount": "1 heaped cup",
+            "metric": "250 g",
+            "name": "Magertopfen (low-fat quark)",
+            "note": null
+          },
+          {
+            "amount": "3 tbsp",
+            "metric": "3 EL",
+            "name": "sour cream",
+            "note": "optional"
+          },
+          {
+            "amount": "scant ½ cup",
+            "metric": "50 g",
+            "name": "spelt flour",
+            "note": null
+          },
+          {
+            "amount": "2",
+            "metric": "",
+            "name": "eggs",
+            "note": null
+          },
+          {
+            "amount": "to taste",
+            "metric": "",
+            "name": "sweetener",
+            "note": null
+          },
+          {
+            "amount": "1 pinch",
+            "metric": "",
+            "name": "salt",
+            "note": null
+          },
+          {
+            "amount": "to taste",
+            "metric": "",
+            "name": "grated lemon zest",
+            "note": null
+          },
+          {
+            "amount": "a splash",
+            "metric": "optional",
+            "name": "water",
+            "note": "if it's too stiff"
+          }
+        ]
+      },
+      {
+        "title": "Pan + plate",
+        "items": [
+          {
+            "amount": "a little",
+            "metric": "",
+            "name": "butter or coconut oil",
+            "note": null
+          },
+          {
+            "amount": "to serve",
+            "metric": "",
+            "name": "fruit or compote",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Yolks meet Topfen.",
+        "text": "Separate the eggs. Stir the Topfen with the 2 yolks (and the sour cream, if using) until well mixed.",
+        "cue": "Smooth and creamy."
+      },
+      {
+        "title": "Flavour it.",
+        "text": "Add flour, sweetener, lemon zest and salt. Stiff? A splash of water.",
+        "cue": "Thick but creamy."
+      },
+      {
+        "title": "Whip + fold.",
+        "text": "Beat the whites stiff and slowly fold them in.",
+        "cue": "Quite a firm batter: that's normal."
+      },
+      {
+        "title": "Low and slow.",
+        "text": "Melt the fat on MEDIUM heat. Spread the batter 0.5–1 cm thick. Fry ~5 min until it starts to set, flip, ~5 min more.",
+        "cue": "Golden at most, never dark."
+      },
+      {
+        "title": "Lid on, chill out.",
+        "text": "Heat off, lid on, let it sit 5 min.",
+        "cue": "Set all the way through."
+      },
+      {
+        "title": "Tear + top.",
+        "text": "Lid off, tear into pieces, pile on fruit or compote.",
+        "cue": "Fluffy, golden chunks."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Our tweaks.",
+        "text": "None to the recipe: amounts and steps are Susanna's. Cups are our approximate conversions. She leaves sweetener, fat and zest to taste."
+      },
+      {
+        "title": "Mind the heat.",
+        "text": "Her big warning: too hot and it burns and goes hard. Keep it on medium."
+      }
+    ]
+  }
+}

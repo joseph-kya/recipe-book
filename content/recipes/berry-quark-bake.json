@@ -1,0 +1,149 @@
+{
+  "slug": "berry-quark-bake",
+  "number": 6,
+  "source": {
+    "site": "REWE",
+    "author": "Susanne Schanz",
+    "url": "https://www.rewe.de/rezepte/suesser-quarkauflauf-beeren-streusel/"
+  },
+  "conversions": "approx. cups; quark ~240 g/cup, sugar 198 g/cup, berries ~140 g/cup",
+  "amounts_credit": {
+    "en": {
+      "label": "Cup conversions",
+      "src": "approx. (King Arthur + quark ~240 g/cup)"
+    }
+  },
+  "en": {
+    "title": "Lemon & Berry Quark Bake",
+    "title_lines": [
+      "Lemon & Berry",
+      "Quark Bake"
+    ],
+    "tagline": "A Topfenauflauf for breakfast, dessert or both.",
+    "sticker": [
+      "Half",
+      "batch!"
+    ],
+    "intro": "REWE's sweet quark bake, halved and minus the streusel: lemony quark, whipped whites, juicy berries.",
+    "stats": [
+      {
+        "value": "30–40 min",
+        "label": "at 160 °C"
+      },
+      {
+        "value": "2",
+        "label": "portions, or 1 big one"
+      },
+      {
+        "value": "~20 min",
+        "label": "prep"
+      }
+    ],
+    "equipment": "Hand mixer, grater, two bowls, a small baking dish (~20 × 15 cm).",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": "The bake",
+        "items": [
+          {
+            "amount": "~1½ cups",
+            "metric": "200 g",
+            "name": "mixed berries",
+            "note": "frozen is fine"
+          },
+          {
+            "amount": "½",
+            "metric": "",
+            "name": "organic lemon",
+            "note": "zest only"
+          },
+          {
+            "amount": "1",
+            "metric": "",
+            "name": "egg",
+            "note": null
+          },
+          {
+            "amount": "1 pinch",
+            "metric": "",
+            "name": "salt",
+            "note": null
+          },
+          {
+            "amount": "2 tbsp",
+            "metric": "25 g",
+            "name": "sugar",
+            "note": "split in half"
+          },
+          {
+            "amount": "1 heaped cup",
+            "metric": "250 g",
+            "name": "Magerquark (low-fat quark)",
+            "note": null
+          },
+          {
+            "amount": "1½ tbsp",
+            "metric": "1½ EL",
+            "name": "durum wheat semolina (Grieß)",
+            "note": null
+          },
+          {
+            "amount": "1 tsp",
+            "metric": "1 TL",
+            "name": "baking powder",
+            "note": null
+          },
+          {
+            "amount": "to dust",
+            "metric": "",
+            "name": "icing sugar",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Berries + zest.",
+        "text": "Oven to 160 °C top/bottom heat. Pick over, wash and drain the berries (frozen: thaw, then drain). Zest the lemon.",
+        "cue": "Berries drained, not sitting in juice."
+      },
+      {
+        "title": "Whip the white.",
+        "text": "Separate the egg. Whip the white with a little salt and 1 tbsp sugar until stiff.",
+        "cue": "Stiff peaks."
+      },
+      {
+        "title": "Quark base.",
+        "text": "Stir quark, yolk, zest, Grieß, baking powder and the other 1 tbsp sugar well. Fold in the white.",
+        "cue": "Smooth and airy, no streaks."
+      },
+      {
+        "title": "Berry time.",
+        "text": "Spoon into the dish and gently fold in the berries.",
+        "cue": "Berries scattered, not mashed."
+      },
+      {
+        "title": "Bake.",
+        "text": "Bake 30–40 min.",
+        "cue": "Firm and lightly browned."
+      },
+      {
+        "title": "Dust + dig in.",
+        "text": "Dust with icing sugar and serve.",
+        "cue": "Warm and set in the middle."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Our tweaks.",
+        "text": "Halved from REWE's 4 portions (1 egg instead of 2), streusel left off, smaller dish is our pick. Smaller dish may bake faster: check from 25 min."
+      },
+      {
+        "title": "No numbers.",
+        "text": "REWE's 464 kcal per portion includes the streusel, so we don't print it. Cups are approximate."
+      }
+    ]
+  }
+}

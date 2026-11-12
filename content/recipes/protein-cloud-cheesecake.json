@@ -1,0 +1,161 @@
+{
+  "slug": "protein-cloud-cheesecake",
+  "number": 4,
+  "source": {
+    "site": "LECKER",
+    "author": "Martha Formella & Inga Pfannebecker",
+    "url": "https://www.lecker.de/high-protein-cheesecake-backen-mit-nur-100-kalorien-pro-stueck-133500.html"
+  },
+  "conversions": "approx. cups; quark ~240 g/cup, cornflour ~8 g/tbsp",
+  "amounts_credit": {
+    "en": {
+      "label": "Cup conversions",
+      "src": "approx. (King Arthur + quark ~240 g/cup)"
+    }
+  },
+  "en": {
+    "title": "High-Protein Cloud Cheesecake",
+    "title_lines": [
+      "Cloud",
+      "Cheesecake"
+    ],
+    "tagline": "Fluffy, light, high-protein. No crust, no fuss.",
+    "sticker": [
+      "8 slices",
+      "Fluffy!"
+    ],
+    "intro": "LECKER's viral 'Wölkchenkuchen': quark and whipped egg whites, baked gently in a water bath.",
+    "stats": [
+      {
+        "value": "~1 h 15 min",
+        "label": "total"
+      },
+      {
+        "value": "10 + 45 min",
+        "label": "in the oven"
+      },
+      {
+        "value": "~100 kcal · 8 g protein",
+        "label": "per slice (LECKER's estimate)"
+      }
+    ],
+    "equipment": "18 cm (7-in) springform, baking paper, foil, big roasting dish, hand mixer, mini chopper.",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": "The batter",
+        "items": [
+          {
+            "amount": "½ cup",
+            "metric": "100 g",
+            "name": "erythritol",
+            "note": "split 5 tbsp + 3 tbsp"
+          },
+          {
+            "amount": "4",
+            "metric": "4 (size M)",
+            "name": "eggs",
+            "note": null
+          },
+          {
+            "amount": "1 pinch",
+            "metric": "",
+            "name": "salt",
+            "note": null
+          },
+          {
+            "amount": "pinch + ¼ tsp",
+            "metric": "",
+            "name": "baking powder",
+            "note": "pinch for the whites"
+          },
+          {
+            "amount": "¾ cup + 1 tbsp",
+            "metric": "200 g",
+            "name": "Magerquark (low-fat quark)",
+            "note": null
+          },
+          {
+            "amount": "3½ tbsp",
+            "metric": "50 g",
+            "name": "reduced-fat cream cheese",
+            "note": "~10% fat"
+          },
+          {
+            "amount": "5 tbsp",
+            "metric": "75 ml",
+            "name": "milk",
+            "note": null
+          },
+          {
+            "amount": "¼ tsp",
+            "metric": "",
+            "name": "vanilla extract",
+            "note": null
+          },
+          {
+            "amount": "⅓ cup",
+            "metric": "40 g",
+            "name": "plain flour",
+            "note": "Type 405"
+          },
+          {
+            "amount": "3 tbsp",
+            "metric": "25 g",
+            "name": "cornflour",
+            "note": null
+          },
+          {
+            "amount": "to dust",
+            "metric": "optional",
+            "name": "icing sugar",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Run a bath.",
+        "text": "Oven to 170 °C (150 °C fan), rack in the middle. Set the roasting dish on it, ~3 cm hot water in. Line the springform base and sides with paper; wrap the outside tightly in foil.",
+        "cue": "Foil snug all round, no gaps for water."
+      },
+      {
+        "title": "Blitz + whip.",
+        "text": "Grind the 5 tbsp and 3 tbsp of erythritol to powder, separately. Separate the eggs. Whip whites with salt and the pinch of baking powder until stiff, raining in the 5-tbsp powder.",
+        "cue": "Stiff, glossy peaks that stay put."
+      },
+      {
+        "title": "Creamy base.",
+        "text": "Beat yolks, the 3-tbsp powder, quark, cream cheese, milk and vanilla. Mix flour, cornflour and ¼ tsp baking powder; stir in.",
+        "cue": "Smooth, no lumps."
+      },
+      {
+        "title": "Fold in the cloud.",
+        "text": "Fold the whites in, in three goes, with a spatula. Pour into the tin.",
+        "cue": "No white streaks, still airy."
+      },
+      {
+        "title": "Into the bath.",
+        "text": "Set the tin in the water bath. Bake 10 min, drop to 150 °C (130 °C fan), bake ~45 min more. Don't open the door!",
+        "cue": "Door shut the whole time."
+      },
+      {
+        "title": "Cool, unmould, slice.",
+        "text": "Cool completely, release from the tin. Dust thinly with icing sugar if you like; cut 8 slices.",
+        "cue": "Fully cool before slicing."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Our tweaks.",
+        "text": "Amounts, times and temps are LECKER's. Cups are our approximate conversions; splitting the erythritol 5 + 3 tbsp before grinding is our no-scale trick."
+      },
+      {
+        "title": "Sugar instead?",
+        "text": "LECKER says plain sugar swaps 1:1 for erythritol, no grinding. Then it's ~150 kcal and 8 g protein a slice (their estimate)."
+      }
+    ]
+  }
+}

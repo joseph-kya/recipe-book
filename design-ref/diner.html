@@ -1,0 +1,106 @@
+<!doctype html><html lang="{{lang}}"><head><meta charset="utf-8"><title>{{r.title}}</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin:0; padding:0; }
+:root { --cherry:#C8233A; --mint:#A8DCCB; --mustard:#F2B134; --choc:#3A2216; --cream:#FFF4DF; }
+html, body { width:210mm; }
+.sheet { position: relative; width:210mm; height:297mm; overflow:hidden; }
+.sheet + .sheet { break-before: page; }
+body { background: var(--cream); color: var(--choc); font: 9pt/1.38 "Nunito", sans-serif; }
+.check { position:absolute; left:0; right:0; height: 8mm; }
+.wrap { padding: 12mm 14mm 0; }
+.hero { position:relative; text-align:center; padding: 2mm 30mm 0; }
+.eyebrow { font-family:"Lilita One"; color: var(--cherry); font-size: 11pt; letter-spacing: .12em; }
+h1 { font-family:"Shrikhand"; font-weight:400; font-size: 40pt; line-height: 1.02; color: var(--cherry); margin-top: 1mm; }
+.tag { font-family:"Kalam"; font-size: 15pt; margin-top: 1.5mm; transform: rotate(-1.5deg); }
+.burst { position:absolute; right: -4mm; top: 6mm; width: 36mm; height: 36mm; }
+.cupsvg { position:absolute; left: 0; top: 10mm; width: 30mm; transform: rotate(-8deg); }
+.stats { text-align:center; margin: 2.5mm 0 4.5mm; }
+.stats span { display:inline-block; font-family:"Lilita One"; font-size: 10pt; background: var(--choc); color: var(--cream); padding: 1.2mm 4mm; border-radius: 10mm; margin: 0 1.2mm; }
+table.lay { border-collapse: separate; border-spacing: 0; width: 100%; }
+td { vertical-align: top; }
+.menu { width: 84mm; background: var(--mint); border: .8mm solid var(--choc); border-radius: 5mm; padding: 5mm; box-shadow: 1.6mm 1.6mm 0 var(--choc); }
+.gap { width: 7mm; }
+h2 { font-family:"Lilita One"; font-weight:400; font-size: 19pt; line-height: 1; color: var(--choc); margin-bottom: 1mm; }
+.sub { font-family:"Kalam"; font-size: 9.5pt; margin-bottom: 2.5mm; }
+.mt { width:100%; border-collapse: collapse; }
+.mt td { padding: 1.3mm 0 1.1mm; border-bottom: .5mm dotted rgba(58,34,22,.55); }
+.mt tr:last-child td { border-bottom: 0; }
+.mt .n { font-weight: 700; }
+.mt .note { display:block; font-size: 7.6pt; opacity: .8; font-weight: 400; }
+.mt .note b { font-weight: 800; }
+.mt .a { font-family:"Lilita One"; font-size: 9.5pt; color: var(--cherry); text-align: right; white-space: nowrap; padding-left: 2mm; }
+.ticket { background: #fff; border: .8mm solid var(--choc); border-radius: 2mm; padding: 5mm 5mm 3mm; }
+.st { display:flex; gap: 3mm; margin-bottom: 2.3mm; }
+.st .k { flex: 0 0 8mm; height: 8mm; border-radius: 50%; background: var(--mustard); border: .6mm solid var(--choc); font-family:"Lilita One"; font-size: 12pt; text-align:center; line-height: 7mm; }
+.st h3 { font-family:"Lilita One"; font-weight:400; font-size: 11.5pt; color: var(--cherry); }
+.st .cue { font-family:"Kalam"; font-size: 9pt; color: #6b4a36; margin-top: .3mm; }
+.tips { margin-top: 5mm; }
+.tips td.t { width: 50%; padding: 0 3mm 0 0; }
+.tips .card { background: var(--mustard); border: .6mm solid var(--choc); border-radius: 3mm; padding: 3mm 4mm; font-size: 8.4pt; transform: rotate(-1deg); }
+.tips td.t + td.t .card { background: #F7C9CF; transform: rotate(1deg); }
+.tips h4 { font-family:"Lilita One"; font-weight:400; font-size: 12pt; }
+.foot { position:absolute; left:14mm; right:14mm; bottom: 10.5mm; font-family:"Kalam"; font-size: 8.5pt; display:flex; justify-content:space-between; }
+
+body.tight1 .st { margin-bottom: 1.6mm; } body.tight1 h1 { font-size: 36pt; } body.tight1 .mt td { padding: 1mm 0 .9mm; } body.tight1 .tips { margin-top: 3.5mm; } body.tight1 .stats { margin: 2mm 0 3.5mm; }
+body.tight2 .st { margin-bottom: 1.2mm; } body.tight2 h1 { font-size: 32pt; } body.tight2 { font-size: 8.5pt; } body.tight2 .mt td { padding: .8mm 0 .7mm; } body.tight2 .tips { margin-top: 3mm; } body.tight2 .ticket { padding: 4mm 4mm 2mm; }
+
+.mt .gh td { font-family:"Lilita One"; color: var(--cherry); font-size: 10.5pt; padding-top: 3mm; border-bottom: .6mm solid var(--choc); }
+.mt .gh:first-child td { padding-top: 0; }
+.menu.wide td.half { width: 50%; vertical-align: top; } .menu.wide td.half + td.half { padding-left: 8mm; }
+.p2head { display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 4mm; }
+.p2head .t { font-family:"Shrikhand"; font-size: 24pt; color: var(--cherry); }
+.p2head .e { font-family:"Lilita One"; color: var(--cherry); font-size: 10pt; letter-spacing: .1em; }
+.ticket.wide { display:block; padding: 6mm 7mm 4mm; }
+.ticket.wide .st { margin-bottom: 4.5mm; } .ticket.wide .st p { font-size: 10pt; } .ticket.wide .st h3 { font-size: 13pt; } .ticket.wide .st .cue { font-size: 10pt; }
+.intro-d { font-family:"Kalam"; font-size: 12pt; text-align:center; margin: 5mm 12mm 0; }
+.next { font-family:"Lilita One"; color: var(--cherry); font-size: 13pt; text-align: right; margin-top: 6mm; }
+</style></head><body>{% macro mt(groups) %}<table class="mt">{% for g in groups %}{% if g.title %}<tr class="gh"><td colspan="2">{{g.title}}</td></tr>{% endif %}{% for it in g['items'] %}<tr><td class="n">{{it.name}}{% if it.metric or it.note %}<span class="note">{% if it.metric %}<b>{{it.metric}}</b>{% endif %}{% if it.metric and it.note %} · {% endif %}{% if it.note %}{{it.note}}{% endif %}</span>{% endif %}</td><td class="a">{{it.amount}}</td></tr>{% endfor %}{% endfor %}</table>{% endmacro %}
+{% macro steps() %}{% for s in r.steps %}<div class="st"><div class="k">{{loop.index}}</div><div><h3>{{s.title}}</h3><p>{{s.text}}</p>{% if s.cue %}<p class="cue">→ {{s.cue}}</p>{% endif %}</div></div>{% endfor %}{% endmacro %}
+{% if not split %}<div class="sheet">
+<svg class="check" style="top:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#3A2216"/><rect x="4" y="4" width="4" height="4" fill="#3A2216"/></pattern></defs><rect width="210" height="8" fill="url(#c)"/></svg>
+<svg class="check" style="bottom:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c2" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#C8233A"/><rect x="4" y="4" width="4" height="4" fill="#C8233A"/></pattern></defs><rect width="210" height="8" fill="url(#c2)"/></svg>
+<div class="wrap"><div class="hero">
+  <svg class="cupsvg" viewBox="0 0 100 100"><g stroke="#3A2216" stroke-width="3" stroke-linejoin="round">
+    <path d="M22 38 h56 l-8 50 h-40 z" fill="#C8233A"/><path d="M30 38 l4 50 M42 38 l1 50 M58 38 l-1 50 M70 38 l-4 50" stroke-width="2"/>
+    <ellipse cx="50" cy="34" rx="32" ry="9" fill="#FFF4DF"/><path d="M28 32 q8-16 22-12 q14-6 22 12" fill="#7A4A35"/>
+    <circle cx="50" cy="14" r="6" fill="#C8233A"/><path d="M50 8 q3-6 8-6" fill="none"/></g></svg>
+  <svg class="burst" viewBox="0 0 100 100"><polygon fill="#F2B134" stroke="#3A2216" stroke-width="2.5" points="{% for i in range(32) %}{% set a = i * 3.14159 / 16 %}{% set rr = 48 if i % 2 == 0 else 38 %}{{ 50 + rr * (a|cos) }},{{ 50 + rr * (a|sin) }} {% endfor %}"/>
+    <text x="50" y="44" text-anchor="middle" font-family="Lilita One" font-size="{{ 13 if r.sticker[0]|length < 11 else 11 }}" fill="#3A2216">{{r.sticker[0]}}</text><text x="50" y="62" text-anchor="middle" font-family="Lilita One" font-size="{{ 13 if r.sticker[1]|length < 11 else 11 }}" fill="#C8233A">{{r.sticker[1]}}</text></svg>
+  <div class="eyebrow">★ {{ui.recipe_no}} {{ '%02d' % meta.number }} ★</div>
+  <h1>{% for l in r.title_lines %}{{l}}{% if not loop.last %}<br>{% endif %}{% endfor %}</h1>
+  <div class="tag">{{r.tagline}}</div>
+</div>
+<div class="stats">{% for s in r.stats %}<span>{{s.value}} {{s.label}}</span>{% endfor %}</div>
+<table class="lay"><tr>
+<td class="menu"><h2>{{r.ingredients_headline}}</h2><div class="sub">{{ui.cups}} · {{ui.metric}}</div>{{ mt(r.groups) }}</td><td class="gap"></td>
+<td class="ticket"><h2>{{r.method_headline}}</h2><div class="sub">{{r.equipment}}</div>{{ steps() }}</td></tr></table>
+<table class="lay tips"><tr>{% for t in r.tips %}<td class="t"><div class="card"><h4>{{t.title}}</h4><p>{{t.text}}</p></div></td>{% endfor %}</tr></table></div><div class="foot"><span>{{ui.recipe}}: {{meta.source.author}} / {{meta.source.site}}</span><span>{{ui.conv_label}}: {{ui.conv_src}}</span></div></div>
+{% else %}{% set n = r.groups|length %}{% set cut = 1 if n > 1 else 0 %}
+<div class="sheet">
+<svg class="check" style="top:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#3A2216"/><rect x="4" y="4" width="4" height="4" fill="#3A2216"/></pattern></defs><rect width="210" height="8" fill="url(#c)"/></svg>
+<svg class="check" style="bottom:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c2" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#C8233A"/><rect x="4" y="4" width="4" height="4" fill="#C8233A"/></pattern></defs><rect width="210" height="8" fill="url(#c2)"/></svg>
+<div class="wrap"><div class="hero">
+  <svg class="cupsvg" viewBox="0 0 100 100"><g stroke="#3A2216" stroke-width="3" stroke-linejoin="round">
+    <path d="M22 38 h56 l-8 50 h-40 z" fill="#C8233A"/><path d="M30 38 l4 50 M42 38 l1 50 M58 38 l-1 50 M70 38 l-4 50" stroke-width="2"/>
+    <ellipse cx="50" cy="34" rx="32" ry="9" fill="#FFF4DF"/><path d="M28 32 q8-16 22-12 q14-6 22 12" fill="#7A4A35"/>
+    <circle cx="50" cy="14" r="6" fill="#C8233A"/><path d="M50 8 q3-6 8-6" fill="none"/></g></svg>
+  <svg class="burst" viewBox="0 0 100 100"><polygon fill="#F2B134" stroke="#3A2216" stroke-width="2.5" points="{% for i in range(32) %}{% set a = i * 3.14159 / 16 %}{% set rr = 48 if i % 2 == 0 else 38 %}{{ 50 + rr * (a|cos) }},{{ 50 + rr * (a|sin) }} {% endfor %}"/>
+    <text x="50" y="44" text-anchor="middle" font-family="Lilita One" font-size="{{ 13 if r.sticker[0]|length < 11 else 11 }}" fill="#3A2216">{{r.sticker[0]}}</text><text x="50" y="62" text-anchor="middle" font-family="Lilita One" font-size="{{ 13 if r.sticker[1]|length < 11 else 11 }}" fill="#C8233A">{{r.sticker[1]}}</text></svg>
+  <div class="eyebrow">★ {{ui.recipe_no}} {{ '%02d' % meta.number }} ★</div>
+  <h1>{% for l in r.title_lines %}{{l}}{% if not loop.last %}<br>{% endif %}{% endfor %}</h1>
+  <div class="tag">{{r.tagline}}</div>
+</div>
+<div class="stats">{% for s in r.stats %}<span>{{s.value}} {{s.label}}</span>{% endfor %}</div>
+<table class="lay"><tr><td class="menu wide"><h2>{{r.ingredients_headline}}</h2><div class="sub">{{ui.cups}} · {{ui.metric}}</div>
+<table class="lay"><tr><td class="half">{{ mt(r.groups[:cut] if cut else r.groups) }}</td><td class="half">{% if cut %}{{ mt(r.groups[cut:]) }}{% endif %}</td></tr></table></td></tr></table>
+{% if r.intro %}<p class="intro-d">{{r.intro}}</p>{% endif %}
+<table class="lay tips"><tr>{% for t in r.tips %}<td class="t"><div class="card"><h4>{{t.title}}</h4><p>{{t.text}}</p></div></td>{% endfor %}</tr></table><div class="next">{{ui.method}} →</div></div><div class="foot"><span>{{ui.recipe}}: {{meta.source.author}} / {{meta.source.site}}</span><span>{{ui.conv_label}}: {{ui.conv_src}}</span></div></div>
+<div class="sheet">
+<svg class="check" style="top:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c3" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#3A2216"/><rect x="4" y="4" width="4" height="4" fill="#3A2216"/></pattern></defs><rect width="210" height="8" fill="url(#c3)"/></svg>
+<svg class="check" style="bottom:0" viewBox="0 0 210 8" preserveAspectRatio="none"><defs><pattern id="c4" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#FFF4DF"/><rect width="4" height="4" fill="#C8233A"/><rect x="4" y="4" width="4" height="4" fill="#C8233A"/></pattern></defs><rect width="210" height="8" fill="url(#c4)"/></svg>
+<div class="wrap">
+<div class="p2head"><span class="t">{{r.title}}</span><span class="e">★ {{ui.recipe_no}} {{ '%02d' % meta.number }} ★</span></div>
+<div class="ticket wide"><h2>{{r.method_headline}}</h2><div class="sub">{{r.equipment}}</div>{{ steps() }}</div></div><div class="foot"><span>{{ui.recipe}}: {{meta.source.author}} / {{meta.source.site}}</span><span>{{ui.conv_label}}: {{ui.conv_src}}</span></div></div>
+{% endif %}
+</body></html>

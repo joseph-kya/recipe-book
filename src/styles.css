@@ -185,12 +185,11 @@ button {
   border: 0;
 }
 
-/* Focus: a two-tone diner ring. Mustard hugs the element, a chocolate outline
-   sits around it; both follow the element's own shape (pill, circle, card). */
+/* Opposite light/dark bands keep focus visible on paper, cherry and the table. */
 :focus-visible {
   outline: 3px solid var(--ring-out, var(--choc));
   outline-offset: 3px;
-  box-shadow: 0 0 0 3px var(--mustard);
+  box-shadow: 0 0 0 3px var(--ring-in, var(--cream));
 }
 
 /* ---------- the stage and the book ---------- */
@@ -464,15 +463,15 @@ button {
   transition: transform var(--press) var(--ease-out);
 }
 
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: calc(var(--rule) * -1);
-  z-index: -1;
-  border-radius: inherit;
-  background: var(--choc);
-  transform: translate(4px, 4px);
-  transition: transform var(--press) var(--ease-out);
+/* An outer shadow always paints behind the face, even inside a transform's
+   stacking context. Never use a negative-z-index child for this shadow. */
+.btn {
+  --btn-shadow: 4px 4px 0 var(--choc);
+  box-shadow: var(--btn-shadow);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring-in, var(--cream)), var(--btn-shadow);
 }
 
 .btn--cherry {
@@ -486,25 +485,18 @@ button {
 }
 
 .btn:active {
+  --btn-shadow: 1px 1px 0 var(--choc);
   transform: translate(3px, 3px);
-}
-
-.btn:active::before {
-  transform: translate(1px, 1px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
+    --btn-shadow: 5px 5px 0 var(--choc);
     transform: translate(-1px, -1px);
   }
-  .btn:hover::before {
-    transform: translate(5px, 5px);
-  }
   .btn:active {
+    --btn-shadow: 1px 1px 0 var(--choc);
     transform: translate(3px, 3px);
-  }
-  .btn:active::before {
-    transform: translate(1px, 1px);
   }
 }
 
@@ -718,7 +710,7 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
   .toc-link:hover .toc-title {
-    color: var(--cherry);
+    color: var(--cherry-ink);
   }
   .toc-link:hover .toc-text {
     transform: translateX(4px);
@@ -1234,7 +1226,7 @@ button {
   border-radius: var(--r-s);
 }
 
-.source a:active {
+.source a:is(:hover, :active) {
   color: var(--cherry-deep);
 }
 
@@ -1246,10 +1238,11 @@ button {
 
 /* ---------- controls ---------- */
 .ctl {
+  flex-shrink: 0;
   display: inline-grid;
   place-items: center;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  min-width: 3rem;
+  min-height: 3rem;
   border: 0;
   background: none;
   cursor: pointer;
@@ -1291,7 +1284,7 @@ button {
 }
 
 .ctl--contents {
-  padding: 0 0.7rem;
+  padding: 0 var(--sp-3);
   border-radius: var(--r-pill);
   font-family: var(--badge);
   font-size: var(--fs-m);
@@ -1316,16 +1309,24 @@ button {
 }
 
 .seg {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
   display: flex;
   padding: 2px;
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
 }
 
-.seg-btn {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0 0.5rem;
+.seg-btn,
+.seg-indicator > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-width: 3rem;
+  min-height: 3rem;
+  padding: 0 var(--sp-3);
   border: 0;
   border-radius: var(--r-pill);
   background: none;
@@ -1339,12 +1340,12 @@ button {
   transform: scale(0.95);
 }
 
-.seg-btn[aria-pressed='true'] {
+.seg:not([data-ready]) .seg-btn[aria-pressed='true'] {
   background: var(--choc);
   color: var(--cream);
 }
 
-/* Phone: a floating bar of translucent menu-card. */
+/* Phone: an opaque menu-card keeps contrast independent of scrolling content. */
 .controls--narrow {
   position: fixed;
   z-index: 20;
@@ -1356,9 +1357,7 @@ button {
   justify-content: space-between;
   gap: 0.25rem;
   padding: 0.3rem;
-  background: rgba(255, 244, 223, 0.86);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  background: var(--cream);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-pill);
   box-shadow: 4px 4px 0 var(--choc);
@@ -1369,16 +1368,6 @@ button {
    its lift, the safe area and its shadow), still focusable and announced. */
 .controls--narrow.controls--away {
   transform: translateY(calc(100% + 0.5rem + 8px + env(safe-area-inset-bottom)));
-}
-
-.controls--narrow .seg {
-  height: 3rem;
-  padding: 0;
-  border-width: 2px;
-}
-
-.controls--narrow .seg-btn {
-  min-height: 100%;
 }
 
 /* Phone bar: the page count would only repeat what the page shows, and
@@ -1407,21 +1396,22 @@ button {
 }
 
 .controls--narrow .ctl--contents {
-  width: 2.75rem;
+  width: 3rem;
   padding: 0;
 }
 
 .controls--narrow .ctl--turn {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
 }
 
 .controls--narrow .ctl-middle {
   gap: var(--sp-1);
 }
 
-/* Very narrow phones: arrows and Contents on one row, the two toggles on the next. */
-@media (max-width: 359px) {
+/* Compact phones: arrows and Contents on one row, the two toggles on the next. */
+@media (max-width: 479px) {
+  :root { --bar-clear: 10.5rem; }
   .controls--narrow {
     flex-wrap: wrap;
     justify-content: space-around;
@@ -1483,10 +1473,10 @@ button {
     bottom: 1.25rem;
   }
   .controls--wide .ctl--prev {
-    left: calc(50% - 15rem);
+    left: 1.5rem;
   }
   .controls--wide .ctl--next {
-    right: calc(50% - 15rem);
+    right: 1.5rem;
   }
   .controls--wide .ctl-middle {
     bottom: 1.5rem;
@@ -1506,12 +1496,13 @@ button {
   border-color: var(--cream);
 }
 
-.controls--wide .seg-btn[aria-pressed='true'] {
+.controls--wide .seg:not([data-ready]) .seg-btn[aria-pressed='true'] {
   background: var(--cream);
   color: var(--choc);
 }
 
 .controls--wide {
+  --ring-in: var(--choc);
   --ring-out: var(--cream);
 }
 
@@ -1536,7 +1527,6 @@ button {
     transform: none !important;
   }
   .btn,
-  .btn::before,
   .toc-text,
   .ctl--turn {
     transition-duration: 0ms;

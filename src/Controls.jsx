@@ -1,5 +1,53 @@
+import { useLayoutEffect, useRef } from 'react';
 import { ui } from './i18n.js';
 import { Arrow } from './ornaments.jsx';
+
+function Segments({ label, options, value, onChange }) {
+  const ref = useRef(null);
+  const labels = options.map((option) => option.short).join('|');
+
+  useLayoutEffect(() => {
+    const group = ref.current;
+    const buttons = [...group.querySelectorAll('button')];
+    const measure = () => {
+      const active = group.querySelector('[aria-pressed="true"]');
+      // Layout dimensions ignore the button's press transform. The absolute
+      // indicator uses the group's padding box as its coordinate system.
+      group.style.setProperty('--seg-left', `${active.offsetLeft}px`);
+      group.style.setProperty('--seg-right', `${group.clientWidth - active.offsetLeft - active.offsetWidth}px`);
+      group.dataset.ready = 'true';
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(group);
+    buttons.forEach((button) => observer.observe(button));
+    // ResizeObserver also catches the self-hosted font replacing its fallback.
+    return () => observer.disconnect();
+  }, [value, labels]);
+
+  return (
+    <div ref={ref} className="seg" role="group" aria-label={label}>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          className={`seg-btn ${option.className}`}
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          lang={option.lang}
+        >
+          {option.short}
+          <span className="sr-only"> – {option.long}</span>
+        </button>
+      ))}
+      {/* Clip the pill and its labels together: text keeps its contrast even
+          halfway through an interrupted slide. Actual buttons stay accessible. */}
+      <span className="seg-indicator" aria-hidden="true">
+        {options.map((option) => <span key={option.value} lang={option.lang}>{option.short}</span>)}
+      </span>
+    </div>
+  );
+}
 
 export default function Controls({ lang, setLang, units, setUnits, index, last, wide, away, onShow, onPrev, onNext }) {
   const t = ui[lang];
@@ -37,38 +85,14 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
         <span className="ctl-count" aria-hidden="true">
           {index + 1}/{last + 1}
         </span>
-        <div className="seg" role="group" aria-label={t.language}>
-          {['en', 'de'].map((l) => (
-            <button
-              key={l}
-              type="button"
-              className="seg-btn lang-btn"
-              aria-pressed={lang === l}
-              onClick={() => setLang(l)}
-              lang={l}
-            >
-              {l.toUpperCase()}
-              <span className="sr-only">{l === 'en' ? ' – English' : ' – Deutsch'}</span>
-            </button>
-          ))}
-        </div>
-        <div className="seg" role="group" aria-label={t.units}>
-          {[
-            ['cups', t.unitCups, t.unitCupsLong],
-            ['metric', t.unitMetric, t.unitMetricLong],
-          ].map(([value, short, long]) => (
-            <button
-              key={value}
-              type="button"
-              className="seg-btn unit-btn"
-              aria-pressed={units === value}
-              onClick={() => setUnits(value)}
-            >
-              {short}
-              <span className="sr-only"> – {long}</span>
-            </button>
-          ))}
-        </div>
+        <Segments label={t.language} value={lang} onChange={setLang} options={[
+          { value: 'en', short: 'EN', long: 'English', lang: 'en', className: 'lang-btn' },
+          { value: 'de', short: 'DE', long: 'Deutsch', lang: 'de', className: 'lang-btn' },
+        ]} />
+        <Segments label={t.units} value={units} onChange={setUnits} options={[
+          { value: 'cups', short: t.unitCups, long: t.unitCupsLong, className: 'unit-btn' },
+          { value: 'metric', short: t.unitMetric, long: t.unitMetricLong, className: 'unit-btn' },
+        ]} />
       </div>
 
       <button

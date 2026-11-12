@@ -1,3 +1,8 @@
+# Handoff (12 Nov 2026, ~17:05 Europe/Vienna), r6
+
+Fixed in r6: buttons use box-shadow, so the Open hover is readable. Controls are content-sized, and the measured pill is inset 3px. The phone bar is one row from 360px. Skills pass: composed contents spread, entrance choreography, contents row micro-interactions, swipe rubber-banding/velocity, and the bar no longer shows a rectangle during transitions. Codex hit its usage limit at about 16:48, and CODEX7 got about 90% done, then I verified and committed it. Audit scripts: `.stove-logs/states.mjs` (contrast per hover/focus state, pixel-based), `.stove-logs/bars.mjs`, `.stove-logs/shoot6.mjs`.
+Open: the toggle pill now jumps instead of sliding (clip-path is no longer animated). At 360px the arrows touch the bar edge.
+
 # Handoff (12 Nov 2026, ~16:05 Europe/Vienna)
 
 Pass r5 is done: rename to Joseph's Recipe Book / Josephs Rezeptbuch, numbers by position (1-5), copy cut, a cups | g units toggle (localStorage `recipe-book:units`), design tokens, motion (src/motion.js + motion.css, View Transitions for EN/DE and units), pagination fixes, and the grams PDF that follows the toggle for brownies. Claude Code hit its 5-hour limit at about 15:40 (resets 18:30). Codex finished the pass. Check script: `node .stove-logs/shoot5.mjs <tag> [nosweep]`.

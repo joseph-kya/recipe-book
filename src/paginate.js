@@ -261,10 +261,39 @@ function balance(root, src, pageHeight) {
 export const isClosing = (segs) =>
   segs.length > 0 && segs.every((seg) => seg.kind === 'tips' || seg.kind === 'credits' || seg.kind === 'ornament');
 
+// Widows and orphans in a split card: an ingredient piece on either side of a
+// page break must carry at least 3 rows (or all that remain, if fewer). The
+// method follows the same rule loosely: a lone last step is not left on its own
+// page when the piece before it had 3 or more to give.
+function widows(plan) {
+  let n = 0;
+  for (const kind of ['menu', 'ticket']) {
+    const pieces = plan.pages.flatMap((segs) => segs.filter((seg) => seg.kind === kind)).map((seg) => seg.items.length);
+    if (pieces.length < 2) continue;
+    const total = pieces.reduce((a, b) => a + b, 0);
+    if (kind === 'menu') {
+      // Only a group split across a page break counts: at least 3 of its rows
+      // must continue, and at least 2 stay before the break. A whole short group
+      // continuing on its own is fine.
+      const segs = plan.pages.flatMap((p) => p.filter((seg) => seg.kind === 'menu'));
+      for (let i = 0; i + 1 < segs.length; i++) {
+        const last = segs[i].items.at(-1);
+        const next = segs[i + 1].items[0];
+        if (!last || !next || last[0] !== next[0]) continue;
+        const g = last[0];
+        const before = segs.slice(0, i + 1).flatMap((s) => s.items).filter((id) => id[0] === g).length;
+        const after = segs.slice(i + 1).flatMap((s) => s.items).filter((id) => id[0] === g).length;
+        if (after < 3 || before < 2) n++;
+      }
+    } else if (total > 1 && pieces.at(-1) === 1 && pieces.at(-2) >= 3) n++;
+  }
+  return n;
+}
+
 // Lower is better: every extra page costs, and so does every page left under
 // about 60% full (`used` includes ~10% of padding and checkers).
 function score(plan) {
-  let s = plan.pages.length * 4;
+  let s = plan.pages.length * 4 + widows(plan) * 100;
   plan.pages.forEach((segs, i) => {
     if (isClosing(segs)) return;
     const gap = Math.max(0, 0.62 - plan.used[i]);

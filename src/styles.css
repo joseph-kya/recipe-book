@@ -274,7 +274,7 @@ button {
 }
 
 .stage--wide {
-  --ph: min(calc(100dvh - 8.5rem), 60rem);
+  --ph: min(calc(100dvh - 7.5rem), 60rem);
   --pw: min(calc(var(--ph) * 0.74), calc(50vw - 6.5rem));
 }
 
@@ -998,44 +998,42 @@ button {
   white-space: nowrap;
 }
 
-/* Wide book pages: grams sit beside the cups on one line, so rows stay one line tall. */
-.book--wide .ing {
-  padding: 6px 0;
+/* ---------- wide cookbook spread ----------
+   The left page holds the header and the whole ingredient card. The card keeps
+   readable type and comfortable rows; the header is compact and the book page
+   tall, so the card fits by using the page height, not by shrinking. */
+
+.book--wide .page-pad {
+  padding: 1.5rem 2rem 2rem;
 }
 
-.book--wide .ing-amount,
-.book--wide .ing-metric {
-  display: inline;
-}
-
-.book--wide .ing-metric {
-  margin-left: var(--sp-2);
-}
-
-/* Wide cookbook spread: header and the whole ingredient card share the left
-   page, so both set a little tighter here (phones keep their roomier sizes). */
 .book--wide .recipe-title {
-  font-size: min(calc(var(--pw) * 0.072), 2.75rem);
+  font-size: min(calc(var(--pw) * 0.066), 2.5rem);
 }
 
 .book--wide .tagline {
-  font-size: 1.125rem;
-  margin-top: var(--sp-1);
+  font-size: 1.0625rem;
+  margin-top: 2px;
 }
 
 .book--wide .stats {
-  padding-top: var(--sp-3);
+  padding-top: var(--sp-2);
+}
+
+.book--wide .stats li {
+  font-size: var(--fs-xs);
+  padding: 2px var(--sp-3);
 }
 
 .book--wide .intro {
-  margin-top: var(--sp-3);
+  margin-top: var(--sp-2);
   font-size: var(--fs-s);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .book--wide .menu {
   margin-top: var(--sp-4);
-  padding: var(--sp-3) var(--sp-4) var(--sp-1);
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
 }
 
 /* card title and its "cups & spoons" line share one line */
@@ -1057,47 +1055,65 @@ button {
   padding-top: var(--sp-2);
 }
 
+/* A row: name and amount on one line, the note on its own line beneath,
+   across the full card width so it never breaks mid-phrase. */
 .book--wide .ing {
-  padding: 1px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--sp-3);
+  align-items: baseline;
+  padding: 5px 0;
 }
 
-.book--wide .ing + .ing {
-  border-top: 1px dotted rgba(58, 34, 22, 0.75);
+.book--wide .ing-what {
+  display: contents;
 }
 
-.book--wide .ing-name,
-.book--wide .ing-amount {
-  line-height: 1.15;
-}
-
-/* name and its note share a line where they fit */
 .book--wide .ing-name {
-  display: inline;
+  grid-column: 1;
+  grid-row: 1;
   font-size: var(--fs-s);
+  line-height: 1.3;
+}
+
+.book--wide .ing-how {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
 }
 
 .book--wide .ing-note {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 1px;
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* grams sit beside the cups, smaller */
+.book--wide .ing-amount,
+.book--wide .ing-metric {
   display: inline;
-  margin-left: var(--sp-1);
 }
 
 .book--wide .ing-amount {
   font-size: 1.0625rem;
+  line-height: 1.3;
 }
 
-.book--wide .page-pad {
-  padding: 1.75rem 2rem 2.25rem;
+.book--wide .ing-metric {
+  margin-left: var(--sp-2);
 }
 
-.book--wide .stats li {
-  font-size: var(--fs-xs);
-  padding: 2px var(--sp-3);
-}
-
-/* Short screens: header and rows a little closer so the card still fits beside the header. */
+/* Short screens: only the header and gaps tighten; ingredient type keeps its size. */
 @media (max-height: 820px) {
+  .book--wide .page-pad {
+    padding-top: var(--sp-4);
+    padding-bottom: 1.5rem;
+  }
   .book--wide .recipe-title {
-    font-size: min(calc(var(--pw) * 0.064), 2.25rem);
+    font-size: min(calc(var(--pw) * 0.06), 2.125rem);
   }
   .book--wide .tagline {
     font-size: var(--fs-m);
@@ -1108,41 +1124,20 @@ button {
   .book--wide .intro {
     margin-top: var(--sp-1);
     font-size: 0.875rem;
-    line-height: 1.45;
   }
   .book--wide .menu {
-    margin-top: var(--sp-2);
+    margin-top: var(--sp-3);
     padding-top: var(--sp-2);
   }
   .book--wide .menu-title {
     font-size: var(--fs-l);
   }
   .book--wide .ing {
-    padding: 1px 0;
-  }
-  .book--wide .page-pad {
-    padding-top: var(--sp-4);
-    padding-bottom: 1.5rem;
-  }
-  .book--wide .ing-group-title {
-    padding-top: var(--sp-1);
-  }
-  .book--wide .menu {
-    padding-bottom: 2px;
-  }
-  .book--wide .ing-name {
-    font-size: 0.875rem;
-  }
-  .book--wide .ing-note,
-  .book--wide .ing-metric {
-    font-size: 0.75rem;
-  }
-  .book--wide .ing-amount {
-    font-size: var(--fs-m);
+    padding: 4px 0;
   }
 }
 
-/* Small laptop: the book page is narrow, so rows would wrap. Set them closer. */
+/* Small laptop: a narrower book page gets narrower margins, not smaller type. */
 @container (max-width: 30rem) {
   .book--wide .page-pad {
     padding-left: var(--sp-5);
@@ -1152,23 +1147,8 @@ button {
     padding-left: var(--sp-3);
     padding-right: var(--sp-3);
   }
-  .book--wide .ing-name {
-    font-size: 0.875rem;
-  }
-  .book--wide .ing-note,
-  .book--wide .ing-metric {
-    font-size: 0.75rem;
-  }
-  .book--wide .ing-amount {
-    font-size: var(--fs-m);
-  }
-  .book--wide .ing-what {
-    flex-basis: 7rem;
-  }
-  .book--wide .intro {
-    font-size: 0.875rem;
-  }
 }
+
 
 .ing-metric {
   display: block;

@@ -1,3 +1,7 @@
+# Handoff (12 Nov 2026, ~16:05 Europe/Vienna)
+
+Pass r5 is done: rename to Joseph's Recipe Book / Josephs Rezeptbuch, numbers by position (1-5), copy cut, a cups | g units toggle (localStorage `recipe-book:units`), design tokens, motion (src/motion.js + motion.css, View Transitions for EN/DE and units), pagination fixes, and the grams PDF that follows the toggle for brownies. Claude Code hit its 5-hour limit at about 15:40 (resets 18:30). Codex finished the pass. Check script: `node .stove-logs/shoot5.mjs <tag> [nosweep]`.
+
 # Handoff (12 Nov 2026, ~13:55 Europe/Vienna)
 
 Update: polish pass merged (balanced pagination, phone bar hides on scroll down, press/focus states, spacing scale, favicon + apple-touch-icon, per-page titles, font preload + metric fallbacks). Codex branch merged and worktree removed. `npm run a11y` (axe, 390 + 1440, EN/DE): 0 violations. Desktop pages still end with some empty space at the bottom (e.g. DE brownies spread 1 at ~50-60%), not broken.

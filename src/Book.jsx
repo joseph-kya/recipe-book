@@ -344,7 +344,7 @@ export default function Book({ lang, setLang }) {
     if (!sp) return;
     const page =
       sp.kind === 'recipe' ? textFor(sp.recipe, lang).text.title : sp.kind === 'contents' ? t.contents : null;
-    document.title = page ? `${page} – ${t.bookTitleFlat}` : t.bookTitleFlat;
+    document.title = page ? `${page} · ${t.bookTitleFlat}` : t.bookTitleFlat;
   }, [index, lang, spreads]);
 
   /* ---------- phone control bar: away while reading down, back on any sign of need ---------- */

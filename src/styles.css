@@ -1106,6 +1106,27 @@ button {
   margin-left: var(--sp-2);
 }
 
+/* A closing page (only tips and the credits): the running head stays at the top,
+   the rest sits centred in the page, so a short last page reads as composed. */
+.book--wide .page-body--closing {
+  display: flex;
+  flex-direction: column;
+}
+
+.book--wide .page-pad--closing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.book--wide .page-pad--closing > .running-head + * {
+  margin-top: auto;
+}
+
+.book--wide .page-pad--closing > :last-child {
+  margin-bottom: auto;
+}
+
 /* Short screens: only the header and gaps tighten; ingredient type keeps its size. */
 @media (max-height: 820px) {
   .book--wide .page-pad {

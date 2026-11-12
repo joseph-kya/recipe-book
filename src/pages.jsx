@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { amountsCreditFor, pad, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { Burst, Checkers, Cupcake } from './ornaments.jsx';
+import { isClosing } from './paginate.js';
 
 /* ---------- Cover ---------- */
 
@@ -409,10 +410,11 @@ function RecipeFull({ recipe, lang }) {
 
 // Wide: one fixed-height book page holding the segments the paginator gave it.
 function RecipePage({ recipe, lang, segs, first }) {
+  const closing = !first && isClosing(segs);
   return (
-    <div className="page-body recipe">
+    <div className={`page-body recipe${closing ? ' page-body--closing' : ''}`}>
       <Checkers tone="choc" edge="top" />
-      <div className="page-pad">
+      <div className={`page-pad${closing ? ' page-pad--closing' : ''}`}>
         {!first && <RunningHead recipe={recipe} lang={lang} />}
         {segs.map((seg, i) => {
           const props = { key: i, recipe, lang };

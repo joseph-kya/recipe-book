@@ -30,7 +30,9 @@ function newPageBox(root, src, pageIndex, slackFor) {
   };
 }
 
-function paginateOne(root, src, slack = 0, byRows = false) {
+// `cut`: when the card is split anyway, end its first piece after this many
+// units (rows or groups) so the right page has room for the method too.
+function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
   const pages = [];
   const used = []; // how full each page ends up, for balancing
   let overflow = false; // a block had to go in taller than its page
@@ -60,7 +62,7 @@ function paginateOne(root, src, slack = 0, byRows = false) {
   };
 
   // A card (ingredients or method) whose rows may run across pages.
-  const placeCard = (card, kind, units, appendUnit) => {
+  const placeCard = (card, kind, units, appendUnit, limit = null) => {
     if (!card || !units.length) return;
     const normalHead = [...card.querySelectorAll(':scope > [data-head="normal"]')];
     const contHead = [...card.querySelectorAll(':scope > [data-head="cont"]')];
@@ -81,7 +83,8 @@ function paginateOne(root, src, slack = 0, byRows = false) {
     for (const u of units) {
       if (!shell) open();
       let added = appendUnit(shell, ctx, u);
-      if (!box.fits()) {
+      const forced = limit !== null && pages.length === 0 && placed >= limit;
+      if (forced || !box.fits()) {
         for (const n of added) n.remove();
         const pageHadOtherBlocks = segs.length > 1 || seg.items.length > 0;
         if (pageHadOtherBlocks) {
@@ -122,11 +125,17 @@ function paginateOne(root, src, slack = 0, byRows = false) {
     : [];
   placeAtom(src.querySelector('[data-unit="hero"]'), { kind: 'hero' });
   if (!byRows) {
-    placeCard(menu, 'menu', menuGroups, (shell, ctx, u) => {
-      const g = u.group.cloneNode(true);
-      shell.append(g);
-      return [g];
-    });
+    placeCard(
+      menu,
+      'menu',
+      menuGroups,
+      (shell, ctx, u) => {
+        const g = u.group.cloneNode(true);
+        shell.append(g);
+        return [g];
+      },
+      cut,
+    );
   } else placeCard(menu, 'menu', menuRows, (shell, ctx, u) => {
     const li = u.li.cloneNode(true);
     if (ctx.gi === u.id[0]) {
@@ -143,7 +152,7 @@ function paginateOne(root, src, slack = 0, byRows = false) {
     ctx.gi = u.id[0];
     // Rolling back the first row of a group takes the group (and its title) with it.
     return [{ remove: () => (g.remove(), (ctx.gi = undefined)) }];
-  });
+  }, cut);
 
   // The method opens the right page when the whole card fit on the left one.
   // (After a continuation it follows on the same page if its head and first
@@ -179,7 +188,15 @@ function paginateOne(root, src, slack = 0, byRows = false) {
   pages.push(segs);
   used.push(box.used());
   box.face.remove();
-  return { pages, used, overflow };
+  const firstMenu = pages[0].find((seg) => seg.kind === 'menu');
+  const menuSplit = !!firstMenu && pages.slice(1).some((p) => p.some((seg) => seg.kind === 'menu'));
+  // how many card units (groups, or rows) stayed on the first page
+  const firstUnits = !firstMenu
+    ? 0
+    : byRows
+      ? firstMenu.items.length
+      : menuGroups.filter((g) => firstMenu.items.some((id) => id[0] === g.ids[0][0])).length;
+  return { pages, used, overflow, menuSplit, firstUnits };
 }
 
 export function paginate(root) {
@@ -192,9 +209,8 @@ export function paginate(root) {
 }
 
 // Cookbook layout first (header + whole card left, method from the right page),
-// then steps and tips fill greedily. The one correction: a near-empty last page
-// (say, the credits alone) is fed from the page before it by lowering only that
-// page's capacity, so its last block moves forward. No page is ever added.
+// then a small search over candidate layouts for the one with the fewest pages
+// and no page left with an empty bottom half.
 function balance(root, src, pageHeight) {
   let byRows = false;
   let greedy = paginateOne(root, src, 0, byRows);
@@ -205,20 +221,50 @@ function balance(root, src, pageHeight) {
     byRows = true;
     greedy = paginateOne(root, src, 0, byRows);
   }
-  const count = greedy.pages.length;
-  const last = count - 1;
-  // `used` counts the page's padding and top checkers (~10%), so 0.5 ≈ 40% of the text area.
-  const TAIL = 0.5;
-  if (count < 3 || greedy.used[last] >= TAIL) return greedy.pages;
+  // Candidates, all within the hard rules (whole card left when it fits, groups
+  // whole, nothing split): the card cut a unit or three earlier when it is split
+  // anyway, so the continuation and the method can share the right page; and
+  // lower capacity on later pages, so steps, tips, PDF and credit spread across
+  // the last spread instead of stacking at the top of each page.
+  const cuts = [null];
+  if (greedy.menuSplit) for (const d of [1, 2, 3]) if (greedy.firstUnits - d >= 1) cuts.push(greedy.firstUnits - d);
+  const SAMPLES = 8;
+  const range = pageHeight * 0.6;
   let best = greedy;
-  const tailScore = (plan) => Math.min(plan.used[last], plan.used[last - 1]);
-  const SAMPLES = 16;
-  // Lower the capacity of the last few pages before the tail (never the first spread).
-  const from = Math.max(2, last - 3);
-  for (let i = 1; i <= SAMPLES; i++) {
-    const extra = (pageHeight * 0.6 * i) / SAMPLES;
-    const plan = paginateOne(root, src, (p) => (p >= from && p < last ? extra : 0), byRows);
-    if (plan.pages.length === count && !plan.overflow && tailScore(plan) > tailScore(best)) best = plan;
+  let bestScore = score(greedy);
+  const consider = (plan) => {
+    if (plan.overflow) return;
+    const sc = score(plan);
+    if (sc < bestScore) {
+      best = plan;
+      bestScore = sc;
+    }
+  };
+  for (const cut of cuts) {
+    const base = cut === null ? greedy : paginateOne(root, src, 0, byRows, cut);
+    consider(base);
+    const last = base.pages.length - 1;
+    for (let i = 1; i <= SAMPLES; i++) {
+      const extra = (range * i) / SAMPLES;
+      consider(paginateOne(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
+      consider(paginateOne(root, src, (p) => (p === last - 1 ? extra : 0), byRows, cut));
+    }
   }
   return best.pages;
+}
+
+// A closing page holds only tips and/or the credits: it is composed on purpose
+// (see .page-pad--closing), so it may be short.
+export const isClosing = (segs) => segs.length > 0 && segs.every((seg) => seg.kind === 'tips' || seg.kind === 'credits');
+
+// Lower is better: every extra page costs, and so does every page left under
+// about 60% full (`used` includes ~10% of padding and checkers).
+function score(plan) {
+  let s = plan.pages.length * 4;
+  plan.pages.forEach((segs, i) => {
+    if (isClosing(segs)) return;
+    const gap = Math.max(0, 0.62 - plan.used[i]);
+    s += gap * gap * 10;
+  });
+  return s;
 }

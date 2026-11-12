@@ -65,7 +65,7 @@
   background: transparent;
 }
 
-.controls--wide [role='group']:has(> button[aria-pressed])::before {
+.controls--wide [role='group']:has(> button[aria-pressed]:nth-child(2):last-child)::before {
   background: var(--cream);
 }
 

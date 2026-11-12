@@ -32,7 +32,7 @@ export const THEMES = {
   },
   soda: {
     primary: '#1a7356', primaryInk: '#145a43', primaryDeep: '#0f4a37',
-    card: '#f9d3da', accent: '#f4c542', accent2: '#cdebdd',
+    card: '#f8e7b0', accent: '#f4c542', accent2: '#cdebdd',
     ink: '#1f2f27', inkSoft: '#2e4338', cue: '#4f5e52',
     ground: '#fdf5e6', paper: '#fffbf2', table: '#1f2f27', tableTile: '#263a30', frosting: '#f7c9cf',
   },

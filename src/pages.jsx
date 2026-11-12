@@ -375,19 +375,21 @@ function Credits({ recipe, lang, units }) {
         </a>
       )}
       <p className="source">
-        {t.source}: {s.author},{' '}
-        <a href={s.url} target="_blank" rel="noopener noreferrer">
-          {s.site}
-        </a>
+        {t.source}: <span className="source-name">{s.author}</span>,{' '}
+        <span className="source-name">
+          <a href={s.url} target="_blank" rel="noopener noreferrer">
+            {s.site}
+          </a>
+        </span>
         {/* Keep the amounts attribution intact, alongside the recipe source. */}
         {credit ? (
           <>
             {'; '}
-            <span lang={credit.lang}>{credit.label}: {credit.src}</span>
+            <span lang={credit.lang}>{credit.label}: <span className="source-name">{credit.src}</span></span>
           </>
         ) : recipe.conversions ? (
           <>
-            {'; '}{t.conversions}: <span lang="en">{recipe.conversions}</span>
+            {'; '}{t.conversions}: <span className="source-name" lang="en">{recipe.conversions}</span>
           </>
         ) : null}
       </p>

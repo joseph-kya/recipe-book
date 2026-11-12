@@ -1,11 +1,13 @@
-/* The cupcake ornament takes its colours from the colourway too
+/* The cupcake follows the colourway, with a fixed cherry-red accent
    (the cover sets its own cup colour, see .cover-cupcake). */
 .cupcake-line {
   stroke: var(--ink);
 }
-.cupcake-cup,
-.cupcake-cherry {
+.cupcake-cup {
   fill: var(--primary);
+}
+.cupcake-cherry {
+  fill: #c8233a;
 }
 .cupcake-cream {
   fill: var(--ground);
@@ -57,7 +59,7 @@ html[data-theme='soda'] {
   --primary: #1a7356;
   --primary-ink: #145a43;
   --primary-deep: #0f4a37;
-  --card: #f9d3da;
+  --card: #f8e7b0;
   --accent: #f4c542;
   --accent2: #cdebdd;
   --ink: #1f2f27;

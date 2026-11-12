@@ -1228,6 +1228,10 @@ button {
   font-size: var(--fs-s);
 }
 
+.source-name {
+  white-space: nowrap;
+}
+
 .source a,
 .small-credit a {
   font-weight: 700;

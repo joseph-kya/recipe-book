@@ -185,6 +185,7 @@ function paginateOne(root, src, slack = 0, byRows = false, cut = null, menuBreak
     shell.append(card);
     return [card];
   });
+  placeAtom(src.querySelector('[data-unit="macros"]'), { kind: 'macros' });
   placeAtom(src.querySelector('[data-unit="credits"]'), { kind: 'credits' });
 
   pages.push(segs);
@@ -296,7 +297,9 @@ function balance(root, src, pageHeight) {
     const ornament = src.querySelector('.closing-cupcake')?.cloneNode(true);
     if (ornament) box.pad.append(ornament);
     for (const seg of segs) {
-      if (seg.kind === 'credits') box.pad.append(src.querySelector('[data-unit="credits"]').cloneNode(true));
+      if (seg.kind === 'credits' || seg.kind === 'macros') {
+        box.pad.append(src.querySelector(`[data-unit="${seg.kind}"]`).cloneNode(true));
+      }
       if (seg.kind === 'tips') {
         const tips = src.querySelector('[data-card="tips"]').cloneNode(true);
         for (const tip of tips.querySelectorAll('[data-tip]')) if (!seg.items.includes(Number(tip.dataset.tip))) tip.remove();
@@ -314,7 +317,7 @@ function balance(root, src, pageHeight) {
 // only when at least PHOTO_MIN px of picture fits there (up to 42% of the
 // page), else on the blank facing page a recipe ending on a left page already
 // has; otherwise it is left out. It never adds a page.
-const PHOTO_MIN = 160;
+const PHOTO_MIN = 110;
 function placePhoto(root, src, pages, used, pageHeight) {
   const figure = src.querySelector('[data-unit="photo"]');
   if (!figure) return pages;
@@ -337,10 +340,10 @@ function placePhoto(root, src, pages, used, pageHeight) {
   return pages;
 }
 
-// A closing page holds only tips and/or the credits: it is composed on purpose
+// A closing page holds only tips, macros and/or the credits: it is composed on purpose
 // (see .page-pad--closing), so it may be short.
 export const isClosing = (segs) =>
-  segs.length > 0 && segs.every((seg) => ['tips', 'credits', 'ornament', 'photo'].includes(seg.kind));
+  segs.length > 0 && segs.every((seg) => ['tips', 'macros', 'credits', 'ornament', 'photo'].includes(seg.kind));
 
 // Widows and orphans in a split card: an ingredient piece on either side of a
 // page break must carry at least 3 rows (or all that remain, if fewer). The

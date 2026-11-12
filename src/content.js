@@ -15,6 +15,7 @@ const pdfFiles = import.meta.glob('/content/pdfs/*.pdf', {
 // Photos of the finished bake, from each recipe's source page (content/photos.json).
 // Paths resolve against the site base, so they work under /recipe-book/ too.
 import photoIndex from '../content/photos.json';
+import nutritionIndex from '../content/nutrition.json';
 
 function photoFor(slug) {
   const p = photoIndex[slug];
@@ -34,6 +35,7 @@ export const recipes = Object.values(recipeFiles)
     route: r.route || r.slug,
     pdf: pdfFor(r.slug),
     photo: photoFor(r.slug),
+    nutrition: nutritionIndex.recipes[r.slug] ?? null,
     photoCredit: photoFor(r.slug)?.credit ?? null,
     gramsPdf: pdfFor(`${r.slug}.grams`),
   }))

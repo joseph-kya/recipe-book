@@ -1,0 +1,676 @@
+{
+  "method": "Approximate. Each ingredient's metric amount (grams; ml converted with USDA portion weights) × USDA FoodData Central SR Legacy (2018-04) values per 100 g, summed, then divided by the recipe's yield. Pinches, \"to taste\", \"as needed\" and optional items are left out. Quark has no USDA entry, so nonfat dry-curd cottage cheese (FDC 172181) stands in; erythritol has none either and is counted as 0 kcal and 0 g carbs. Eggs use the USDA large egg (50 g).",
+  "source": "USDA FoodData Central, SR Legacy, https://fdc.nal.usda.gov/",
+  "recipes": {
+    "fudge-brownies": {
+      "servings": 24,
+      "serving_basis": "24 squares (recipe yield)",
+      "per_serving": {
+        "kcal": 197,
+        "protein": 3.1,
+        "carbs": 28.9,
+        "fat": 8.1,
+        "sugar": 18.6
+      },
+      "total": {
+        "kcal": 4720,
+        "protein": 73.5,
+        "carbs": 693.4,
+        "fat": 194.1,
+        "sugar": 447.0
+      },
+      "ingredients": [
+        {
+          "ingredient": "dark couverture chocolate",
+          "grams": 175,
+          "fdc_ids": [
+            170273
+          ],
+          "fdc_names": [
+            "Chocolate, dark, 70-85% cacao solids"
+          ],
+          "basis": "175 g",
+          "kcal": 1046.5
+        },
+        {
+          "ingredient": "unsalted butter",
+          "grams": 115,
+          "fdc_ids": [
+            173430
+          ],
+          "fdc_names": [
+            "Butter, without salt"
+          ],
+          "basis": "115 g",
+          "kcal": 824.5
+        },
+        {
+          "ingredient": "unsweetened cocoa powder",
+          "grams": 30,
+          "fdc_ids": [
+            169593
+          ],
+          "fdc_names": [
+            "Cocoa, dry powder, unsweetened"
+          ],
+          "basis": "30 g",
+          "kcal": 68.4
+        },
+        {
+          "ingredient": "plain flour",
+          "grams": 250,
+          "fdc_ids": [
+            168894
+          ],
+          "fdc_names": [
+            "Wheat flour, white, all-purpose, enriched, bleached"
+          ],
+          "basis": "250 g",
+          "kcal": 910.0
+        },
+        {
+          "ingredient": "salt",
+          "grams": 3,
+          "fdc_ids": [
+            173468
+          ],
+          "fdc_names": [
+            "Salt, table"
+          ],
+          "basis": "½ tsp = 3 g (USDA tsp 6 g)",
+          "kcal": 0.0
+        },
+        {
+          "ingredient": "eggs",
+          "grams": 200,
+          "fdc_ids": [
+            171287
+          ],
+          "fdc_names": [
+            "Egg, whole, raw, fresh"
+          ],
+          "basis": "4 × 50 g (USDA large; EU size M is similar)",
+          "kcal": 286.0
+        },
+        {
+          "ingredient": "white granulated sugar",
+          "grams": 400,
+          "fdc_ids": [
+            169655
+          ],
+          "fdc_names": [
+            "Sugars, granulated"
+          ],
+          "basis": "400 g",
+          "kcal": 1548.0
+        },
+        {
+          "ingredient": "vanilla extract",
+          "grams": 4.2,
+          "fdc_ids": [
+            173471
+          ],
+          "fdc_names": [
+            "Vanilla extract"
+          ],
+          "basis": "1 tsp = 4.2 g (USDA)",
+          "kcal": 12.1
+        },
+        {
+          "ingredient": "buttermilk",
+          "grams": 61,
+          "fdc_ids": [
+            170874
+          ],
+          "fdc_names": [
+            "Milk, buttermilk, fluid, cultured, lowfat"
+          ],
+          "basis": "60 ml → 61 g (USDA cup 245 g)",
+          "kcal": 24.4
+        }
+      ],
+      "left_out": []
+    },
+    "best-classic-cinnamon-rolls": {
+      "servings": 12,
+      "serving_basis": "12 rolls (recipe yield)",
+      "per_serving": {
+        "kcal": 448,
+        "protein": 8.2,
+        "carbs": 68.9,
+        "fat": 15.9,
+        "sugar": 32.4
+      },
+      "total": {
+        "kcal": 5371,
+        "protein": 98.4,
+        "carbs": 826.6,
+        "fat": 190.3,
+        "sugar": 388.5
+      },
+      "ingredients": [
+        {
+          "ingredient": "unbleached bread flour",
+          "grams": 568,
+          "fdc_ids": [
+            168896
+          ],
+          "fdc_names": [
+            "Wheat flour, white, bread, enriched"
+          ],
+          "basis": "568 g (excl. flour for rolling)",
+          "kcal": 2050.5
+        },
+        {
+          "ingredient": "granulated sugar",
+          "grams": 65,
+          "fdc_ids": [
+            169655
+          ],
+          "fdc_names": [
+            "Sugars, granulated"
+          ],
+          "basis": "65 g",
+          "kcal": 251.6
+        },
+        {
+          "ingredient": "instant dry yeast",
+          "grams": 11,
+          "fdc_ids": [
+            175043
+          ],
+          "fdc_names": [
+            "Leavening agents, yeast, baker's, active dry"
+          ],
+          "basis": "11 g",
+          "kcal": 35.8
+        },
+        {
+          "ingredient": "fine table salt",
+          "grams": 10,
+          "fdc_ids": [
+            173468
+          ],
+          "fdc_names": [
+            "Salt, table"
+          ],
+          "basis": "10 g",
+          "kcal": 0.0
+        },
+        {
+          "ingredient": "egg",
+          "grams": 50,
+          "fdc_ids": [
+            171287
+          ],
+          "fdc_names": [
+            "Egg, whole, raw, fresh"
+          ],
+          "basis": "1 large = 50 g (USDA)",
+          "kcal": 71.5
+        },
+        {
+          "ingredient": "liquid oil",
+          "grams": 24,
+          "fdc_ids": [
+            172336
+          ],
+          "fdc_names": [
+            "Oil, canola"
+          ],
+          "basis": "24 g, canola",
+          "kcal": 212.2
+        },
+        {
+          "ingredient": "milk",
+          "grams": 305,
+          "fdc_ids": [
+            171265
+          ],
+          "fdc_names": [
+            "Milk, whole, 3.25% milkfat, with added vitamin D"
+          ],
+          "basis": "300 ml → 305 g (USDA cup 244 g); whole milk",
+          "kcal": 186.1
+        },
+        {
+          "ingredient": "unsalted butter (dough)",
+          "grams": 28,
+          "fdc_ids": [
+            173430
+          ],
+          "fdc_names": [
+            "Butter, without salt"
+          ],
+          "basis": "28 g",
+          "kcal": 200.8
+        },
+        {
+          "ingredient": "dark brown sugar",
+          "grams": 220,
+          "fdc_ids": [
+            168833
+          ],
+          "fdc_names": [
+            "Sugars, brown"
+          ],
+          "basis": "220 g",
+          "kcal": 836.0
+        },
+        {
+          "ingredient": "ground cinnamon",
+          "grams": 10,
+          "fdc_ids": [
+            171320
+          ],
+          "fdc_names": [
+            "Spices, cinnamon, ground"
+          ],
+          "basis": "10 g",
+          "kcal": 24.7
+        },
+        {
+          "ingredient": "all-purpose flour",
+          "grams": 13,
+          "fdc_ids": [
+            168894
+          ],
+          "fdc_names": [
+            "Wheat flour, white, all-purpose, enriched, bleached"
+          ],
+          "basis": "13 g",
+          "kcal": 47.3
+        },
+        {
+          "ingredient": "fine table salt (filling)",
+          "grams": 1.5,
+          "fdc_ids": [
+            173468
+          ],
+          "fdc_names": [
+            "Salt, table"
+          ],
+          "basis": "1.5 g",
+          "kcal": 0.0
+        },
+        {
+          "ingredient": "unsalted butter (filling)",
+          "grams": 70,
+          "fdc_ids": [
+            173430
+          ],
+          "fdc_names": [
+            "Butter, without salt"
+          ],
+          "basis": "70 g",
+          "kcal": 501.9
+        },
+        {
+          "ingredient": "cream cheese",
+          "grams": 113,
+          "fdc_ids": [
+            173418
+          ],
+          "fdc_names": [
+            "Cheese, cream"
+          ],
+          "basis": "113 g",
+          "kcal": 395.5
+        },
+        {
+          "ingredient": "unsalted butter (frosting)",
+          "grams": 28,
+          "fdc_ids": [
+            173430
+          ],
+          "fdc_names": [
+            "Butter, without salt"
+          ],
+          "basis": "28 g",
+          "kcal": 200.8
+        },
+        {
+          "ingredient": "powdered sugar",
+          "grams": 90,
+          "fdc_ids": [
+            169656
+          ],
+          "fdc_names": [
+            "Sugars, powdered"
+          ],
+          "basis": "90 g",
+          "kcal": 350.1
+        },
+        {
+          "ingredient": "pure vanilla extract",
+          "grams": 2.1,
+          "fdc_ids": [
+            173471
+          ],
+          "fdc_names": [
+            "Vanilla extract"
+          ],
+          "basis": "½ tsp = 2.1 g (USDA)",
+          "kcal": 6.0
+        },
+        {
+          "ingredient": "water",
+          "grams": 22,
+          "fdc_ids": [],
+          "fdc_names": [],
+          "basis": "22 ml water, 0 kcal",
+          "kcal": 0.0
+        }
+      ],
+      "left_out": [
+        "water (as needed, 0 kcal)",
+        "extra flour for rolling (as needed)"
+      ]
+    },
+    "protein-cloud-cheesecake": {
+      "servings": 8,
+      "serving_basis": "8 slices (recipe sticker \"8 slices\")",
+      "per_serving": {
+        "kcal": 103,
+        "protein": 7.0,
+        "carbs": 9.5,
+        "fat": 3.9,
+        "sugar": 1.3
+      },
+      "total": {
+        "kcal": 825,
+        "protein": 56.3,
+        "carbs": 75.7,
+        "fat": 30.8,
+        "sugar": 10.2
+      },
+      "ingredients": [
+        {
+          "ingredient": "erythritol",
+          "grams": 100,
+          "fdc_ids": [],
+          "fdc_names": [],
+          "basis": "not in USDA SR; counted as 0 kcal / 0 g carbs (polyol, 0 kcal/g on EU labels)",
+          "kcal": 0.0
+        },
+        {
+          "ingredient": "eggs",
+          "grams": 200,
+          "fdc_ids": [
+            171287
+          ],
+          "fdc_names": [
+            "Egg, whole, raw, fresh"
+          ],
+          "basis": "4 × 50 g (USDA large; EU size M is similar)",
+          "kcal": 286.0
+        },
+        {
+          "ingredient": "baking powder",
+          "grams": 1.5,
+          "fdc_ids": [
+            172803
+          ],
+          "fdc_names": [
+            "Leavening agents, baking powder, double-acting, sodium aluminum sulfate"
+          ],
+          "basis": "pinch + ¼ tsp ≈ 1.5 g (USDA tsp 4.6 g)",
+          "kcal": 0.8
+        },
+        {
+          "ingredient": "Magerquark (low-fat quark)",
+          "grams": 200,
+          "fdc_ids": [
+            172181
+          ],
+          "fdc_names": [
+            "Cheese, cottage, nonfat, uncreamed, dry, large or small curd"
+          ],
+          "basis": "200 g; proxy: nonfat dry-curd cottage cheese (no quark in USDA)",
+          "kcal": 144.0
+        },
+        {
+          "ingredient": "reduced-fat cream cheese",
+          "grams": 50,
+          "fdc_ids": [
+            169079
+          ],
+          "fdc_names": [
+            "Cheese, cream, low fat"
+          ],
+          "basis": "50 g, low-fat cream cheese",
+          "kcal": 104.0
+        },
+        {
+          "ingredient": "milk",
+          "grams": 76,
+          "fdc_ids": [
+            171265
+          ],
+          "fdc_names": [
+            "Milk, whole, 3.25% milkfat, with added vitamin D"
+          ],
+          "basis": "75 ml → 76 g; whole milk",
+          "kcal": 46.4
+        },
+        {
+          "ingredient": "vanilla extract",
+          "grams": 1,
+          "fdc_ids": [
+            173471
+          ],
+          "fdc_names": [
+            "Vanilla extract"
+          ],
+          "basis": "¼ tsp ≈ 1 g",
+          "kcal": 2.9
+        },
+        {
+          "ingredient": "plain flour",
+          "grams": 40,
+          "fdc_ids": [
+            168894
+          ],
+          "fdc_names": [
+            "Wheat flour, white, all-purpose, enriched, bleached"
+          ],
+          "basis": "40 g",
+          "kcal": 145.6
+        },
+        {
+          "ingredient": "cornflour",
+          "grams": 25,
+          "fdc_ids": [
+            169698
+          ],
+          "fdc_names": [
+            "Cornstarch"
+          ],
+          "basis": "25 g cornstarch",
+          "kcal": 95.2
+        }
+      ],
+      "left_out": [
+        "salt (pinch, 0 kcal)",
+        "icing sugar (to dust, optional)"
+      ]
+    },
+    "berry-quark-bake": {
+      "servings": 2,
+      "serving_basis": "2 portions (recipe yield)",
+      "per_serving": {
+        "kcal": 251,
+        "protein": 17.9,
+        "carbs": 38.9,
+        "fat": 3.3,
+        "sugar": 21.3
+      },
+      "total": {
+        "kcal": 502,
+        "protein": 35.9,
+        "carbs": 77.8,
+        "fat": 6.5,
+        "sugar": 42.7
+      },
+      "ingredients": [
+        {
+          "ingredient": "mixed berries",
+          "grams": 200,
+          "fdc_ids": [
+            167762,
+            167755,
+            171711
+          ],
+          "fdc_names": [
+            "Strawberries, raw",
+            "Raspberries, raw",
+            "Blueberries, raw"
+          ],
+          "basis": "200 g; average of strawberries, raspberries, blueberries",
+          "kcal": 94.0
+        },
+        {
+          "ingredient": "organic lemon (zest)",
+          "grams": 2,
+          "fdc_ids": [
+            167749
+          ],
+          "fdc_names": [
+            "Lemon peel, raw"
+          ],
+          "basis": "½ lemon zest ≈ 1 tsp = 2 g (USDA lemon peel tsp)",
+          "kcal": 0.9
+        },
+        {
+          "ingredient": "egg",
+          "grams": 50,
+          "fdc_ids": [
+            171287
+          ],
+          "fdc_names": [
+            "Egg, whole, raw, fresh"
+          ],
+          "basis": "1 × 50 g (USDA large)",
+          "kcal": 71.5
+        },
+        {
+          "ingredient": "sugar",
+          "grams": 25,
+          "fdc_ids": [
+            169655
+          ],
+          "fdc_names": [
+            "Sugars, granulated"
+          ],
+          "basis": "25 g",
+          "kcal": 96.8
+        },
+        {
+          "ingredient": "Magerquark (low-fat quark)",
+          "grams": 250,
+          "fdc_ids": [
+            172181
+          ],
+          "fdc_names": [
+            "Cheese, cottage, nonfat, uncreamed, dry, large or small curd"
+          ],
+          "basis": "250 g; proxy: nonfat dry-curd cottage cheese (no quark in USDA)",
+          "kcal": 180.0
+        },
+        {
+          "ingredient": "durum wheat semolina (Grieß)",
+          "grams": 15.7,
+          "fdc_ids": [
+            169715
+          ],
+          "fdc_names": [
+            "Semolina, enriched"
+          ],
+          "basis": "1½ tbsp ≈ 15.7 g (USDA cup 167 g)",
+          "kcal": 56.5
+        },
+        {
+          "ingredient": "baking powder",
+          "grams": 4.6,
+          "fdc_ids": [
+            172803
+          ],
+          "fdc_names": [
+            "Leavening agents, baking powder, double-acting, sodium aluminum sulfate"
+          ],
+          "basis": "1 tsp = 4.6 g (USDA)",
+          "kcal": 2.4
+        }
+      ],
+      "left_out": [
+        "salt (pinch, 0 kcal)",
+        "icing sugar (to dust)"
+      ]
+    },
+    "topfenschmarren": {
+      "servings": 1,
+      "serving_basis": "1 big portion (recipe yield)",
+      "per_serving": {
+        "kcal": 492,
+        "protein": 45.7,
+        "carbs": 52.5,
+        "fat": 11.4,
+        "sugar": 8.4
+      },
+      "total": {
+        "kcal": 492,
+        "protein": 45.7,
+        "carbs": 52.5,
+        "fat": 11.4,
+        "sugar": 8.4
+      },
+      "ingredients": [
+        {
+          "ingredient": "Magertopfen (low-fat quark)",
+          "grams": 250,
+          "fdc_ids": [
+            172181
+          ],
+          "fdc_names": [
+            "Cheese, cottage, nonfat, uncreamed, dry, large or small curd"
+          ],
+          "basis": "250 g; proxy: nonfat dry-curd cottage cheese (no quark in USDA)",
+          "kcal": 180.0
+        },
+        {
+          "ingredient": "spelt flour",
+          "grams": 50,
+          "fdc_ids": [
+            169745
+          ],
+          "fdc_names": [
+            "Spelt, uncooked"
+          ],
+          "basis": "50 g; USDA \"Spelt, uncooked\"",
+          "kcal": 169.0
+        },
+        {
+          "ingredient": "eggs",
+          "grams": 100,
+          "fdc_ids": [
+            171287
+          ],
+          "fdc_names": [
+            "Egg, whole, raw, fresh"
+          ],
+          "basis": "2 × 50 g (USDA large)",
+          "kcal": 143.0
+        }
+      ],
+      "left_out": [
+        "sour cream (optional)",
+        "sweetener (to taste)",
+        "salt (pinch)",
+        "lemon zest (to taste)",
+        "water (optional splash)",
+        "butter or coconut oil for the pan (\"a little\")",
+        "fruit or compote (to serve)"
+      ]
+    }
+  }
+}

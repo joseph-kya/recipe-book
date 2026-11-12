@@ -10,6 +10,7 @@ class Block {
     this.height = height;
     this.dataset = dataset;
     this.children = [];
+    this.style = { setProperty: () => {} };
     this.classList = { add: (name) => { this.className += ` ${name}`; } };
   }
   append(...nodes) {
@@ -42,12 +43,14 @@ class Block {
     const inset = this.className.split(' ').includes('page-pad') ? 40 : this.className.includes('checkers--top') ? 14 : 0;
     return inset + this.height + this.children.reduce((sum, node) => sum + node.offsetHeight, 0);
   }
+  getBoundingClientRect() { return { height: this.offsetHeight }; }
   get clientHeight() { return this.parentElement?.clientHeight ?? 700; }
 }
 
+globalThis.getComputedStyle = () => ({ marginTop: '0' });
 globalThis.document = { createElement: () => new Block() };
 
-function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90, 90], tipHeights = [], credits = 100, ornament } = {}) {
+function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90, 90], tipHeights = [], credits = 100, ornament, macros = 0, photo = false } = {}) {
   const root = new Block();
   const src = new Block('', 0, { src: 'recipe' });
   const running = new Block('', 25, { unit: 'running' });
@@ -68,7 +71,22 @@ function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90,
   method.append(steps);
   const tips = new Block('tips', 0, { card: 'tips' });
   tipHeights.forEach((height, i) => tips.append(new Block('tip', height, { tip: String(i) })));
-  src.append(running, header, menu, method, tips, new Block('credits', credits, { unit: 'credits' }));
+  src.append(running, header, menu, method, tips);
+  if (macros) src.append(new Block('macros', macros, { unit: 'macros' }));
+  src.append(new Block('credits', credits, { unit: 'credits' }));
+  if (photo) {
+    const figure = new Block('photo', 60, { unit: 'photo' });
+    const image = new Block('image', 160);
+    image.matches = (selector) => selector === 'img';
+    // Preserve the image selector through the paginator's clone.
+    image.cloneNode = () => {
+      const clone = new Block('image', 160);
+      clone.matches = (selector) => selector === 'img';
+      return clone;
+    };
+    figure.append(image);
+    src.append(figure);
+  }
   if (ornament) src.append(new Block('closing-cupcake', ornament));
   root.append(src);
   return paginate(root).recipe;
@@ -131,4 +149,24 @@ test('a closing ornament is included only when its measured height fits', () => 
   const options = { hero: 100, groups: [3], stepHeights: [500], credits: 300 };
   assert.equal(recipe({ ...options, ornament: 72 }).at(-1)[0].kind, 'ornament');
   assert.equal(recipe({ ...options, ornament: 600 }).at(-1)[0].kind, 'credits');
+});
+
+
+test('macros remain whole and present once when the method leaves too little room', () => {
+  const plan = recipe({ hero: 100, groups: [3], stepHeights: [500], macros: 130 });
+  assert.equal(plan.flat().filter((seg) => seg.kind === 'macros').length, 1);
+  assert.equal(plan[1].some((seg) => seg.kind === 'macros'), false);
+  assert.deepEqual(plan.at(-1).map((seg) => seg.kind), ['macros', 'credits']);
+});
+
+test('closing ornament measurement reserves the full macros block', () => {
+  const plan = recipe({ hero: 100, groups: [3], stepHeights: [500], credits: 300, macros: 130, ornament: 200 });
+  assert.deepEqual(plan.at(-1).map((seg) => seg.kind), ['macros', 'credits']);
+});
+
+test('macros reserve photo space, keeping a fitting photo and dropping a tight one', () => {
+  const options = { hero: 100, groups: [3], stepHeights: [200], credits: 100, photo: true };
+  assert.equal(recipe(options).flat().filter((seg) => seg.kind === 'photo').length, 1);
+  assert.equal(recipe({ ...options, macros: 130 }).flat().filter((seg) => seg.kind === 'photo').length, 0);
+  assert.equal(recipe({ ...options, stepHeights: [90], macros: 130 }).flat().filter((seg) => seg.kind === 'photo').length, 1);
 });

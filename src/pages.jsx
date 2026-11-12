@@ -8,6 +8,7 @@ import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import Scaler from './Scaler.jsx';
 import Photo from './Photo.jsx';
+import Macros from './Macros.jsx';
 import ThemePicker from './ThemePicker.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
@@ -409,6 +410,7 @@ function RecipeFull({ recipe, lang, units }) {
         <Ingredients recipe={recipe} lang={lang} units={units} />
         <Method recipe={recipe} lang={lang} />
         <Tips recipe={recipe} lang={lang} />
+        <Macros recipe={recipe} lang={lang} />
         <Credits recipe={recipe} lang={lang} units={units} />
         <Photo recipe={recipe} lang={lang} />
       </div>
@@ -434,6 +436,7 @@ function RecipePage({ recipe, lang, units, segs, first }) {
           if (seg.kind === 'ticket') return <Method key={i} {...props} steps={seg.items} cont={seg.cont} />;
           if (seg.kind === 'tips') return <Tips key={i} {...props} items={seg.items} />;
           if (seg.kind === 'ornament') return hasPhoto ? null : <Cupcake key={i} className="closing-cupcake" />;
+          if (seg.kind === 'macros') return <Macros key={i} {...props} />;
           if (seg.kind === 'photo') return <Photo key={i} {...props} height={seg.h} />;
           return <Credits key={i} {...props} units={units} />;
         })}
@@ -463,6 +466,7 @@ export function RecipeMeasure({ recipe, lang, units }) {
       <Ingredients recipe={recipe} lang={lang} units={units} measure />
       <Method recipe={recipe} lang={lang} measure />
       <Tips recipe={recipe} lang={lang} />
+      <Macros recipe={recipe} lang={lang} />
       <Credits recipe={recipe} lang={lang} units={units} />
       <Cupcake className="closing-cupcake" />
       <Photo recipe={recipe} lang={lang} height={160} />

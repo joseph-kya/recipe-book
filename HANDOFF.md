@@ -1,4 +1,7 @@
-# Handoff (12 Nov 2026, ~12:25 Europe/Vienna)
+# Handoff (12 Nov 2026, ~13:55 Europe/Vienna)
+
+Update: polish pass merged (balanced pagination, phone bar hides on scroll down, press/focus states, spacing scale, favicon + apple-touch-icon, per-page titles, font preload + metric fallbacks). Codex branch merged and worktree removed. `npm run a11y` (axe, 390 + 1440, EN/DE): 0 violations. Desktop pages still end with some empty space at the bottom (e.g. DE brownies spread 1 at ~50-60%), not broken.
+
 
 ## State
 - Engine: Claude Code 2.1.314, model `claude-opus-5-5`, `--effort medium`, one session (de4a0da2-bdc5-489e-a935-c3fa7d08660f). Two runs: the initial build and fix pass 1 (prompt in .stove-logs/FIX1.md, gitignored).

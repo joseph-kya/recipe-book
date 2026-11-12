@@ -4,6 +4,9 @@ import { ui } from './i18n.js';
 import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
+import { scaleAmount, scaleStat } from './scale.js';
+import { useScale } from './useScale.js';
+import Scaler from './Scaler.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
@@ -132,6 +135,7 @@ function RunningHead({ recipe, lang }) {
 
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
+  const [factor] = useScale(recipe.slug);
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
@@ -159,7 +163,8 @@ function RecipeHero({ recipe, lang }) {
       <ul className="stats" lang={textLang}>
         {r.stats.map((s, i) => (
           <li key={i}>
-            <b>{s.value}</b> {s.label}
+            {/* a plain-number yield ("24" squares) follows the portion scale */}
+            <b>{scaleStat(s.value, factor)}</b> {s.label}
           </li>
         ))}
       </ul>
@@ -190,16 +195,22 @@ const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, 
 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
+  const [factor] = useScale(recipe.slug);
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
     if (!byGroup.has(gi)) byGroup.set(gi, []);
     byGroup.get(gi).push(ii);
   }
+  // The first piece of the card carries the portion scale (and its note when scaled).
   const normalHead = (
-    <h2 className="menu-title" lang={textLang} data-head="normal">
-      {r.ingredients_headline}
-    </h2>
+    <div className="menu-head" data-head="normal">
+      <h2 className="menu-title" lang={textLang}>
+        {r.ingredients_headline}
+      </h2>
+      <Scaler slug={recipe.slug} label={t.scale} />
+      {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
+    </div>
   );
   const contHead = (
     <h2 className="menu-title" lang={textLang} data-head="cont">
@@ -230,7 +241,13 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
             )}
             <ul className="ing-list" lang={textLang}>
               {iis.map((ii) => {
-                const it = g.items[ii];
+                const raw = g.items[ii];
+                // display-only: the JSON amounts, scaled in the language they are written in
+                const it = factor === 1 ? raw : {
+                  ...raw,
+                  amount: scaleAmount(raw.amount, factor, textLang),
+                  metric: scaleAmount(raw.metric, factor, textLang),
+                };
                 const { primary, secondary, metricFirst } = amountsFor(it, units);
                 return (
                   <li className="ing" key={ii} data-item={`${gi}:${ii}`}>

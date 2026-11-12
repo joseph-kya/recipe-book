@@ -3,6 +3,7 @@ import { recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { buildSpreads, firstIndexFor, routeOfHash } from './layout.js';
 import { paginate } from './paginate.js';
+import { useScales } from './useScale.js';
 import { RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband, unRubberband, rubberbandVelocity } from './spring.js';
 import Controls from './Controls.jsx';
@@ -37,6 +38,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export default function Book({ lang, setLang, units, setUnits }) {
   const wide = useMedia(WIDE_QUERY);
   const reduce = useMedia(REDUCE_QUERY);
+  const { scales } = useScales(); // portion scale: amounts change width, so re-paginate
   const [plans, setPlans] = useState(null); // wide only: recipe slug -> pages of segments
   const [planVersion, setPlanVersion] = useState(0);
   const spreads = useMemo(() => buildSpreads(wide, plans), [wide, plans]);
@@ -251,7 +253,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   // Measure before paint, again when the language changes.
   useLayoutEffect(() => {
     if (wide) runPaginate();
-  }, [wide, lang, units, runPaginate]);
+  }, [wide, lang, units, scales, runPaginate]);
 
   // ...and once the real fonts are in, and after every resize.
   useEffect(() => {

@@ -1,0 +1,81 @@
+/* Portion scaler on the ingredient card's head: ½× 1× 2× 3×.
+   A cream pill of chips on the mint card, the chosen one in choc, like the
+   diner's other toggles. Title and chips share a line when there is room. */
+
+.menu-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--sp-3);
+  row-gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.book .menu-head .menu-title {
+  display: block;
+  margin: 0;
+}
+
+.scaler {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  background: var(--cream);
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+}
+
+.scaler-chip {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-2);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.scaler-chip[aria-pressed='true'] {
+  background: var(--choc);
+  color: var(--cream);
+}
+
+.scaler-chip:active {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scaler-chip:not([aria-pressed='true']):hover {
+    background: rgba(58, 34, 22, 0.1);
+  }
+}
+
+/* only when scaled: one short line, in the card's handwritten voice */
+.scale-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-family: var(--hand);
+  font-size: var(--fs-s);
+  line-height: 1.3;
+  color: var(--choc-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scaler-chip {
+    transition: none;
+  }
+  .scaler-chip:active {
+    transform: none;
+  }
+}

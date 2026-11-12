@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { Checkers, Cupcake } from './ornaments.jsx';
@@ -11,12 +11,77 @@ import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 import ThemePicker from './ThemePicker.jsx';
 
+const prefersReducedMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const SPRING_EASE = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+const OUT_EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+
+let coverEntered = false;
+let contentsLeftEntered = false;
+
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
 export function Cover({ lang }) {
   const t = ui[lang];
+  const rootRef = useRef(null);
+  const popAnimRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || coverEntered || prefersReducedMotion() || !root.closest('.face--rest')) return;
+    coverEntered = true;
+    const animations = [];
+    const cupcake = root.querySelector('.cover-cupcake');
+    const picker = root.querySelector('.theme-picker');
+    if (cupcake?.animate) {
+      animations.push(
+        cupcake.animate(
+          [{ transform: 'rotate(-15deg) scale(0.92)' }, { transform: 'rotate(-8deg) scale(1)' }],
+          { delay: 65, duration: 320, easing: SPRING_EASE, fill: 'backwards' }
+        )
+      );
+    }
+    if (picker?.animate) {
+      animations.push(
+        picker.animate(
+          [
+            { opacity: 0, transform: 'translateY(6px) scale(0.96)' },
+            { opacity: 1, transform: 'translateY(0) scale(1)' },
+          ],
+          { delay: 155, duration: 220, easing: OUT_EASE, fill: 'backwards' }
+        )
+      );
+    }
+    const finish = () => {
+      animations.forEach((a) => a.cancel());
+      root.removeEventListener('pointerdown', finish, true);
+      root.removeEventListener('focusin', finish, true);
+    };
+    root.addEventListener('pointerdown', finish, true);
+    root.addEventListener('focusin', finish, true);
+    Promise.allSettled(animations.map((a) => a.finished)).then(finish);
+    return finish;
+  }, []);
+
+  const popCupcake = () => {
+    if (prefersReducedMotion()) return;
+    const cupcake = rootRef.current?.querySelector('.cover-cupcake');
+    if (!cupcake?.animate) return;
+    popAnimRef.current?.cancel();
+    popAnimRef.current = cupcake.animate(
+      [
+        { transform: 'rotate(-8deg) scale(1)' },
+        { transform: 'rotate(5deg) scale(1.12)', offset: 0.38 },
+        { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
+        { transform: 'rotate(-8deg) scale(1)' },
+      ],
+      { duration: 380, easing: OUT_EASE }
+    );
+  };
+
   return (
-    <div className="page-body cover">
+    <div ref={rootRef} className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
         <h1 className="cover-title">
@@ -31,7 +96,9 @@ export function Cover({ lang }) {
             </span>
           ))}
         </h1>
-        <Cupcake className="cover-cupcake" />
+        <span className="cover-cupcake-hit" onClick={popCupcake}>
+          <Cupcake className="cover-cupcake" />
+        </span>
         <div className="cover-open">
           <a className="btn btn--cream" href="#/contents">
             {t.open}
@@ -49,11 +116,69 @@ export function Cover({ lang }) {
 // Wide: the left page of the contents spread carries its heading and an ornament.
 function ContentsLeft({ lang }) {
   const t = ui[lang];
+  const rootRef = useRef(null);
+  const popAnimRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || contentsLeftEntered || prefersReducedMotion() || !root.closest('.face--rest')) return;
+    contentsLeftEntered = true;
+    const animations = [];
+    const medallion = root.querySelector('.contents-medallion');
+    const title = root.querySelector('.contents-title');
+    if (medallion?.animate) {
+      animations.push(
+        medallion.animate(
+          [
+            { opacity: 0, transform: 'scale(0.93) rotate(-4deg)' },
+            { opacity: 1, transform: 'scale(1) rotate(0deg)' },
+          ],
+          { duration: 280, easing: SPRING_EASE, fill: 'backwards' }
+        )
+      );
+    }
+    if (title?.animate) {
+      animations.push(
+        title.animate(
+          [
+            { opacity: 0, transform: 'translateY(8px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          { delay: 50, duration: 220, easing: OUT_EASE, fill: 'backwards' }
+        )
+      );
+    }
+    const finish = () => {
+      animations.forEach((a) => a.cancel());
+      root.removeEventListener('pointerdown', finish, true);
+      root.removeEventListener('focusin', finish, true);
+    };
+    root.addEventListener('pointerdown', finish, true);
+    root.addEventListener('focusin', finish, true);
+    Promise.allSettled(animations.map((a) => a.finished)).then(finish);
+    return finish;
+  }, []);
+
+  const popMedallion = () => {
+    if (prefersReducedMotion()) return;
+    const medallion = rootRef.current?.querySelector('.contents-medallion');
+    if (!medallion?.animate) return;
+    popAnimRef.current?.cancel();
+    popAnimRef.current = medallion.animate(
+      [
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.06) rotate(4deg)', offset: 0.4 },
+        { transform: 'scale(1) rotate(0deg)' },
+      ],
+      { duration: 320, easing: SPRING_EASE }
+    );
+  };
+
   return (
-    <div className="page-body contents-left">
+    <div ref={rootRef} className="page-body contents-left">
       <Checkers tone="choc" edge="top" />
       <div className="contents-left-inner">
-        <div className="contents-medallion" aria-hidden="true">
+        <div className="contents-medallion" aria-hidden="true" onClick={popMedallion}>
           <Cupcake className="contents-cupcake" />
         </div>
         <h1 className="contents-title">{t.contents}</h1>

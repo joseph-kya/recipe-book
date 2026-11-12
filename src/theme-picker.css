@@ -1,10 +1,15 @@
 /* Colourway swatches on the cover: four small rounds under Open, each split
    into the theme's primary and accent, ringed in cream on the cover colour.
-   The chosen one wears a thicker ring; focus uses the shared diner ring. */
+   The chosen one wears a springy outer ring; focus uses the shared diner ring. */
 
 .theme-picker {
   display: flex;
-  gap: var(--sp-2);
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--choc) 18%, transparent);
+  border: 2px solid color-mix(in srgb, var(--cream) 28%, transparent);
 }
 
 .theme-swatch {
@@ -17,7 +22,7 @@
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--press) var(--ease-out);
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* the visible dot sits inside the 44px target */
@@ -30,32 +35,48 @@
   box-shadow:
     0 0 0 2px var(--cream),
     2px 2px 0 2px var(--choc);
-  transition: box-shadow 200ms var(--ease-out);
 }
 
-.theme-swatch[aria-checked='true']::before {
-  box-shadow:
-    0 0 0 4px var(--cream),
-    3px 3px 0 4px var(--choc);
+/* active ring animates only transform + opacity */
+.theme-swatch::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 3px solid var(--cream);
+  box-shadow: 2px 2px 0 var(--choc);
+  opacity: 0;
+  transform: scale(0.86);
+  pointer-events: none;
+  transition:
+    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 150ms var(--ease-out);
+}
+
+.theme-swatch[aria-checked='true']::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .theme-swatch:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
+  transition-duration: 90ms;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .theme-swatch:not([aria-checked='true']):hover {
-    transform: scale(1.08);
+    transform: scale(1.1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .theme-swatch,
-  .theme-swatch::before {
+  .theme-swatch::after {
     transition: none;
   }
   .theme-swatch:active,
-  .theme-swatch:hover {
+  .theme-swatch:hover,
+  .theme-swatch[aria-checked='true']::after {
     transform: none;
   }
 }

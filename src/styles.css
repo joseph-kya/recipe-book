@@ -514,8 +514,21 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cream) 10%, transparent), transparent 62%), var(--cherry);
+  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cream) 12%, transparent), transparent 62%), var(--cherry);
   color: var(--cream);
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 24px var(--sp-3);
+  border: 2px solid color-mix(in srgb, var(--cream) 28%, transparent);
+  border-radius: var(--r-m);
+  pointer-events: none;
+}
+
+.book--wide .cover::before {
+  inset: 28px var(--sp-4);
 }
 
 .cover .checkers {
@@ -549,10 +562,12 @@ button {
   font-family: var(--display);
   font-weight: 400;
   font-size: clamp(3rem, 15vw, 4.75rem);
-  line-height: 0.98;
-  letter-spacing: -0.01em;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
   color: var(--cream);
-  text-shadow: 4px 4px 0 var(--choc);
+  text-shadow:
+    3px 3px 0 var(--choc),
+    6px 6px 0 color-mix(in srgb, var(--choc) 28%, transparent);
 }
 
 .book--wide .cover-title {
@@ -573,15 +588,33 @@ button {
   font-size: min(13.5vw, 4.75rem);
 }
 
+.cover-cupcake-hit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .cover-cupcake {
   width: 6.5rem;
   transform: rotate(-8deg);
-  transition: transform var(--press) var(--ease-out);
+  filter: drop-shadow(3px 4px 0 var(--choc));
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cover-cupcake-hit:active .cover-cupcake {
+  transform: rotate(-11deg) scale(0.94);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .cover-cupcake:hover {
-    transform: rotate(-4deg) scale(1.04);
+  .cover-cupcake-hit:hover .cover-cupcake {
+    transform: rotate(-3deg) scale(1.07);
+  }
+  .cover-cupcake-hit:active .cover-cupcake {
+    transform: rotate(-11deg) scale(0.94);
   }
 }
 
@@ -598,14 +631,36 @@ button {
   display: flex;
 }
 
+.cover-open .btn {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cover-open .btn:active {
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-out);
+}
+
 /* ---------- contents: numbers and titles ---------- */
 .contents-title {
   font-family: var(--display);
   font-weight: 400;
   font-size: var(--fs-3xl);
-  line-height: 1.05;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
   color: var(--cherry);
+  text-shadow: 2px 2px 0 color-mix(in srgb, var(--choc) 14%, transparent);
   margin-bottom: var(--sp-5);
+}
+
+.contents .contents-title::after {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 5px;
+  margin: var(--sp-3) 0 0;
+  border-radius: var(--r-pill);
+  background: var(--mustard);
+  border: 2px solid var(--choc);
 }
 
 /* Wide: the contents heading and an ornament hold the left page of the spread. */
@@ -634,13 +689,16 @@ button {
 .contents-left .contents-title::after {
   content: '';
   display: block;
-  width: 3rem;
-  height: var(--rule);
-  margin: var(--sp-5) auto 0;
-  background: var(--choc);
+  width: 3.5rem;
+  height: 5px;
+  margin: var(--sp-4) auto 0;
+  border-radius: var(--r-pill);
+  background: var(--mustard);
+  border: 2px solid var(--choc);
 }
 
 .contents-medallion {
+  position: relative;
   display: grid;
   place-items: center;
   width: min(calc(var(--pw) * 0.57), calc(var(--ph) * 0.31));
@@ -649,7 +707,34 @@ button {
   border: var(--rule) solid var(--choc);
   border-radius: 50%;
   background: var(--mint);
-  box-shadow: 5px 5px 0 var(--choc);
+  box-shadow: 6px 6px 0 var(--choc);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.contents-medallion::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--choc) 32%, transparent);
+  pointer-events: none;
+}
+
+.contents-medallion:active {
+  transform: scale(0.96);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .contents-medallion:hover {
+    transform: rotate(3deg) scale(1.04);
+  }
+  .contents-medallion:active {
+    transform: scale(0.96);
+  }
 }
 
 .contents-cupcake {
@@ -683,6 +768,8 @@ button {
 
 /* The whole row is the link: badge, title and trailing cue, at least 44px tall. */
 .toc-link {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: 3rem 1fr auto;
   gap: var(--sp-4);
@@ -693,12 +780,36 @@ button {
   border-radius: var(--r-m);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--press) var(--ease-out), background-color 160ms var(--ease-out);
+  transition: transform 180ms var(--ease-out);
+}
+
+/* Hover/press plate animates only opacity + transform (no background-color paint). */
+.toc-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 2px solid color-mix(in srgb, var(--choc) 18%, transparent);
+  opacity: 0;
+  transform: scale(0.98);
+  z-index: -1;
+  pointer-events: none;
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 200ms var(--ease-out);
 }
 
 .toc-link:active {
-  background-color: color-mix(in srgb, var(--accent) 28%, transparent);
   transform: scale(0.985);
+  transition-duration: 90ms;
+}
+
+.toc-link:active::before {
+  opacity: 1;
+  transform: scale(0.99);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  transition-duration: 90ms;
 }
 
 .toc-no {
@@ -712,12 +823,13 @@ button {
   box-shadow: 2px 2px 0 var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-l);
-  transition: transform var(--press) var(--ease-out), box-shadow var(--press) var(--ease-out);
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .toc-link:active .toc-no {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--choc);
+  transform: translate(1px, 1px) scale(0.95);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-out);
 }
 
 .toc-text {
@@ -738,23 +850,26 @@ button {
   line-height: 1;
   color: color-mix(in srgb, var(--choc) 55%, transparent);
   padding-inline-end: var(--sp-1);
-  transition: transform var(--press) var(--ease-out), color var(--press) var(--ease-out);
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .toc-link:hover {
-    transform: translateY(-2px);
-    background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+    transform: translateX(3px);
+  }
+  .toc-link:hover::before {
+    opacity: 1;
+    transform: scale(1);
   }
   .toc-link:hover .toc-title {
     color: var(--cherry-ink);
   }
   .toc-link:hover .toc-no {
-    transform: translateX(2px);
+    transform: rotate(-6deg) scale(1.07);
   }
   .toc-link:hover .toc-arrow {
     color: var(--cherry-ink);
-    transform: translateX(3px);
+    transform: translateX(4px);
   }
   .toc-link:active {
     transform: scale(0.985);
@@ -1695,12 +1810,23 @@ button {
   }
   .btn,
   .cover-cupcake,
+  .contents-medallion,
   .toc-link,
+  .toc-link::before,
   .toc-no,
   .toc-text,
   .toc-arrow,
   .ctl--turn {
     transition-duration: 0ms;
+  }
+  .cover-cupcake-hit:is(:hover, :active) .cover-cupcake {
+    transform: rotate(-8deg);
+  }
+  .contents-medallion:is(:hover, :active),
+  .toc-link:is(:hover, :active),
+  .toc-link:is(:hover, :active)::before,
+  .toc-link:is(:hover, :active) :is(.toc-no, .toc-arrow) {
+    transform: none;
   }
   /* the phone bar fades in place instead of sliding */
   .controls--narrow {

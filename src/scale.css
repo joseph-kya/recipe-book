@@ -17,6 +17,21 @@
   margin: 0;
 }
 
+.scaler-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-2);
+}
+
+/* the yield's own label, once, beside its numbers ("squares, 5 × 5 cm") */
+.scaler-unit {
+  font-family: var(--hand);
+  font-size: var(--fs-s);
+  line-height: 1.2;
+  color: var(--choc-soft);
+}
+
 .scaler {
   display: flex;
   flex: none;

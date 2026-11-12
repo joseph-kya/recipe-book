@@ -11,7 +11,7 @@
 // - A qualifier stays with its scaled number and is not normalised:
 //   "1 heaped cup", "scant ½ cup", "~1½ cups" (nearest ¼).
 // - A parenthetical is scaled too, in its own unit: "½ cup (8 tbsp)" → "1 cup (16 tbsp)".
-// - Grams and ml: under 10 to the nearest 0.5, under 100 whole, else nearest 5.
+// - Grams and ml: whole units under 100 (never below 1), else nearest 5.
 //   Ranges scale both ends ("10–20 ml" → "20–40 ml").
 // - Ounces to the nearest ½.
 // - Countables ("4", "1 large", "½", "4 (size M)", stat values like "24")
@@ -20,11 +20,12 @@
 //   its pinch and scales the spoon part.
 // - Anything else ("to taste", "as needed", "a splash", "to dust", "optional",
 //   time and kcal stats) stays as written.
+// Which factors a recipe offers at all is decided further down (feasible,
+// offeredFactors): only those at which every amount can really be measured.
 
 const VULGAR = { '¼': 0.25, '½': 0.5, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': 0.125 };
 const NUM = String.raw`(?:\d+(?:[.,]\d+)?)?[¼½¾⅓⅔⅛]?`;
 
-export const FACTORS = [0.5, 1, 2, 3];
 
 export function parseNumber(text) {
   const m = String(text).trim().match(/^(\d+(?:[.,]\d+)?)?([¼½¾⅓⅔⅛])?$/);
@@ -121,10 +122,9 @@ export function formatSpoons(tsp, lang) {
   return best.parts.join(' + ');
 }
 
-// Grams and millilitres: under 10 to 0.5, under 100 whole, else nearest 5.
+// Grams and millilitres: whole units under 100 (at least 1), else nearest 5.
 export function roundMetric(x) {
-  if (x < 10) return Math.max(0.5, Math.round(x * 2) / 2);
-  if (x < 100) return Math.round(x);
+  if (x < 100) return Math.max(1, Math.round(x));
   return Math.round(x / 5) * 5;
 }
 
@@ -222,4 +222,97 @@ export function scaleStat(value, factor) {
   return formatNumber(countable(Number(value) * factor), HALVES);
 }
 
-export const factorLabel = (f) => `${formatNumber(f, HALVES)}×`;
+export const factorLabel = (f) => `${formatNumber(f)}×`;
+
+/* ---------- Feasibility: only offer factors a kitchen can actually measure ----------
+   An amount is feasible at a factor when it can be measured without fuss:
+   - countables (eggs, "1 large", "½" lemon) land on whole numbers;
+   - grams and ml round to whole units of at least 1 (5 g steps from 100),
+     drifting no more than 5% from the exact value;
+   - cups, tbsp and tsp land on quarter steps (¼ cup, ¼ tbsp, ¼ tsp smallest),
+     within 5%, and never shrink to a pinch;
+   - words ("to taste", "a splash", a pinch already in the JSON) and anything
+     unparsed are always fine. */
+
+export const CANDIDATES = [0.25, 1 / 3, 0.5, 2 / 3, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4];
+const TOLERANCE = 0.05;
+const near = (got, exact) => exact > 0 && Math.abs(got - exact) / exact <= TOLERANCE;
+const isWhole = (x) => Math.abs(x - Math.round(x)) < 1e-6 && Math.round(x) >= 1;
+const quarterStep = (x) => x >= 0.25 - 1e-9 && near(Math.round(x * 4) / 4, x);
+
+function spoonsFeasible(tsp) {
+  if (tsp < 0.25 - 1e-9) return false; // would be a pinch
+  const shown = spoonTotal(formatSpoons(tsp, 'en'));
+  return shown !== null && near(shown, tsp);
+}
+
+export function feasible(text, factor) {
+  if (factor === 1 || text == null) return true;
+  const s = String(text).trim();
+  if (!s) return true;
+
+  const paren = s.match(/^(.+?) \((.+)\)$/);
+  if (paren) {
+    const inner = paren[2].match(new RegExp(`^(${NUM}) (cups?|tbsp|tsp|Tassen?|EL|TL)$`));
+    const innerOk = inner ? quarterStep(parseNumber(inner[1]) * factor) : feasible(paren[2], factor);
+    return feasible(paren[1], factor) && innerOk;
+  }
+
+  const spoons = parseSpoons(s);
+  if (spoons) return spoonsFeasible(spoons.total * factor);
+
+  const pinchPlus = s.match(/^(pinch|Prise) \+ (.+)$/);
+  if (pinchPlus) {
+    const rest = parseSpoons(pinchPlus[2]);
+    return rest ? spoonsFeasible(rest.total * factor) : true;
+  }
+
+  if (/^\d+ (pinch(?:es)?|Prisen?)$/.test(s)) return true;
+
+  const qual = s.match(new RegExp(`^(~|scant |knapp )?(${NUM})( heaped| gehäufte?)? (cups?|Tassen?)$`));
+  if (qual && (qual[1] || qual[3])) return quarterStep(parseNumber(qual[2]) * factor);
+
+  const metric = s.match(/^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/);
+  if (metric) {
+    return [metric[1], metric[2]].filter(Boolean).every((v) => {
+      const exact = parseNumber(v) * factor;
+      return exact >= 1 - 1e-9 && near(roundMetric(exact), exact);
+    });
+  }
+
+  const oz = s.match(new RegExp(`^(${NUM}) oz$`));
+  if (oz) return quarterStep(parseNumber(oz[1]) * factor);
+
+  const count = s.match(new RegExp(`^(${NUM})( large| small| medium| groß| klein)?$`));
+  if (count && parseNumber(count[1]) !== null) return isWhole(parseNumber(count[1]) * factor);
+
+  return true;
+}
+
+// The recipe's yield stat, when its value is a plain number ("24" squares).
+export function yieldStat(text) {
+  return text.stats.find((s) => /^\d+$/.test(String(s.value).trim())) || null;
+}
+
+// Every factor at which every amount (cups and metric) in every language the
+// recipe is written in can be measured, and the yield stays whole. 1× always.
+export function feasibleFactors(recipe) {
+  const texts = ['en', 'de'].filter((l) => recipe[l]).map((l) => recipe[l]);
+  return CANDIDATES.filter((f) => {
+    if (f === 1) return true;
+    return texts.every((t) => {
+      const y = yieldStat(t);
+      if (y && !isWhole(Number(y.value) * f)) return false;
+      return t.groups.every((g) => g.items.every((it) => feasible(it.amount, f) && feasible(it.metric, f)));
+    });
+  });
+}
+
+// At most 5 chips: 1×, the most useful smaller one (nearest ½×), and up to
+// three larger ones in order of usefulness (2×, 3×, 1½×, 4×, 2½×, 1¼×).
+export function offeredFactors(recipe) {
+  const ok = feasibleFactors(recipe);
+  const below = ok.filter((f) => f < 1).sort((a, b) => Math.abs(a - 0.5) - Math.abs(b - 0.5)).slice(0, 1);
+  const above = [2, 3, 1.5, 4, 2.5, 1.25].filter((f) => ok.includes(f)).slice(0, 3);
+  return [...below, 1, ...above].sort((a, b) => a - b);
+}

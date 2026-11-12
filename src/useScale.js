@@ -1,5 +1,5 @@
 import { createContext, createElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { FACTORS } from './scale.js';
+import { CANDIDATES, offeredFactors } from './scale.js';
 import { transition } from './motion.js';
 
 // Portion scale, per recipe: you scale the one you are cooking, and opening
@@ -11,7 +11,7 @@ function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
     if (saved && typeof saved === 'object') {
-      return Object.fromEntries(Object.entries(saved).filter(([, f]) => FACTORS.includes(f) && f !== 1));
+      return Object.fromEntries(Object.entries(saved).filter(([, f]) => CANDIDATES.includes(f) && f !== 1));
     }
   } catch {
     /* storage blocked or malformed: start at 1× */
@@ -25,7 +25,7 @@ export function ScaleProvider({ children }) {
   const [scales, setScales] = useState(load);
   const latest = useRef(scales);
   const setScale = useCallback((slug, factor) => {
-    if (!FACTORS.includes(factor) || (latest.current[slug] || 1) === factor) return;
+    if (!CANDIDATES.includes(factor) || (latest.current[slug] || 1) === factor) return;
     const next = { ...latest.current };
     if (factor === 1) delete next[slug];
     else next[slug] = factor;
@@ -45,7 +45,18 @@ export function ScaleProvider({ children }) {
 
 export const useScales = () => useContext(ScaleContext);
 
-export function useScale(slug) {
+const offeredCache = new Map();
+const offeredFor = (recipe) => {
+  if (!offeredCache.has(recipe.slug)) offeredCache.set(recipe.slug, offeredFactors(recipe));
+  return offeredCache.get(recipe.slug);
+};
+
+// [factor, setFactor, offered] for one recipe. A saved factor this recipe does
+// not offer (an old choice, or the rules changed) quietly reads as 1×.
+export function useScale(recipe) {
   const { scales, setScale } = useContext(ScaleContext);
-  return [scales[slug] || 1, (f) => setScale(slug, f)];
+  const offered = offeredFor(recipe);
+  const saved = scales[recipe.slug] || 1;
+  const factor = offered.includes(saved) ? saved : 1;
+  return [factor, (f) => offered.includes(f) && setScale(recipe.slug, f), offered];
 }

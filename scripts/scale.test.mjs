@@ -2,7 +2,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
-import { formatSpoons, roundMetric, scaleAmount, scaleStat, spoonTotal } from '../src/scale.js';
+import {
+  CANDIDATES,
+  feasible,
+  feasibleFactors,
+  formatSpoons,
+  offeredFactors,
+  roundMetric,
+  scaleAmount,
+  scaleStat,
+  spoonTotal,
+  yieldStat,
+} from '../src/scale.js';
 
 const dir = new URL('../content/recipes/', import.meta.url);
 const recipes = readdirSync(dir)
@@ -98,7 +109,7 @@ test('German amounts scale in German units', () => {
     ['½ TL', 0.5, '¼ TL'],
   ];
   for (const [text, f, want] of cases) assert.equal(scaleAmount(text, f, 'de'), want, `${text} × ${f}`);
-  assert.equal(scaleAmount('1.5 g', 3, 'de'), '4,5 g');
+  assert.equal(scaleAmount('1.5 g', 3, 'de'), '5 g');
 });
 
 test('qualifiers, parentheticals, ranges, pinches and countables', () => {
@@ -137,9 +148,88 @@ test('only plain-number stats scale (yields), never times or kcal', () => {
   }
 });
 
-test('metric rounding: under 10 to 0.5, under 100 whole, else nearest 5', () => {
-  assert.equal(roundMetric(5.4), 5.5);
+test('metric rounding: whole units (at least 1) under 100, else nearest 5', () => {
+  assert.equal(roundMetric(5.4), 5);
+  assert.equal(roundMetric(0.75), 1);
   assert.equal(roundMetric(87.5), 88);
   assert.equal(roundMetric(1136), 1135);
   assert.equal(formatSpoons(0.1, 'en'), '1 pinch');
+});
+
+/* ---------- feasibility: only factors a kitchen can really measure ---------- */
+
+const textsOf = (r) => ['en', 'de'].filter((l) => r[l]).map((l) => ({ lang: l, t: r[l] }));
+const itemsOf = (r) =>
+  textsOf(r).flatMap(({ lang, t }) => t.groups.flatMap((g) => g.items.flatMap((it) => [it.amount, it.metric].map((text) => ({ text, lang })))));
+
+test('each recipe offers 1× and at most 5 factors (printed)', () => {
+  for (const r of recipes) {
+    const offered = offeredFactors(r);
+    console.log(`  ${r.slug.padEnd(28)} offers ${offered.map((f) => +f.toFixed(2)).join(' ')}   (feasible: ${feasibleFactors(r).map((f) => +f.toFixed(2)).join(' ')})`);
+    assert.ok(offered.includes(1));
+    assert.ok(offered.length <= 5);
+    for (const f of offered) assert.ok(CANDIDATES.includes(f));
+  }
+});
+
+test('a recipe with one egg never offers ½×', () => {
+  const oneEgg = recipes.filter((r) =>
+    r.en.groups.some((g) => g.items.some((it) => /\begg/i.test(it.name) && /^1( large)?$/.test(String(it.amount).trim()))),
+  );
+  assert.ok(oneEgg.length >= 1);
+  for (const r of oneEgg) assert.ok(!offeredFactors(r).includes(0.5), r.slug);
+});
+
+test('no offered factor gives half grams, a new pinch, a non-whole countable or yield', () => {
+  for (const r of recipes) {
+    for (const f of offeredFactors(r).filter((x) => x !== 1)) {
+      for (const { text, lang } of itemsOf(r)) {
+        const out = String(scaleAmount(text, f, lang));
+        assert.ok(!/\d[.,]\d+ (g|ml)\b/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
+        if (!/pinch|Prise/.test(String(text))) assert.ok(!/pinch|Prise/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
+        if (/^\d+(?: large)?$|^½$/.test(String(text).trim())) assert.ok(/^\d+( large)?$/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
+      }
+      for (const { t } of textsOf(r)) {
+        const y = yieldStat(t);
+        if (y) assert.match(scaleStat(y.value, f), /^\d+$/, `${r.slug} yield × ${f}`);
+      }
+    }
+  }
+});
+
+test('every offered spoon amount reads back in quarter steps, within 5%', () => {
+  const quarters = (out) =>
+    out.split(' + ').every((part) => {
+      const m = part.match(/^([\d¼½¾⅓⅔]+) /);
+      if (!m) return false;
+      const n = m[1].replace(/[¼½¾⅓⅔]/, (c) => ({ '¼': '.25', '½': '.5', '¾': '.75', '⅓': '.333', '⅔': '.667' })[c]);
+      const v = Number(n.startsWith('.') ? `0${n}` : n);
+      // thirds only ever for whole cup sizes; spoons step in quarters
+      return /cup|Tasse/.test(part) ? Math.abs(v * 12 - Math.round(v * 12)) < 0.02 : Math.abs(v * 4 - Math.round(v * 4)) < 1e-9;
+    });
+  for (const r of recipes) {
+    for (const f of offeredFactors(r).filter((x) => x !== 1)) {
+      for (const { text, lang } of itemsOf(r)) {
+        const before = spoonTotal(text);
+        if (before === null) continue;
+        const out = scaleAmount(text, f, lang);
+        assert.ok(quarters(out), `${r.slug} ${text} × ${f} → ${out}`);
+        assert.ok(Math.abs(spoonTotal(out) - before * f) / (before * f) <= 0.05, `${r.slug} ${text} × ${f} → ${out}`);
+      }
+    }
+  }
+});
+
+test('feasibility rules on single amounts', () => {
+  assert.equal(feasible('1', 0.5), false); // half an egg
+  assert.equal(feasible('½', 0.5), false); // a quarter lemon
+  assert.equal(feasible('½', 2), true);
+  assert.equal(feasible('1.5 g', 0.5), false); // 0.75 g
+  assert.equal(feasible('11 g', 0.5), false); // 5.5 g drifts 9% from 5 or 6
+  assert.equal(feasible('568 g', 0.5), true);
+  assert.equal(feasible('¼ tsp', 0.5), false); // a pinch
+  assert.equal(feasible('1 cup + 1½ tsp', 0.5), true);
+  assert.equal(feasible('to taste', 0.25), true);
+  assert.equal(feasible('1 pinch', 0.5), true);
+  assert.equal(feasible('anything else', 3), true);
 });

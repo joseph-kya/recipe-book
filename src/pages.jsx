@@ -135,7 +135,7 @@ function RunningHead({ recipe, lang }) {
 
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
-  const [factor] = useScale(recipe.slug);
+  const [factor] = useScale(recipe);
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
@@ -195,7 +195,7 @@ const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, 
 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  const [factor] = useScale(recipe.slug);
+  const [factor] = useScale(recipe);
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
@@ -208,7 +208,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
       <h2 className="menu-title" lang={textLang}>
         {r.ingredients_headline}
       </h2>
-      <Scaler slug={recipe.slug} label={t.scale} />
+      <Scaler recipe={recipe} text={r} textLang={textLang} label={t.scale} />
       {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
     </div>
   );

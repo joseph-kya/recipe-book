@@ -11,13 +11,13 @@ export function Cover({ lang }) {
     <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
-        <p className="eyebrow cover-eyebrow">★ {t.coverEyebrow} ★</p>
+        <p className="eyebrow cover-eyebrow">★ {t.coverEyebrow(recipes.length)} ★</p>
         <h1 className="cover-title" data-enter>
           <span>{t.bookTitle[0]}</span>
           <span>{t.bookTitle[1]}</span>
         </h1>
         <Cupcake className="cover-cupcake" />
-        <Burst lines={t.coverSticker(recipes.length)} className="cover-burst" />
+        <Burst lines={t.coverSticker} className="cover-burst" />
         <p className="cover-note">{t.coverNote}</p>
         <a className="btn btn--cream" href={hashFor(1)}>
           {t.open}

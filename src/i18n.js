@@ -5,8 +5,8 @@ export const ui = {
   en: {
     bookTitle: ["Bread Pitt's", 'Recipe Book'],
     bookTitleFlat: "Bread Pitt's Recipe Book",
-    coverEyebrow: "From Joseph's oven",
-    coverSticker: (n) => [`${n} recipes`, 'inside'],
+    coverEyebrow: (n) => `${n} recipes from Joseph's oven`,
+    coverSticker: ['Cups', 'first!'],
     coverNote: 'Cups and spoons first. The kitchen scale is broken.',
     open: 'Open the book',
     contents: 'Contents',
@@ -38,8 +38,8 @@ export const ui = {
   de: {
     bookTitle: ['Bread Pitts', 'Rezeptbuch'],
     bookTitleFlat: 'Bread Pitts Rezeptbuch',
-    coverEyebrow: 'Aus Josephs Ofen',
-    coverSticker: (n) => [`${n} Rezepte`, 'drin'],
+    coverEyebrow: (n) => `${n} Rezepte aus Josephs Ofen`,
+    coverSticker: ['Tassen', 'zuerst!'],
     coverNote: 'Erst Tassen und Löffel. Die Küchenwaage ist kaputt.',
     open: 'Buch öffnen',
     contents: 'Inhalt',

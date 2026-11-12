@@ -42,6 +42,7 @@
 :root {
   --cherry: #c8233a;
   --cherry-ink: #a11b2e; /* cherry deep enough for text on mint (5:1) */
+  --cherry-deep: #8e1626; /* cherry for small text on mustard (4.9:1) */
   --mint: #a8dccb;
   --mustard: #f2b134;
   --choc: #3a2216;
@@ -389,7 +390,7 @@ button {
 
 .burst-second {
   display: block;
-  color: var(--cherry-ink);
+  color: var(--cherry-deep);
 }
 
 .cupcake {
@@ -422,12 +423,13 @@ button {
   align-items: center;
   justify-content: center;
   gap: 1.25rem;
-  padding: 2.5rem 1.5rem calc(6.5rem + env(safe-area-inset-bottom));
+  /* the top padding keeps the sticker's corner clear */
+  padding: 8rem 1.5rem calc(6.5rem + env(safe-area-inset-bottom));
   text-align: center;
 }
 
 .book--wide .cover-inner {
-  padding: 3rem 2.5rem;
+  padding: 10rem 2.5rem 3rem;
 }
 
 .cover-eyebrow {
@@ -1074,6 +1076,15 @@ button {
 
 .controls--narrow .lang-btn {
   min-height: 100%;
+}
+
+@media (max-width: 359px) {
+  .controls--narrow .ctl-count {
+    display: none;
+  }
+  .controls--narrow .ctl--contents {
+    padding: 0 0.4rem;
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {

@@ -33,7 +33,7 @@ function useMedia(query) {
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-export default function Book({ lang, setLang }) {
+export default function Book({ lang, setLang, units, setUnits }) {
   const wide = useMedia(WIDE_QUERY);
   const reduce = useMedia(REDUCE_QUERY);
   const [plans, setPlans] = useState(null); // wide only: recipe slug -> pages of segments
@@ -232,7 +232,7 @@ export default function Book({ lang, setLang }) {
   // Measure before paint, again when the language changes.
   useLayoutEffect(() => {
     if (wide) runPaginate();
-  }, [wide, lang, runPaginate]);
+  }, [wide, lang, units, runPaginate]);
 
   // ...and once the real fonts are in, and after every resize.
   useEffect(() => {
@@ -513,7 +513,7 @@ export default function Book({ lang, setLang }) {
   const faces = [];
   const add = (idx, side, role) => {
     const sp = spreads[idx];
-    const content = sp && renderFace(sp[side], lang);
+    const content = sp && renderFace(sp[side], lang, units);
     if (content) faces.push({ key: `${layoutKey}-${idx}-${side}`, idx, side, role, content });
   };
   if (turn) {
@@ -579,7 +579,7 @@ export default function Book({ lang, setLang }) {
         <div className="book book--wide measure" ref={measureRef} aria-hidden="true" inert>
           <div className="measure-src" hidden>
             {recipes.map((r) => (
-              <RecipeMeasure key={r.slug} recipe={r} lang={lang} />
+              <RecipeMeasure key={r.slug} recipe={r} lang={lang} units={units} />
             ))}
           </div>
         </div>
@@ -587,6 +587,8 @@ export default function Book({ lang, setLang }) {
       <Controls
         lang={lang}
         setLang={setLang}
+        units={units}
+        setUnits={setUnits}
         index={index}
         last={spreads.length - 1}
         wide={wide}

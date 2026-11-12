@@ -19,6 +19,7 @@ npm run preview   # serve dist/ locally
 - **Turning:** swipe (the page follows your finger; a flick is enough), ← / → keys, or the arrow buttons. A turn can be caught and reversed mid-flight.
 - **Phone:** one scrolling page per recipe. **Wide screens (≥ 960 px):** an open book with two-page spreads; the closed book sits centred on its cover. Book pages never scroll: `src/paginate.js` measures the real rendered blocks and runs each recipe over as many spreads as it needs (never splitting an ingredient row, step or tip card), and re-paginates on resize and language change. `#/brownies` always opens a recipe's first spread; Back steps through its spreads.
 - **Reduced motion:** no flip, a 200 ms crossfade instead.
+- **cups | g:** the toggle beside EN/DE puts cups and spoons first (default) or the metric value first; the other amount sits small beside it. Only metric values already in the JSON are shown, never converted; a row without one keeps its cups amount. Remembered in `localStorage` (`recipe-book:units`); wide pages re-paginate when it changes.
 - **EN / DE:** the toggle translates all UI text and is remembered in `localStorage`. Recipe text switches only where the JSON has a `de` block. Otherwise the English recipe shows with a short note saying so. Nothing is machine-translated.
 
 ## Add a recipe

@@ -3,6 +3,7 @@ import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
+import { amountsFor } from './units.js';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
@@ -173,7 +174,7 @@ function Amount({ text }) {
 
 const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
 
-function Ingredients({ recipe, lang, items, cont = false, measure = false }) {
+function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const shown = items || allItems(r);
   const byGroup = new Map();
@@ -216,18 +217,17 @@ function Ingredients({ recipe, lang, items, cont = false, measure = false }) {
             <ul className="ing-list" lang={textLang}>
               {iis.map((ii) => {
                 const it = g.items[ii];
-                const showMetric = it.metric && it.metric !== it.amount;
+                const { primary, secondary, metricFirst } = amountsFor(it, units);
                 return (
                   <li className="ing" key={ii} data-item={`${gi}:${ii}`}>
                     <span className="ing-what">
                       <span className="ing-name">{it.name}</span>
                       {it.note && <span className="ing-note">{it.note}</span>}
                     </span>
-                    <span className="ing-how">
-                      <span className="ing-amount">
-                        <Amount text={it.amount} />
-                      </span>
-                      {showMetric && <span className="ing-metric">{it.metric}</span>}
+                    {/* keyed by units: a toggle remounts just the amounts, which crossfade in */}
+                    <span className="ing-how" key={units}>
+                      <span className="ing-amount">{metricFirst ? primary : <Amount text={primary} />}</span>
+                      {secondary && <span className="ing-metric">{secondary}</span>}
                     </span>
                   </li>
                 );
@@ -364,13 +364,13 @@ function Credits({ recipe, lang }) {
 /* ---------- Recipe pages ---------- */
 
 // Phone: the whole recipe on one scrolling page.
-function RecipeFull({ recipe, lang }) {
+function RecipeFull({ recipe, lang, units }) {
   return (
     <div className="page-body recipe">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
         <RecipeHero recipe={recipe} lang={lang} />
-        <Ingredients recipe={recipe} lang={lang} />
+        <Ingredients recipe={recipe} lang={lang} units={units} />
         <Method recipe={recipe} lang={lang} />
         <Tips recipe={recipe} lang={lang} />
         <Credits recipe={recipe} lang={lang} />
@@ -381,7 +381,7 @@ function RecipeFull({ recipe, lang }) {
 }
 
 // Wide: one fixed-height book page holding the segments the paginator gave it.
-function RecipePage({ recipe, lang, segs, first }) {
+function RecipePage({ recipe, lang, units, segs, first }) {
   const closing = !first && isClosing(segs);
   return (
     <div className={`page-body recipe${closing ? ' page-body--closing' : ''}`}>
@@ -391,7 +391,7 @@ function RecipePage({ recipe, lang, segs, first }) {
         {segs.map((seg, i) => {
           const props = { key: i, recipe, lang };
           if (seg.kind === 'hero') return <RecipeHero {...props} />;
-          if (seg.kind === 'menu') return <Ingredients {...props} items={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'menu') return <Ingredients {...props} units={units} items={seg.items} cont={seg.cont} />;
           if (seg.kind === 'ticket') return <Method {...props} steps={seg.items} cont={seg.cont} />;
           if (seg.kind === 'tips') return <Tips {...props} items={seg.items} />;
           if (seg.kind === 'ornament') return <Cupcake key={i} className="closing-cupcake" />;
@@ -415,12 +415,12 @@ function BlankPage() {
 }
 
 // Hidden source for the paginator: every block of one recipe, in book order.
-export function RecipeMeasure({ recipe, lang }) {
+export function RecipeMeasure({ recipe, lang, units }) {
   return (
     <div data-src={recipe.slug}>
       <RunningHead recipe={recipe} lang={lang} />
       <RecipeHero recipe={recipe} lang={lang} />
-      <Ingredients recipe={recipe} lang={lang} measure />
+      <Ingredients recipe={recipe} lang={lang} units={units} measure />
       <Method recipe={recipe} lang={lang} measure />
       <Tips recipe={recipe} lang={lang} />
       <Credits recipe={recipe} lang={lang} />
@@ -430,7 +430,7 @@ export function RecipeMeasure({ recipe, lang }) {
 
 /* ---------- One face of the book from its layout descriptor ---------- */
 
-export function renderFace(desc, lang) {
+export function renderFace(desc, lang, units) {
   if (!desc) return null;
   switch (desc.type) {
     case 'cover':
@@ -440,12 +440,12 @@ export function renderFace(desc, lang) {
     case 'contentsList':
       return <ContentsList lang={lang} withTitle={desc.withTitle} />;
     case 'recipeFull':
-      return <RecipeFull recipe={desc.recipe} lang={lang} />;
+      return <RecipeFull recipe={desc.recipe} lang={lang} units={units} />;
     case 'recipePage':
       return desc.segs ? (
-        <RecipePage recipe={desc.recipe} lang={lang} segs={desc.segs} first={desc.first} />
+        <RecipePage recipe={desc.recipe} lang={lang} units={units} segs={desc.segs} first={desc.first} />
       ) : (
-        <RecipeFull recipe={desc.recipe} lang={lang} />
+        <RecipeFull recipe={desc.recipe} lang={lang} units={units} />
       );
     case 'blank':
       return <BlankPage />;

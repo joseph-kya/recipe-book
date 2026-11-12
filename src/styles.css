@@ -113,6 +113,12 @@
   --fs-xl: 1.5rem;
   --fs-2xl: 1.875rem;
   --fs-3xl: 3rem;
+
+  /* one corner-radius set */
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 18px;
+  --r-pill: 999px;
   /* phone control bar: 48px buttons + padding + border + its 8px lift + shadow ≈ 4.75rem,
      plus 2.25rem of air so the last line scrolls fully clear of it */
   --bar-clear: 7rem;
@@ -870,6 +876,21 @@ button {
   white-space: nowrap;
 }
 
+/* Units toggle: the swapped amounts crossfade in with a 3px rise. Only right
+   after a toggle (html[data-units-swap], set by units.js), never on load or a
+   page turn; the rest of the row stays still. Instant under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-units-swap] .ing-how {
+    animation: amt-swap 200ms var(--ease-out) both;
+  }
+  @keyframes amt-swap {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+  }
+}
+
 /* ---------- wide cookbook spread ----------
    The left page holds the header and the whole ingredient card. The card keeps
    readable type and comfortable rows; the header is compact and the book page
@@ -1289,14 +1310,14 @@ button {
   text-align: center;
 }
 
-.lang {
+.seg {
   display: flex;
   padding: 2px;
   border: 2px solid var(--choc);
   border-radius: 999px;
 }
 
-.lang-btn {
+.seg-btn {
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0 0.5rem;
@@ -1309,11 +1330,11 @@ button {
   transition: transform var(--press) var(--ease-out);
 }
 
-.lang-btn:active {
+.seg-btn:active {
   transform: scale(0.95);
 }
 
-.lang-btn[aria-pressed='true'] {
+.seg-btn[aria-pressed='true'] {
   background: var(--choc);
   color: var(--cream);
 }
@@ -1345,22 +1366,80 @@ button {
   transform: translateY(calc(100% + 0.5rem + 8px + env(safe-area-inset-bottom)));
 }
 
-.controls--narrow .lang {
+.controls--narrow .seg {
   height: 3rem;
   padding: 0;
   border-width: 2px;
 }
 
-.controls--narrow .lang-btn {
+.controls--narrow .seg-btn {
   min-height: 100%;
 }
 
+/* Phone bar: the page count would only repeat what the page shows, and
+   Contents is a list icon (its word stays the link's name). */
+.controls--narrow .ctl-count {
+  display: none;
+}
+
+.ctl-icon {
+  display: none;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.controls--narrow .ctl-icon {
+  display: block;
+}
+
+.controls--narrow .ctl-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.controls--narrow .ctl--contents {
+  width: 2.75rem;
+  padding: 0;
+}
+
+.controls--narrow .ctl--turn {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.controls--narrow .ctl-middle {
+  gap: var(--sp-1);
+}
+
+/* Very narrow phones: arrows and Contents on one row, the two toggles on the next. */
 @media (max-width: 359px) {
-  .controls--narrow .ctl-count {
-    display: none;
+  .controls--narrow {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    row-gap: var(--sp-1);
+    border-radius: var(--r-l);
+  }
+  .controls--narrow .ctl-middle {
+    display: contents;
+  }
+  .controls--narrow .ctl--prev {
+    order: 1;
   }
   .controls--narrow .ctl--contents {
-    padding: 0 0.4rem;
+    order: 2;
+    /* takes the rest of row one, so both toggles share row two */
+    flex: 1 0 calc(100% - 7rem);
+    width: auto;
+  }
+  .controls--narrow .ctl--next {
+    order: 3;
+  }
+  .controls--narrow .seg {
+    order: 4;
   }
 }
 
@@ -1418,11 +1497,11 @@ button {
   gap: 0.75rem;
 }
 
-.controls--wide .lang {
+.controls--wide .seg {
   border-color: var(--cream);
 }
 
-.controls--wide .lang-btn[aria-pressed='true'] {
+.controls--wide .seg-btn[aria-pressed='true'] {
   background: var(--cream);
   color: var(--choc);
 }

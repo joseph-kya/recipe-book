@@ -422,6 +422,7 @@ function RecipePage({ recipe, lang, segs, first }) {
           if (seg.kind === 'menu') return <Ingredients {...props} items={seg.items} cont={seg.cont} />;
           if (seg.kind === 'ticket') return <Method {...props} steps={seg.items} cont={seg.cont} />;
           if (seg.kind === 'tips') return <Tips {...props} items={seg.items} />;
+          if (seg.kind === 'ornament') return <Cupcake key={i} className="closing-cupcake" />;
           return <Credits {...props} />;
         })}
       </div>

@@ -1117,6 +1117,14 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.book--wide .page-pad--closing > .running-head,
+.book--wide .page-pad--closing > .tips {
+  align-self: stretch;
+  text-align: left;
 }
 
 .book--wide .page-pad--closing > .running-head + * {
@@ -1125,6 +1133,18 @@ button {
 
 .book--wide .page-pad--closing > :last-child {
   margin-bottom: auto;
+}
+
+.closing-cupcake {
+  width: 4.5rem;
+  margin-bottom: var(--sp-5);
+  transform: rotate(-8deg);
+}
+
+/* the credits close the page: no rule needed under the ornament */
+.closing-cupcake + .credits {
+  border-top: 0;
+  padding-top: 0;
 }
 
 /* Short screens: only the header and gaps tighten; ingredient type keeps its size. */

@@ -250,12 +250,16 @@ function balance(root, src, pageHeight) {
       consider(paginateOne(root, src, (p) => (p === last - 1 ? extra : 0), byRows, cut));
     }
   }
-  return best.pages;
+  // A roomy closing page gets the cupcake ornament above its content.
+  return best.pages.map((segs, i) =>
+    i > 0 && isClosing(segs) && best.used[i] < 0.7 ? [{ kind: 'ornament' }, ...segs] : segs,
+  );
 }
 
 // A closing page holds only tips and/or the credits: it is composed on purpose
 // (see .page-pad--closing), so it may be short.
-export const isClosing = (segs) => segs.length > 0 && segs.every((seg) => seg.kind === 'tips' || seg.kind === 'credits');
+export const isClosing = (segs) =>
+  segs.length > 0 && segs.every((seg) => seg.kind === 'tips' || seg.kind === 'credits' || seg.kind === 'ornament');
 
 // Lower is better: every extra page costs, and so does every page left under
 // about 60% full (`used` includes ~10% of padding and checkers).

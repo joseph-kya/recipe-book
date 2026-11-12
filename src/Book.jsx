@@ -11,14 +11,14 @@ import { enterPage, transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
-// A button turn settles in ~280 ms; gesture releases retain their own momentum.
-const TURN_RESPONSE = 0.3;
+// A button turn settles in ~260 ms; gesture releases retain their own momentum.
+const TURN_RESPONSE = 0.28;
 const TURN_SPRING = makeSpring({ response: TURN_RESPONSE, damping: 1 });
 // A button turn starts at the spring's natural velocity. From rest a
 // critically damped spring is an S-curve (it creeps first, like ease-in); with
 // v0 = ω·distance it becomes x(t) = 1 − e^(−ωt), a pure ease-out with the same settle.
 const TURN_OMEGA = (2 * Math.PI) / TURN_RESPONSE;
-const EDGE_SPRING = makeSpring({ response: 0.3, damping: 1 });
+const EDGE_SPRING = makeSpring({ response: 0.32, damping: 0.86 });
 const NARROW_MAX_DEG = 115; // past ~95° a phone page is already off-screen
 
 function useMedia(query) {
@@ -86,16 +86,16 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const shade = el.lastElementChild;
       if (role === 'front') {
         el.style.transform = `rotateY(${-maxDeg * p}deg)`;
-        shade.style.opacity = String(0.32 * Math.sin(Math.PI * p));
+        shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
       } else if (role === 'back') {
         el.style.transform = `rotateY(${180 - 180 * p}deg)`;
-        shade.style.opacity = String(0.32 * Math.sin(Math.PI * p));
+        shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
       } else if (role === 'under-r') {
-        el.style.transform = '';
-        shade.style.opacity = String(0.4 * (1 - p));
+        el.style.transform = s.wide ? '' : `scale(${0.98 + 0.02 * p})`;
+        shade.style.opacity = String(0.42 * (1 - p));
       } else if (role === 'under-l') {
         el.style.transform = '';
-        shade.style.opacity = String(0.4 * p);
+        shade.style.opacity = String(0.42 * p);
       } else {
         el.style.transform = '';
         shade.style.opacity = '0';

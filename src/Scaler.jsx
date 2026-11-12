@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { clampFactor, CUSTOM_MAX, CUSTOM_MIN, factorLabel, scaleStat, yieldStat } from './scale.js';
 import { useScale } from './useScale.js';
 
@@ -20,6 +20,39 @@ export default function Scaler({ recipe, text, textLang, t }) {
   const timer = useRef(0);
   const field = useRef(null);
   const opening = useRef(false);
+  const groupRef = useRef(null);
+  const labels = offered.map((f) => (y ? scaleStat(y.value, f) : factorLabel(f))).join('|');
+
+  useLayoutEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+    const indicator = group.querySelector('.scaler-indicator');
+    const buttons = [...group.querySelectorAll('.scaler-chip')];
+    let disposed = false;
+    const measure = () => {
+      if (disposed || !indicator) return;
+      const active = group.querySelector('[aria-pressed="true"]');
+      if (!active) {
+        indicator.dataset.hidden = 'true';
+        return;
+      }
+      delete indicator.dataset.hidden;
+      indicator.style.width = `${active.offsetWidth}px`;
+      indicator.style.transform = `translateX(${active.offsetLeft}px)`;
+      group.dataset.ready = 'true';
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(group);
+    buttons.forEach((b) => observer.observe(b));
+    document.fonts?.ready.then(measure);
+    document.fonts?.addEventListener('loadingdone', measure);
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      document.fonts?.removeEventListener('loadingdone', measure);
+    };
+  }, [factor, custom, labels]);
 
   // keep the field in step with the saved value unless someone is typing in it
   useEffect(() => {
@@ -65,18 +98,23 @@ export default function Scaler({ recipe, text, textLang, t }) {
 
   return (
     <div className="scaler-row">
-      <div className="scaler" role="group" aria-label={y ? `${t.scale}: ${y.label}` : t.scale}>
-        {offered.map((f) => (
-          <button
-            key={f}
-            type="button"
-            className="scaler-chip"
-            aria-pressed={!custom && factor === f}
-            onClick={() => setFactor(f)}
-          >
-            {y ? scaleStat(y.value, f) : factorLabel(f)}
-          </button>
-        ))}
+      <div ref={groupRef} className="scaler" role="group" aria-label={y ? `${t.scale}: ${y.label}` : t.scale}>
+        {offered.map((f) => {
+          const textLabel = y ? scaleStat(y.value, f) : factorLabel(f);
+          return (
+            <button
+              key={f}
+              type="button"
+              className="scaler-chip"
+              aria-pressed={!custom && factor === f}
+              onClick={() => setFactor(f)}
+            >
+              {textLabel}
+              <span className="scaler-label-active" aria-hidden="true">{textLabel}</span>
+            </button>
+          );
+        })}
+        <span className="scaler-indicator" aria-hidden="true" />
       </div>
       <button
         type="button"

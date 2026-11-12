@@ -1364,6 +1364,21 @@ button {
   transform: scale(0.94);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .ctl--turn:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  .ctl--turn:not(:disabled):active {
+    transform: scale(0.94);
+  }
+  .ctl--contents:hover {
+    background-color: color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .controls--wide .ctl--contents:hover {
+    background-color: color-mix(in srgb, var(--ground) 10%, transparent);
+  }
+}
+
 .ctl--turn:disabled {
   opacity: 0.35;
   cursor: default;

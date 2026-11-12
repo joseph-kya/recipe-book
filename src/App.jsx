@@ -1,3 +1,11 @@
+import Book from './Book.jsx';
+import { useLang } from './i18n.js';
+
 export default function App() {
-  return <main>Bread Pitt's Recipe Book</main>;
+  const [lang, setLang] = useLang();
+  return (
+    <main className="app">
+      <Book lang={lang} setLang={setLang} />
+    </main>
+  );
 }

@@ -744,9 +744,12 @@ button {
   font-size: calc(var(--pw) * 0.085);
 }
 
-.recipe-title span {
+.recipe-title > .title-line {
   display: block;
 }
+
+.recipe-title .title-space { display: none; }
+.recipe-title .title-hyphen { display: inline; }
 
 .tagline {
   font-family: var(--hand);
@@ -880,21 +883,6 @@ button {
   white-space: nowrap;
 }
 
-/* Units toggle: the swapped amounts crossfade in with a 3px rise. Only right
-   after a toggle (html[data-units-swap], set by units.js), never on load or a
-   page turn; the rest of the row stays still. Instant under reduced motion. */
-@media (prefers-reduced-motion: no-preference) {
-  html[data-units-swap] .ing-how {
-    animation: amt-swap 200ms var(--ease-out) both;
-  }
-  @keyframes amt-swap {
-    from {
-      opacity: 0;
-      transform: translateY(3px);
-    }
-  }
-}
-
 /* ---------- wide cookbook spread ----------
    The left page holds the header and the whole ingredient card. The card keeps
    readable type and comfortable rows; the header is compact and the book page
@@ -907,6 +895,10 @@ button {
 .book--wide .recipe-title {
   font-size: min(calc(var(--pw) * 0.066), 2.5rem);
 }
+
+.book--wide .recipe-title > .title-line,
+.book--wide .recipe-title .title-space { display: inline; }
+.book--wide .recipe-title .title-hyphen { display: none; }
 
 .book--wide .tagline {
   font-size: var(--fs-m);
@@ -976,7 +968,7 @@ button {
   margin-top: 1px;
   font-size: var(--fs-xs);
   line-height: 1.3;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* grams sit beside the cups, smaller */
@@ -997,6 +989,7 @@ button {
 /* A closing page (only tips and the credits): the running head stays at the top,
    the rest sits centred in the page, so a short last page reads as composed. */
 .book--wide .page-body--closing {
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -1025,6 +1018,8 @@ button {
 
 .closing-cupcake {
   width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
   margin-bottom: var(--sp-5);
   transform: rotate(-8deg);
 }
@@ -1062,7 +1057,7 @@ button {
     font-size: var(--fs-l);
   }
   .book--wide .ing {
-    padding: 4px 0;
+    padding: 3px 0;
   }
 }
 
@@ -1075,6 +1070,12 @@ button {
   .book--wide .menu {
     padding-left: var(--sp-3);
     padding-right: var(--sp-3);
+  }
+  .book--wide .ing {
+    column-gap: var(--sp-2);
+  }
+  .book--wide .ing-how {
+    max-width: 11rem;
   }
 }
 

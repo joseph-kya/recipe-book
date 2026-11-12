@@ -22,6 +22,7 @@ export const recipes = Object.values(recipeFiles)
     // Short route from the optional "route" field, else the slug itself.
     route: r.route || r.slug,
     pdf: pdfFor(r.slug),
+    gramsPdf: pdfFor(`${r.slug}.grams`),
   }))
   .sort((a, b) => a.number - b.number)
   // The number shown is the position in the book (1, 2, 3…), so a recipe removed

@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { transition } from './motion.js';
 
 // Which amount leads: 'cups' (cups and spoons big, grams small) or 'metric'
 // (grams big, cups small). Only metric values already in the JSON are ever shown.
@@ -16,14 +17,13 @@ function initialUnits() {
 
 export function useUnits() {
   const [units, setUnitsState] = useState(initialUnits);
+  const requestedUnits = useRef(units);
   const setUnits = useCallback((next) => {
-    // Mark the next ~400 ms as a swap, so only the toggle (never a page load or
-    // a page turn) plays the amounts' crossfade (see .ing-how in styles.css).
-    const root = document.documentElement;
-    root.dataset.unitsSwap = '';
-    clearTimeout(useUnits.swapTimer);
-    useUnits.swapTimer = setTimeout(() => delete root.dataset.unitsSwap, 400);
-    setUnitsState(next);
+    if (next !== 'cups' && next !== 'metric') return;
+    if (next === requestedUnits.current) return;
+    requestedUnits.current = next;
+    // Capture the full reading surface, including any changed page breaks.
+    transition(() => setUnitsState(next));
     try {
       localStorage.setItem(KEY, next);
     } catch {

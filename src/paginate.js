@@ -59,6 +59,7 @@ function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
       box.pad.append(c);
     }
     segs.push(seg);
+    if (!box.fits()) overflow = true;
   };
 
   // A card (ingredients or method) whose rows may run across pages.
@@ -98,7 +99,7 @@ function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
         }
         // On a fresh page it goes in even if it is taller than a page.
         added = appendUnit(shell, ctx, u);
-        if (!box.fits() && kind === 'menu') overflow = true;
+        if (!box.fits()) overflow = true;
       }
       if (u.ids) seg.items.push(...u.ids);
       else seg.items.push(u.id);
@@ -221,39 +222,58 @@ function balance(root, src, pageHeight) {
     byRows = true;
     greedy = paginateOne(root, src, 0, byRows);
   }
-  // Candidates, all within the hard rules (whole card left when it fits, groups
-  // whole, nothing split): the card cut a unit or three earlier when it is split
-  // anyway, so the continuation and the method can share the right page; and
-  // lower capacity on later pages, so steps, tips, PDF and credit spread across
-  // the last spread instead of stacking at the top of each page.
+  // Search every earlier cut: a large first piece may need more than three
+  // rows removed to leave a legal continuation of its final group.
   const cuts = [null];
-  if (greedy.menuSplit) for (const d of [1, 2, 3]) if (greedy.firstUnits - d >= 1) cuts.push(greedy.firstUnits - d);
+  if (greedy.menuSplit) for (let cut = greedy.firstUnits - 1; cut >= 1; cut--) cuts.push(cut);
   const SAMPLES = 8;
   const range = pageHeight * 0.6;
+  // Continuation rules and a full left page take precedence over balancing
+  // later pages. A soft penalty let a 5/4 dough split beat the valid 6/3 split.
+  const rank = (plan) => [Number(plan.overflow), widows(plan, ['menu']), -plan.firstUnits, score(plan)];
+  const better = (a, b) => {
+    const ar = rank(a), br = rank(b);
+    for (let i = 0; i < ar.length; i++) if (ar[i] !== br[i]) return ar[i] < br[i];
+    return false;
+  };
   let best = greedy;
-  let bestScore = score(greedy);
   const consider = (plan) => {
-    if (plan.overflow) return;
-    const sc = score(plan);
-    if (sc < bestScore) {
-      best = plan;
-      bestScore = sc;
-    }
+    if (better(plan, best)) best = plan;
   };
   for (const cut of cuts) {
     const base = cut === null ? greedy : paginateOne(root, src, 0, byRows, cut);
     consider(base);
+    // Later-page balancing cannot improve a worse first ingredient piece.
+    if (base.overflow || widows(base, ['menu']) > widows(best, ['menu']) ||
+        (base.firstUnits < best.firstUnits && widows(base, ['menu']) === widows(best, ['menu']))) continue;
     const last = base.pages.length - 1;
     for (let i = 1; i <= SAMPLES; i++) {
       const extra = (range * i) / SAMPLES;
       consider(paginateOne(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
-      consider(paginateOne(root, src, (p) => (p === last - 1 ? extra : 0), byRows, cut));
+      consider(paginateOne(root, src, (p) => (p > 0 && p === last - 1 ? extra : 0), byRows, cut));
     }
   }
-  // A roomy closing page gets the cupcake ornament above its content.
-  return best.pages.map((segs, i) =>
-    i > 0 && isClosing(segs) && best.used[i] < 0.7 ? [{ kind: 'ornament' }, ...segs] : segs,
-  );
+  // Measure the ornament with the exact closing-page styles; a percentage of
+  // unused space alone cannot guarantee that it fits on a short desktop.
+  return best.pages.map((segs, i) => {
+    if (i === 0 || !isClosing(segs)) return segs;
+    const box = newPageBox(root, src, i, 0);
+    box.pad.parentElement.classList.add('page-body--closing');
+    box.pad.classList.add('page-pad--closing');
+    const ornament = src.querySelector('.closing-cupcake')?.cloneNode(true);
+    if (ornament) box.pad.append(ornament);
+    for (const seg of segs) {
+      if (seg.kind === 'credits') box.pad.append(src.querySelector('[data-unit="credits"]').cloneNode(true));
+      if (seg.kind === 'tips') {
+        const tips = src.querySelector('[data-card="tips"]').cloneNode(true);
+        for (const tip of tips.querySelectorAll('[data-tip]')) if (!seg.items.includes(Number(tip.dataset.tip))) tip.remove();
+        box.pad.append(tips);
+      }
+    }
+    const fits = box.fits();
+    box.face.remove();
+    return ornament && fits ? [{ kind: 'ornament' }, ...segs] : segs;
+  });
 }
 
 // A closing page holds only tips and/or the credits: it is composed on purpose
@@ -265,9 +285,9 @@ export const isClosing = (segs) =>
 // page break must carry at least 3 rows (or all that remain, if fewer). The
 // method follows the same rule loosely: a lone last step is not left on its own
 // page when the piece before it had 3 or more to give.
-function widows(plan) {
+function widows(plan, kinds = ['menu', 'ticket']) {
   let n = 0;
-  for (const kind of ['menu', 'ticket']) {
+  for (const kind of kinds) {
     const pieces = plan.pages.flatMap((segs) => segs.filter((seg) => seg.kind === kind)).map((seg) => seg.items.length);
     if (pieces.length < 2) continue;
     const total = pieces.reduce((a, b) => a + b, 0);
@@ -295,6 +315,8 @@ function widows(plan) {
 function score(plan) {
   let s = plan.pages.length * 4 + widows(plan) * 100;
   plan.pages.forEach((segs, i) => {
+    // A closing page with only the credits is too sparse: prefer the tips to move over.
+    if (isClosing(segs) && !segs.some((seg) => seg.kind === 'tips')) s += 1.5;
     if (isClosing(segs)) return;
     const gap = Math.max(0, 0.62 - plan.used[i]);
     s += gap * gap * 10;

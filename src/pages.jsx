@@ -133,10 +133,20 @@ function RecipeHero({ recipe, lang }) {
       <p className="eyebrow">
         {t.recipeNo} {recipe.no}
       </p>
+      {/* Phones break the title at its title_lines; wide pages run it on one line
+          where it fits, so a "Topfen-" line break joins back to "Topfenschmarren". */}
       <h1 className="recipe-title" lang={textLang}>
-        {r.title_lines.map((l, i) => (
-          <span key={i}>{l}</span>
-        ))}
+        {r.title_lines.map((l, i) => {
+          const prevHyphen = i > 0 && r.title_lines[i - 1].endsWith('-');
+          const hyphen = l.endsWith('-');
+          return (
+            <span key={i} className="title-line">
+              {i > 0 && !prevHyphen && <span className="title-space"> </span>}
+              {hyphen ? l.slice(0, -1) : l}
+              {hyphen && <span className="title-hyphen">-</span>}
+            </span>
+          );
+        })}
       </h1>
       <p className="tagline" lang={textLang}>
         {r.tagline}
@@ -224,8 +234,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
                       <span className="ing-name">{it.name}</span>
                       {it.note && <span className="ing-note">{it.note}</span>}
                     </span>
-                    {/* keyed by units: a toggle remounts just the amounts, which crossfade in */}
-                    <span className="ing-how" key={units}>
+                    <span className="ing-how">
                       <span className="ing-amount">{metricFirst ? primary : <Amount text={primary} />}</span>
                       {secondary && <span className="ing-metric">{secondary}</span>}
                     </span>
@@ -313,18 +322,20 @@ function Tips({ recipe, lang, items }) {
   );
 }
 
-function Credits({ recipe, lang }) {
+function Credits({ recipe, lang, units }) {
   const { r, t } = useRecipeText(recipe, lang);
   const credit = amountsCreditFor(recipe, lang);
   const s = recipe.source;
+  const grams = units === 'metric' && !!recipe.gramsPdf;
+  const pdf = grams ? recipe.gramsPdf : recipe.pdf;
   return (
     <footer className="credits" data-unit="credits">
-      {recipe.pdf && (
+      {pdf && (
         <a
           className="btn btn--cherry"
-          href={recipe.pdf}
-          download={`${recipe.slug}.pdf`}
-          aria-label={t.pdfLabel(r.title)}
+          href={pdf}
+          download={`${recipe.slug}${grams ? '.grams' : ''}.pdf`}
+          aria-label={t.pdfLabel(r.title, grams)}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="btn-icon">
             <path
@@ -373,7 +384,7 @@ function RecipeFull({ recipe, lang, units }) {
         <Ingredients recipe={recipe} lang={lang} units={units} />
         <Method recipe={recipe} lang={lang} />
         <Tips recipe={recipe} lang={lang} />
-        <Credits recipe={recipe} lang={lang} />
+        <Credits recipe={recipe} lang={lang} units={units} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -389,13 +400,13 @@ function RecipePage({ recipe, lang, units, segs, first }) {
       <div className={`page-pad${closing ? ' page-pad--closing' : ''}`}>
         {!first && <RunningHead recipe={recipe} lang={lang} />}
         {segs.map((seg, i) => {
-          const props = { key: i, recipe, lang };
-          if (seg.kind === 'hero') return <RecipeHero {...props} />;
-          if (seg.kind === 'menu') return <Ingredients {...props} units={units} items={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'ticket') return <Method {...props} steps={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'tips') return <Tips {...props} items={seg.items} />;
+          const props = { recipe, lang };
+          if (seg.kind === 'hero') return <RecipeHero key={i} {...props} />;
+          if (seg.kind === 'menu') return <Ingredients key={i} {...props} units={units} items={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'ticket') return <Method key={i} {...props} steps={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'tips') return <Tips key={i} {...props} items={seg.items} />;
           if (seg.kind === 'ornament') return <Cupcake key={i} className="closing-cupcake" />;
-          return <Credits {...props} />;
+          return <Credits key={i} {...props} units={units} />;
         })}
       </div>
       <Checkers tone="cherry" edge="bottom" />
@@ -423,7 +434,8 @@ export function RecipeMeasure({ recipe, lang, units }) {
       <Ingredients recipe={recipe} lang={lang} units={units} measure />
       <Method recipe={recipe} lang={lang} measure />
       <Tips recipe={recipe} lang={lang} />
-      <Credits recipe={recipe} lang={lang} />
+      <Credits recipe={recipe} lang={lang} units={units} />
+      <Cupcake className="closing-cupcake" />
     </div>
   );
 }

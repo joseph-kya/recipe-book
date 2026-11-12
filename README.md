@@ -26,6 +26,7 @@ npm run preview   # serve dist/ locally
 
 1. Drop `content/recipes/<slug>.json` in place.
 2. Drop its sheet at `content/pdfs/<slug>.pdf` (same `slug`).
+   Optionally add `content/pdfs/<slug>.grams.pdf`; the PDF button selects that sheet in `g` mode and the original in `cups` mode.
 3. `npm run build`. Done.
 
 No code or index file needs editing. `src/content.js` picks up both folders with `import.meta.glob` and orders recipes by their JSON `number`. The number shown in the book is the recipe's position (1, 2, 3…), so new or removed recipes never leave a gap: give a new recipe any `number` that sorts it where you want it.

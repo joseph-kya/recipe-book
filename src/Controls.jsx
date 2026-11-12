@@ -62,7 +62,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
               type="button"
               className="seg-btn unit-btn"
               aria-pressed={units === value}
-              onClick={() => units !== value && setUnits(value)}
+              onClick={() => setUnits(value)}
             >
               {short}
               <span className="sr-only"> – {long}</span>

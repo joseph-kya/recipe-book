@@ -59,6 +59,9 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press: 160ms;
   --rule: 3px;
+  /* phone control bar: 48px buttons + padding + border + its 8px lift + shadow ≈ 4.75rem,
+     plus 2.25rem of air so the last line scrolls fully clear of it */
+  --bar-clear: 7rem;
 }
 
 *,
@@ -423,13 +426,15 @@ button {
   align-items: center;
   justify-content: center;
   gap: 1.25rem;
-  /* the top padding keeps the sticker's corner clear */
-  padding: 8rem 1.5rem calc(6.5rem + env(safe-area-inset-bottom));
+  /* the top padding is the sticker's corner */
+  padding: 6.5rem 1.5rem calc(var(--bar-clear) + env(safe-area-inset-bottom));
   text-align: center;
 }
 
+/* Wide cover scales with the page height so it never outgrows a short book page. */
 .book--wide .cover-inner {
-  padding: 10rem 2.5rem 3rem;
+  gap: calc(var(--ph) * 0.022);
+  padding: calc(var(--ph) * 0.15) 2.5rem calc(var(--ph) * 0.05);
 }
 
 .cover-eyebrow {
@@ -447,11 +452,25 @@ button {
 }
 
 .book--wide .cover-title {
-  font-size: calc(var(--pw) * 0.135);
+  font-size: min(calc(var(--pw) * 0.135), calc(var(--ph) * 0.1));
 }
 
-.cover-title span {
+.cover-title > span {
   display: block;
+}
+
+/* Phone: one word per line, so EN sets as 4 lines and DE as 3, never a ragged break. */
+.book--narrow .cover-title .w {
+  display: block;
+}
+
+/* "Rezeptbuch" is the longest word: keep it inside the margins down to 320px. */
+:lang(de) .book--narrow .cover-title {
+  font-size: min(13.5vw, 4.75rem);
+}
+
+.book--wide .cover-cupcake {
+  width: calc(var(--ph) * 0.11);
 }
 
 .cover-cupcake {
@@ -463,20 +482,25 @@ button {
   fill: var(--mustard);
 }
 
+/* Quiet corner sticker: it sits inside the cover's top padding, never beside the eyebrow. */
 .cover-burst {
   position: absolute;
-  top: 1.75rem;
-  right: 0.75rem;
-  width: 6.25rem;
+  top: 0.75rem;
+  right: 0.6rem;
+  width: 4.75rem;
 }
 
 .book--wide .cover-burst {
-  top: 2.25rem;
-  right: 1.5rem;
-  width: 7.5rem;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: calc(var(--ph) * 0.11);
 }
 
 .cover-burst .burst-text {
+  font-size: 0.85rem;
+}
+
+.book--wide .cover-burst .burst-text {
   font-size: 1rem;
 }
 
@@ -494,10 +518,10 @@ button {
 
 /* The book's one entrance: the cover title stamps in, the sticker lands after it. */
 @media (prefers-reduced-motion: no-preference) {
-  .cover-title span {
+  .cover-title > span {
     animation: stamp 560ms var(--ease-out) both;
   }
-  .cover-title span + span {
+  .cover-title > span + span {
     animation-delay: 90ms;
   }
   .cover-burst {
@@ -649,21 +673,6 @@ button {
 /* ---------- recipe: hero ---------- */
 .hero {
   display: flow-root;
-}
-
-.hero-burst-wrap {
-  float: right;
-  width: 6rem;
-  margin: 0.4rem -0.25rem 0.5rem 0.5rem;
-  shape-outside: circle(50%);
-}
-
-.hero-burst {
-  transform: rotate(6deg);
-}
-
-.book--wide .hero-burst-wrap {
-  width: 7.25rem;
 }
 
 .recipe-title {

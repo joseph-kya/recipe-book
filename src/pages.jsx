@@ -13,8 +13,16 @@ export function Cover({ lang }) {
       <div className="cover-inner">
         <p className="eyebrow cover-eyebrow">★ {t.coverEyebrow(recipes.length)} ★</p>
         <h1 className="cover-title" data-enter>
-          <span>{t.bookTitle[0]}</span>
-          <span>{t.bookTitle[1]}</span>
+          {t.bookTitle.map((line, i) => (
+            <span key={i}>
+              {line.split(' ').map((word, j) => (
+                <Fragment key={j}>
+                  {j > 0 && ' '}
+                  <span className="w">{word}</span>
+                </Fragment>
+              ))}
+            </span>
+          ))}
         </h1>
         <Cupcake className="cover-cupcake" />
         <Burst lines={t.coverSticker} className="cover-burst" />
@@ -117,12 +125,7 @@ function FallbackNote({ fallback, t }) {
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
   return (
-    <header className="hero">
-      {r.sticker && (
-        <div lang={textLang} className="hero-burst-wrap">
-          <Burst lines={r.sticker} className="hero-burst" />
-        </div>
-      )}
+    <header className="hero" data-unit="hero">
       <p className="eyebrow">
         ★ {t.recipeNo} {pad(recipe.number)} ★
       </p>

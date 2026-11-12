@@ -1,4 +1,3 @@
-import { hashFor } from './content.js';
 import { ui } from './i18n.js';
 import { Arrow } from './ornaments.jsx';
 
@@ -17,7 +16,7 @@ export default function Controls({ lang, setLang, index, last, wide, onPrev, onN
       </button>
 
       <div className="ctl-middle">
-        <a className="ctl ctl--contents" href={hashFor(1)} aria-current={index === 1 ? 'page' : undefined}>
+        <a className="ctl ctl--contents" href="#/contents" aria-current={index === 1 ? 'page' : undefined}>
           {t.toContents}
         </a>
         <span className="ctl-count" aria-hidden="true">

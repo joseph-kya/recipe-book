@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { hashFor, indexForHash, pages, textFor } from './content.js';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
-import { renderPage } from './pages.jsx';
+import { buildSpreads, firstIndexFor, routeOfHash } from './layout.js';
+import { paginate } from './paginate.js';
+import { RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband } from './spring.js';
 import Controls from './Controls.jsx';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
-const LAST = pages.length - 1;
 // response 0.42 s, critically damped: a full turn settles in about 450 ms.
 const TURN_SPRING = makeSpring({ response: 0.42, damping: 1 });
 const EDGE_SPRING = makeSpring({ response: 0.3, damping: 1 });
@@ -30,11 +31,16 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export default function Book({ lang, setLang }) {
   const wide = useMedia(WIDE_QUERY);
   const reduce = useMedia(REDUCE_QUERY);
-  const [index, setIndex] = useState(() => indexForHash(location.hash));
+  const [plans, setPlans] = useState(null); // wide only: recipe slug -> pages of segments
+  const [planVersion, setPlanVersion] = useState(0);
+  const spreads = useMemo(() => buildSpreads(wide, plans), [wide, plans]);
+  const layoutKey = wide ? `w${planVersion}` : 'n';
+  const [index, setIndex] = useState(() => firstIndexFor(spreads, routeOfHash(location.hash)));
   const [turn, setTurn] = useState(null); // { lo, hi } while a leaf is moving
   const [fade, setFade] = useState(null); // { from } during a reduced-motion crossfade
   const [announce, setAnnounce] = useState('');
   const bookRef = useRef(null);
+  const measureRef = useRef(null);
   const faceEls = useRef(new Map());
 
   // The engine's live state. React state above only decides which faces exist.
@@ -49,13 +55,14 @@ export default function Book({ lang, setLang }) {
     didDrag: false,
     rb: 0,
     rbAnim: null,
-    wide,
-    reduce,
-    lang,
+    spreads,
+    key: layoutKey,
+    plans: null,
   }).current;
   s.wide = wide;
   s.reduce = reduce;
   s.lang = lang;
+  const last = () => s.spreads.length - 1;
 
   /* ---------- painting: transform + opacity only, straight onto the faces ---------- */
 
@@ -92,17 +99,29 @@ export default function Book({ lang, setLang }) {
 
   /* ---------- settling and the URL ---------- */
 
-  const syncHash = useCallback((k) => {
-    if (indexForHash(location.hash) !== k) history.pushState(null, '', hashFor(k));
-  }, []);
+  // Hash names the recipe; history.state remembers which of its spreads.
+  const syncHash = useCallback(
+    (k) => {
+      const sp = s.spreads[k];
+      const url = `#/${sp.route}`;
+      const st = history.state;
+      if (routeOfHash(location.hash) !== sp.route) {
+        history.pushState({ k, key: s.key }, '', url);
+      } else {
+        const known = st && st.key === s.key ? st.k : firstIndexFor(s.spreads, sp.route);
+        if (known !== k) history.pushState({ k, key: s.key }, '', url);
+      }
+    },
+    [s],
+  );
 
   const announceFor = useCallback(
     (k) => {
       const t = ui[s.lang];
-      const page = pages[k];
+      const sp = s.spreads[k];
       const name =
-        page.kind === 'cover' ? t.cover : page.kind === 'contents' ? t.contents : textFor(page.recipe, s.lang).text.title;
-      setAnnounce(`${t.pageOf(k + 1, pages.length)}: ${name}`);
+        sp.kind === 'cover' ? t.cover : sp.kind === 'contents' ? t.contents : textFor(sp.recipe, s.lang).text.title;
+      setAnnounce(`${t.pageOf(k + 1, s.spreads.length)}: ${name}`);
     },
     [s],
   );
@@ -158,7 +177,7 @@ export default function Book({ lang, setLang }) {
 
   const navigate = useCallback(
     (to) => {
-      const t = clamp(to, 0, LAST);
+      const t = clamp(to, 0, s.spreads.length - 1);
       if (s.drag?.decided) return;
 
       if (s.reduce) {
@@ -193,7 +212,65 @@ export default function Book({ lang, setLang }) {
     [s, finishNow, runSpring, syncHash, announceFor],
   );
 
-  // Faces changed: re-collect them, repaint at the current progress, start any pending turn.
+  /* ---------- pagination (wide) ---------- */
+
+  const runPaginate = useCallback(() => {
+    if (!s.wide || !measureRef.current) return;
+    const next = paginate(measureRef.current);
+    if (JSON.stringify(next) === JSON.stringify(s.plans)) return;
+    s.plans = next;
+    setPlans(next);
+    setPlanVersion((v) => v + 1);
+  }, [s]);
+
+  // Measure before paint, again when the language changes.
+  useLayoutEffect(() => {
+    if (wide) runPaginate();
+  }, [wide, lang, runPaginate]);
+
+  // ...and once the real fonts are in, and after every resize.
+  useEffect(() => {
+    if (!wide) return;
+    let timer = 0;
+    let alive = true;
+    document.fonts?.ready.then(() => alive && runPaginate());
+    const onResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(runPaginate, 120);
+    };
+    addEventListener('resize', onResize);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      removeEventListener('resize', onResize);
+    };
+  }, [wide, runPaginate]);
+
+  // New layout (phone ↔ spread, or a new pagination): stay on the same recipe,
+  // as close to the same page as the new layout allows.
+  useLayoutEffect(() => {
+    const old = s.spreads;
+    if (old === spreads) return;
+    const oldIndex = destination();
+    if (s.anim) s.anim.stop();
+    s.anim = null;
+    s.turn = null;
+    s.p = 0;
+    const was = old[oldIndex] || old[0];
+    s.spreads = spreads;
+    s.key = layoutKey;
+    const base = firstIndexFor(spreads, was.route);
+    const count = spreads.filter((x) => x.route === was.route).length;
+    const k = base + Math.min(was.offset || 0, count - 1);
+    s.index = k;
+    setTurn(null);
+    setFade(null);
+    setIndex(k);
+    if (history.state) history.replaceState({ k, key: layoutKey }, '', location.hash || '#/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spreads, layoutKey]);
+
+  // Faces changed: repaint at the current progress, start any pending turn.
   useLayoutEffect(() => {
     paint();
     if (s.pendingTarget !== null && s.turn) {
@@ -201,27 +278,24 @@ export default function Book({ lang, setLang }) {
       s.pendingTarget = null;
       runSpring(target, 0);
     }
-  }, [turn, index, wide, fade, paint, runSpring, s]);
+  }, [turn, index, wide, fade, spreads, paint, runSpring, s]);
 
-  // Back / forward buttons and plain #/ links.
+  // Back / forward and plain #/ links.
   useEffect(() => {
-    const onHash = () => navigate(indexForHash(location.hash));
-    addEventListener('hashchange', onHash);
-    addEventListener('popstate', onHash);
-    return () => {
-      removeEventListener('hashchange', onHash);
-      removeEventListener('popstate', onHash);
+    const onHistory = () => {
+      const route = routeOfHash(location.hash);
+      const st = history.state;
+      const k =
+        st && st.key === s.key && s.spreads[st.k]?.route === route ? st.k : firstIndexFor(s.spreads, route);
+      navigate(k);
     };
-  }, [navigate]);
-
-  // Switching between phone and spread layout mid-turn: land the leaf where it was heading.
-  useEffect(() => {
-    if (!s.turn) return;
-    const k = destination();
-    if (s.anim) s.anim.stop();
-    settle(k, { push: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wide]);
+    addEventListener('hashchange', onHistory);
+    addEventListener('popstate', onHistory);
+    return () => {
+      removeEventListener('hashchange', onHistory);
+      removeEventListener('popstate', onHistory);
+    };
+  }, [navigate, s]);
 
   // ← / → turn pages, unless someone is typing.
   useEffect(() => {
@@ -283,7 +357,7 @@ export default function Book({ lang, setLang }) {
       return;
     }
     const k = s.index;
-    if ((dir < 0 && k < LAST) || (dir > 0 && k > 0)) {
+    if ((dir < 0 && k < last()) || (dir > 0 && k > 0)) {
       s.turn = dir < 0 ? { lo: k, hi: k + 1 } : { lo: k - 1, hi: k };
       s.p = dir < 0 ? 0 : 1;
       s.target = s.p;
@@ -396,8 +470,9 @@ export default function Book({ lang, setLang }) {
 
   const faces = [];
   const add = (idx, side, role) => {
-    const content = renderPage(idx, side, wide, lang);
-    if (content) faces.push({ key: `${wide ? 'w' : 'n'}-${idx}-${side}`, idx, side, role, content });
+    const sp = spreads[idx];
+    const content = sp && renderFace(sp[side], lang);
+    if (content) faces.push({ key: `${layoutKey}-${idx}-${side}`, idx, side, role, content });
   };
   if (turn) {
     if (wide) add(turn.lo, 'L', 'under-l');
@@ -452,11 +527,21 @@ export default function Book({ lang, setLang }) {
           );
         })}
       </div>
+      {wide && (
+        // Off-screen copy of every recipe for the paginator to measure against.
+        <div className="book book--wide measure" ref={measureRef} aria-hidden="true" inert>
+          <div className="measure-src" hidden>
+            {recipes.map((r) => (
+              <RecipeMeasure key={r.slug} recipe={r} lang={lang} />
+            ))}
+          </div>
+        </div>
+      )}
       <Controls
         lang={lang}
         setLang={setLang}
         index={index}
-        last={LAST}
+        last={spreads.length - 1}
         wide={wide}
         onPrev={() => navigate(destination() - 1)}
         onNext={() => navigate(destination() + 1)}

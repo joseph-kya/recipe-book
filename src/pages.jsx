@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { amountsCreditFor, hashFor, pad, pages, recipes, textFor } from './content.js';
+import { amountsCreditFor, pad, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { Burst, Checkers, Cupcake } from './ornaments.jsx';
 
@@ -27,7 +27,7 @@ export function Cover({ lang }) {
         <Cupcake className="cover-cupcake" />
         <Burst lines={t.coverSticker} className="cover-burst" />
         <p className="cover-note">{t.coverNote}</p>
-        <a className="btn btn--cream" href={hashFor(1)}>
+        <a className="btn btn--cream" href="#/contents">
           {t.open}
         </a>
       </div>
@@ -56,7 +56,7 @@ function HowItWorks({ lang, compact }) {
   );
 }
 
-export function ContentsLeft({ lang }) {
+function ContentsLeft({ lang }) {
   return (
     <div className="page-body contents-left">
       <Checkers tone="choc" edge="top" />
@@ -69,7 +69,7 @@ export function ContentsLeft({ lang }) {
   );
 }
 
-export function ContentsList({ lang, withHow = false }) {
+function ContentsList({ lang, withHow = false }) {
   const t = ui[lang];
   return (
     <div className="page-body contents">
@@ -80,10 +80,9 @@ export function ContentsList({ lang, withHow = false }) {
         <ol className="toc">
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);
-            const i = pages.findIndex((p) => p.recipe === r);
             return (
               <li key={r.slug}>
-                <a href={hashFor(i)} className="toc-link">
+                <a href={`#/${r.route}`} className="toc-link">
                   <span className="toc-no" aria-hidden="true">
                     {pad(r.number)}
                   </span>
@@ -110,7 +109,10 @@ export function ContentsList({ lang, withHow = false }) {
   );
 }
 
-/* ---------- Recipe parts ---------- */
+/* ---------- Recipe parts ----------
+   Each part can render a slice (some ingredient rows, some steps), so a recipe
+   can run across several printed-book pages. `measure` renders every head
+   variant for the paginator to clone from. */
 
 function useRecipeText(recipe, lang) {
   const { text, lang: textLang, fallback } = textFor(recipe, lang);
@@ -120,6 +122,30 @@ function useRecipeText(recipe, lang) {
 function FallbackNote({ fallback, t }) {
   if (!fallback || !t.englishOnly) return null;
   return <p className="fallback-note">{t.englishOnly}</p>;
+}
+
+function ContMark({ t, lang }) {
+  return (
+    <span className="cont-mark" lang={lang}>
+      {' '}
+      {t.cont}
+    </span>
+  );
+}
+
+// Book pages after a recipe's first carry its name, like the printed sheet's page two.
+function RunningHead({ recipe, lang }) {
+  const { r, textLang, t } = useRecipeText(recipe, lang);
+  return (
+    <p className="running-head" data-unit="running">
+      <span className="running-title" lang={textLang}>
+        {r.title}
+      </span>
+      <span className="eyebrow">
+        ★ {t.recipeNo} {pad(recipe.number)} ★
+      </span>
+    </p>
+  );
 }
 
 function RecipeHero({ recipe, lang }) {
@@ -168,74 +194,132 @@ function Amount({ text }) {
   ));
 }
 
-function Ingredients({ recipe, lang }) {
+const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
+
+function Ingredients({ recipe, lang, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  return (
-    <section className="menu" aria-label={t.ingredients}>
-      <h2 className="menu-title" lang={textLang}>
+  const shown = items || allItems(r);
+  const byGroup = new Map();
+  for (const [gi, ii] of shown) {
+    if (!byGroup.has(gi)) byGroup.set(gi, []);
+    byGroup.get(gi).push(ii);
+  }
+  const normalHead = (
+    <>
+      <h2 className="menu-title" lang={textLang} data-head="normal">
         {r.ingredients_headline}
       </h2>
-      <p className="menu-sub">{t.cupsMetric}</p>
-      {r.groups.map((g, gi) => (
-        <div className="ing-group" key={gi}>
-          {g.title && (
-            <h3 className="ing-group-title" lang={textLang}>
-              {g.title}
-            </h3>
-          )}
-          <ul className="ing-list" lang={textLang}>
-            {g.items.map((it, ii) => {
-              const showMetric = it.metric && it.metric !== it.amount;
-              return (
-                <li className="ing" key={ii}>
-                  <span className="ing-what">
-                    <span className="ing-name">{it.name}</span>
-                    {it.note && <span className="ing-note">{it.note}</span>}
-                  </span>
-                  <span className="ing-how">
-                    <span className="ing-amount">
-                      <Amount text={it.amount} />
+      <p className="menu-sub" data-head="normal">
+        {t.cupsMetric}
+      </p>
+    </>
+  );
+  const contHead = (
+    <h2 className="menu-title" lang={textLang} data-head="cont">
+      {r.ingredients_headline}
+      <ContMark t={t} lang={lang} />
+    </h2>
+  );
+  return (
+    <section className="menu" aria-label={t.ingredients} data-card="menu">
+      {measure ? (
+        <>
+          {normalHead}
+          {contHead}
+        </>
+      ) : cont ? (
+        contHead
+      ) : (
+        normalHead
+      )}
+      {[...byGroup].map(([gi, iis]) => {
+        const g = r.groups[gi];
+        return (
+          <div className="ing-group" key={gi} data-group={gi}>
+            {g.title && iis[0] === 0 && (
+              <h3 className="ing-group-title" lang={textLang}>
+                {g.title}
+              </h3>
+            )}
+            <ul className="ing-list" lang={textLang}>
+              {iis.map((ii) => {
+                const it = g.items[ii];
+                const showMetric = it.metric && it.metric !== it.amount;
+                return (
+                  <li className="ing" key={ii} data-item={`${gi}:${ii}`}>
+                    <span className="ing-what">
+                      <span className="ing-name">{it.name}</span>
+                      {it.note && <span className="ing-note">{it.note}</span>}
                     </span>
-                    {showMetric && <span className="ing-metric">{it.metric}</span>}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+                    <span className="ing-how">
+                      <span className="ing-amount">
+                        <Amount text={it.amount} />
+                      </span>
+                      {showMetric && <span className="ing-metric">{it.metric}</span>}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </section>
   );
 }
 
-function Method({ recipe, lang }) {
+function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  return (
-    <section className="ticket" aria-label={t.method}>
-      <h2 className="ticket-title" lang={textLang}>
+  const shown = steps || r.steps.map((_, i) => i);
+  const normalHead = (
+    <>
+      <h2 className="ticket-title" lang={textLang} data-head="normal">
         {r.method_headline}
       </h2>
-      <p className="equipment">
+      <p className="equipment" data-head="normal">
         <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
       </p>
-      <ol className="steps" lang={textLang}>
-        {r.steps.map((s, i) => (
-          <li className="step" key={i}>
-            <span className="step-dot" aria-hidden="true">
-              {i + 1}
-            </span>
-            <div className="step-body">
-              <h3 className="step-title">{s.title}</h3>
-              <p>{s.text}</p>
-              {s.cue && (
-                <p className="cue">
-                  <span aria-hidden="true">→ </span>
-                  {s.cue}
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
+    </>
+  );
+  const contHead = (
+    <h2 className="ticket-title ticket-title--cont" lang={textLang} data-head="cont">
+      {r.method_headline}
+      <ContMark t={t} lang={lang} />
+    </h2>
+  );
+  return (
+    <section className="ticket" aria-label={t.method} data-card="ticket">
+      {measure ? (
+        <>
+          {normalHead}
+          {contHead}
+        </>
+      ) : cont ? (
+        contHead
+      ) : (
+        normalHead
+      )}
+      <ol className="steps" lang={textLang} start={shown[0] + 1}>
+        {shown.map((i) => {
+          const s = r.steps[i];
+          return (
+            <li className="step" key={i} data-step={i}>
+              <span className="step-dot" aria-hidden="true">
+                {i + 1}
+              </span>
+              <div className="step-body">
+                <h3 className="step-title">{s.title}</h3>
+                <p>{s.text}</p>
+                {s.cue && (
+                  <p className="cue">
+                    <span aria-hidden="true">→ </span>
+                    {s.cue}
+                  </p>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
@@ -245,7 +329,7 @@ function Tips({ recipe, lang }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   if (!r.tips?.length) return null;
   return (
-    <section className="tips" aria-label={t.tips} lang={textLang}>
+    <section className="tips" aria-label={t.tips} lang={textLang} data-unit="tips">
       {r.tips.map((tip, i) => (
         <div className="tip" key={i}>
           <h3 className="tip-title">{tip.title}</h3>
@@ -261,7 +345,7 @@ function Credits({ recipe, lang }) {
   const credit = amountsCreditFor(recipe, lang);
   const s = recipe.source;
   return (
-    <footer className="credits">
+    <footer className="credits" data-unit="credits">
       {recipe.pdf && (
         <a
           className="btn btn--cherry"
@@ -305,34 +389,8 @@ function Credits({ recipe, lang }) {
 
 /* ---------- Recipe pages ---------- */
 
-export function RecipeLeft({ recipe, lang }) {
-  return (
-    <div className="page-body recipe">
-      <Checkers tone="choc" edge="top" />
-      <div className="page-pad">
-        <RecipeHero recipe={recipe} lang={lang} />
-        <Ingredients recipe={recipe} lang={lang} />
-      </div>
-      <Checkers tone="cherry" edge="bottom" />
-    </div>
-  );
-}
-
-export function RecipeRight({ recipe, lang }) {
-  return (
-    <div className="page-body recipe">
-      <Checkers tone="choc" edge="top" />
-      <div className="page-pad">
-        <Method recipe={recipe} lang={lang} />
-        <Tips recipe={recipe} lang={lang} />
-        <Credits recipe={recipe} lang={lang} />
-      </div>
-      <Checkers tone="cherry" edge="bottom" />
-    </div>
-  );
-}
-
-export function RecipeFull({ recipe, lang }) {
+// Phone: the whole recipe on one scrolling page.
+function RecipeFull({ recipe, lang }) {
   return (
     <div className="page-body recipe">
       <Checkers tone="choc" edge="top" />
@@ -348,21 +406,74 @@ export function RecipeFull({ recipe, lang }) {
   );
 }
 
-/* ---------- Page lookup by book index and side ---------- */
+// Wide: one fixed-height book page holding the segments the paginator gave it.
+function RecipePage({ recipe, lang, segs, first }) {
+  return (
+    <div className="page-body recipe">
+      <Checkers tone="choc" edge="top" />
+      <div className="page-pad">
+        {!first && <RunningHead recipe={recipe} lang={lang} />}
+        {segs.map((seg, i) => {
+          const props = { key: i, recipe, lang };
+          if (seg.kind === 'hero') return <RecipeHero {...props} />;
+          if (seg.kind === 'menu') return <Ingredients {...props} items={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'ticket') return <Method {...props} steps={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'tips') return <Tips {...props} />;
+          return <Credits {...props} />;
+        })}
+      </div>
+      <Checkers tone="cherry" edge="bottom" />
+    </div>
+  );
+}
 
-// Wide: every index is a spread (left + right). Narrow: one page per index.
-export function renderPage(index, side, wide, lang) {
-  const p = pages[index];
-  if (!p) return null;
-  if (p.kind === 'cover') return side === 'R' ? <Cover lang={lang} /> : null;
-  if (p.kind === 'contents') {
-    if (!wide) return <ContentsList lang={lang} withHow />;
-    return side === 'L' ? <ContentsLeft lang={lang} /> : <ContentsList lang={lang} />;
+// The quiet right-hand page when a recipe ends on a left page.
+function BlankPage() {
+  return (
+    <div className="page-body blank-page">
+      <Checkers tone="choc" edge="top" />
+      <Cupcake className="blank-cupcake" />
+      <Checkers tone="cherry" edge="bottom" />
+    </div>
+  );
+}
+
+// Hidden source for the paginator: every block of one recipe, in book order.
+export function RecipeMeasure({ recipe, lang }) {
+  return (
+    <div data-src={recipe.slug}>
+      <RunningHead recipe={recipe} lang={lang} />
+      <RecipeHero recipe={recipe} lang={lang} />
+      <Ingredients recipe={recipe} lang={lang} measure />
+      <Method recipe={recipe} lang={lang} measure />
+      <Tips recipe={recipe} lang={lang} />
+      <Credits recipe={recipe} lang={lang} />
+    </div>
+  );
+}
+
+/* ---------- One face of the book from its layout descriptor ---------- */
+
+export function renderFace(desc, lang) {
+  if (!desc) return null;
+  switch (desc.type) {
+    case 'cover':
+      return <Cover lang={lang} />;
+    case 'contentsLeft':
+      return <ContentsLeft lang={lang} />;
+    case 'contentsList':
+      return <ContentsList lang={lang} withHow={desc.withHow} />;
+    case 'recipeFull':
+      return <RecipeFull recipe={desc.recipe} lang={lang} />;
+    case 'recipePage':
+      return desc.segs ? (
+        <RecipePage recipe={desc.recipe} lang={lang} segs={desc.segs} first={desc.first} />
+      ) : (
+        <RecipeFull recipe={desc.recipe} lang={lang} />
+      );
+    case 'blank':
+      return <BlankPage />;
+    default:
+      return null;
   }
-  if (!wide) return <RecipeFull recipe={p.recipe} lang={lang} />;
-  return side === 'L' ? (
-    <RecipeLeft recipe={p.recipe} lang={lang} />
-  ) : (
-    <RecipeRight recipe={p.recipe} lang={lang} />
-  );
 }

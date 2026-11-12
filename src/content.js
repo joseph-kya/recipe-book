@@ -39,19 +39,3 @@ export function amountsCreditFor(recipe, lang) {
   if (c[lang]) return { ...c[lang], lang };
   return c.en ? { ...c.en, lang: 'en' } : null;
 }
-
-// The book's pages in order. Index 0 is the cover, 1 the contents,
-// then one page (one spread on wide screens) per recipe.
-export const pages = [
-  { kind: 'cover', route: '' },
-  { kind: 'contents', route: 'contents' },
-  ...recipes.map((recipe) => ({ kind: 'recipe', route: recipe.route, recipe })),
-];
-
-export function indexForHash(hash) {
-  const route = decodeURIComponent((hash || '').replace(/^#\/?/, '')).replace(/\/$/, '');
-  const i = pages.findIndex((p) => p.route === route);
-  return i === -1 ? 0 : i;
-}
-
-export const hashFor = (i) => `#/${pages[i].route}`;

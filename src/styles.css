@@ -256,7 +256,80 @@ button {
 }
 
 .page-pad {
-  padding: 1.5rem 1.125rem calc(6.5rem + env(safe-area-inset-bottom));
+  padding: 1.5rem 1.125rem calc(var(--bar-clear) + env(safe-area-inset-bottom));
+}
+
+/* whatever opens a page sits on the page's top margin */
+.page-pad > :first-child {
+  margin-top: 0;
+}
+
+/* Wide book pages never scroll: the paginator sizes their content to fit. */
+.book--wide .face-scroll {
+  overflow: hidden;
+}
+
+/* The paginator's off-screen page: same size and styles as a real one. */
+.book.measure {
+  left: -300vw;
+  visibility: hidden;
+  pointer-events: none;
+  transform: none;
+}
+
+/* Running head on a recipe's later pages, after the printed sheet's page two. */
+.running-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.25rem;
+  border-bottom: var(--rule) solid var(--choc);
+}
+
+.running-title {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  line-height: 1.1;
+  color: var(--cherry);
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.running-head .eyebrow {
+  flex: none;
+  font-size: 0.85rem;
+}
+
+.cont-mark {
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--choc-soft);
+}
+
+.page-pad > .running-head + * {
+  margin-top: 0;
+}
+
+/* The quiet facing page when a recipe ends on the left. */
+.blank-page {
+  display: grid;
+  place-items: center;
+}
+
+.blank-page .checkers--top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.blank-cupcake {
+  width: 5rem;
+  opacity: 0.35;
+  transform: rotate(-8deg);
 }
 
 .book--wide .page-pad {
@@ -551,6 +624,21 @@ button {
   margin: 0.25rem 0 1.25rem;
 }
 
+/* Wide contents scale with the page height so five recipes (and more) fit a short page. */
+.book--wide .contents-title {
+  font-size: min(3rem, calc(var(--ph) * 0.06));
+  margin-bottom: calc(var(--ph) * 0.02);
+}
+
+.book--wide .toc-link {
+  min-height: calc(var(--ph) * 0.085);
+  padding: calc(var(--ph) * 0.01) 0;
+}
+
+.book--wide .toc-tag {
+  line-height: 1.2;
+}
+
 .toc li + li {
   border-top: 2px dotted rgba(58, 34, 22, 0.5);
 }
@@ -828,6 +916,20 @@ button {
   white-space: nowrap;
 }
 
+/* Wide book pages: grams sit beside the cups on one line, so rows stay one line tall. */
+.book--wide .ing {
+  padding: 0.45rem 0;
+}
+
+.book--wide .ing-amount,
+.book--wide .ing-metric {
+  display: inline;
+}
+
+.book--wide .ing-metric {
+  margin-left: 0.45rem;
+}
+
 .ing-metric {
   display: block;
   font-size: 0.8rem;
@@ -845,8 +947,8 @@ button {
   border-radius: 8px;
 }
 
-.book--wide .ticket {
-  margin-top: 0;
+.ticket-title--cont {
+  margin-bottom: 1rem;
 }
 
 .ticket-title {

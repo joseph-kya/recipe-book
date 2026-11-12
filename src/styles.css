@@ -1020,6 +1020,17 @@ button {
   align-items: start;
 }
 
+/* A narrow book page (small laptop) stacks the tips instead of squeezing them. */
+.book--wide .face {
+  container-type: inline-size;
+}
+
+@container (max-width: 30rem) {
+  .book--wide .tips {
+    grid-template-columns: 1fr;
+  }
+}
+
 .tip {
   padding: 0.9rem 1rem;
   background: var(--mustard);

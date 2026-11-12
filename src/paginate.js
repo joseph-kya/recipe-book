@@ -10,7 +10,10 @@ function el(cls) {
   return d;
 }
 
-function newPageBox(root, src, pageIndex) {
+// `slack` lowers the usable page height; balancing uses it (see paginate below).
+// It is a number for every page, or a function of the page index.
+function newPageBox(root, src, pageIndex, slackFor) {
+  const slack = typeof slackFor === 'function' ? slackFor(pageIndex) : slackFor;
   const face = el('face face--L');
   const body = el('page-body recipe');
   const top = el('checkers checkers--choc checkers--top');
@@ -22,20 +25,23 @@ function newPageBox(root, src, pageIndex) {
   return {
     face,
     pad,
-    fits: () => body.offsetHeight <= face.clientHeight + 0.5,
+    fits: () => top.offsetHeight + pad.offsetHeight + slack <= face.clientHeight + 0.5,
+    used: () => (top.offsetHeight + pad.offsetHeight) / face.clientHeight,
   };
 }
 
-function paginateOne(root, src) {
+function paginateOne(root, src, slack = 0) {
   const pages = [];
+  const used = []; // how full each page ends up, for balancing
   let segs = [];
-  let box = newPageBox(root, src, 0);
+  let box = newPageBox(root, src, 0, slack);
 
   const nextPage = () => {
     pages.push(segs);
+    used.push(box.used());
     box.face.remove();
     segs = [];
-    box = newPageBox(root, src, pages.length);
+    box = newPageBox(root, src, pages.length, slack);
   };
 
   // A block that moves as one piece.
@@ -137,18 +143,63 @@ function paginateOne(root, src) {
     return [li];
   });
 
-  placeAtom(src.querySelector('[data-unit="tips"]'), { kind: 'tips' });
+  // Tips: each card moves whole, but two cards may sit on different pages.
+  const tips = src.querySelector('[data-card="tips"]');
+  const tipUnits = tips ? [...tips.querySelectorAll('[data-tip]')].map((el) => ({ id: Number(el.dataset.tip), li: el })) : [];
+  placeCard(tips, 'tips', tipUnits, (shell, ctx, u) => {
+    const card = u.li.cloneNode(true);
+    shell.append(card);
+    return [card];
+  });
   placeAtom(src.querySelector('[data-unit="credits"]'), { kind: 'credits' });
 
   pages.push(segs);
+  used.push(box.used());
   box.face.remove();
-  return pages;
+  return { pages, used };
 }
 
 export function paginate(root) {
   const plans = {};
+  const pageHeight = root.clientHeight;
   for (const src of root.querySelectorAll('[data-src]')) {
-    plans[src.dataset.src] = paginateOne(root, src);
+    plans[src.dataset.src] = balance(root, src, pageHeight);
   }
   return plans;
+}
+
+// Greedy filling packs early pages full and leaves the last one a near-empty
+// tail. Like balancing newspaper columns: keep the fewest pages greedy found,
+// find how far every page's capacity can drop without adding a page, then
+// among capacities in that range keep the plan whose emptiest page is fullest.
+function balance(root, src, pageHeight) {
+  const greedy = paginateOne(root, src, 0);
+  const count = greedy.pages.length;
+  if (count < 2) return greedy.pages;
+  // Page count is not strictly monotonic in capacity (atomic blocks), so sample
+  // the whole range rather than trusting one bound.
+  let best = greedy;
+  let bestSlack = 0;
+  const score = (plan) => Math.min(...plan.used);
+  const SAMPLES = 24;
+  const range = pageHeight * 0.6;
+  for (let i = 1; i <= SAMPLES; i++) {
+    const slack = (range * i) / SAMPLES;
+    const plan = paginateOne(root, src, slack);
+    if (plan.pages.length === count && score(plan) > score(best)) {
+      best = plan;
+      bestSlack = slack;
+    }
+  }
+  // A short tail (say, the credits alone) can only be fed from the page before
+  // it: lower just that page's capacity so its last block moves forward.
+  const last = count - 1;
+  if (best.used[last] === score(best)) {
+    for (let i = 1; i <= SAMPLES; i++) {
+      const extra = (range * i) / SAMPLES;
+      const plan = paginateOne(root, src, (p) => (p === last - 1 ? bestSlack + extra : bestSlack));
+      if (plan.pages.length === count && score(plan) > score(best)) best = plan;
+    }
+  }
+  return best.pages;
 }

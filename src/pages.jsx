@@ -325,15 +325,16 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
   );
 }
 
-function Tips({ recipe, lang }) {
+function Tips({ recipe, lang, items }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   if (!r.tips?.length) return null;
+  const shown = items || r.tips.map((_, i) => i);
   return (
-    <section className="tips" aria-label={t.tips} lang={textLang} data-unit="tips">
-      {r.tips.map((tip, i) => (
-        <div className="tip" key={i}>
-          <h3 className="tip-title">{tip.title}</h3>
-          <p>{tip.text}</p>
+    <section className="tips" aria-label={t.tips} lang={textLang} data-card="tips">
+      {shown.map((i) => (
+        <div className="tip" key={i} data-tip={i}>
+          <h3 className="tip-title">{r.tips[i].title}</h3>
+          <p>{r.tips[i].text}</p>
         </div>
       ))}
     </section>
@@ -418,7 +419,7 @@ function RecipePage({ recipe, lang, segs, first }) {
           if (seg.kind === 'hero') return <RecipeHero {...props} />;
           if (seg.kind === 'menu') return <Ingredients {...props} items={seg.items} cont={seg.cont} />;
           if (seg.kind === 'ticket') return <Method {...props} steps={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'tips') return <Tips {...props} />;
+          if (seg.kind === 'tips') return <Tips {...props} items={seg.items} />;
           return <Credits {...props} />;
         })}
       </div>

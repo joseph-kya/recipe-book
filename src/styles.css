@@ -1336,8 +1336,9 @@ button {
   border-radius: var(--r-pill);
 }
 
-.seg-btn,
-.seg-indicator > span {
+.seg-btn {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -1443,25 +1444,24 @@ button {
     width: 44px;
     height: 44px;
   }
-  .controls--narrow .seg-btn,
-  .controls--narrow .seg-indicator > span {
+  .controls--narrow .seg-btn {
     min-width: 44px;
     min-height: 44px;
     font-size: 0.875rem;
   }
 }
 
-/* Keep label breathing room at the tightest one-row widths. Spend the space
-   on the seven 44px targets rather than gaps or the outer card's padding. */
+/* Tighter bar padding leaves 10px around labels even at 360px, while the
+   Contents icon and every other target retain their full 44px hit area. */
 @media (min-width: 360px) and (max-width: 389px) {
   .controls--narrow {
     left: 2px;
     right: 2px;
     gap: 0;
-    padding: 0;
+    padding: 4px 2px;
   }
   .controls--narrow .ctl-middle { gap: 0; }
-  .controls--narrow .arrow-icon { width: 1.25rem; height: 1.25rem; }
+  .controls--narrow .seg-btn { padding-inline: 10px; }
 }
 
 /* Compact phones: arrows and Contents on one row, the two toggles on the next. */
@@ -1506,7 +1506,7 @@ button {
   color: var(--cream);
 }
 
-.controls--wide :is(.ctl--contents, .ctl-count, .seg-btn, .seg-indicator > span) {
+.controls--wide :is(.ctl--contents, .ctl-count, .seg-btn) {
   font-family: var(--badge);
   font-size: var(--fs-s);
   font-weight: 400;

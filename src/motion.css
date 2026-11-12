@@ -35,20 +35,18 @@
   from { opacity: 0; transform: translateY(4px); }
 }
 
-/* One clipped light/dark copy moves as a pill. Its labels and background
-   share the same clip, so contrast cannot invert early during a slide. The
-   measured insets follow content widths, font swaps and responsive layout. */
+/* The measured face slides and resizes; labels stay sharp in their buttons.
+   CSS transitions retarget from the current position on rapid reversals. */
 .seg-indicator {
   position: absolute;
-  inset: 0;
-  display: flex;
-  padding: var(--seg-inset);
-  border-radius: inherit;
+  top: var(--seg-inset);
+  bottom: var(--seg-inset);
+  left: 0;
+  width: 48px;
+  border-radius: var(--r-pill);
   pointer-events: none;
   background: var(--choc);
-  color: var(--cream);
-  clip-path: inset(var(--seg-inset) var(--seg-right, 100%) var(--seg-inset) var(--seg-left, 0px) round var(--r-pill));
-  /* Measured clipping changes at once; only press transforms animate. */
+  transition: transform 240ms var(--ease-out), width 240ms var(--ease-out);
   visibility: hidden;
 }
 
@@ -58,6 +56,27 @@
 
 .controls--wide .seg-indicator {
   background: var(--cream);
+}
+
+/* Two tiny text layers crossfade via opacity, avoiding animated text paint
+   or a moving clip. Both retain the button's actual, content-sized width. */
+.seg-label-active {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  color: var(--cream);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms var(--ease-out);
+}
+
+.seg-btn[aria-pressed='true'] .seg-label-active {
+  opacity: 1;
+}
+
+.controls--wide .seg-label-active {
   color: var(--choc);
 }
 
@@ -65,16 +84,8 @@
   z-index: 1;
 }
 
-.seg:has(> .seg-btn:nth-child(1):active) .seg-indicator > span:nth-child(1),
-.seg:has(> .seg-btn:nth-child(2):active) .seg-indicator > span:nth-child(2) {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .seg-btn:hover,
-  .seg:has(> .seg-btn:nth-child(1):hover) .seg-indicator > span:nth-child(1),
-  .seg:has(> .seg-btn:nth-child(2):hover) .seg-indicator > span:nth-child(2) {
+  .seg-btn:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -119,7 +130,7 @@
   .book .btn,
   .controls button,
   .controls .ctl,
-  .seg-indicator > span,
+  .seg-label-active,
   .book .toc-link,
   .book .toc-no,
   .book .toc-text,
@@ -128,7 +139,7 @@
   .book .btn:is(:active, :hover),
   .controls button:not(:disabled):is(:active, :hover),
   .controls .ctl--contents:active,
-  .seg:has(> .seg-btn:active) .seg-indicator > span,
+  .seg:has(> .seg-btn:active) .seg-label-active,
   .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
   .book [role='group'] > button[aria-pressed]:active { transform: none; }

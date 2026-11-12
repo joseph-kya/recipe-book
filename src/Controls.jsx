@@ -9,20 +9,31 @@ function Segments({ label, options, value, onChange }) {
   useLayoutEffect(() => {
     const group = ref.current;
     const buttons = [...group.querySelectorAll('button')];
+    const indicator = group.querySelector('.seg-indicator');
+    let disposed = false;
     const measure = () => {
+      if (disposed) return;
       const active = group.querySelector('[aria-pressed="true"]');
       // Layout dimensions ignore the button's press transform. The absolute
       // indicator uses the group's padding box as its coordinate system.
-      group.style.setProperty('--seg-left', `${active.offsetLeft}px`);
-      group.style.setProperty('--seg-right', `${group.clientWidth - active.offsetLeft - active.offsetWidth}px`);
+      // Animate width on this tiny absolute element: the isolated layout cost
+      // is acceptable to keep the pill's caps circular at every width.
+      indicator.style.width = `${active.offsetWidth}px`;
+      indicator.style.transform = `translateX(${active.offsetLeft}px)`;
       group.dataset.ready = 'true';
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(group);
     buttons.forEach((button) => observer.observe(button));
-    // ResizeObserver also catches the self-hosted font replacing its fallback.
-    return () => observer.disconnect();
+    // Observe intrinsic label widths as well as the responsive group width.
+    document.fonts.ready.then(measure);
+    document.fonts.addEventListener('loadingdone', measure);
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      document.fonts.removeEventListener('loadingdone', measure);
+    };
   }, [value, labels]);
 
   return (
@@ -37,14 +48,12 @@ function Segments({ label, options, value, onChange }) {
           lang={option.lang}
         >
           {option.short}
+          <span className="seg-label-active" aria-hidden="true">{option.short}</span>
           <span className="sr-only"> – {option.long}</span>
         </button>
       ))}
-      {/* Clip the pill and its labels together: text keeps its contrast even
-          halfway through an interrupted slide. Actual buttons stay accessible. */}
-      <span className="seg-indicator" aria-hidden="true">
-        {options.map((option) => <span key={option.value} lang={option.lang}>{option.short}</span>)}
-      </span>
+      {/* Keep text unscaled; its active-colour copy crossfades over the pill. */}
+      <span className="seg-indicator" aria-hidden="true" />
     </div>
   );
 }

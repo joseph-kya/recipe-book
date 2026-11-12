@@ -12,6 +12,10 @@
     "en": {
       "label": "Cup conversions",
       "src": "approx. (Topfen ~240 g/cup, flour ~120 g/cup)"
+    },
+    "de": {
+      "label": "Tassenumrechnung",
+      "src": "ungefähr (Topfen ~240 g/Tasse, Mehl ~120 g/Tasse)"
     }
   },
   "en": {
@@ -157,5 +161,150 @@
         "text": "Her big warning: too hot and it burns and goes hard. Keep it on medium."
       }
     ]
+  },
+  "de": {
+    "title": "Topfenschmarren",
+    "title_lines": [
+      "Topfen-",
+      "schmarren"
+    ],
+    "tagline": "Der leichtere, eiweißreiche Cousin vom Kaiserschmarrn.",
+    "sticker": [
+      "1 großer",
+      "Teller!"
+    ],
+    "intro": "Magertopfen und Eischnee, langsam bei mäßiger Hitze gebraten und in fluffige Stücke gezupft.",
+    "stats": [
+      {
+        "value": "5 + 5 + 5 min",
+        "label": "in der Pfanne"
+      },
+      {
+        "value": "1",
+        "label": "große Portion"
+      },
+      {
+        "value": "470 kcal · 48 g Eiweiß",
+        "label": "(Schätzung aus dem Originalrezept)"
+      }
+    ],
+    "equipment": "Beschichtete Pfanne mit Deckel, zwei Schüsseln, Schneebesen oder Handmixer, Pfannenwender.",
+    "ingredients_headline": "Das gute Zeug",
+    "groups": [
+      {
+        "title": "Der Teig",
+        "items": [
+          {
+            "amount": "1 gehäufte Tasse",
+            "metric": "250 g",
+            "name": "Magertopfen",
+            "note": null
+          },
+          {
+            "amount": "3 EL",
+            "metric": "3 EL",
+            "name": "Sauerrahm",
+            "note": "wahlweise"
+          },
+          {
+            "amount": "knapp ½ Tasse",
+            "metric": "50 g",
+            "name": "Dinkelmehl",
+            "note": null
+          },
+          {
+            "amount": "2",
+            "metric": "",
+            "name": "Eier",
+            "note": null
+          },
+          {
+            "amount": "nach Geschmack",
+            "metric": "",
+            "name": "Süßungsmittel",
+            "note": null
+          },
+          {
+            "amount": "1 Prise",
+            "metric": "",
+            "name": "Salz",
+            "note": null
+          },
+          {
+            "amount": "nach Geschmack",
+            "metric": "",
+            "name": "geriebene Zitronenschale",
+            "note": null
+          },
+          {
+            "amount": "ein Schuss",
+            "metric": "wahlweise",
+            "name": "Wasser",
+            "note": "falls der Teig zu fest ist"
+          }
+        ]
+      },
+      {
+        "title": "Für Pfanne und Teller",
+        "items": [
+          {
+            "amount": "etwas",
+            "metric": "",
+            "name": "Butter oder Kokosöl",
+            "note": null
+          },
+          {
+            "amount": "zum Servieren",
+            "metric": "",
+            "name": "Obst oder Kompott",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Jetzt wird's chaotisch.",
+    "steps": [
+      {
+        "title": "Eigelb trifft Topfen.",
+        "text": "Eier trennen. Topfen mit den 2 Eigelb (und dem Sauerrahm, falls du ihn verwendest) gut verrühren.",
+        "cue": "Glatt und cremig."
+      },
+      {
+        "title": "Geschmack rein.",
+        "text": "Mehl, Süßungsmittel, Zitronenschale und Salz dazugeben. Zu fest? Ein Schuss Wasser hilft.",
+        "cue": "Dick, aber cremig."
+      },
+      {
+        "title": "Aufschlagen und unterheben.",
+        "text": "Eiweiß steif schlagen und langsam unterheben.",
+        "cue": "Ein ziemlich fester Teig: Das ist normal."
+      },
+      {
+        "title": "Langsam braten.",
+        "text": "Fett bei MITTLERER Hitze schmelzen. Teig 0.5–1 cm dick verstreichen. ~5 min braten, bis er anfängt zu stocken, wenden und weitere ~5 min braten.",
+        "cue": "Höchstens goldbraun, niemals dunkel."
+      },
+      {
+        "title": "Deckel drauf, Pause machen.",
+        "text": "Hitze aus, Deckel drauf, 5 min ruhen lassen.",
+        "cue": "Bis in die Mitte gestockt."
+      },
+      {
+        "title": "Zupfen und belegen.",
+        "text": "Deckel abnehmen, in Stücke zupfen und Obst oder Kompott daraufgeben.",
+        "cue": "Fluffige, goldbraune Stücke."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Unsere Anpassungen.",
+        "text": "Am Rezept keine: Mengen und Schritte stammen von Susanna. Die Tassenangaben sind unsere ungefähren Umrechnungen. Süßungsmittel, Fett und Zitronenschale lässt sie nach Geschmack dosieren."
+      },
+      {
+        "title": "Auf die Hitze achten.",
+        "text": "Ihr wichtigster Hinweis: Bei zu viel Hitze brennt er an und wird hart. Bleib bei mittlerer Hitze."
+      }
+    ],
+    "conversions": "Ungefähre Tassenangaben; Topfen ~240 g/Tasse, Mehl ~120 g/Tasse"
   }
 }

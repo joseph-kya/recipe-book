@@ -386,11 +386,11 @@ function Credits({ recipe, lang, units }) {
         {credit ? (
           <>
             {'; '}
-            <span lang={credit.lang}>{credit.label}: <span className="source-name">{credit.src}</span></span>
+            <span lang={credit.lang}>{credit.label}: {credit.src}</span>
           </>
         ) : recipe.conversions ? (
           <>
-            {'; '}{t.conversions}: <span className="source-name" lang="en">{recipe.conversions}</span>
+            {'; '}{t.conversions}: <span className="source-name" lang={r.conversions ? lang : 'en'}>{r.conversions || recipe.conversions}</span>
           </>
         ) : null}
       </p>

@@ -33,6 +33,10 @@ export const ui = {
     next: 'Next page',
     toContents: 'Contents',
     language: 'Language',
+    languageEnglish: 'English',
+    languageGerman: 'Deutsch',
+    description: "Joseph's baking recipes in a book you flip through: cups and spoons first, grams beside, a printable sheet for every recipe.",
+    shareDescription: "Joseph's baking recipes, cups and spoons first.",
     units: 'Units',
     unitCups: 'cups',
     unitMetric: 'g',
@@ -79,6 +83,10 @@ export const ui = {
     next: 'Nächste Seite',
     toContents: 'Inhalt',
     language: 'Sprache',
+    languageEnglish: 'Englisch',
+    languageGerman: 'Deutsch',
+    description: 'Josephs Backrezepte in einem Buch zum Durchblättern: Tassen und Löffel zuerst, Gramm daneben und zu jedem Rezept ein Blatt zum Ausdrucken.',
+    shareDescription: 'Josephs Backrezepte, mit Tassen und Löffeln zuerst.',
     units: 'Einheiten',
     unitCups: 'Tassen',
     unitMetric: 'g',
@@ -117,6 +125,14 @@ export function useLang() {
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    const t = ui[lang];
+    for (const [selector, content] of [
+      ['meta[name="description"]', t.description],
+      ['meta[property="og:title"]', t.bookTitleFlat],
+      ['meta[property="og:description"]', t.shareDescription],
+    ]) {
+      document.querySelector(selector)?.setAttribute('content', content);
+    }
   }, [lang]);
 
   const setLang = useCallback((next) => {

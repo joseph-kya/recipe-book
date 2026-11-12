@@ -274,9 +274,25 @@
         "text": "1 Tasse ≈ 240 ml · 1 EL = 15 ml · 1 TL = 5 ml. Echte Messbecher statt Kaffeetassen. Mehl und Kakao locker einlöffeln, dann glatt streichen. Butter ohne Luftlöcher eindrücken."
       },
       {
-        "title": "Schoko-Cheat-Code.",
+        "title": "Der Schoko-Trick.",
         "text": "Gehackte Schokolade fällt unterschiedlich aus. Genauer: 1¾ Tafeln à 100 g (175 g). Alle Tassen-Angaben sind Näherungswerte."
       }
-    ]
+    ],
+    "tagline_grams": "Große Schoko-Energie. Aufs Gramm genau.",
+    "sticker_grams": [
+      "Gramm für Gramm.",
+      "Genau richtig."
+    ],
+    "tips_grams": [
+      {
+        "title": "Direkt aus dem Original.",
+        "text": "Alle Mengen sind die Gramm- und ml-Angaben des Originalrezepts. Löffel: 1 EL = 15 ml · 1 TL = 5 ml. Keine Waage? Nimm die Tassen-Version."
+      },
+      {
+        "title": "Der Schoko-Trick.",
+        "text": "175 g Kuvertüre = 1¾ Tafeln à 100 g. Fein hacken, damit sie gleichmäßig mit der Butter schmilzt."
+      }
+    ],
+    "conversions": "King Arthur Baking: Tabelle für Zutatengewichte"
   }
 }

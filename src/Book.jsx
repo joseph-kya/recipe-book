@@ -136,6 +136,11 @@ export default function Book({ lang, setLang, units, setUnits }) {
     [s],
   );
 
+  // A language switch must also replace any previous live page announcement.
+  useEffect(() => {
+    announceFor(s.index);
+  }, [lang, announceFor, s]);
+
   const settle = useCallback(
     (k, { push = true } = {}) => {
       s.anim = null;

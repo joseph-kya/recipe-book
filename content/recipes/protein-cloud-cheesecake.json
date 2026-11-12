@@ -12,6 +12,10 @@
     "en": {
       "label": "Cup conversions",
       "src": "approx. (King Arthur + quark ~240 g/cup)"
+    },
+    "de": {
+      "label": "Tassenumrechnung",
+      "src": "ungefähr (King Arthur + Quark ~240 g/Tasse)"
     }
   },
   "en": {
@@ -158,5 +162,151 @@
         "text": "LECKER says plain sugar swaps 1:1 for erythritol, no grinding. Then it's ~150 kcal and 8 g protein a slice (their estimate)."
       }
     ]
+  },
+  "de": {
+    "title": "Eiweißreicher Wölkchenkuchen",
+    "title_lines": [
+      "Wölkchen-",
+      "kuchen"
+    ],
+    "tagline": "Fluffig, leicht, eiweißreich. Ohne Boden, ohne Aufwand.",
+    "sticker": [
+      "8 Stücke",
+      "Fluffig!"
+    ],
+    "intro": "LECKERs viraler Wölkchenkuchen: Quark und Eischnee, sanft im Wasserbad gebacken.",
+    "stats": [
+      {
+        "value": "~1 h 15 min",
+        "label": "gesamt"
+      },
+      {
+        "value": "10 + 45 min",
+        "label": "im Ofen"
+      },
+      {
+        "value": "~100 kcal · 8 g Eiweiß",
+        "label": "pro Stück (Schätzung von LECKER)"
+      }
+    ],
+    "equipment": "Springform 18 cm (7 Zoll), Backpapier, Alufolie, große Bratform, Handmixer, kleiner Zerkleinerer.",
+    "ingredients_headline": "Das gute Zeug",
+    "groups": [
+      {
+        "title": "Der Teig",
+        "items": [
+          {
+            "amount": "½ Tasse",
+            "metric": "100 g",
+            "name": "Erythrit",
+            "note": "in 5 EL + 3 EL aufteilen"
+          },
+          {
+            "amount": "4",
+            "metric": "4 (Größe M)",
+            "name": "Eier",
+            "note": null
+          },
+          {
+            "amount": "1 Prise",
+            "metric": "",
+            "name": "Salz",
+            "note": null
+          },
+          {
+            "amount": "Prise + ¼ TL",
+            "metric": "",
+            "name": "Backpulver",
+            "note": "die Prise kommt zum Eischnee"
+          },
+          {
+            "amount": "¾ Tasse + 1 EL",
+            "metric": "200 g",
+            "name": "Magerquark",
+            "note": null
+          },
+          {
+            "amount": "3½ EL",
+            "metric": "50 g",
+            "name": "fettreduzierter Frischkäse",
+            "note": "~10% Fett"
+          },
+          {
+            "amount": "5 EL",
+            "metric": "75 ml",
+            "name": "Milch",
+            "note": null
+          },
+          {
+            "amount": "¼ TL",
+            "metric": "",
+            "name": "Vanilleextrakt",
+            "note": null
+          },
+          {
+            "amount": "⅓ Tasse",
+            "metric": "40 g",
+            "name": "Weizenmehl",
+            "note": "Type 405"
+          },
+          {
+            "amount": "3 EL",
+            "metric": "25 g",
+            "name": "Maisstärke",
+            "note": null
+          },
+          {
+            "amount": "zum Bestäuben",
+            "metric": "wahlweise",
+            "name": "Puderzucker",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Jetzt wird's chaotisch.",
+    "steps": [
+      {
+        "title": "Ein Bad einlassen.",
+        "text": "Ofen auf 170 °C (150 °C Umluft), Rost auf die mittlere Schiene. Bratform daraufstellen und ~3 cm heißes Wasser einfüllen. Boden und Rand der Springform mit Backpapier auslegen; außen fest mit Alufolie umwickeln.",
+        "cue": "Folie rundherum dicht anlegen, damit kein Wasser eindringt."
+      },
+      {
+        "title": "Mahlen und aufschlagen.",
+        "text": "Die 5 EL und 3 EL Erythrit getrennt zu Pulver mahlen. Eier trennen. Eiweiß mit Salz und der Prise Backpulver steif schlagen, dabei das Pulver aus den 5 EL einrieseln lassen.",
+        "cue": "Feste, glänzende Spitzen, die stehen bleiben."
+      },
+      {
+        "title": "Die cremige Basis.",
+        "text": "Eigelb, das Pulver aus den 3 EL, Quark, Frischkäse, Milch und Vanille verrühren. Mehl, Maisstärke und ¼ TL Backpulver mischen und unterrühren.",
+        "cue": "Glatt, ohne Klümpchen."
+      },
+      {
+        "title": "Die Wolke unterheben.",
+        "text": "Eischnee mit einem Teigschaber in drei Portionen unterheben. In die Form füllen.",
+        "cue": "Keine weißen Schlieren, immer noch luftig."
+      },
+      {
+        "title": "Ab ins Wasserbad.",
+        "text": "Form ins Wasserbad stellen. 10 min backen, auf 150 °C (130 °C Umluft) herunterschalten und weitere ~45 min backen. Tür nicht öffnen!",
+        "cue": "Die Tür bleibt die ganze Zeit zu."
+      },
+      {
+        "title": "Abkühlen, lösen, schneiden.",
+        "text": "Komplett auskühlen lassen und aus der Form lösen. Nach Lust dünn mit Puderzucker bestäuben und in 8 Stücke schneiden.",
+        "cue": "Vor dem Schneiden ganz auskühlen lassen."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Unsere Anpassungen.",
+        "text": "Mengen, Zeiten und Temperaturen stammen von LECKER. Die Tassenangaben sind unsere ungefähren Umrechnungen; das Erythrit vor dem Mahlen in 5 + 3 EL aufzuteilen, ist unser Trick ohne Waage."
+      },
+      {
+        "title": "Lieber Zucker?",
+        "text": "Laut LECKER lässt sich Erythrit 1:1 durch normalen Zucker ersetzen, ohne Mahlen. Dann hat ein Stück ~150 kcal und 8 g Eiweiß (deren Schätzung)."
+      }
+    ],
+    "conversions": "Ungefähre Tassenangaben; Quark ~240 g/Tasse, Maisstärke ~8 g/EL"
   }
 }

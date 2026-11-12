@@ -12,6 +12,10 @@
     "en": {
       "label": "Amounts",
       "src": "as published, cups + grams are the author's own"
+    },
+    "de": {
+      "label": "Mengen",
+      "src": "wie veröffentlicht; Tassen- und Grammangaben stammen von der Autorin"
     }
   },
   "en": {
@@ -231,5 +235,224 @@
         "text": "Cream bath = mushy rolls; glass needs 5–10 min extra. Tacky dough? Add water, never flour. Overnight: shape, cover, chill, then proof."
       }
     ]
+  },
+  "de": {
+    "title": "Die BESTEN klassischen Zimtschnecken",
+    "title_lines": [
+      "Klassische",
+      "Zimtschnecken"
+    ],
+    "tagline": "Zwei Lebensmittelwissenschaftler. Zwölf fluffige Schnecken.",
+    "sticker": [
+      "12 Schnecken.",
+      "Wissenschaft!"
+    ],
+    "intro": "Federleichte Schnecken zum Auseinanderzupfen, mit einer Füllung wie feuchter Sand, die da bleibt, wo sie soll. Alles eine Frage der Technik.",
+    "stats": [
+      {
+        "value": "1–2 h + 30–60 min",
+        "label": "Gehzeit"
+      },
+      {
+        "value": "20–25 min",
+        "label": "Backen bei 350 °F"
+      },
+      {
+        "value": "12",
+        "label": "Schnecken"
+      }
+    ],
+    "equipment": "Küchenmaschine mit Knethaken, gefettete Metallform 13 × 9 Zoll, Nudelholz, Winkelpalette, Thermometer.",
+    "ingredients_headline": "Das gute Zeug",
+    "groups": [
+      {
+        "title": "Der Teig",
+        "items": [
+          {
+            "amount": "4 Tassen",
+            "metric": "568 g",
+            "name": "ungebleichtes, backstarkes Weizenmehl",
+            "note": "+ etwas mehr zum Ausrollen"
+          },
+          {
+            "amount": "⅓ Tasse",
+            "metric": "65 g",
+            "name": "Zucker",
+            "note": null
+          },
+          {
+            "amount": "3 TL",
+            "metric": "11 g",
+            "name": "Instant-Trockenhefe",
+            "note": null
+          },
+          {
+            "amount": "1¼ TL",
+            "metric": "10 g",
+            "name": "feines Speisesalz",
+            "note": "bei Koschersalz: 10 g abwiegen (etwa 2 TL)"
+          },
+          {
+            "amount": "1 groß",
+            "metric": "1",
+            "name": "Ei",
+            "note": "zimmerwarm"
+          },
+          {
+            "amount": "2 EL",
+            "metric": "24 g",
+            "name": "flüssiges Öl",
+            "note": "Pflanzen-, Raps-, Sonnenblumen- oder Olivenöl"
+          },
+          {
+            "amount": "1¼ Tassen",
+            "metric": "300 ml",
+            "name": "Milch",
+            "note": "Vollmilch oder 2% Fett"
+          },
+          {
+            "amount": "2 EL",
+            "metric": "28 g",
+            "name": "ungesalzene Butter",
+            "note": "weich"
+          },
+          {
+            "amount": "nach Bedarf",
+            "metric": "10–20 ml",
+            "name": "Wasser",
+            "note": "schluckweise zugeben"
+          }
+        ]
+      },
+      {
+        "title": "Die Füllung wie feuchter Sand",
+        "items": [
+          {
+            "amount": "1 Tasse",
+            "metric": "220 g",
+            "name": "dunkelbrauner Zucker",
+            "note": "fest angedrückt"
+          },
+          {
+            "amount": "4 TL",
+            "metric": "10 g",
+            "name": "gemahlener Zimt",
+            "note": null
+          },
+          {
+            "amount": "1½ EL",
+            "metric": "13 g",
+            "name": "Weizenmehl",
+            "note": null
+          },
+          {
+            "amount": "1½ EL",
+            "metric": "22 ml",
+            "name": "Wasser",
+            "note": null
+          },
+          {
+            "amount": "¼ TL",
+            "metric": "1.5 g",
+            "name": "feines Speisesalz",
+            "note": "als Ausgleich für die ungesalzene Butter"
+          },
+          {
+            "amount": "5 EL",
+            "metric": "70 g",
+            "name": "ungesalzene Butter",
+            "note": "halb geschmolzen, dann ganz glatt gerührt"
+          }
+        ]
+      },
+      {
+        "title": "Die Glasur",
+        "items": [
+          {
+            "amount": "4 oz",
+            "metric": "113 g",
+            "name": "Frischkäse",
+            "note": "weich"
+          },
+          {
+            "amount": "2 EL",
+            "metric": "28 g",
+            "name": "ungesalzene Butter",
+            "note": "weich"
+          },
+          {
+            "amount": "¾ Tasse",
+            "metric": "90 g",
+            "name": "Puderzucker",
+            "note": null
+          },
+          {
+            "amount": "½ TL",
+            "metric": "½ TL",
+            "name": "reiner Vanilleextrakt",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "Jetzt wird's chaotisch.",
+    "steps": [
+      {
+        "title": "Kleine Häufchen machen.",
+        "text": "Mehl in die Rührschüssel geben. Zucker, Hefe und Salz als getrennte kleine Häufchen daraufgeben.",
+        "cue": "Salz und Hefe berühren sich nicht."
+      },
+      {
+        "title": "Ordentlich durchkneten.",
+        "text": "Ei, Öl, Milch und weiche Butter dazugeben. Mit dem Knethaken auf mittlerer bis niedriger Stufe 10–15 min kneten; nach 2 min die Schüssel ausschaben, dann alle 3–5 min. Zu trocken oder fest? Wasser in Schritten von 10 ml zugeben.",
+        "cue": "Klettert am Haken hoch und löst sich dann von der Schüssel; 24–26 °C (75–79 °F)."
+      },
+      {
+        "title": "Dehnen und falten.",
+        "text": "Auf einer leicht bemehlten Arbeitsfläche dehnen und falten, bis der Teig ganz glatt ist. Zur Kugel formen, leicht einölen und in einer Schüssel abdecken.",
+        "cue": "Die Oberfläche der Kugel lässt sich glatt spannen, ohne zu reißen."
+      },
+      {
+        "title": "Aufgehen lassen, kurz kühlen.",
+        "text": "An einem warmen Ort 1–2 Stunden gehen lassen, dann 15 min kühlen (in einer sehr kalten Küche weglassen).",
+        "cue": "Fast aufs Dreifache aufgegangen."
+      },
+      {
+        "title": "Form und Füllung vorbereiten.",
+        "text": "Form einfetten. Zucker, Zimt, Mehl und Salz mischen. Butter nur zur Hälfte schmelzen, dann rühren, bis sie ganz geschmolzen ist. Zusammen mit dem Wasser unterrühren.",
+        "cue": "Wie feuchter Sand: nicht heiß (sonst tritt Fett aus), nicht kalt (sonst wird die Füllung fest)."
+      },
+      {
+        "title": "Ausrollen, bestreichen, schneiden, aufrollen.",
+        "text": "Nicht mehr kneten. Auf 17 × 14 Zoll ausrollen, die lange Seite zeigt zu dir; Füllung bis an die Ränder verstreichen. In 12 Streifen (~1¼ × 14 Zoll) schneiden und einzeln zu Schnecken aufrollen (oder als Rolle aufrollen und in 12 Scheiben schneiden).",
+        "cue": "Ein Rechteck mit geraden Kanten, 12 gleichmäßige Streifen."
+      },
+      {
+        "title": "Dicht an dicht gehen lassen.",
+        "text": "Mit der Spirale nach oben dicht nebeneinandersetzen, ohne Überlappungen. Locker abdecken und 30–60 min gehen lassen. Auf 350 °F / 177 °C vorheizen.",
+        "cue": "Ein Fingerdruck federt langsam zurück, ein leichter Abdruck bleibt. Tiefe Delle = zu lange gegangen."
+      },
+      {
+        "title": "Bis zur richtigen Kerntemperatur backen.",
+        "text": "20–25 min backen. Locker mit Folie abdecken, falls die Oberfläche zu schnell bräunt. Auf einem Gitter 15–20 min abkühlen lassen.",
+        "cue": "Gleichmäßig goldbraun; die mittlere Schnecke hat innen 92–94 °C (198–201 °F)."
+      },
+      {
+        "title": "Glasur drauf.",
+        "text": "Frischkäse und Butter ganz glatt schlagen, dann Puderzucker und Vanille unterrühren. Jede Schnecke dünn damit bestreichen.",
+        "cue": "Glatt, dick und cremig."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Mit ungesalzener Butter.",
+        "text": "Sie verwendet gesalzene Butter; hier nehmen wir ungesalzene und geben dafür ¼ TL Salz in die Füllung. Ihre Tasse Mehl ist schwer: 4 Tassen = 568 g."
+      },
+      {
+        "title": "Metallform, kein Sahnebad.",
+        "text": "Ein Sahnebad macht die Schnecken matschig; in Glas brauchen sie 5–10 min länger. Klebriger Teig? Wasser dazugeben, niemals Mehl. Über Nacht: formen, abdecken, kühlen und dann gehen lassen."
+      }
+    ],
+    "conversions": "Tassen- und Grammangaben der Autorin (wie veröffentlicht)"
   }
 }

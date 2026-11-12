@@ -44,15 +44,5 @@ export const recipes = Object.values(recipeFiles)
   // at the source never leaves a gap. The JSON `number` only sets the order.
   .map((r, i) => ({ ...r, no: i + 1 }));
 
-// Recipe text in the asked language, only when the JSON really has it.
-export function textFor(recipe, lang) {
-  if (lang !== 'en' && recipe[lang]) return { text: recipe[lang], lang, fallback: false };
-  return { text: recipe.en, lang: 'en', fallback: lang !== 'en' };
-}
-
-export function amountsCreditFor(recipe, lang) {
-  const c = recipe.amounts_credit;
-  if (!c) return null;
-  if (c[lang]) return { ...c[lang], lang };
-  return c.en ? { ...c.en, lang: 'en' } : null;
-}
+// Pure selectors are also exercised directly by the Node translation tests.
+export { textFor, amountsCreditFor } from './recipe-i18n.js';

@@ -1,6 +1,7 @@
-import { Fragment, useLayoutEffect, useRef } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
+import { reducedMotion } from './motion.js';
 import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
@@ -328,6 +329,35 @@ const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
+  const menuRef = useRef(null);
+  const prevRef = useRef({ factor, units });
+
+  // Purposeful state-indication wave when portion scale or unit system changes.
+  useEffect(() => {
+    const prev = prevRef.current;
+    prevRef.current = { factor, units };
+    if (measure || reducedMotion()) return;
+    if (prev.factor === factor && prev.units === units) return;
+    const root = menuRef.current;
+    if (!root) return;
+    const amounts = [...root.querySelectorAll('.ing-amount')].slice(0, 6);
+    const anims = amounts.map((el, idx) =>
+      el.animate(
+        [
+          { transform: 'translateY(-3px) scale(1.06)', opacity: 0.65 },
+          { transform: 'translateY(0) scale(1)', opacity: 1 },
+        ],
+        {
+          duration: 210,
+          delay: idx * 22,
+          easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)',
+          fill: 'backwards',
+        },
+      ),
+    );
+    return () => anims.forEach((a) => a.cancel());
+  }, [factor, units, measure]);
+
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
@@ -351,7 +381,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
     </h2>
   );
   return (
-    <section className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
+    <section ref={menuRef} className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
       {measure ? (
         <>
           {normalHead}
@@ -404,6 +434,21 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
 
 function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
+  const [doneSteps, setDoneSteps] = useState(() => new Set());
+  useEffect(() => {
+    setDoneSteps(new Set());
+  }, [recipe.slug]);
+
+  const toggleStep = (stepIndex) => {
+    if (measure) return;
+    setDoneSteps((prev) => {
+      const next = new Set(prev);
+      if (next.has(stepIndex)) next.delete(stepIndex);
+      else next.add(stepIndex);
+      return next;
+    });
+  };
+
   const shown = steps || r.steps.map((_, i) => i);
   const normalHead = (
     <>
@@ -436,11 +481,30 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
       <ol className="steps" lang={textLang} start={shown[0] + 1}>
         {shown.map((i) => {
           const s = r.steps[i];
+          const isDone = doneSteps.has(i);
           return (
-            <li className="step" key={i} data-step={i}>
-              <span className="step-dot" aria-hidden="true">
-                {i + 1}
-              </span>
+            <li className={`step${isDone ? ' step--done' : ''}`} key={i} data-step={i}>
+              <button
+                type="button"
+                className="step-dot"
+                aria-pressed={isDone}
+                aria-label={`${i + 1}. ${s.title}`}
+                onClick={() => toggleStep(i)}
+              >
+                <span className="step-num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <svg className="step-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path
+                    d="M5 12.5 9.5 17 19 7.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
               <div className="step-body">
                 <h3 className="step-title">{s.title}</h3>
                 <p>{s.text}</p>

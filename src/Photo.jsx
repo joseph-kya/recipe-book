@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { textFor } from './content.js';
 import { ui } from './i18n.js';
 import './photo.css';
@@ -7,24 +8,38 @@ import './photo.css';
 // to the room left on the page); without it the picture fills the column.
 export default function Photo({ recipe, lang, height }) {
   const photo = recipe.photo;
+  const imgRef = useRef(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+    else setLoaded(false);
+  }, [photo?.small, photo?.large]);
+
   if (!photo) return null;
   const t = ui[lang];
   const { text } = textFor(recipe, lang);
   const site = photo.credit?.site;
   return (
     <figure className="photo" data-unit="photo" style={height ? { '--photo-h': `${height}px` } : undefined}>
-      <p className="photo-label">{t.photoLabel}</p>
+      {t.photoLabel && <p className="photo-label">{t.photoLabel}</p>}
       <div className="photo-mat">
-        <img
-          src={photo.small}
-          srcSet={`${photo.small} 400w, ${photo.large} 800w`}
-          sizes="(min-width: 960px) 360px, calc(100vw - 4rem)"
-          width="800"
-          height="600"
-          loading="lazy"
-          decoding="async"
-          alt={site ? t.photoAlt(text.title, site) : text.title}
-        />
+        <div className="photo-frame">
+          <img
+            ref={imgRef}
+            className={loaded ? 'is-loaded' : undefined}
+            src={photo.small}
+            srcSet={`${photo.small} 400w, ${photo.large} 800w`}
+            sizes="(min-width: 960px) 360px, calc(100vw - 4rem)"
+            width="800"
+            height="600"
+            loading="lazy"
+            decoding="async"
+            alt={site ? t.photoAlt(text.title, site) : text.title}
+            onLoad={() => setLoaded(true)}
+          />
+        </div>
       </div>
       {site && (
         <figcaption className="photo-credit">

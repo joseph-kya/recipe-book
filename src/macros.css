@@ -11,22 +11,24 @@
   font-family: var(--badge);
   font-size: var(--fs-l);
   line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 
 .macros-basis,
 .macros-note {
   font-size: var(--fs-xs);
   line-height: 1.35;
+  color: var(--choc-soft);
 }
 
 .macros-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: var(--sp-1) 0 0;
-  border: 2px solid var(--choc);
+  border: var(--rule) solid var(--choc);
   border-radius: var(--r-m);
   background: var(--cream);
-  box-shadow: 3px 3px 0 var(--choc);
+  box-shadow: 5px 5px 0 var(--choc);
   overflow: hidden;
 }
 
@@ -40,16 +42,17 @@
 }
 
 .macros-cell:first-child {
-  background: color-mix(in srgb, var(--mustard) 28%, var(--cream));
+  background: color-mix(in srgb, var(--mustard) 42%, var(--cream));
 }
 
 .macros-cell + .macros-cell {
-  border-left: 1px dashed var(--choc);
+  border-left: 2px dashed color-mix(in srgb, var(--choc) 45%, transparent);
 }
 
 .macros-cell dt {
   font-size: var(--fs-xs);
   font-weight: 800;
+  letter-spacing: 0.02em;
   line-height: 1.2;
   hyphens: manual;
 }
@@ -57,8 +60,8 @@
 .macros-cell dd {
   margin: 2px 0 0;
   font-family: var(--badge);
-  font-size: var(--fs-l);
-  line-height: 1.1;
+  font-size: var(--fs-xl);
+  line-height: 1.08;
   font-variant-numeric: tabular-nums;
 }
 

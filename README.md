@@ -27,7 +27,7 @@ npm run preview   # serve dist/ locally
 2. Drop its sheet at `content/pdfs/<slug>.pdf` (same `slug`).
 3. `npm run build`. Done.
 
-No code or index file needs editing. `src/content.js` picks up both folders with `import.meta.glob` and orders recipes by `number`. Gaps in numbering are shown as they are (there is no No. 02).
+No code or index file needs editing. `src/content.js` picks up both folders with `import.meta.glob` and orders recipes by their JSON `number`. The number shown in the book is the recipe's position (1, 2, 3…), so new or removed recipes never leave a gap: give a new recipe any `number` that sorts it where you want it.
 
 ### JSON shape
 
@@ -35,7 +35,7 @@ No code or index file needs editing. `src/content.js` picks up both folders with
 {
   "slug": "fudge-brownies",          // matches the PDF file name
   "route": "brownies",               // optional short URL (#/brownies); falls back to slug
-  "number": 1,                       // shown as "Recipe No. 01"
+  "number": 1,                       // sort order only; the book numbers recipes 1, 2, 3… by position
   "source": { "site": "…", "author": "…", "url": "https://…" },
   "conversions": "…",                // optional, shown small
   "amounts_credit": { "en": { "label": "…", "src": "…" } },  // optional, shown small

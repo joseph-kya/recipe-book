@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { amountsCreditFor, pad, recipes, textFor } from './content.js';
+import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { Burst, Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
@@ -85,11 +85,11 @@ function ContentsList({ lang, withHow = false }) {
               <li key={r.slug}>
                 <a href={`#/${r.route}`} className="toc-link">
                   <span className="toc-no" aria-hidden="true">
-                    {pad(r.number)}
+                    {r.no}
                   </span>
                   <span className="toc-text">
                     <span className="sr-only">
-                      {t.recipeNo} {pad(r.number)}:{' '}
+                      {t.recipeNo} {r.no}:{' '}
                     </span>
                     <span className="toc-title" lang={textLang}>
                       {text.title}
@@ -143,7 +143,7 @@ function RunningHead({ recipe, lang }) {
         {r.title}
       </span>
       <span className="eyebrow">
-        ★ {t.recipeNo} {pad(recipe.number)} ★
+        ★ {t.recipeNo} {recipe.no} ★
       </span>
     </p>
   );
@@ -154,7 +154,7 @@ function RecipeHero({ recipe, lang }) {
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
-        ★ {t.recipeNo} {pad(recipe.number)} ★
+        ★ {t.recipeNo} {recipe.no} ★
       </p>
       <h1 className="recipe-title" lang={textLang}>
         {r.title_lines.map((l, i) => (

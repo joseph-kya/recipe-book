@@ -23,9 +23,10 @@ export const recipes = Object.values(recipeFiles)
     route: r.route || r.slug,
     pdf: pdfFor(r.slug),
   }))
-  .sort((a, b) => a.number - b.number);
-
-export const pad = (n) => String(n).padStart(2, '0');
+  .sort((a, b) => a.number - b.number)
+  // The number shown is the position in the book (1, 2, 3…), so a recipe removed
+  // at the source never leaves a gap. The JSON `number` only sets the order.
+  .map((r, i) => ({ ...r, no: i + 1 }));
 
 // Recipe text in the asked language, only when the JSON really has it.
 export function textFor(recipe, lang) {

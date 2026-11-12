@@ -260,7 +260,7 @@ export default function Book({ lang, setLang }) {
   const onPointerDown = (e) => {
     if (!e.isPrimary || e.button !== 0 || s.drag) return;
     s.didDrag = false;
-    s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, decided: false, samples: [] };
+    s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0, decided: false, samples: [] };
   };
 
   const beginDrag = (dir) => {
@@ -302,7 +302,10 @@ export default function Book({ lang, setLang }) {
     if (!d || e.pointerId !== d.id) return;
     const dxRaw = e.clientX - d.x0;
     const dyRaw = e.clientY - d.y0;
+    d.dx = dxRaw;
+    d.dy = dyRaw;
     if (!d.decided) {
+      // The first ~10px pick the axis; after that the other axis is ignored.
       if (Math.abs(dxRaw) < 10 && Math.abs(dyRaw) < 10) return;
       if (Math.abs(dyRaw) >= Math.abs(dxRaw)) {
         s.drag = null; // vertical: let the page scroll
@@ -366,6 +369,19 @@ export default function Book({ lang, setLang }) {
     const dpdx = progressFor(d.pStart, dx + 1) - progressFor(d.pStart, dx);
     runSpring(target, clamp(dpdx * v, -10, 10));
   };
+
+  // Once a swipe is horizontal, the page must not also scroll vertically.
+  useEffect(() => {
+    const book = bookRef.current;
+    const onTouchMove = (e) => {
+      const d = s.drag;
+      if (!d) return;
+      const horizontal = d.decided || (Math.abs(d.dx) > 3 && Math.abs(d.dx) > Math.abs(d.dy));
+      if (horizontal && e.cancelable) e.preventDefault();
+    };
+    book.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => book.removeEventListener('touchmove', onTouchMove);
+  }, [s]);
 
   // A drag must never also count as a tap on a link underneath.
   const onClickCapture = (e) => {

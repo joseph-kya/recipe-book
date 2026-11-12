@@ -87,6 +87,9 @@ function ContentsList({ lang, withTitle = false }) {
                       {text.title}
                     </span>
                   </span>
+                  <span className="toc-arrow" aria-hidden="true">
+                    ›
+                  </span>
                 </a>
               </li>
             );

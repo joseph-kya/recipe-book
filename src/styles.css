@@ -511,9 +511,10 @@ button {
 /* ---------- cover: the title, an ornament, Open ---------- */
 .cover {
   --ring-out: var(--cream);
+  position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--cherry);
+  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cream) 10%, transparent), transparent 62%), var(--cherry);
   color: var(--cream);
 }
 
@@ -575,6 +576,13 @@ button {
 .cover-cupcake {
   width: 6.5rem;
   transform: rotate(-8deg);
+  transition: transform var(--press) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-cupcake:hover {
+    transform: rotate(-4deg) scale(1.04);
+  }
 }
 
 .book--wide .cover-cupcake {
@@ -673,10 +681,10 @@ button {
   border-top: 2px dotted color-mix(in srgb, var(--ink) 50%, transparent);
 }
 
-/* The whole row is the link: badge, title and tagline, at least 44px tall. */
+/* The whole row is the link: badge, title and trailing cue, at least 44px tall. */
 .toc-link {
   display: grid;
-  grid-template-columns: 3rem 1fr;
+  grid-template-columns: 3rem 1fr auto;
   gap: var(--sp-4);
   align-items: center;
   min-height: 4.5rem;
@@ -685,12 +693,12 @@ button {
   border-radius: var(--r-m);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--press) var(--ease-out);
+  transition: transform var(--press) var(--ease-out), background-color 160ms var(--ease-out);
 }
 
 .toc-link:active {
   background-color: color-mix(in srgb, var(--accent) 28%, transparent);
-  transform: scale(0.98);
+  transform: scale(0.985);
 }
 
 .toc-no {
@@ -701,9 +709,15 @@ button {
   border-radius: 50%;
   background: var(--mustard);
   border: var(--rule) solid var(--choc);
+  box-shadow: 2px 2px 0 var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-l);
-  transition: transform var(--press) var(--ease-out);
+  transition: transform var(--press) var(--ease-out), box-shadow var(--press) var(--ease-out);
+}
+
+.toc-link:active .toc-no {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--choc);
 }
 
 .toc-text {
@@ -718,9 +732,19 @@ button {
   line-height: 1.15;
 }
 
+.toc-arrow {
+  font-family: var(--badge);
+  font-size: var(--fs-xl);
+  line-height: 1;
+  color: color-mix(in srgb, var(--choc) 55%, transparent);
+  padding-inline-end: var(--sp-1);
+  transition: transform var(--press) var(--ease-out), color var(--press) var(--ease-out);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .toc-link:hover {
     transform: translateY(-2px);
+    background-color: color-mix(in srgb, var(--accent) 12%, transparent);
   }
   .toc-link:hover .toc-title {
     color: var(--cherry-ink);
@@ -728,8 +752,12 @@ button {
   .toc-link:hover .toc-no {
     transform: translateX(2px);
   }
+  .toc-link:hover .toc-arrow {
+    color: var(--cherry-ink);
+    transform: translateX(3px);
+  }
   .toc-link:active {
-    transform: scale(0.98);
+    transform: scale(0.985);
   }
 }
 
@@ -1598,7 +1626,11 @@ button {
     transform: none !important;
   }
   .btn,
+  .cover-cupcake,
+  .toc-link,
+  .toc-no,
   .toc-text,
+  .toc-arrow,
   .ctl--turn {
     transition-duration: 0ms;
   }

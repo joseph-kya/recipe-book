@@ -25,18 +25,45 @@
   background: var(--cream);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-s);
-  box-shadow: 4px 4px 0 var(--choc);
+  box-shadow: 5px 5px 0 var(--choc);
   transform: rotate(-1deg);
+  transition: transform 240ms cubic-bezier(0.22, 1.28, 0.36, 1);
 }
 
-.photo-mat img {
+.photo-frame {
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--mint);
+}
+
+.photo-frame img {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 4px;
-  background: var(--mint);
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 220ms var(--ease-out), transform 280ms var(--ease-out);
+}
+
+.photo-frame img.is-loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .photo-mat:hover {
+    transform: rotate(0deg) translateY(-3px) scale(1.015);
+  }
+  .photo-mat:hover .photo-frame img.is-loaded {
+    transform: scale(1.03);
+  }
+}
+
+.photo-mat:active {
+  transform: rotate(-0.5deg) scale(0.985);
+  transition-duration: 100ms;
 }
 
 .photo-credit {
@@ -48,10 +75,35 @@
 
 /* a 44px tall tap target without growing the type */
 .photo-credit a {
-  display: inline-block;
-  padding: 0.85rem 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.4rem 0;
   font-weight: 700;
   color: var(--cherry);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
+  transition: transform 140ms var(--ease-out);
+}
+
+.photo-credit a:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-mat,
+  .photo-frame img,
+  .photo-credit a {
+    transition: none;
+  }
+  .photo-frame img {
+    opacity: 1;
+    transform: none;
+  }
+  .photo-mat:hover,
+  .photo-mat:active,
+  .photo-mat:hover .photo-frame img.is-loaded,
+  .photo-credit a:active {
+    transform: none;
+  }
 }

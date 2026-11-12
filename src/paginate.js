@@ -32,7 +32,7 @@ function newPageBox(root, src, pageIndex, slackFor) {
 
 // `cut`: when the card is split anyway, end its first piece after this many
 // units (rows or groups) so the right page has room for the method too.
-function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
+function paginateOne(root, src, slack = 0, byRows = false, cut = null, menuBreaks = []) {
   const pages = [];
   const used = []; // how full each page ends up, for balancing
   let overflow = false; // a block had to go in taller than its page
@@ -84,7 +84,8 @@ function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
     for (const u of units) {
       if (!shell) open();
       let added = appendUnit(shell, ctx, u);
-      const forced = limit !== null && pages.length === 0 && placed >= limit;
+      const forced = (limit !== null && pages.length === 0 && placed >= limit) ||
+        (kind === 'menu' && menuBreaks.includes(placed));
       if (forced || !box.fits()) {
         for (const n of added) n.remove();
         const pageHadOtherBlocks = segs.length > 1 || seg.items.length > 0;
@@ -200,6 +201,38 @@ function paginateOne(root, src, slack = 0, byRows = false, cut = null) {
   return { pages, used, overflow, menuSplit, firstUnits };
 }
 
+// Repair each ingredient boundary where it occurs. Cutting only the first
+// page can otherwise move several rows off it just to fix a later group's
+// one- or two-row tail, even though its own continuation was already legal.
+function paginateLegal(root, src, slack = 0, byRows = false, cut = null) {
+  let breaks = [];
+  let plan = paginateOne(root, src, slack, byRows, cut, breaks);
+  if (!byRows) return plan;
+  const rows = [...src.querySelectorAll('[data-item]')].map((li) => li.dataset.item.split(':').map(Number));
+  for (let attempt = 0; attempt < rows.length; attempt++) {
+    const pieces = plan.pages.flatMap((p) => p.filter((s) => s.kind === 'menu'));
+    let placed = 0;
+    let repair = null;
+    for (let i = 0; i + 1 < pieces.length; i++) {
+      placed += pieces[i].items.length;
+      const group = rows[placed - 1][0];
+      if (rows[placed][0] !== group) continue;
+      const before = rows.slice(0, placed).filter((id) => id[0] === group).length;
+      const after = rows.slice(placed).filter((id) => id[0] === group).length;
+      if (before < 2 || after < 3) {
+        repair = placed - (before < 2 ? before : 3 - after);
+        break;
+      }
+    }
+    // A group that cannot form a legal piece even on a fresh page has no
+    // earlier boundary to try. Leave it for the existing overflow ranking.
+    if (repair === null || repair <= 0 || breaks.includes(repair)) return plan;
+    breaks = [...breaks.filter((at) => at < repair), repair];
+    plan = paginateOne(root, src, slack, byRows, cut, breaks);
+  }
+  return plan;
+}
+
 export function paginate(root) {
   const plans = {};
   const pageHeight = root.clientHeight;
@@ -220,7 +253,7 @@ function balance(root, src, pageHeight) {
     // A group taller than a page, or a card whose first group cannot sit beside
     // the header: split that card by rows rather than leave the header alone.
     byRows = true;
-    greedy = paginateOne(root, src, 0, byRows);
+    greedy = paginateLegal(root, src, 0, byRows);
   }
   // Search every earlier cut: a large first piece may need more than three
   // rows removed to leave a legal continuation of its final group.
@@ -241,7 +274,7 @@ function balance(root, src, pageHeight) {
     if (better(plan, best)) best = plan;
   };
   for (const cut of cuts) {
-    const base = cut === null ? greedy : paginateOne(root, src, 0, byRows, cut);
+    const base = cut === null ? greedy : paginateLegal(root, src, 0, byRows, cut);
     consider(base);
     // Later-page balancing cannot improve a worse first ingredient piece.
     if (base.overflow || widows(base, ['menu']) > widows(best, ['menu']) ||
@@ -249,8 +282,8 @@ function balance(root, src, pageHeight) {
     const last = base.pages.length - 1;
     for (let i = 1; i <= SAMPLES; i++) {
       const extra = (range * i) / SAMPLES;
-      consider(paginateOne(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
-      consider(paginateOne(root, src, (p) => (p > 0 && p === last - 1 ? extra : 0), byRows, cut));
+      consider(paginateLegal(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
+      consider(paginateLegal(root, src, (p) => (p > 0 && p === last - 1 ? extra : 0), byRows, cut));
     }
   }
   // Measure the ornament with the exact closing-page styles; a percentage of
@@ -315,8 +348,8 @@ function widows(plan, kinds = ['menu', 'ticket']) {
 function score(plan) {
   let s = plan.pages.length * 4 + widows(plan) * 100;
   plan.pages.forEach((segs, i) => {
-    // A closing page with only the credits is too sparse: prefer the tips to move over.
-    if (isClosing(segs) && !segs.some((seg) => seg.kind === 'tips')) s += 1.5;
+    // Credits alone are centred with an ornament when it fits. Do not pull
+    // tips off a method page just to decorate an already composed closing.
     if (isClosing(segs)) return;
     const gap = Math.max(0, 0.62 - plan.used[i]);
     s += gap * gap * 10;

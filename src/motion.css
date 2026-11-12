@@ -129,3 +129,16 @@
 
   .controls--narrow { transition: opacity 150ms var(--ease-out); }
 }
+
+/* The control bar is its own layer during a text swap: it never ghosts. */
+.controls--narrow,
+.controls--wide .ctl-middle {
+  view-transition-name: book-controls;
+}
+::view-transition-group(book-controls),
+::view-transition-new(book-controls) {
+  animation: none;
+}
+::view-transition-old(book-controls) {
+  display: none;
+}

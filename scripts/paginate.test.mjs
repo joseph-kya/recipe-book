@@ -47,7 +47,7 @@ class Block {
 
 globalThis.document = { createElement: () => new Block() };
 
-function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90, 90], credits = 100, ornament } = {}) {
+function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90, 90], tipHeights = [], credits = 100, ornament } = {}) {
   const root = new Block();
   const src = new Block('', 0, { src: 'recipe' });
   const running = new Block('', 25, { unit: 'running' });
@@ -66,7 +66,9 @@ function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90,
   const steps = new Block('steps');
   stepHeights.forEach((height, i) => steps.append(new Block('step', height, { step: String(i) })));
   method.append(steps);
-  src.append(running, header, menu, method, new Block('credits', credits, { unit: 'credits' }));
+  const tips = new Block('tips', 0, { card: 'tips' });
+  tipHeights.forEach((height, i) => tips.append(new Block('tip', height, { tip: String(i) })));
+  src.append(running, header, menu, method, tips, new Block('credits', credits, { unit: 'credits' }));
   if (ornament) src.append(new Block('closing-cupcake', ornament));
   root.append(src);
   return paginate(root).recipe;
@@ -78,6 +80,28 @@ test('a nine-row group leaves three continuing rows and fills the left page with
   const parts = ingredients(recipe());
   assert.deepEqual(parts.map((part) => part.items.length), [6, 3]);
   assert.deepEqual(parts.flatMap((part) => part.items), Array.from({ length: 9 }, (_, i) => [0, i]));
+});
+
+test('a later group boundary cannot steal a fitting sixth row from the first page', () => {
+  // Six rows fit below the hero. Greedy placement then puts just one row of
+  // the final group on page two; moving that group fixes it locally. The old
+  // first-page-only search instead chose five rows to avoid that later split.
+  const parts = ingredients(recipe({ hero: 210, groups: [9, 6, 4], row: 59 }));
+  assert.deepEqual(parts.map((part) => part.items.length), [6, 9, 4]);
+  assert.deepEqual(parts[1].items, [
+    ...Array.from({ length: 3 }, (_, i) => [0, i + 6]),
+    ...Array.from({ length: 6 }, (_, i) => [1, i]),
+  ]);
+});
+
+test('fitting tips stay beneath the last steps instead of filling a credits closing page', () => {
+  const plan = recipe({ hero: 100, groups: [3], stepHeights: [180, 180, 180, 150, 150],
+    tipHeights: [100, 100], credits: 300, ornament: 72 });
+  assert.equal(plan.length, 4);
+  assert.deepEqual(plan[2].map((seg) => [seg.kind, seg.items]), [
+    ['ticket', [3, 4]], ['tips', [0, 1]],
+  ]);
+  assert.deepEqual(plan[3].map((seg) => seg.kind), ['ornament', 'credits']);
 });
 
 test('a card that fits stays whole on the left', () => {

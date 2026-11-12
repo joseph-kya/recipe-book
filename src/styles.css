@@ -38,6 +38,42 @@
   font-display: swap;
 }
 
+/* Metric-matched fallbacks: until the web fonts arrive, Arial is sized and spaced
+   to the same width, ascent and descent, so the swap does not shift the layout.
+   Values measured in the browser against the real fonts. */
+@font-face {
+  font-family: 'Shrikhand Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  size-adjust: 111.16%;
+  ascent-override: 92.66%;
+  descent-override: 38.68%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Lilita One Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  size-adjust: 88.76%;
+  ascent-override: 103.65%;
+  descent-override: 24.79%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Kalam Fallback';
+  src: local('Arial'), local('ArialMT');
+  size-adjust: 96.21%;
+  ascent-override: 110.18%;
+  descent-override: 55.09%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Nunito Fallback';
+  src: local('Arial'), local('ArialMT');
+  size-adjust: 101.8%;
+  ascent-override: 99.21%;
+  descent-override: 34.38%;
+  line-gap-override: 0%;
+}
+
 /* ---------- tokens ---------- */
 :root {
   --cherry: #c8233a;
@@ -51,10 +87,10 @@
   --cue: #6b4a36;
   --choc-soft: #4a3022;
 
-  --display: 'Shrikhand', 'Georgia', serif;
-  --badge: 'Lilita One', 'Arial Rounded MT Bold', sans-serif;
-  --hand: 'Kalam', 'Comic Sans MS', cursive;
-  --body: 'Nunito', system-ui, sans-serif;
+  --display: 'Shrikhand', 'Shrikhand Fallback', serif;
+  --badge: 'Lilita One', 'Lilita One Fallback', sans-serif;
+  --hand: 'Kalam', 'Kalam Fallback', cursive;
+  --body: 'Nunito', 'Nunito Fallback', sans-serif;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press: 160ms;

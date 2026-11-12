@@ -89,7 +89,6 @@ export function useLang() {
 
   useEffect(() => {
     document.documentElement.lang = lang;
-    document.title = ui[lang].bookTitleFlat;
   }, [lang]);
 
   const setLang = useCallback((next) => {

@@ -337,6 +337,16 @@ export default function Book({ lang, setLang }) {
     return Math.acos(e) / A;
   };
 
+  // The tab names the page you are on, in the current language.
+  useEffect(() => {
+    const t = ui[lang];
+    const sp = spreads[index];
+    if (!sp) return;
+    const page =
+      sp.kind === 'recipe' ? textFor(sp.recipe, lang).text.title : sp.kind === 'contents' ? t.contents : null;
+    document.title = page ? `${page} – ${t.bookTitleFlat}` : t.bookTitleFlat;
+  }, [index, lang, spreads]);
+
   /* ---------- phone control bar: away while reading down, back on any sign of need ---------- */
 
   // Every new page starts with the bar in view.

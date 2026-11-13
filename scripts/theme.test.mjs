@@ -162,3 +162,28 @@ test('cover cupcake bites are noticeably big, finish on the last bite, celebrate
     assert.match(styles, new RegExp(`@media \\(prefers-reduced-motion: reduce\\)[\\s\\S]*${name === 'cupcake-chomp' ? 'cover-cupcake--bitten' : name === 'cupcake-fresh' ? 'cover-cupcake--fresh' : name === 'cupcake-crumb-pop' ? 'cover-crumb' : name === 'cupcake-gone-pop' ? 'cover-cupcake-gone' : 'cover-cupcake-reply'}[\\s\\S]*animation:\\s*none;`));
   }
 });
+
+test('monochrome palettes have one accent and otherwise neutral tokens', () => {
+  for (const id of ['paper', 'ink']) {
+    const t = THEMES[id];
+    assert.equal(t.coverBtn, t.accent);
+    assert.equal(t.cupcakeCherry, t.accent);
+    for (const [key, value] of Object.entries(t)) {
+      if (['accent', 'coverBtn', 'cupcakeCherry'].includes(key)) continue;
+      const channels = value.slice(1).match(/../g);
+      assert.equal(new Set(channels).size, 1, `${id}.${key} must be grayscale`);
+    }
+  }
+});
+
+test('pre-paint ignores a retired saved colourway', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const changes = [];
+  new Function('localStorage', 'document', script)(
+    { getItem: () => 'after' + 'hours' },
+    { documentElement: { setAttribute: (...args) => changes.push(args) },
+      querySelector: () => ({ setAttribute: (...args) => changes.push(args) }) },
+  );
+  assert.deepEqual(changes, [], 'unknown saved values retain the default first paint');
+});

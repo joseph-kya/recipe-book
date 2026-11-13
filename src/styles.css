@@ -242,6 +242,7 @@ button {
   inset: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  overflow-anchor: none;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--ink) 35%, transparent) transparent;
@@ -1163,8 +1164,23 @@ button {
   flex: 0 1 auto;
   max-width: 100%;
   margin-left: auto;
+  display: inline-grid;
+  justify-items: end;
+  align-items: start;
   text-align: right;
   overflow-wrap: normal;
+}
+
+.ing-how-live,
+.ing-how-sizer {
+  grid-area: 1 / 1;
+}
+
+.ing-how-sizer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Cups and spoons are the number you read. Metric is the footnote. */
@@ -1258,6 +1274,7 @@ button {
   grid-column: 2;
   grid-row: 1;
   margin: 0;
+  align-items: baseline;
 }
 
 .book--wide .ing-note {
@@ -1910,6 +1927,20 @@ button {
   transform-origin: center center;
 }
 
+.ctl-flip--in {
+  grid-area: 1 / 1;
+}
+
+.unit-btn .ctl-flip-box::after {
+  content: 'Tassen';
+  content: 'Tassen' / '';
+  grid-area: 1 / 1;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .ctl-flip--out {
   position: absolute;
   inset-inline: -1.5rem;
@@ -2054,9 +2085,24 @@ button {
   min-height: 3rem;
 }
 
+.controls--wide .ctl--contents .ctl-label {
+  grid-area: 1 / 1;
+}
+
+.controls--wide .ctl--contents::after {
+  content: 'Contents';
+  content: 'Contents' / '';
+  grid-area: 1 / 1;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .controls--wide .ctl-count {
   display: grid;
   place-items: center;
+  min-width: 3.2rem;
   font-variant-numeric: tabular-nums;
 }
 

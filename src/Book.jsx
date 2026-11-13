@@ -7,7 +7,7 @@ import { useScales } from './useScale.js';
 import { RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband, unRubberband, rubberbandVelocity } from './spring.js';
 import Controls from './Controls.jsx';
-import { enterPage, transition } from './motion.js';
+import { enterPage, swapContent, transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
@@ -35,6 +35,20 @@ function useMedia(query) {
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+const ANCHOR_SELECTOR =
+  '[data-unit="hero"], .menu-head, [data-item], .ticket-head, [data-step], [data-tip], [data-unit="macros"], [data-unit="credits"], [data-unit="photo"], .toc-link[href]';
+
+function anchorSelectorFor(el) {
+  if (el.dataset.item) return `[data-item="${el.dataset.item}"]`;
+  if (el.dataset.step) return `[data-step="${el.dataset.step}"]`;
+  if (el.dataset.tip) return `[data-tip="${el.dataset.tip}"]`;
+  if (el.dataset.unit) return `[data-unit="${el.dataset.unit}"]`;
+  if (el.classList.contains('toc-link')) return `.toc-link[href="${el.getAttribute('href')}"]`;
+  if (el.classList.contains('menu-head')) return '.menu-head';
+  if (el.classList.contains('ticket-head')) return '.ticket-head';
+  return null;
+}
+
 export default function Book({ lang, setLang, units, setUnits }) {
   const wide = useMedia(WIDE_QUERY);
   const reduce = useMedia(REDUCE_QUERY);
@@ -52,6 +66,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const measureRef = useRef(null);
   const faceEls = useRef(new Map());
   const entered = useRef(new Set());
+  const swapAnimRef = useRef(null);
+  const prevLocaleRef = useRef({ lang, units });
+  const pendingSwapRef = useRef(null);
+  const scrollAnchorRef = useRef(null);
 
   // The engine's live state. React state above only decides which faces exist.
   const s = useRef({
@@ -68,10 +86,14 @@ export default function Book({ lang, setLang, units, setUnits }) {
     spreads,
     key: layoutKey,
     plans: null,
+    planVersion: 0,
+    repaginating: false,
+    planCache: new Map(),
   }).current;
   s.wide = wide;
   s.reduce = reduce;
   s.lang = lang;
+  s.scales = scales;
   const last = () => s.spreads.length - 1;
 
   /* ---------- painting: transform + opacity only, straight onto the faces ---------- */
@@ -248,19 +270,60 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   /* ---------- pagination (wide) ---------- */
 
-  const runPaginate = useCallback(() => {
-    if (!s.wide || !measureRef.current) return;
-    const next = paginate(measureRef.current);
-    if (JSON.stringify(next) === JSON.stringify(s.plans)) return;
-    s.plans = next;
-    setPlans(next);
-    setPlanVersion((v) => v + 1);
-  }, [s]);
+  const applySpreads = useCallback(
+    (nextSpreads, nextKey) => {
+      const old = s.spreads;
+      if (old === nextSpreads || s.key === nextKey) return;
+      const oldIndex = destination();
+      if (s.anim) s.anim.stop();
+      s.anim = null;
+      s.pendingTarget = null;
+      s.drag = null;
+      bookRef.current?.classList.remove('is-dragging');
+      s.turn = null;
+      s.p = 0;
+      const was = old[oldIndex] || old[0];
+      s.spreads = nextSpreads;
+      s.key = nextKey;
+      const base = firstIndexFor(nextSpreads, was.route);
+      const count = nextSpreads.filter((x) => x.route === was.route).length;
+      const k = base + Math.min(was.offset || 0, count - 1);
+      s.index = k;
+      setTurn(null);
+      setFade(null);
+      setIndex(k);
+      if (history.state) history.replaceState({ k, key: nextKey }, '', location.hash || '#/');
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [s],
+  );
 
-  // Measure before paint, again when the language changes.
+  const runPaginate = useCallback(() => {
+    const root = measureRef.current;
+    if (!s.wide || !root) return false;
+    const fontsReady = document.fonts?.status === 'loaded' ? 1 : 0;
+    const cacheKey = `${s.lang}|${root.clientWidth}x${root.clientHeight}|${JSON.stringify(s.scales)}|${fontsReady}`;
+    let next = s.planCache.get(cacheKey);
+    if (!next) {
+      next = paginate(root);
+      s.planCache.set(cacheKey, next);
+    }
+    if (JSON.stringify(next) === JSON.stringify(s.plans)) return false;
+    const nextVersion = s.planVersion + 1;
+    const nextKey = `w${nextVersion}`;
+    s.plans = next;
+    s.planVersion = nextVersion;
+    setPlans(next);
+    setPlanVersion(nextVersion);
+    applySpreads(buildSpreads(true, next), nextKey);
+    return true;
+  }, [s, applySpreads]);
+
+  // Measure before paint, again when the language or portion scale changes.
+  // Units (cups <-> g) reserve both sizes in CSS and never alter pagination.
   useLayoutEffect(() => {
-    if (wide) runPaginate();
-  }, [wide, lang, units, scales, runPaginate]);
+    s.repaginating = wide ? runPaginate() : false;
+  }, [wide, lang, scales, runPaginate, s]);
 
   // ...and once the real fonts are in, and after every resize.
   useEffect(() => {
@@ -283,29 +346,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
   // New layout (phone ↔ spread, or a new pagination): stay on the same recipe,
   // as close to the same page as the new layout allows.
   useLayoutEffect(() => {
-    const old = s.spreads;
-    if (old === spreads) return;
-    const oldIndex = destination();
-    if (s.anim) s.anim.stop();
-    s.anim = null;
-    s.pendingTarget = null;
-    s.drag = null;
-    bookRef.current?.classList.remove('is-dragging');
-    s.turn = null;
-    s.p = 0;
-    const was = old[oldIndex] || old[0];
-    s.spreads = spreads;
-    s.key = layoutKey;
-    const base = firstIndexFor(spreads, was.route);
-    const count = spreads.filter((x) => x.route === was.route).length;
-    const k = base + Math.min(was.offset || 0, count - 1);
-    s.index = k;
-    setTurn(null);
-    setFade(null);
-    setIndex(k);
-    if (history.state) history.replaceState({ k, key: layoutKey }, '', location.hash || '#/');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spreads, layoutKey]);
+    applySpreads(spreads, layoutKey);
+  }, [spreads, layoutKey, applySpreads]);
 
   // Faces changed: repaint at the current progress, start any pending turn.
   useLayoutEffect(() => {
@@ -328,6 +370,50 @@ export default function Book({ lang, setLang, units, setUnits }) {
     const root = bookRef.current?.querySelector(`.face--rest .${kind === 'cover' ? 'cover' : 'contents'}`);
     return enterPage(root, kind);
   }, [index, turn, wide, reduce, s]);
+
+  // After a language or unit switch settles (including any wide repagination),
+  // restore the phone reading anchor without hiding the bar and animate the
+  // swapped words/amounts cleanly in-place.
+  useLayoutEffect(() => {
+    const prev = prevLocaleRef.current;
+    if (prev.lang !== lang) pendingSwapRef.current = 'lang';
+    else if (prev.units !== units) pendingSwapRef.current = 'units';
+    prevLocaleRef.current = { lang, units };
+
+    if (s.repaginating) {
+      s.repaginating = false;
+      return;
+    }
+    if (!pendingSwapRef.current) return;
+    const kind = pendingSwapRef.current;
+    pendingSwapRef.current = null;
+
+    if (!wide) {
+      const scroller = bookRef.current?.querySelector('.face--rest .face-scroll');
+      if (scroller) {
+        s.suppressScrollUntil = performance.now() + 100;
+        const anchor = scrollAnchorRef.current;
+        scrollAnchorRef.current = null;
+        if (kind === 'lang' && anchor && scroller.scrollTop > 0) {
+          const target = scroller.querySelector(anchor.selector);
+          if (target) {
+            const dy = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.offset;
+            if (Math.abs(dy) > 0.5) scroller.scrollTop = Math.max(0, scroller.scrollTop + dy);
+          }
+        }
+        s.scrollMark = scroller.scrollTop;
+      } else {
+        scrollAnchorRef.current = null;
+      }
+      setBarAway(false);
+    } else {
+      scrollAnchorRef.current = null;
+    }
+
+    if (turn) return;
+    const restFaces = [...(bookRef.current?.querySelectorAll('.face--rest') || [])];
+    swapContent(restFaces, kind, swapAnimRef);
+  }, [lang, units, spreads, index, wide, turn, reduce, s]);
 
   // Back / forward and plain #/ links.
   useEffect(() => {
@@ -401,6 +487,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const onFaceScroll = (e) => {
     const el = e.currentTarget;
     const y = el.scrollTop;
+    if (s.suppressScrollUntil && performance.now() < s.suppressScrollUntil) {
+      s.scrollMark = y;
+      return;
+    }
     const atEnd = y + el.clientHeight >= el.scrollHeight - 24;
     if (atEnd || y < 64) {
       s.scrollMark = y;
@@ -604,7 +694,46 @@ export default function Book({ lang, setLang, units, setUnits }) {
   useEffect(() => () => {
     s.anim?.stop();
     s.rbAnim?.stop();
+    swapAnimRef.current?.cancel();
   }, [s]);
+
+  const captureScrollAnchor = useCallback(() => {
+    if (s.wide) return;
+    const scroller = bookRef.current?.querySelector('.face--rest .face-scroll');
+    if (!scroller || scroller.scrollTop <= 0) {
+      scrollAnchorRef.current = null;
+      return;
+    }
+    const viewTop = scroller.getBoundingClientRect().top;
+    const nodes = scroller.querySelectorAll(ANCHOR_SELECTOR);
+    for (const node of nodes) {
+      const rect = node.getBoundingClientRect();
+      if (rect.height > 0 && rect.bottom > viewTop + 8) {
+        const selector = anchorSelectorFor(node);
+        if (selector) {
+          scrollAnchorRef.current = { selector, offset: rect.top - viewTop };
+          return;
+        }
+      }
+    }
+    scrollAnchorRef.current = null;
+  }, [s]);
+
+  const handleSetLang = useCallback(
+    (next) => {
+      captureScrollAnchor();
+      setLang(next);
+    },
+    [captureScrollAnchor, setLang],
+  );
+
+  const handleSetUnits = useCallback(
+    (next) => {
+      if (!s.wide) s.suppressScrollUntil = performance.now() + 100;
+      setUnits(next);
+    },
+    [s, setUnits],
+  );
 
   /* ---------- which faces exist right now ---------- */
 
@@ -612,8 +741,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const add = (idx, side, role) => {
     const sp = spreads[idx];
     const content = sp && renderFace(sp[side], lang, units);
-    // Repaginating recipes must not remount the fixed opening pages mid-entry.
-    const key = sp?.kind === 'recipe' ? `${layoutKey}-${idx}-${side}` : `${wide}-${sp?.kind}-${side}`;
+    // Key recipe faces by recipe + spread offset + side (not layoutKey or idx) so
+    // EN<->DE or cups<->g repagination updates content in-place without remounting.
+    const baseKey = sp?.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp?.kind}-${side}`;
+    const key = role === 'fading' ? `fade-${baseKey}` : baseKey;
     if (content) faces.push({ key, idx, side, role, content });
   };
   if (turn) {
@@ -692,9 +823,9 @@ export default function Book({ lang, setLang, units, setUnits }) {
       )}
       <Controls
         lang={lang}
-        setLang={setLang}
+        setLang={handleSetLang}
         units={units}
-        setUnits={setUnits}
+        setUnits={handleSetUnits}
         index={activeIndex}
         last={spreads.length - 1}
         wide={wide}

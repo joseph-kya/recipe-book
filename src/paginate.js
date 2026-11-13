@@ -30,186 +30,349 @@ function newPageBox(root, src, pageIndex, slackFor) {
   };
 }
 
+// Measure every block, head, group, row, step and tip of one recipe in a
+// single DOM layout pass instead of forcing thousands of synchronous layouts
+// across candidate page-break searches.
+function measureRecipe(root, src, pageHeight) {
+  const face = el('face face--L');
+  const body = el('page-body recipe');
+  const top = el('checkers checkers--choc checkers--top');
+  const pad = el('page-pad');
+  body.append(top, pad);
+  face.append(body);
+  root.append(face);
+
+  const runningSrc = src.querySelector('[data-unit="running"]');
+  const heroSrc = src.querySelector('[data-unit="hero"]');
+  const menuSrc = src.querySelector('[data-card="menu"]');
+  const ticketSrc = src.querySelector('[data-card="ticket"]');
+  const tipsSrc = src.querySelector('[data-card="tips"]');
+  const macrosSrc = src.querySelector('[data-unit="macros"]');
+  const creditsSrc = src.querySelector('[data-unit="credits"]');
+
+  const running = runningSrc?.cloneNode(true);
+  const hero = heroSrc?.cloneNode(true);
+  const menu = menuSrc?.cloneNode(true);
+  const ticket = ticketSrc?.cloneNode(true);
+  const tips = tipsSrc?.cloneNode(true);
+  const macros = macrosSrc?.cloneNode(true);
+  const credits = creditsSrc?.cloneNode(true);
+
+  for (const node of [running, hero, menu, ticket, tips, macros, credits]) {
+    if (node) pad.append(node);
+  }
+
+  const faceH = face.clientHeight || pageHeight;
+  const topH = top.offsetHeight;
+  const padCS = getComputedStyle(pad);
+  const padPadY = parseFloat(padCS.paddingTop) + parseFloat(padCS.paddingBottom);
+
+  const runningH = running
+    ? running.offsetHeight + parseFloat(getComputedStyle(running).marginBottom)
+    : 0;
+  const heroH = hero ? hero.offsetHeight : 0;
+
+  let menuMetrics = null;
+  if (menu) {
+    const cs = getComputedStyle(menu);
+    const normalHeads = [...menu.querySelectorAll(':scope > [data-head="normal"]')];
+    const contHeads = [...menu.querySelectorAll(':scope > [data-head="cont"]')];
+    const headHeight = (els) => {
+      if (!els.length) return 0;
+      const last = els.at(-1);
+      const firstMT = parseFloat(getComputedStyle(els[0]).marginTop);
+      const lastMB = parseFloat(getComputedStyle(last).marginBottom);
+      return last.offsetTop + last.offsetHeight - els[0].offsetTop + firstMT + lastMB;
+    };
+    const groupEls = [...menu.querySelectorAll('.ing-group')];
+    const groupGap = groupEls.length > 1 ? parseFloat(getComputedStyle(groupEls[1]).marginTop) : 0;
+    const groups = groupEls.map((g) => {
+      const titleEl = g.querySelector('.ing-group-title');
+      const items = [...g.querySelectorAll('[data-item]')].map((li) => {
+        const [gi, ii] = li.dataset.item.split(':').map(Number);
+        const h = li.offsetHeight;
+        const borderTop = parseFloat(getComputedStyle(li).borderTopWidth);
+        return { id: [gi, ii], h, borderTop };
+      });
+      return {
+        h: g.offsetHeight,
+        titleH: titleEl ? titleEl.offsetHeight : 0,
+        ids: items.map((x) => x.id),
+        items,
+      };
+    });
+    const rows = groups.flatMap((g, gIdx) =>
+      g.items.map((item) => ({ ...item, titleH: g.titleH, gIdx })),
+    );
+    menuMetrics = {
+      marginTop: parseFloat(cs.marginTop),
+      chrome:
+        parseFloat(cs.borderTopWidth) +
+        parseFloat(cs.borderBottomWidth) +
+        parseFloat(cs.paddingTop) +
+        parseFloat(cs.paddingBottom),
+      normalHeadH: headHeight(normalHeads),
+      contHeadH: headHeight(contHeads),
+      groupGap,
+      groups,
+      rows,
+    };
+  }
+
+  let ticketMetrics = null;
+  if (ticket) {
+    const cs = getComputedStyle(ticket);
+    const normalHeads = [...ticket.querySelectorAll(':scope > [data-head="normal"]')];
+    const contHeads = [...ticket.querySelectorAll(':scope > [data-head="cont"]')];
+    const headHeight = (els) => {
+      if (!els.length) return 0;
+      const last = els.at(-1);
+      const firstMT = parseFloat(getComputedStyle(els[0]).marginTop);
+      const lastMB = parseFloat(getComputedStyle(last).marginBottom);
+      return last.offsetTop + last.offsetHeight - els[0].offsetTop + firstMT + lastMB;
+    };
+    const steps = [...ticket.querySelectorAll('[data-step]')].map((li) => ({
+      id: Number(li.dataset.step),
+      h: li.offsetHeight,
+    }));
+    ticketMetrics = {
+      marginTop: parseFloat(cs.marginTop),
+      chrome:
+        parseFloat(cs.borderTopWidth) +
+        parseFloat(cs.borderBottomWidth) +
+        parseFloat(cs.paddingTop) +
+        parseFloat(cs.paddingBottom),
+      normalHeadH: headHeight(normalHeads),
+      contHeadH: headHeight(contHeads),
+      steps,
+    };
+  }
+
+  let tipsMetrics = null;
+  if (tips) {
+    const cs = getComputedStyle(tips);
+    const items = [...tips.querySelectorAll('[data-tip]')].map((t) => ({
+      id: Number(t.dataset.tip),
+      h: t.offsetHeight,
+    }));
+    const cols = Math.max(1, cs.gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length);
+    tipsMetrics = {
+      marginTop: parseFloat(cs.marginTop),
+      cols,
+      rowGap: parseFloat(cs.rowGap) || 0,
+      items,
+    };
+  }
+
+  let macrosMetrics = null;
+  if (macros) {
+    macrosMetrics = {
+      marginTop: parseFloat(getComputedStyle(macros).marginTop),
+      h: macros.offsetHeight,
+    };
+  }
+
+  let creditsMetrics = null;
+  if (credits) {
+    const cs = getComputedStyle(credits);
+    const trim = parseFloat(cs.borderTopWidth) + parseFloat(cs.paddingTop);
+    creditsMetrics = {
+      marginTop: parseFloat(cs.marginTop),
+      h: credits.offsetHeight,
+      afterRunningH: credits.offsetHeight - trim,
+    };
+  }
+
+  face.remove();
+  return {
+    faceH,
+    topH,
+    padPadY,
+    runningH,
+    heroH,
+    menu: menuMetrics,
+    ticket: ticketMetrics,
+    tips: tipsMetrics,
+    macros: macrosMetrics,
+    credits: creditsMetrics,
+  };
+}
+
 // `cut`: when the card is split anyway, end its first piece after this many
 // units (rows or groups) so the right page has room for the method too.
-function paginateOne(root, src, slack = 0, byRows = false, cut = null, menuBreaks = []) {
+function paginateOne(m, slack = 0, byRows = false, cut = null, menuBreaks = []) {
   const pages = [];
-  const used = []; // how full each page ends up, for balancing
-  let overflow = false; // a block had to go in taller than its page
+  const used = [];
+  let overflow = false;
   let segs = [];
-  let box = newPageBox(root, src, 0, slack);
+  let blockH = 0;
+
+  const pageSlack = (idx) => (typeof slack === 'function' ? slack(idx) : slack);
+  const currentPadH = (extra = 0) => m.padPadY + (pages.length > 0 ? m.runningH : 0) + blockH + extra;
+  const fits = (extra = 0) => m.topH + currentPadH(extra) + pageSlack(pages.length) <= m.faceH + 0.5;
+  const pageUsed = () => (m.topH + currentPadH()) / m.faceH;
 
   const nextPage = () => {
     pages.push(segs);
-    used.push(box.used());
-    box.face.remove();
+    used.push(pageUsed());
     segs = [];
-    box = newPageBox(root, src, pages.length, slack);
+    blockH = 0;
   };
 
-  // A block that moves as one piece.
-  const placeAtom = (node, seg) => {
-    if (!node) return;
-    let c = node.cloneNode(true);
-    box.pad.append(c);
-    if (!box.fits() && segs.length) {
-      c.remove();
+  const placeAtom = (exists, h, marginTop, seg, afterRunningH = h) => {
+    if (!exists) return;
+    const isFirst = segs.length === 0;
+    const addedFirst = isFirst ? (pages.length > 0 ? afterRunningH : h) : marginTop + h;
+    if (!fits(addedFirst) && segs.length) {
       nextPage();
-      c = node.cloneNode(true);
-      box.pad.append(c);
+      const onFresh = pages.length > 0 ? afterRunningH : h;
+      blockH += onFresh;
+      segs.push(seg);
+      if (!fits()) overflow = true;
+      return;
     }
+    blockH += addedFirst;
     segs.push(seg);
-    if (!box.fits()) overflow = true;
+    if (!fits()) overflow = true;
   };
 
-  // A card (ingredients or method) whose rows may run across pages.
-  const placeCard = (card, kind, units, appendUnit, limit = null) => {
-    if (!card || !units.length) return;
-    const normalHead = [...card.querySelectorAll(':scope > [data-head="normal"]')];
-    const contHead = [...card.querySelectorAll(':scope > [data-head="cont"]')];
-    let shell = null;
+  const placeCard = (kind, units, meta, stepDelta, limit = null) => {
+    if (!meta || !units.length) return;
+    let cardBase = 0;
+    let cardContent = 0;
     let seg = null;
     let ctx = null;
     let placed = 0;
 
     const open = () => {
-      shell = card.cloneNode(false);
-      for (const h of placed ? contHead : normalHead) shell.append(h.cloneNode(true));
-      box.pad.append(shell);
+      const marginTop = segs.length > 0 ? meta.marginTop : 0;
+      const headH = placed ? meta.contHeadH : meta.normalHeadH;
+      cardBase = marginTop + meta.chrome + headH;
+      cardContent = 0;
+      ctx = {};
       seg = { kind, cont: placed > 0, items: [] };
       segs.push(seg);
-      ctx = {};
     };
 
     for (const u of units) {
-      if (!shell) open();
-      let added = appendUnit(shell, ctx, u);
-      const forced = (limit !== null && pages.length === 0 && placed >= limit) ||
+      if (!seg) open();
+      const delta = stepDelta(ctx, u, false);
+      const forced =
+        (limit !== null && pages.length === 0 && placed >= limit) ||
         (kind === 'menu' && menuBreaks.includes(placed));
-      if (forced || !box.fits()) {
-        for (const n of added) n.remove();
+      if (forced || !fits(cardBase + cardContent + delta)) {
         const pageHadOtherBlocks = segs.length > 1 || seg.items.length > 0;
         if (pageHadOtherBlocks) {
-          if (!seg.items.length) {
-            // The head would be left alone at the bottom: take it along.
-            shell.remove();
-            segs.pop();
-          }
+          if (!seg.items.length) segs.pop();
+          else blockH += cardBase + cardContent;
           nextPage();
           open();
         }
-        // On a fresh page it goes in even if it is taller than a page.
-        added = appendUnit(shell, ctx, u);
-        if (!box.fits()) overflow = true;
+        cardContent += stepDelta(ctx, u, true);
+        if (!fits(cardBase + cardContent)) overflow = true;
+      } else {
+        cardContent += stepDelta(ctx, u, true);
       }
       if (u.ids) seg.items.push(...u.ids);
       else seg.items.push(u.id);
       placed++;
     }
+    if (seg && seg.items.length) blockH += cardBase + cardContent;
   };
 
-  // Ingredients. Cookbook rule: the whole card sits on the left page under the
-  // header; a card too long for that splits only between its groups (dough /
-  // filling / icing), the rest continuing at the top of the right page. Rows are
-  // the unit only as a last resort, when a group itself cannot fit (`byRows`).
-  const menu = src.querySelector('[data-card="menu"]');
-  const menuRows = menu
-    ? [...menu.querySelectorAll('[data-item]')].map((li) => {
-        const [gi, ii] = li.dataset.item.split(':').map(Number);
-        return { id: [gi, ii], li, group: li.closest('.ing-group') };
-      })
-    : [];
-  const menuGroups = menu
-    ? [...menu.querySelectorAll('.ing-group')].map((group) => ({
-        group,
-        ids: [...group.querySelectorAll('[data-item]')].map((li) => li.dataset.item.split(':').map(Number)),
-      }))
-    : [];
-  placeAtom(src.querySelector('[data-unit="hero"]'), { kind: 'hero' });
-  if (!byRows) {
-    placeCard(
-      menu,
-      'menu',
-      menuGroups,
-      (shell, ctx, u) => {
-        const g = u.group.cloneNode(true);
-        shell.append(g);
-        return [g];
-      },
-      cut,
-    );
-  } else placeCard(menu, 'menu', menuRows, (shell, ctx, u) => {
-    const li = u.li.cloneNode(true);
-    if (ctx.gi === u.id[0]) {
-      ctx.list.append(li);
-      return [li];
-    }
-    const g = u.group.cloneNode(false);
-    const title = u.group.querySelector('.ing-group-title');
-    if (title && u.id[1] === 0) g.append(title.cloneNode(true));
-    ctx.list = u.group.querySelector('.ing-list').cloneNode(false);
-    ctx.list.append(li);
-    g.append(ctx.list);
-    shell.append(g);
-    ctx.gi = u.id[0];
-    // Rolling back the first row of a group takes the group (and its title) with it.
-    return [{ remove: () => (g.remove(), (ctx.gi = undefined)) }];
-  }, cut);
+  placeAtom(m.heroH > 0, m.heroH, 0, { kind: 'hero' });
 
-  // The method opens the right page when the whole card fit on the left one.
-  // (After a continuation it follows on the same page if its head and first
-  // step fit, else it starts the next spread: placeCard's keep-with-next.)
+  if (m.menu) {
+    if (!byRows) {
+      placeCard(
+        'menu',
+        m.menu.groups,
+        m.menu,
+        (ctx, g, commit) => {
+          const delta = (ctx.count ? m.menu.groupGap : 0) + g.h;
+          if (commit) ctx.count = (ctx.count || 0) + 1;
+          return delta;
+        },
+        cut,
+      );
+    } else {
+      placeCard(
+        'menu',
+        m.menu.rows,
+        m.menu,
+        (ctx, row, commit) => {
+          let delta = 0;
+          if (ctx.gi === row.id[0]) {
+            delta = row.borderTop ? row.h : row.h;
+          } else {
+            const firstRowH = row.h - row.borderTop;
+            const titleH = row.id[1] === 0 ? row.titleH : 0;
+            delta = (ctx.gi !== undefined ? m.menu.groupGap : 0) + titleH + firstRowH;
+            if (commit) ctx.gi = row.id[0];
+          }
+          return delta;
+        },
+        cut,
+      );
+    }
+  }
+
   if (pages.length === 0) nextPage();
 
-  // Method: one list of numbered steps.
-  const ticket = src.querySelector('[data-card="ticket"]');
-  const stepUnits = ticket
-    ? [...ticket.querySelectorAll('[data-step]')].map((li) => ({ id: Number(li.dataset.step), li }))
-    : [];
-  const steps = ticket?.querySelector('.steps');
-  placeCard(ticket, 'ticket', stepUnits, (shell, ctx, u) => {
-    if (!ctx.list) {
-      ctx.list = steps.cloneNode(false);
-      shell.append(ctx.list);
-    }
-    const li = u.li.cloneNode(true);
-    ctx.list.append(li);
-    return [li];
-  });
+  if (m.ticket) {
+    placeCard('ticket', m.ticket.steps, m.ticket, (_ctx, step) => step.h);
+  }
 
-  // Tips: each card moves whole, but two cards may sit on different pages.
-  const tips = src.querySelector('[data-card="tips"]');
-  const tipUnits = tips ? [...tips.querySelectorAll('[data-tip]')].map((el) => ({ id: Number(el.dataset.tip), li: el })) : [];
-  placeCard(tips, 'tips', tipUnits, (shell, ctx, u) => {
-    const card = u.li.cloneNode(true);
-    shell.append(card);
-    return [card];
-  });
-  placeAtom(src.querySelector('[data-unit="macros"]'), { kind: 'macros' });
-  placeAtom(src.querySelector('[data-unit="credits"]'), { kind: 'credits' });
+  if (m.tips) {
+    placeCard('tips', m.tips.items, { marginTop: m.tips.marginTop, chrome: 0, normalHeadH: 0, contHeadH: 0 }, (ctx, tip, commit) => {
+      const idx = ctx.items ? ctx.items.length : 0;
+      let delta = 0;
+      if (m.tips.cols >= 2) {
+        const col = idx % m.tips.cols;
+        if (col === 0) {
+          delta = (idx > 0 ? m.tips.rowGap : 0) + tip.h;
+          if (commit) {
+            ctx.rowMax = tip.h;
+            (ctx.items ||= []).push(tip.h);
+          }
+        } else {
+          delta = Math.max(0, tip.h - (ctx.rowMax || 0));
+          if (commit) {
+            ctx.rowMax = Math.max(ctx.rowMax || 0, tip.h);
+            ctx.items.push(tip.h);
+          }
+        }
+      } else {
+        delta = (idx > 0 ? m.tips.rowGap : 0) + tip.h;
+        if (commit) (ctx.items ||= []).push(tip.h);
+      }
+      return delta;
+    });
+  }
+
+  if (m.macros) placeAtom(true, m.macros.h, m.macros.marginTop, { kind: 'macros' });
+  if (m.credits) placeAtom(true, m.credits.h, m.credits.marginTop, { kind: 'credits' }, m.credits.afterRunningH);
 
   pages.push(segs);
-  used.push(box.used());
-  box.face.remove();
+  used.push(pageUsed());
+
   const firstMenu = pages[0].find((seg) => seg.kind === 'menu');
   const menuSplit = !!firstMenu && pages.slice(1).some((p) => p.some((seg) => seg.kind === 'menu'));
-  // how many card units (groups, or rows) stayed on the first page
   const firstUnits = !firstMenu
     ? 0
     : byRows
       ? firstMenu.items.length
-      : menuGroups.filter((g) => firstMenu.items.some((id) => id[0] === g.ids[0][0])).length;
+      : m.menu.groups.filter((g) => firstMenu.items.some((id) => id[0] === g.ids[0][0])).length;
   return { pages, used, overflow, menuSplit, firstUnits };
 }
 
 // Repair each ingredient boundary where it occurs. Cutting only the first
 // page can otherwise move several rows off it just to fix a later group's
 // one- or two-row tail, even though its own continuation was already legal.
-function paginateLegal(root, src, slack = 0, byRows = false, cut = null) {
+function paginateLegal(m, rows, slack = 0, byRows = false, cut = null) {
   let breaks = [];
-  let plan = paginateOne(root, src, slack, byRows, cut, breaks);
+  let plan = paginateOne(m, slack, byRows, cut, breaks);
   if (!byRows) return plan;
-  const rows = [...src.querySelectorAll('[data-item]')].map((li) => li.dataset.item.split(':').map(Number));
   for (let attempt = 0; attempt < rows.length; attempt++) {
     const pieces = plan.pages.flatMap((p) => p.filter((s) => s.kind === 'menu'));
     let placed = 0;
@@ -229,7 +392,7 @@ function paginateLegal(root, src, slack = 0, byRows = false, cut = null) {
     // earlier boundary to try. Leave it for the existing overflow ranking.
     if (repair === null || repair <= 0 || breaks.includes(repair)) return plan;
     breaks = [...breaks.filter((at) => at < repair), repair];
-    plan = paginateOne(root, src, slack, byRows, cut, breaks);
+    plan = paginateOne(m, slack, byRows, cut, breaks);
   }
   return plan;
 }
@@ -247,14 +410,16 @@ export function paginate(root) {
 // then a small search over candidate layouts for the one with the fewest pages
 // and no page left with an empty bottom half.
 function balance(root, src, pageHeight) {
+  const m = measureRecipe(root, src, pageHeight);
+  const rows = m.menu ? m.menu.rows.map((r) => r.id) : [];
   let byRows = false;
-  let greedy = paginateOne(root, src, 0, byRows);
+  let greedy = paginateOne(m, 0, byRows);
   const headerAlone = !greedy.pages[0].some((seg) => seg.kind === 'menu');
   if (greedy.overflow || headerAlone) {
     // A group taller than a page, or a card whose first group cannot sit beside
     // the header: split that card by rows rather than leave the header alone.
     byRows = true;
-    greedy = paginateLegal(root, src, 0, byRows);
+    greedy = paginateLegal(m, rows, 0, byRows);
   }
   // Search every earlier cut: a large first piece may need more than three
   // rows removed to leave a legal continuation of its final group.
@@ -275,7 +440,7 @@ function balance(root, src, pageHeight) {
     if (better(plan, best)) best = plan;
   };
   for (const cut of cuts) {
-    const base = cut === null ? greedy : paginateLegal(root, src, 0, byRows, cut);
+    const base = cut === null ? greedy : paginateLegal(m, rows, 0, byRows, cut);
     consider(base);
     // Later-page balancing cannot improve a worse first ingredient piece.
     if (base.overflow || widows(base, ['menu']) > widows(best, ['menu']) ||
@@ -283,9 +448,9 @@ function balance(root, src, pageHeight) {
     const last = base.pages.length - 1;
     for (let i = 1; i <= SAMPLES; i++) {
       const extra = (range * i) / SAMPLES;
-      consider(paginateLegal(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
+      consider(paginateLegal(m, rows, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
       for (let targetPage = 1; targetPage < last; targetPage++) {
-        consider(paginateLegal(root, src, (p) => (p === targetPage ? extra : 0), byRows, cut));
+        consider(paginateLegal(m, rows, (p) => (p === targetPage ? extra : 0), byRows, cut));
       }
     }
   }

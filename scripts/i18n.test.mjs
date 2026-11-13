@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { textFor, amountsCreditFor } from '../src/recipe-i18n.js';
 import { scaleAmount, offeredFactors } from '../src/scale.js';
 import { ui } from '../src/i18n.js';
-import { themeText } from '../src/theme-i18n.js';
+import { pickNextIndex, themeText } from '../src/theme-i18n.js';
 
 const directory = new URL('../content/recipes/', import.meta.url);
 const recipes = readdirSync(directory).filter((file) => file.endsWith('.json'))
@@ -84,10 +84,22 @@ test('German chrome covers every English UI and theme key', () => {
   assert.equal(themeText.de.changeColor, 'Farbe wechseln');
   assert.equal(themeText.en.bites.length, 4);
   assert.equal(themeText.de.bites.length, 4);
-  assert.ok(themeText.en.allGone.trim().length > 0 && themeText.de.allGone.trim().length > 0);
-  assert.notEqual(themeText.en.allGone, themeText.de.allGone);
-  assert.ok(themeText.en.muffinReply.trim().length > 0 && themeText.de.muffinReply.trim().length > 0);
-  assert.notEqual(themeText.en.muffinReply, themeText.de.muffinReply);
+  assert.equal(themeText.en.allGone.length, 20);
+  assert.equal(themeText.de.allGone.length, 20);
+  assert.equal(new Set(themeText.en.allGone).size, 20);
+  assert.equal(new Set(themeText.de.allGone).size, 20);
+  for (let i = 0; i < 20; i++) {
+    assert.ok(themeText.en.allGone[i].trim().length > 0 && themeText.de.allGone[i].trim().length > 0);
+    assert.notEqual(themeText.en.allGone[i], themeText.de.allGone[i]);
+  }
+  assert.equal(themeText.en.muffinReply.length, 20);
+  assert.equal(themeText.de.muffinReply.length, 20);
+  assert.equal(new Set(themeText.en.muffinReply).size, 20);
+  assert.equal(new Set(themeText.de.muffinReply).size, 20);
+  for (let i = 0; i < 20; i++) {
+    assert.ok(themeText.en.muffinReply[i].trim().length > 0 && themeText.de.muffinReply[i].trim().length > 0);
+    assert.notEqual(themeText.en.muffinReply[i], themeText.de.muffinReply[i]);
+  }
   assert.equal(ui.de.languageEnglish, 'Englisch');
   assert.match(ui.en.switchLang, /\bEN\b/);
   assert.match(ui.de.switchLang, /\bDE\b/);
@@ -99,4 +111,25 @@ test('German chrome covers every English UI and theme key', () => {
   assert.match(ui.de.photoAlt('Zimtschnecken', 'Scientifically Sweet'), /Foto von/);
   assert.match(ui.de.pdfLabel('Zimtschnecken'), /herunterladen/);
   assert.match(ui.de.pageOf(2, 5), /Seite 2 von 5/);
+});
+
+test('pickNextIndex picks across the full pool and never repeats twice in a row', () => {
+  assert.equal(pickNextIndex(1, 0, () => 0.5), 0);
+  const firstPool = new Set();
+  for (let i = 0; i < 20; i++) {
+    firstPool.add(pickNextIndex(20, -1, () => i / 20));
+  }
+  assert.equal(firstPool.size, 20);
+
+  for (let last = 0; last < 20; last++) {
+    const seen = new Set();
+    for (let step = 0; step < 19; step++) {
+      const next = pickNextIndex(20, last, () => step / 19);
+      assert.notEqual(next, last);
+      assert.ok(next >= 0 && next < 20);
+      seen.add(next);
+    }
+    assert.equal(seen.size, 19);
+    assert.notEqual(pickNextIndex(20, last, () => 0.999999), last);
+  }
 });

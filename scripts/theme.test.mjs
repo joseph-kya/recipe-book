@@ -104,14 +104,20 @@ test('cover cupcake bites are noticeably big, finish on the last bite, celebrate
   assert.match(ornaments, /export function CupcakeCrumbs/);
 
   assert.match(pages, /<CupcakeCrumbs \/>/);
-  assert.match(pages, /className="cover-cupcake-gone"[\s\S]*themeCopy\.allGone/);
-  assert.match(pages, /className="cover-cupcake-reply"[\s\S]*themeCopy\.muffinReply/);
+  assert.match(pages, /pickNextIndex\(copyRef\.current\.allGone\.length,\s*lastGoneIndex\)/);
+  assert.match(pages, /pickNextIndex\(copyRef\.current\.muffinReply\.length,\s*lastReplyIndex\)/);
+  assert.match(pages, /className="cover-cupcake-gone"[\s\S]*themeCopy\.allGone\[goneIndex\]/);
+  assert.match(pages, /className="cover-cupcake-reply"[\s\S]*themeCopy\.muffinReply\[replyIndex\]/);
   assert.match(pages, /setFresh\(true\)/);
   assert.match(pages, /setReplying\(true\)/);
 
   // Kalam font, flat retro look (no box-shadow/text-shadow/filter), transform/opacity only, reduced-motion safe.
-  assert.match(styles, /\.cover-cupcake-gone\s*\{[\s\S]*font-family:\s*var\(--hand\);/);
-  assert.match(styles, /\.cover-cupcake-reply\s*\{[\s\S]*font-family:\s*var\(--hand\);/);
+  const goneRule = styles.match(/\.cover-cupcake-gone\s*\{([\s\S]*?)\n\}/);
+  const replyRule = styles.match(/\.cover-cupcake-reply\s*\{([\s\S]*?)\n\}/);
+  assert.ok(goneRule && /font-family:\s*var\(--hand\);/.test(goneRule[1]));
+  assert.ok(replyRule && /font-family:\s*var\(--hand\);/.test(replyRule[1]));
+  assert.doesNotMatch(goneRule[1], /box-shadow|text-shadow|filter|glow/);
+  assert.doesNotMatch(replyRule[1], /box-shadow|text-shadow|filter|glow/);
   const keyframeNames = ['cupcake-chomp', 'cupcake-fresh', 'cupcake-crumb-pop', 'cupcake-gone-pop', 'cupcake-reply-pop'];
   for (const name of keyframeNames) {
     const m = styles.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?)\\n\\}`));

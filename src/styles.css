@@ -661,31 +661,37 @@ button {
 }
 .cover-crumb {
   transform-origin: 50% 50%;
-  animation: cupcake-crumb-pop 760ms var(--ease-out) both;
+  animation: cupcake-crumb-pop 920ms var(--ease-out) both;
 }
 .cover-cupcake-gone {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: max-content;
+  max-width: min(17rem, 78vw);
   font-family: var(--hand);
   font-weight: 700;
   font-size: var(--fs-l);
   line-height: 1.05;
   color: var(--cream);
-  white-space: nowrap;
+  text-align: center;
+  text-wrap: balance;
   transform: translate(-50%, -50%) rotate(-4deg);
-  animation: cupcake-gone-pop 920ms var(--ease-out) both;
+  animation: cupcake-gone-pop 1320ms var(--ease-out) both;
 }
 .cover-cupcake-reply {
   position: absolute;
   left: calc(100% + var(--sp-2));
   top: 0.35rem;
+  width: max-content;
+  max-width: min(10.5rem, calc(50vw - 4.25rem));
   font-family: var(--hand);
   font-weight: 700;
   font-size: var(--fs-s);
   line-height: 1.1;
   color: var(--cream);
-  white-space: nowrap;
+  text-align: left;
+  text-wrap: balance;
   pointer-events: none;
   transform: rotate(-5deg);
   transform-origin: left center;
@@ -710,8 +716,8 @@ button {
 }
 @keyframes cupcake-gone-pop {
   0% { opacity: 0; transform: translate(-50%, -42%) rotate(-4deg) scale(0.72); }
-  22% { opacity: 1; transform: translate(-50%, -52%) rotate(-4deg) scale(1.08); }
-  38%, 82% { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(1); }
+  16% { opacity: 1; transform: translate(-50%, -52%) rotate(-4deg) scale(1.08); }
+  28%, 85% { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -54%) rotate(-4deg) scale(0.92); }
 }
 @keyframes cupcake-reply-pop {
@@ -756,6 +762,7 @@ button {
   }
   .book--narrow .cover-cupcake-reply {
     left: calc(100% + var(--sp-1));
+    max-width: min(7.5rem, calc(50vw - 3.5rem));
     font-size: var(--fs-xs);
   }
 }

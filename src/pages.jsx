@@ -11,12 +11,15 @@ import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining,
 import { ring as ringDing } from './audio.js';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
-import { themeText } from './theme-i18n.js';
+import { pickNextIndex, themeText } from './theme-i18n.js';
 import Scaler from './Scaler.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
+
+let lastGoneIndex = -1;
+let lastReplyIndex = -1;
 
 export function Cover({ lang }) {
   const t = ui[lang];
@@ -31,6 +34,8 @@ export function Cover({ lang }) {
   const [fresh, setFresh] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [replying, setReplying] = useState(false);
+  const [goneIndex, setGoneIndex] = useState(0);
+  const [replyIndex, setReplyIndex] = useState(0);
   const holdRef = useRef(0);
   const respawnRef = useRef(0);
   const replyTimerRef = useRef(0);
@@ -69,19 +74,25 @@ export function Cover({ lang }) {
     setBites(n);
     setFresh(false);
     if (n >= CUPCAKE_BITES.length) {
+      const nextGone = pickNextIndex(copyRef.current.allGone.length, lastGoneIndex);
+      lastGoneIndex = nextGone;
+      setGoneIndex(nextGone);
       setCelebrating(true);
-      setAnnounced(copyRef.current.bites[n - 1]);
+      setAnnounced(copyRef.current.allGone[nextGone]);
       clearTimeout(respawnRef.current);
       respawnRef.current = setTimeout(() => {
+        const nextReply = pickNextIndex(copyRef.current.muffinReply.length, lastReplyIndex);
+        lastReplyIndex = nextReply;
+        setReplyIndex(nextReply);
         setCelebrating(false);
         bitesRef.current = 0;
         setBites(0);
         setFresh(true);
         setReplying(true);
-        setAnnounced(copyRef.current.bites[CUPCAKE_BITES.length]);
+        setAnnounced(`${copyRef.current.bites[CUPCAKE_BITES.length]} ${copyRef.current.muffinReply[nextReply]}`);
         clearTimeout(replyTimerRef.current);
         replyTimerRef.current = setTimeout(() => setReplying(false), 2400);
-      }, 950);
+      }, 1350);
     } else {
       setAnnounced(copyRef.current.bites[n - 1]);
     }
@@ -141,12 +152,12 @@ export function Cover({ lang }) {
           {celebrating && (
             <div className="cover-cupcake-celebrate" aria-hidden="true">
               <CupcakeCrumbs />
-              <span className="cover-cupcake-gone">{themeCopy.allGone}</span>
+              <span className="cover-cupcake-gone">{themeCopy.allGone[goneIndex]}</span>
             </div>
           )}
           {replying && (
             <span className="cover-cupcake-reply" aria-hidden="true">
-              {themeCopy.muffinReply}
+              {themeCopy.muffinReply[replyIndex]}
             </span>
           )}
         </div>

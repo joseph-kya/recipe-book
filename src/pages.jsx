@@ -607,6 +607,8 @@ const stepListeners = new Set();
 
 function TicketProgress({ doneCount, totalSteps, measure }) {
   const pillRef = useRef(null);
+  const iconRef = useRef(null);
+  const ringRef = useRef(null);
   const prevCountRef = useRef(doneCount);
 
   useEffect(() => {
@@ -616,25 +618,51 @@ function TicketProgress({ doneCount, totalSteps, measure }) {
     const el = pillRef.current;
     if (!el?.animate) return;
     const allDone = doneCount === totalSteps;
-    const anim = el.animate(
-      prev === 0
-        ? [
-            { opacity: 0, transform: 'scale(0.92)' },
-            { opacity: 1, transform: 'scale(1)' },
-          ]
-        : allDone
+    const becameDone = allDone && prev < totalSteps;
+    const anims = [
+      el.animate(
+        prev === 0
           ? [
-              { transform: 'scale(0.95)' },
-              { transform: 'scale(1.09)', offset: 0.45 },
-              { transform: 'scale(1)' },
+              { opacity: 0, transform: 'scale(0.92)' },
+              { opacity: 1, transform: 'scale(1)' },
             ]
-          : [
-              { transform: 'scale(1.07)' },
-              { transform: 'scale(1)' },
-            ],
-      { duration: allDone ? 240 : 190, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
-    );
-    return () => anim.cancel();
+          : becameDone
+            ? [
+                { transform: 'scale(0.94)' },
+                { transform: 'scale(1.1)', offset: 0.45 },
+                { transform: 'scale(1)' },
+              ]
+            : [
+                { transform: 'scale(1.07)' },
+                { transform: 'scale(1)' },
+              ],
+        { duration: becameDone ? 240 : 190, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
+      ),
+    ];
+    if (becameDone && iconRef.current?.animate) {
+      anims.push(
+        iconRef.current.animate(
+          [
+            { opacity: 0, transform: 'scale(0.65) rotate(-14deg)' },
+            { opacity: 1, transform: 'scale(1.14) rotate(4deg)', offset: 0.55 },
+            { opacity: 1, transform: 'scale(1) rotate(0deg)' },
+          ],
+          { delay: 40, duration: 210, easing: SPRING_EASE, fill: 'backwards' },
+        ),
+      );
+    }
+    if (becameDone && ringRef.current?.animate) {
+      anims.push(
+        ringRef.current.animate(
+          [
+            { opacity: 0.72, transform: 'scale(0.95)' },
+            { opacity: 0, transform: 'scale(1.42)' },
+          ],
+          { delay: 20, duration: 340, easing: OUT_EASE, fill: 'both' },
+        ),
+      );
+    }
+    return () => anims.forEach((a) => a.cancel());
   }, [doneCount, totalSteps, measure]);
 
   if (doneCount === 0) return null;
@@ -645,8 +673,9 @@ function TicketProgress({ doneCount, totalSteps, measure }) {
       className={`ticket-progress${allDone ? ' ticket-progress--done' : ''}`}
       aria-hidden="true"
     >
+      {allDone && <span ref={ringRef} className="ticket-progress-ring" />}
       {allDone && (
-        <svg className="ticket-progress-icon" viewBox="0 0 24 24" focusable="false">
+        <svg ref={iconRef} className="ticket-progress-icon" viewBox="0 0 24 24" focusable="false">
           <path
             d="M5 12.5 9.5 17 19 7.5"
             fill="none"

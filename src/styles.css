@@ -1116,7 +1116,7 @@ button {
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: var(--sp-3);
   align-items: baseline;
-  padding: 5px 0;
+  padding: 5px var(--sp-2);
 }
 
 .book--wide .ing-what {
@@ -1318,6 +1318,14 @@ button {
   );
 }
 
+.step--done:not(:last-child)::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--primary) 48%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+
 .step-body {
   min-width: 0;
   transition: opacity 200ms var(--ease-out);
@@ -1349,23 +1357,30 @@ button {
 }
 
 .step-dot:active {
-  transform: scale(0.92);
-  transition-duration: 100ms;
+  transform: translate(2px, 2px) scale(0.94);
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .step-dot:hover {
-    transform: translateY(-2px) scale(1.04);
+    transform: translate(-1px, -1px) scale(1.04);
   }
-  .step-dot:active {
-    transform: scale(0.92);
+  .step--done .step-dot:hover {
+    transform: translate(1px, 1px) scale(1.04);
+  }
+  .step-dot:active,
+  .step--done .step-dot:active {
+    transform: translate(2px, 2px) scale(0.94);
+    transition-duration: 85ms;
+    transition-timing-function: var(--ease-out);
   }
 }
 
 .step-num,
 .step-check {
   grid-area: 1 / 1;
-  transition: transform 220ms cubic-bezier(0.22, 1.28, 0.36, 1), opacity 160ms var(--ease-out);
+  transition: transform 200ms cubic-bezier(0.22, 1.28, 0.36, 1), opacity 110ms var(--ease-out);
 }
 
 .step-check {
@@ -1377,7 +1392,8 @@ button {
 
 .step--done .step-dot {
   background: var(--mint);
-  transform: scale(1);
+  box-shadow: 1px 1px 0 var(--choc);
+  transform: translate(2px, 2px);
 }
 
 .step--done .step-num {
@@ -1391,7 +1407,13 @@ button {
 }
 
 .step--done .step-body {
-  opacity: 0.58;
+  opacity: 0.62;
+}
+
+.step--done .step-title {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: color-mix(in srgb, var(--cherry) 60%, transparent);
 }
 
 .step-title {
@@ -1465,11 +1487,6 @@ button {
   }
 }
 
-.tip:active {
-  transform: scale(0.985);
-  transition-duration: 100ms;
-}
-
 .tip-title {
   font-family: var(--badge);
   font-weight: 400;
@@ -1489,15 +1506,23 @@ button {
   transition: transform 180ms var(--ease-out);
 }
 
+.credits .btn:active .btn-icon {
+  transform: translateY(3px);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .credits .btn:hover .btn-icon {
     transform: translateY(2px);
   }
+  .credits .btn:active .btn-icon {
+    transform: translateY(3px);
+  }
 }
 
 .source {
-  margin-top: var(--sp-2);
+  margin-top: var(--sp-1);
   font-size: var(--fs-s);
+  line-height: 1.35;
 }
 
 .source-name {
@@ -1530,8 +1555,9 @@ button {
 }
 
 .small-credit {
-  margin-top: var(--sp-1);
+  margin-top: 2px;
   font-size: var(--fs-xs);
+  line-height: 1.35;
   color: var(--choc-soft);
 }
 
@@ -1547,12 +1573,15 @@ button {
   }
   .step-dot:hover,
   .step-dot:active,
+  .step--done .step-dot,
+  .step--done .step-dot:hover,
+  .step--done .step-dot:active,
   .step--done .step-num,
   .step--done .step-check,
   .tip:hover,
   .tip + .tip:hover,
-  .tip:active,
   .credits .btn:hover .btn-icon,
+  .credits .btn:active .btn-icon,
   .source a:active {
     transform: none;
   }

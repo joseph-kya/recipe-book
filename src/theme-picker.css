@@ -66,17 +66,20 @@
 }
 
 .theme-swatch:active {
-  transform: scale(0.92);
+  transform: scale(0.91);
   transition-duration: 85ms;
   transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .theme-swatch:not([aria-checked='true']):hover {
-    transform: scale(1.08);
+    transform: translateY(-1.5px) scale(1.08);
   }
   .theme-swatch:not([aria-checked='true']):hover::before {
     transform: scale(1);
+  }
+  .theme-swatch:active {
+    transform: scale(0.91);
   }
 }
 

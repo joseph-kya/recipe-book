@@ -15,7 +15,7 @@ import ThemePicker from './ThemePicker.jsx';
 const prefersReducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const SPRING_EASE = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+const SPRING_EASE = 'cubic-bezier(0.32, 1.32, 0.56, 1)';
 const OUT_EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 
 let coverEntered = false;
@@ -33,13 +33,25 @@ export function Cover({ lang }) {
     if (!root || coverEntered || prefersReducedMotion() || !root.closest('.face--rest')) return;
     coverEntered = true;
     const animations = [];
+    const hit = root.querySelector('.cover-cupcake-hit');
     const cupcake = root.querySelector('.cover-cupcake');
     const picker = root.querySelector('.theme-picker');
+    if (hit?.animate) {
+      animations.push(
+        hit.animate(
+          [
+            { opacity: 0, transform: 'scale(0.92)' },
+            { opacity: 1, transform: 'scale(1)' },
+          ],
+          { delay: 65, duration: 230, easing: OUT_EASE, fill: 'backwards' }
+        )
+      );
+    }
     if (cupcake?.animate) {
       animations.push(
         cupcake.animate(
-          [{ transform: 'rotate(-15deg) scale(0.92)' }, { transform: 'rotate(-8deg) scale(1)' }],
-          { delay: 65, duration: 320, easing: SPRING_EASE, fill: 'backwards' }
+          [{ transform: 'rotate(-14deg) scale(0.94)' }, { transform: 'rotate(-8deg) scale(1)' }],
+          { delay: 65, duration: 250, easing: SPRING_EASE, fill: 'backwards' }
         )
       );
     }
@@ -50,7 +62,7 @@ export function Cover({ lang }) {
             { opacity: 0, transform: 'translateY(6px) scale(0.96)' },
             { opacity: 1, transform: 'translateY(0) scale(1)' },
           ],
-          { delay: 155, duration: 220, easing: OUT_EASE, fill: 'backwards' }
+          { delay: 120, duration: 180, easing: OUT_EASE, fill: 'backwards' }
         )
       );
     }
@@ -75,19 +87,20 @@ export function Cover({ lang }) {
       cupcake.animate(
         [
           { transform: 'rotate(-8deg) scale(1)' },
-          { transform: 'rotate(5deg) scale(1.12)', offset: 0.38 },
+          { transform: 'rotate(5deg) scale(1.1)', offset: 0.36 },
           { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
           { transform: 'rotate(-8deg) scale(1)' },
         ],
-        { duration: 380, easing: OUT_EASE }
+        { duration: 340, easing: OUT_EASE }
       ),
       ring?.animate(
         [
           { transform: 'scale(1) rotate(0deg)', opacity: 0.9 },
-          { transform: 'scale(1.18) rotate(14deg)', opacity: 0.35, offset: 0.45 },
-          { transform: 'scale(1) rotate(18deg)', opacity: 0.9 },
+          { transform: 'scale(1.14) rotate(12deg)', opacity: 0.45, offset: 0.4 },
+          { transform: 'scale(0.98) rotate(-4deg)', opacity: 0.85, offset: 0.76 },
+          { transform: 'scale(1) rotate(0deg)', opacity: 0.9 },
         ],
-        { duration: 420, easing: OUT_EASE }
+        { duration: 360, easing: OUT_EASE }
       ),
     ];
   };
@@ -141,6 +154,7 @@ function ContentsLeft({ lang }) {
   const t = ui[lang];
   const rootRef = useRef(null);
   const popAnimRef = useRef([]);
+  const range = recipes.length > 1 ? `1–${recipes.length}` : '1';
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -149,6 +163,7 @@ function ContentsLeft({ lang }) {
     const animations = [];
     const medallion = root.querySelector('.contents-medallion');
     const title = root.querySelector('.contents-title');
+    const count = root.querySelector('.contents-count');
     if (medallion?.animate) {
       animations.push(
         medallion.animate(
@@ -156,7 +171,7 @@ function ContentsLeft({ lang }) {
             { opacity: 0, transform: 'scale(0.93) rotate(-4deg)' },
             { opacity: 1, transform: 'scale(1) rotate(0deg)' },
           ],
-          { duration: 280, easing: SPRING_EASE, fill: 'backwards' }
+          { duration: 250, easing: SPRING_EASE, fill: 'backwards' }
         )
       );
     }
@@ -167,7 +182,18 @@ function ContentsLeft({ lang }) {
             { opacity: 0, transform: 'translateY(8px)' },
             { opacity: 1, transform: 'translateY(0)' },
           ],
-          { delay: 50, duration: 220, easing: OUT_EASE, fill: 'backwards' }
+          { delay: 45, duration: 200, easing: OUT_EASE, fill: 'backwards' }
+        )
+      );
+    }
+    if (count?.animate) {
+      animations.push(
+        count.animate(
+          [
+            { opacity: 0, transform: 'translateY(6px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          { delay: 95, duration: 180, easing: OUT_EASE, fill: 'backwards' }
         )
       );
     }
@@ -185,16 +211,29 @@ function ContentsLeft({ lang }) {
   const popMedallion = () => {
     if (prefersReducedMotion()) return;
     const medallion = rootRef.current?.querySelector('.contents-medallion');
+    const cupcake = rootRef.current?.querySelector('.contents-cupcake');
     if (!medallion?.animate) return;
-    popAnimRef.current?.cancel();
-    popAnimRef.current = medallion.animate(
-      [
-        { transform: 'scale(1) rotate(0deg)' },
-        { transform: 'scale(1.06) rotate(4deg)', offset: 0.4 },
-        { transform: 'scale(1) rotate(0deg)' },
-      ],
-      { duration: 320, easing: SPRING_EASE }
-    );
+    popAnimRef.current.forEach((a) => a?.cancel());
+    popAnimRef.current = [
+      medallion.animate(
+        [
+          { transform: 'scale(1) rotate(0deg)' },
+          { transform: 'scale(1.06) rotate(4deg)', offset: 0.38 },
+          { transform: 'scale(0.99) rotate(-2deg)', offset: 0.72 },
+          { transform: 'scale(1) rotate(0deg)' },
+        ],
+        { duration: 300, easing: OUT_EASE }
+      ),
+      cupcake?.animate(
+        [
+          { transform: 'rotate(-8deg) scale(1)' },
+          { transform: 'rotate(-2deg) scale(1.07)', offset: 0.38 },
+          { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
+          { transform: 'rotate(-8deg) scale(1)' },
+        ],
+        { duration: 300, easing: OUT_EASE }
+      ),
+    ];
   };
 
   return (
@@ -205,6 +244,9 @@ function ContentsLeft({ lang }) {
           <Cupcake className="contents-cupcake" />
         </div>
         <h1 className="contents-title">{t.contents}</h1>
+        <p className="contents-count">
+          {t.recipeNo} <b>{range}</b>
+        </p>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -213,11 +255,19 @@ function ContentsLeft({ lang }) {
 
 function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
+  const range = recipes.length > 1 ? `1–${recipes.length}` : '1';
   return (
     <div className="page-body contents">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
-        {withTitle && <h1 className="contents-title">{t.contents}</h1>}
+        {withTitle && (
+          <div className="contents-head">
+            <h1 className="contents-title">{t.contents}</h1>
+            <p className="contents-count">
+              {t.recipeNo} <b>{range}</b>
+            </p>
+          </div>
+        )}
         <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);

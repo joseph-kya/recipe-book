@@ -17,7 +17,7 @@ import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 
 export { useRecipeText } from './recipeUI.jsx';
-export { getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
+export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 

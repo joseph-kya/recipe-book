@@ -6,12 +6,14 @@ import { ui } from '../src/i18n.js';
 const cookSrc = readFileSync(new URL('../src/CookMode.jsx', import.meta.url), 'utf8');
 const awakeSrc = readFileSync(new URL('../src/Awake.jsx', import.meta.url), 'utf8');
 const methodSrc = readFileSync(new URL('../src/Method.jsx', import.meta.url), 'utf8');
+const ornamentsSrc = readFileSync(new URL('../src/ornaments.jsx', import.meta.url), 'utf8');
 const bookSrc = readFileSync(new URL('../src/Book.jsx', import.meta.url), 'utf8');
 const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 
-test('Cook mode UI strings exist in both English and German', () => {
+test('Cook mode UI strings exist in English, German, and French', () => {
   const keys = [
     'startCooking',
+    'resetSteps',
     'cookMode',
     'cookDialogLabel',
     'cookStepOf',
@@ -26,10 +28,13 @@ test('Cook mode UI strings exist in both English and German', () => {
   for (const key of keys) {
     assert.ok(Object.hasOwn(ui.en, key), `missing EN key ${key}`);
     assert.ok(Object.hasOwn(ui.de, key), `missing DE key ${key}`);
+    assert.ok(Object.hasOwn(ui.fr, key), `missing FR key ${key}`);
     if (typeof ui.en[key] === 'string') {
       assert.ok(ui.en[key].trim().length > 0);
       assert.ok(ui.de[key].trim().length > 0);
+      assert.ok(ui.fr[key].trim().length > 0);
       assert.notEqual(ui.en[key], ui.de[key]);
+      assert.notEqual(ui.en[key], ui.fr[key]);
     }
   }
   assert.equal(ui.en.cookStepOf(3, 8), 'Step 3 of 8');
@@ -67,9 +72,14 @@ test('CookMode implements accessible modal dialog, keyboard, and swipe navigatio
   assert.match(cookSrc, /t\.cookBackToRecipe/);
 });
 
-test('Method button fits pagination measurement and Book isolates background while Cook mode is open', () => {
-  assert.match(methodSrc, /<div className="ticket-cook" data-head="normal">[\s\S]*className="btn btn--cherry cook-start-btn"/);
+test('Method buttons fit pagination measurement and Book isolates background while Cook mode is open', () => {
+  assert.match(methodSrc, /<div className="ticket-cook" data-head="normal">[\s\S]*className="btn btn--cherry cook-start-btn"[\s\S]*className="cook-reset-btn"/);
   assert.match(methodSrc, /onClick=\{measure \? undefined : \(e\) => onStartCooking\?\.\(recipe, e\.currentTarget\)\}/);
+  assert.match(methodSrc, /aria-label=\{t\.resetSteps\}[\s\S]*title=\{t\.resetSteps\}[\s\S]*disabled=\{measure \|\| doneCount === 0\}[\s\S]*clearDoneSteps\(recipe\.slug\)/);
+  assert.match(methodSrc, /export function clearDoneSteps\(slug\)/);
+  const clearBody = methodSrc.match(/export function clearDoneSteps\(slug\) \{[^}]*\}/)?.[0] ?? '';
+  assert.doesNotMatch(clearBody, /stopTimer|clearGotItems/);
+  assert.match(ornamentsSrc, /export function ResetIcon\(/);
   assert.match(bookSrc, /inert=\{cookOpen\}/);
   assert.match(bookSrc, /aria-hidden=\{cookOpen \|\| undefined\}/);
   assert.match(bookSrc, /if \(s\.cookOpen\) return;/);
@@ -77,9 +87,11 @@ test('Method button fits pagination measurement and Book isolates background whi
   assert.match(bookSrc, /cookTriggerRef\.current\?\.isConnected/);
 });
 
-test('Cook mode styles use theme tokens, contrast-safe Done title, reduced-motion, and running-head cascade protection', () => {
+test('Cook mode and reset button styles use theme tokens, contrast-safe Done title, reduced-motion, and running-head cascade protection', () => {
   assert.match(stylesCss, /\.cook-modal\s*\{[\s\S]*background:\s*var\(--cream\);/);
   assert.match(stylesCss, /\.cook-done-title\s*\{[\s\S]*color:\s*var\(--cherry-ink\);/);
+  assert.match(stylesCss, /\.cook-reset-btn\s*\{[\s\S]*width:\s*2\.75rem;[\s\S]*height:\s*2\.75rem;[\s\S]*background:\s*var\(--cream\);[\s\S]*color:\s*var\(--choc\);/);
+  assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cook-reset-btn/);
   assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cook-close[\s\S]*\.cook-bar-fill/);
   assert.match(stylesCss, /@media \(max-height: 820px\)[\s\S]*\.book--wide \.page-pad > \.running-head \+ \*\s*\{\s*margin-top:\s*0;\s*\}/);
 });

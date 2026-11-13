@@ -49,58 +49,100 @@ function prepareAudioSession() {
 function chomp(context, step = 0) {
   if (!context || context.state !== 'running') return;
   const now = context.currentTime;
-  const pitch = [1, 0.92, 1.08][step % 3] || 1;
+  const pitch = [1, 0.94, 1.07][step % 3] || 1;
 
-  // Short downward jaw-chomp thud.
+  // Subtle short jaw thump so the crisp crunch dominates.
   const osc = context.createOscillator();
   const oscGain = context.createGain();
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(240 * pitch, now);
-  osc.frequency.exponentialRampToValueAtTime(72 * pitch, now + 0.095);
+  osc.frequency.setValueAtTime(165 * pitch, now);
+  osc.frequency.exponentialRampToValueAtTime(56 * pitch, now + 0.05);
   oscGain.gain.setValueAtTime(0.0001, now);
-  oscGain.gain.exponentialRampToValueAtTime(0.36, now + 0.008);
-  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+  oscGain.gain.exponentialRampToValueAtTime(0.14, now + 0.005);
+  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
   osc.connect(oscGain).connect(context.destination);
   osc.onended = () => { osc.disconnect(); oscGain.disconnect(); };
   osc.start(now);
-  osc.stop(now + 0.12);
+  osc.stop(now + 0.07);
 
-  // Crumbly pastry & frosting crunch burst through a sweeping bandpass filter.
+  // Granular crisp crunch buffer: multi-wave crumb grit + sharp fracture snaps.
   const rate = context.sampleRate || 44100;
-  const length = Math.max(1, Math.floor(rate * 0.16));
+  const length = Math.max(1, Math.floor(rate * 0.24));
   const buffer = context.createBuffer(1, length, rate);
   const data = buffer.getChannelData?.(0);
   if (data) {
-    let seed = 1337 + step * 97;
-    for (let i = 0; i < length; i++) {
+    let seed = 4242 + step * 131;
+    const rand = () => {
       seed = (seed * 16807) % 2147483647;
-      const white = (seed / 1073741823.5) - 1;
+      return seed / 2147483647;
+    };
+    for (let i = 0; i < length; i++) {
       const t = i / rate;
-      const pulse = 0.45 + 0.55 * Math.sin(t * Math.PI * 36) ** 2;
-      const crackle = Math.abs(white) > 0.38 ? white : white * 0.25;
-      data[i] = crackle * pulse * Math.exp(-t * 14);
+      const white = rand() * 2 - 1;
+      const wave = (
+        Math.exp(-((t - 0.018) ** 2) / 0.0008)
+        + 0.95 * Math.exp(-((t - 0.082) ** 2) / 0.0015)
+        + 0.55 * Math.exp(-((t - 0.155) ** 2) / 0.0018)
+      );
+      data[i] = white * 0.3 * wave;
+    }
+    for (let s = 0; s < 48; s++) {
+      const tCenter = s < 18 ? rand() * 0.055 : s < 36 ? 0.055 + rand() * 0.08 : 0.135 + rand() * 0.09;
+      const idx = Math.floor(tCenter * rate);
+      const amp = (s < 36 ? 0.9 : 0.6) * (0.55 + 0.45 * rand()) * (rand() > 0.5 ? 1 : -1);
+      const snapLen = Math.max(1, Math.floor(rate * (0.0011 + rand() * 0.0016)));
+      for (let k = 0; k < snapLen && idx + k < length; k++) {
+        const env = Math.exp(-k / (snapLen * 0.3));
+        const sign = k === 0 ? 1 : (rand() > 0.35 ? 1 : -0.75);
+        data[idx + k] = Math.max(-1, Math.min(1, data[idx + k] + amp * env * sign));
+      }
     }
   }
   const source = context.createBufferSource();
   source.buffer = buffer;
-  const filter = context.createBiquadFilter?.();
-  const noiseGain = context.createGain();
-  noiseGain.gain.setValueAtTime(0.0001, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.55, now + 0.006);
-  noiseGain.gain.exponentialRampToValueAtTime(0.32, now + 0.05);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.155);
-  if (filter) {
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(1750 * pitch, now);
-    filter.frequency.exponentialRampToValueAtTime(820 * pitch, now + 0.14);
-    filter.Q.value = 0.95;
-    source.connect(filter).connect(noiseGain).connect(context.destination);
+  const midFilter = context.createBiquadFilter?.();
+  const hiFilter = context.createBiquadFilter?.();
+  const midGain = context.createGain();
+  midGain.gain.setValueAtTime(0.0001, now);
+  midGain.gain.exponentialRampToValueAtTime(0.65, now + 0.004);
+  midGain.gain.linearRampToValueAtTime(0.55, now + 0.16);
+  midGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.235);
+
+  let hiGain;
+  if (midFilter && hiFilter) {
+    midFilter.type = 'bandpass';
+    midFilter.frequency.setValueAtTime(2450 * pitch, now);
+    midFilter.frequency.exponentialRampToValueAtTime(1250 * pitch, now + 0.22);
+    midFilter.Q.value = 0.8;
+
+    hiFilter.type = 'highpass';
+    hiFilter.frequency.setValueAtTime(2400 * pitch, now);
+    hiGain = context.createGain();
+    hiGain.gain.setValueAtTime(0.0001, now);
+    hiGain.gain.exponentialRampToValueAtTime(0.55, now + 0.004);
+    hiGain.gain.linearRampToValueAtTime(0.45, now + 0.16);
+    hiGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.235);
+
+    source.connect(midFilter).connect(midGain).connect(context.destination);
+    source.connect(hiFilter).connect(hiGain).connect(context.destination);
+  } else if (midFilter) {
+    midFilter.type = 'bandpass';
+    midFilter.frequency.setValueAtTime(2450 * pitch, now);
+    midFilter.frequency.exponentialRampToValueAtTime(1250 * pitch, now + 0.22);
+    midFilter.Q.value = 0.8;
+    source.connect(midFilter).connect(midGain).connect(context.destination);
   } else {
-    source.connect(noiseGain).connect(context.destination);
+    source.connect(midGain).connect(context.destination);
   }
-  source.onended = () => { source.disconnect(); filter?.disconnect(); noiseGain.disconnect(); };
+  source.onended = () => {
+    source.disconnect();
+    midFilter?.disconnect();
+    hiFilter?.disconnect();
+    midGain.disconnect();
+    hiGain?.disconnect();
+  };
   source.start(now);
-  source.stop(now + 0.16);
+  source.stop(now + 0.24);
 }
 
 export function ring() {

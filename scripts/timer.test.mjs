@@ -103,7 +103,7 @@ test('bell, timer and bite audio wait for resume and reuse one WebKit context', 
   let tones = 0;
   let bursts = 0;
   let filters = 0;
-  const param = () => ({ setValueAtTime() {}, exponentialRampToValueAtTime() {} });
+  const param = () => ({ setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
   class Context {
     state = 'suspended'; currentTime = 0; sampleRate = 44100; destination = {};
     constructor() { instances.push(this); }
@@ -138,7 +138,7 @@ test('bell, timer and bite audio wait for resume and reuse one WebKit context', 
     assert.equal(instances.length, 1);
     assert.equal(tones, 9);
     assert.equal(bursts - burstsBeforeBites, 3);
-    assert.equal(filters, 3);
+    assert.equal(filters, 6);
     instances[0].state = 'interrupted';
     const again = sound.ring();
     completeResume();

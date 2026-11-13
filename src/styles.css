@@ -1095,7 +1095,9 @@ button {
   font-weight: 400;
   font-size: clamp(2.4rem, 11vw, 3rem);
   line-height: 1.02;
+  letter-spacing: -0.015em;
   color: var(--cherry);
+  text-shadow: 2px 2px 0 color-mix(in srgb, var(--choc) 14%, transparent);
   margin-top: var(--sp-1);
   overflow-wrap: break-word;
 }
@@ -1193,6 +1195,7 @@ button {
 /* Name and amount share a line when both fit. A long amount drops to its own
    right-aligned line instead of breaking into ragged pieces. */
 .ing {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1209,8 +1212,14 @@ button {
   }
 }
 
-.ing + .ing {
+.ing + .ing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--sp-2);
+  right: var(--sp-2);
   border-top: 2px dotted color-mix(in srgb, var(--ink) 55%, transparent);
+  pointer-events: none;
 }
 
 .ing-what {
@@ -1376,9 +1385,14 @@ button {
 }
 
 .book--wide .page-pad--closing > .running-head,
-.book--wide .page-pad--closing > .tips {
+.book--wide .page-pad--closing > .tips,
+.book--wide .page-pad--closing > .macros {
   align-self: stretch;
   text-align: left;
+}
+
+.book--wide .page-pad--closing > .credits {
+  align-self: stretch;
 }
 
 .book--wide .page-pad--closing > .running-head + * {
@@ -1464,7 +1478,7 @@ button {
 
 /* ---------- recipe: the method ticket ---------- */
 .ticket {
-  margin-top: var(--sp-5);
+  margin: var(--sp-5) 6px 0 0;
   padding: var(--sp-4) var(--sp-4) var(--sp-1);
   background: var(--paper);
   border: var(--rule) solid var(--choc);
@@ -1472,8 +1486,20 @@ button {
   box-shadow: 6px 6px 0 var(--choc);
 }
 
-.ticket-title--cont {
+.ticket-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.ticket-head--cont {
   margin-bottom: var(--sp-4);
+}
+
+.ticket-title--cont {
+  margin-bottom: 0;
 }
 
 .ticket-title {
@@ -1481,6 +1507,38 @@ button {
   font-weight: 400;
   font-size: var(--fs-2xl);
   line-height: 1;
+}
+
+.book--narrow .ticket-title {
+  font-size: clamp(1.3rem, 6vw, var(--fs-2xl));
+}
+
+.ticket-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  padding: 2px 0.55rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 2px 2px 0 var(--choc);
+}
+
+.ticket-progress--done {
+  background: var(--mint);
+  box-shadow: 1px 1px 0 var(--choc);
+}
+
+.ticket-progress-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
 }
 
 .equipment {
@@ -1641,7 +1699,7 @@ button {
 .tips {
   display: grid;
   gap: var(--sp-4);
-  margin-top: var(--sp-5);
+  margin: var(--sp-5) 5px 0 0;
 }
 
 .book--wide .tips {

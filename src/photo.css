@@ -22,8 +22,8 @@
   position: relative;
   /* the picture is 4:3; its width follows from the height it may take */
   width: min(100%, calc(var(--photo-h, 270px) * 4 / 3 + 2 * (var(--sp-2) + var(--rule))));
-  padding: 6px 6px 9px;
-  background: var(--cream);
+  padding: 7px 7px 14px;
+  background: var(--paper);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-s);
   box-shadow: 5px 5px 0 var(--choc);
@@ -38,9 +38,9 @@
   left: 50%;
   width: 3.25rem;
   height: 0.95rem;
-  background: color-mix(in srgb, var(--mustard) 85%, var(--cream));
+  background: color-mix(in srgb, var(--mustard) 82%, var(--paper));
   border: 2px solid var(--choc);
-  border-radius: 2px;
+  border-radius: 3px;
   box-shadow: 1px 1px 0 var(--choc);
   transform: translateX(-50%) rotate(1.5deg);
   pointer-events: none;

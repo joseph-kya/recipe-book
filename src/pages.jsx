@@ -346,6 +346,32 @@ function RunningHead({ recipe, lang }) {
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
+  const statsRef = useRef(null);
+  const prevFactorRef = useRef(factor);
+
+  // Sync the scalable yield pill in the hero with the ingredient card's scaling wave.
+  useEffect(() => {
+    const prev = prevFactorRef.current;
+    prevFactorRef.current = factor;
+    if (prev === factor || reducedMotion()) return;
+    const list = statsRef.current;
+    if (!list || list.closest('.measure')) return;
+    const anims = [];
+    for (const el of list.querySelectorAll('[data-scaled-stat="true"]')) {
+      if (!el.animate) continue;
+      anims.push(
+        el.animate(
+          [
+            { transform: 'scale(1.07) translateY(-1px)' },
+            { transform: 'scale(1) translateY(0)' },
+          ],
+          { duration: 210, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
+        ),
+      );
+    }
+    return () => anims.forEach((a) => a.cancel());
+  }, [factor]);
+
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
@@ -370,13 +396,16 @@ function RecipeHero({ recipe, lang }) {
         {r.tagline}
       </p>
       <FallbackNote fallback={fallback} t={t} />
-      <ul className="stats" lang={textLang}>
-        {r.stats.map((s, i) => (
-          <li key={i}>
-            {/* a plain-number yield ("24" squares) follows the portion scale */}
-            <b>{scaleStat(s.value, factor, custom, textLang)}</b> {s.label}
-          </li>
-        ))}
+      <ul ref={statsRef} className="stats" lang={textLang}>
+        {r.stats.map((s, i) => {
+          const scalable = /^\d+$/.test(s.value.trim());
+          return (
+            <li key={i} data-scaled-stat={scalable ? 'true' : undefined}>
+              {/* a plain-number yield ("24" squares) follows the portion scale */}
+              <b>{scaleStat(s.value, factor, custom, textLang)}</b> {s.label}
+            </li>
+          );
+        })}
       </ul>
       {r.intro && (
         <p className="intro" lang={textLang}>
@@ -523,6 +552,64 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
 }
 
 const doneStepsBySlug = new Map();
+const stepListeners = new Set();
+
+function TicketProgress({ doneCount, totalSteps, measure }) {
+  const pillRef = useRef(null);
+  const prevCountRef = useRef(doneCount);
+
+  useEffect(() => {
+    const prev = prevCountRef.current;
+    prevCountRef.current = doneCount;
+    if (measure || doneCount === 0 || prev === doneCount || reducedMotion()) return;
+    const el = pillRef.current;
+    if (!el?.animate) return;
+    const allDone = doneCount === totalSteps;
+    const anim = el.animate(
+      prev === 0
+        ? [
+            { opacity: 0, transform: 'scale(0.92)' },
+            { opacity: 1, transform: 'scale(1)' },
+          ]
+        : allDone
+          ? [
+              { transform: 'scale(0.95)' },
+              { transform: 'scale(1.09)', offset: 0.45 },
+              { transform: 'scale(1)' },
+            ]
+          : [
+              { transform: 'scale(1.07)' },
+              { transform: 'scale(1)' },
+            ],
+      { duration: allDone ? 240 : 190, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
+    );
+    return () => anim.cancel();
+  }, [doneCount, totalSteps, measure]);
+
+  if (doneCount === 0) return null;
+  const allDone = doneCount === totalSteps;
+  return (
+    <span
+      ref={pillRef}
+      className={`ticket-progress${allDone ? ' ticket-progress--done' : ''}`}
+      aria-hidden="true"
+    >
+      {allDone && (
+        <svg className="ticket-progress-icon" viewBox="0 0 24 24" focusable="false">
+          <path
+            d="M5 12.5 9.5 17 19 7.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+      <span>{doneCount}/{totalSteps}</span>
+    </span>
+  );
+}
 
 function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
@@ -531,7 +618,13 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
 
   useEffect(() => {
     setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
-  }, [recipe.slug]);
+    if (measure) return;
+    const sync = (slug) => {
+      if (slug === recipe.slug) setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
+    };
+    stepListeners.add(sync);
+    return () => stepListeners.delete(sync);
+  }, [recipe.slug, measure]);
 
   useEffect(() => () => {
     for (const list of animsRef.current.values()) list.forEach((a) => a.cancel());
@@ -545,7 +638,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
     if (wasDone) next.delete(stepIndex);
     else next.add(stepIndex);
     doneStepsBySlug.set(recipe.slug, next);
-    setDoneSteps(new Set(next));
+    for (const sync of stepListeners) sync(recipe.slug);
 
     if (reducedMotion() || !btn?.animate) return;
     animsRef.current.get(stepIndex)?.forEach((a) => a.cancel());
@@ -601,21 +694,29 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
   };
 
   const shown = steps || r.steps.map((_, i) => i);
+  const doneCount = doneSteps.size;
+  const totalSteps = r.steps.length;
   const normalHead = (
     <>
-      <h2 className="ticket-title" lang={textLang} data-head="normal">
-        {r.method_headline}
-      </h2>
+      <div className="ticket-head" data-head="normal">
+        <h2 className="ticket-title" lang={textLang}>
+          {r.method_headline}
+        </h2>
+        <TicketProgress doneCount={doneCount} totalSteps={totalSteps} measure={measure} />
+      </div>
       <p className="equipment" data-head="normal">
         <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
       </p>
     </>
   );
   const contHead = (
-    <h2 className="ticket-title ticket-title--cont" lang={textLang} data-head="cont">
-      {r.method_headline}
-      <ContMark t={t} lang={lang} />
-    </h2>
+    <div className="ticket-head ticket-head--cont" data-head="cont">
+      <h2 className="ticket-title ticket-title--cont" lang={textLang}>
+        {r.method_headline}
+        <ContMark t={t} lang={lang} />
+      </h2>
+      <TicketProgress doneCount={doneCount} totalSteps={totalSteps} measure={measure} />
+    </div>
   );
   return (
     <section className="ticket" aria-label={cont ? `${t.method} ${t.cont}` : t.method} data-card="ticket">

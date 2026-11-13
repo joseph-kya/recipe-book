@@ -104,10 +104,12 @@ test('cover cupcake bites are noticeably big, finish on the last bite, celebrate
   assert.match(ornaments, /export function CupcakeCrumbs/);
 
   assert.match(pages, /<CupcakeCrumbs \/>/);
-  assert.match(pages, /pickNextIndex\(copyRef\.current\.allGone\.length,\s*lastGoneIndex\)/);
-  assert.match(pages, /pickNextIndex\(copyRef\.current\.muffinReply\.length,\s*lastReplyIndex\)/);
-  assert.match(pages, /className="cover-cupcake-gone"[\s\S]*themeCopy\.allGone\[goneIndex\]/);
-  assert.match(pages, /className="cover-cupcake-reply"[\s\S]*themeCopy\.muffinReply\[replyIndex\]/);
+  assert.match(pages, /recordMuffinFinish\(\)/);
+  assert.match(pages, /tierForFinishes\(totalFinishes\)/);
+  assert.match(pages, /pickNextIndex\(tierPool\.allGone\.length,\s*lastGoneByTier\[tier\]\)/);
+  assert.match(pages, /pickNextIndex\(replyPool\.length,\s*lastReplyByTier\[tier\]\)/);
+  assert.match(pages, /className="cover-cupcake-gone"[\s\S]*themeCopy\.tiers\[finishTier\]\.allGone\[goneIndex\]/);
+  assert.match(pages, /className="cover-cupcake-reply"[\s\S]*themeCopy\.tiers\[finishTier\]\.muffinReply\[replyIndex\]/);
   assert.match(pages, /setFresh\(true\)/);
   assert.match(pages, /setReplying\(true\)/);
 

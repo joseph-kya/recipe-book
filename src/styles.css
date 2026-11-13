@@ -1126,6 +1126,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0 var(--sp-3);
   border: 2px solid var(--choc);
@@ -1143,6 +1144,11 @@ button {
     transform var(--press) var(--ease-out),
     background-color 140ms ease,
     color 140ms ease;
+}
+
+.menu-action-btn--copy {
+  width: 2.75rem;
+  padding: 0;
 }
 
 .menu-action-btn.is-copied {
@@ -1176,7 +1182,6 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
   transition: opacity 140ms var(--ease-out);
 }
 
@@ -1193,8 +1198,8 @@ button {
 }
 
 .menu-action-icon {
-  width: 1em;
-  height: 1em;
+  width: 1.25rem;
+  height: 1.25rem;
   flex-shrink: 0;
 }
 
@@ -1597,7 +1602,7 @@ button {
   .book--wide .ing-btn {
     column-gap: var(--sp-2);
   }
-  .book--wide .menu-action-btn {
+  .book--wide .menu-action-btn--clear {
     font-size: var(--fs-xs);
     padding: 0 0.65rem;
   }
@@ -1678,6 +1683,10 @@ button {
 }
 
 .ticket-cook {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
   margin: 0 0 var(--sp-4);
 }
 
@@ -1685,6 +1694,43 @@ button {
   min-height: 2.75rem;
   padding: 0 1.15rem;
   font-size: var(--fs-m);
+}
+
+.cook-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 2.5px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.cook-reset-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cook-reset-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cook-reset-btn:not(:disabled):hover {
+    background: color-mix(in srgb, var(--ink) 8%, var(--cream));
+  }
 }
 
 /* Step: cherry badge title, plain body text, then the handwritten cue at body size. */
@@ -1977,6 +2023,7 @@ button {
   .menu-action-btn,
   .menu-action-label,
   .menu-action-done,
+  .cook-reset-btn,
   .step-dot,
   .step-body,
   .step-timer-main,
@@ -1985,6 +2032,7 @@ button {
   }
   .ing-btn:active .ing-tick,
   .menu-action-btn:active:not(:disabled),
+  .cook-reset-btn:active:not(:disabled),
   .step-dot:active,
   .step-timer-main:active,
   .step-timer-adj:active {

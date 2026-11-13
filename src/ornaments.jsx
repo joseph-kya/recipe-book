@@ -183,16 +183,48 @@ export function CheckIcon({ className, strokeWidth = 3.2 }) {
   );
 }
 
-export function CopyIcon({ className }) {
+export function ShoppingListIcon({ className }) {
   return (
     <Icon className={className}>
-      <rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+      <rect x="9" y="2.5" width="6" height="3" rx="1" fill="none" stroke="currentColor" strokeWidth="2.1" />
       <path
-        d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
+        d="M9 4H6.5A1.5 1.5 0 0 0 5 5.5v14A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-14A1.5 1.5 0 0 0 17.5 4H15"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 10.2 9.4 11.6 11.8 9M13.8 10.5h2.7M8.2 14.2h.01M11.5 14.2h5M8.2 17.6h.01M11.5 17.6h5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}
+
+export function ResetIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M4 12a8 8 0 1 0 2.34-5.66L4 8.7"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.4"
         strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 4.2v4.5h4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Icon>
   );

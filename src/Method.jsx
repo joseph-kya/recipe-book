@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckIcon, PlayIcon, TimerIcon } from './ornaments.jsx';
+import { CheckIcon, PlayIcon, ResetIcon, TimerIcon } from './ornaments.jsx';
 import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
 import {
   MIN_SECONDS,
@@ -42,6 +42,12 @@ export function setStepDone(slug, stepIndex, done = true) {
 
 export function toggleStepDone(slug, stepIndex) {
   setStepDone(slug, stepIndex, !doneStepsBySlug.get(slug)?.has(stepIndex));
+}
+
+export function clearDoneSteps(slug) {
+  if (!doneStepsBySlug.get(slug)?.size) return;
+  doneStepsBySlug.delete(slug);
+  for (const sync of stepListeners) sync(slug);
 }
 
 export function useDoneSteps(slug, disabled = false) {
@@ -189,6 +195,16 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
         >
           <PlayIcon className="btn-icon" />
           {t.startCooking}
+        </button>
+        <button
+          type="button"
+          className="cook-reset-btn"
+          aria-label={t.resetSteps}
+          title={t.resetSteps}
+          disabled={measure || doneCount === 0}
+          onClick={measure ? undefined : () => clearDoneSteps(recipe.slug)}
+        >
+          <ResetIcon className="btn-icon" />
         </button>
       </div>
     </>

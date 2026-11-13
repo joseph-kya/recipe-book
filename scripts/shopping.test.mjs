@@ -166,3 +166,30 @@ test('shareOrCopyList uses navigator.share on touch devices and navigator.clipbo
   );
   assert.equal(calls.length, 2);
 });
+
+test('copy list button is icon-only with ShoppingListIcon, tooltip, sr announcement, and fixed width', () => {
+  const ingredientsSrc = readFileSync(new URL('../src/Ingredients.jsx', import.meta.url), 'utf8');
+  const ornamentsSrc = readFileSync(new URL('../src/ornaments.jsx', import.meta.url), 'utf8');
+  const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+
+  assert.match(ornamentsSrc, /export function ShoppingListIcon\(/);
+  assert.doesNotMatch(ornamentsSrc, /export function CopyIcon\(/);
+
+  assert.match(
+    ingredientsSrc,
+    /className=\{cx\('menu-action-btn menu-action-btn--copy', copied && 'is-copied'\)\}[\s\S]*aria-label=\{t\.copyList\}[\s\S]*title=\{t\.copyList\}/,
+  );
+  assert.match(
+    ingredientsSrc,
+    /<span className="menu-action-label">\s*<ShoppingListIcon className="menu-action-icon" \/>\s*<\/span>/,
+  );
+  assert.match(
+    ingredientsSrc,
+    /<span className="menu-action-done" aria-hidden="true">\s*<CheckIcon className="menu-action-icon" strokeWidth=\{3\} \/>\s*<\/span>/,
+  );
+  assert.match(ingredientsSrc, /<span className="sr-only" aria-live="polite">\s*\{copied \? t\.copied : ''\}\s*<\/span>/);
+  assert.match(ingredientsSrc, /className="menu-action-btn menu-action-btn--clear"/);
+
+  assert.match(stylesCss, /\.menu-action-btn\s*\{[\s\S]*min-width:\s*2\.75rem;\s*min-height:\s*2\.75rem;/);
+  assert.match(stylesCss, /\.menu-action-btn--copy\s*\{\s*width:\s*2\.75rem;\s*padding:\s*0;\s*\}/);
+});

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { CheckIcon, CopyIcon } from './ornaments.jsx';
+import { CheckIcon, ShoppingListIcon } from './ornaments.jsx';
 import { ContMark, cx, useRecipeText } from './recipeUI.jsx';
 import { scaleAmount } from './scale.js';
 import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
@@ -109,17 +109,16 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
           type="button"
           className={cx('menu-action-btn menu-action-btn--copy', copied && 'is-copied')}
           aria-label={t.copyList}
+          title={t.copyList}
           disabled={remainingCount === 0}
           onClick={handleCopy}
         >
           <span className="menu-action-box">
             <span className="menu-action-label">
-              <CopyIcon className="menu-action-icon" />
-              {t.copyList}
+              <ShoppingListIcon className="menu-action-icon" />
             </span>
             <span className="menu-action-done" aria-hidden="true">
               <CheckIcon className="menu-action-icon" strokeWidth={3} />
-              {t.copied}
             </span>
           </span>
         </button>

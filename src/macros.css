@@ -34,7 +34,8 @@
 
 .macros-cell {
   min-width: 0;
-  padding: var(--sp-2) var(--sp-1);
+  padding: var(--sp-1) var(--sp-1) var(--sp-2);
+  border-top: 4px solid var(--mint);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -43,6 +44,15 @@
 
 .macros-cell:first-child {
   background: color-mix(in srgb, var(--mustard) 42%, var(--cream));
+  border-top-color: var(--mustard);
+}
+
+.macros-cell:nth-child(2) {
+  border-top-color: var(--cherry);
+}
+
+.macros-cell:nth-child(4) {
+  border-top-color: var(--pink);
 }
 
 .macros-cell + .macros-cell {
@@ -68,6 +78,9 @@
 .macros-cell small {
   font-family: var(--body);
   font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--choc-soft);
+  margin-left: 1px;
 }
 
 .macros-head {

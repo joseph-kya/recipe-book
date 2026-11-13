@@ -352,6 +352,7 @@ function Amount({ text }) {
 }
 
 const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
+const ING_STAGGER = [0, 20, 38, 54, 68, 80];
 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
@@ -364,24 +365,36 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
     const prev = prevRef.current;
     prevRef.current = { factor, units };
     if (measure || reducedMotion()) return;
-    if (prev.factor === factor && prev.units === units) return;
+    const factorChanged = prev.factor !== factor;
+    const unitsChanged = prev.units !== units;
+    if (!factorChanged && !unitsChanged) return;
     const root = menuRef.current;
     if (!root) return;
-    const amounts = [...root.querySelectorAll('.ing-amount')].slice(0, 6);
-    const anims = amounts.map((el, idx) =>
-      el.animate(
-        [
-          { transform: 'translateY(-3px) scale(1.06)', opacity: 0.65 },
-          { transform: 'translateY(0) scale(1)', opacity: 1 },
-        ],
-        {
-          duration: 210,
-          delay: idx * 22,
-          easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)',
-          fill: 'backwards',
-        },
-      ),
-    );
+    const rows = [...root.querySelectorAll('.ing')];
+    const anims = [];
+    rows.forEach((row, idx) => {
+      const delay = ING_STAGGER[Math.min(idx, ING_STAGGER.length - 1)];
+      const targets = unitsChanged
+        ? row.querySelectorAll('.ing-amount, .ing-metric')
+        : row.querySelectorAll('.ing-amount');
+      for (const el of targets) {
+        if (!el.animate) continue;
+        anims.push(
+          el.animate(
+            [
+              { transform: 'translateY(-3px) scale(1.05)', opacity: 0.65 },
+              { transform: 'translateY(0) scale(1)', opacity: 1 },
+            ],
+            {
+              duration: 210,
+              delay,
+              easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)',
+              fill: 'backwards',
+            },
+          ),
+        );
+      }
+    });
     return () => anims.forEach((a) => a.cancel());
   }, [factor, units, measure]);
 
@@ -459,21 +472,82 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
   );
 }
 
+const doneStepsBySlug = new Map();
+
 function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  const [doneSteps, setDoneSteps] = useState(() => new Set());
+  const [doneSteps, setDoneSteps] = useState(() => new Set(doneStepsBySlug.get(recipe.slug)));
+  const animsRef = useRef(new Map());
+
   useEffect(() => {
-    setDoneSteps(new Set());
+    setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
   }, [recipe.slug]);
 
-  const toggleStep = (stepIndex) => {
+  useEffect(() => () => {
+    for (const list of animsRef.current.values()) list.forEach((a) => a.cancel());
+    animsRef.current.clear();
+  }, []);
+
+  const toggleStep = (stepIndex, btn) => {
     if (measure) return;
-    setDoneSteps((prev) => {
-      const next = new Set(prev);
-      if (next.has(stepIndex)) next.delete(stepIndex);
-      else next.add(stepIndex);
-      return next;
-    });
+    const wasDone = doneSteps.has(stepIndex);
+    const next = new Set(doneStepsBySlug.get(recipe.slug) || doneSteps);
+    if (wasDone) next.delete(stepIndex);
+    else next.add(stepIndex);
+    doneStepsBySlug.set(recipe.slug, next);
+    setDoneSteps(new Set(next));
+
+    if (reducedMotion() || !btn?.animate) return;
+    animsRef.current.get(stepIndex)?.forEach((a) => a.cancel());
+    const created = [];
+    if (!wasDone) {
+      created.push(
+        btn.animate(
+          [
+            { transform: 'translate(2px, 2px) scale(0.96)' },
+            { transform: 'translate(2px, 2px) scale(1.09)', offset: 0.45 },
+            { transform: 'translate(2px, 2px) scale(1)' },
+          ],
+          { duration: 220, easing: SPRING_EASE },
+        ),
+      );
+      const check = btn.querySelector('.step-check');
+      if (check?.animate) {
+        created.push(
+          check.animate(
+            [
+              { opacity: 0.2, transform: 'scale(0.8) rotate(-10deg)' },
+              { opacity: 1, transform: 'scale(1.08) rotate(2deg)', offset: 0.55 },
+              { opacity: 1, transform: 'scale(1) rotate(0deg)' },
+            ],
+            { delay: 15, duration: 205, easing: SPRING_EASE, fill: 'backwards' },
+          ),
+        );
+      }
+    } else {
+      created.push(
+        btn.animate(
+          [
+            { transform: 'translate(1px, 1px) scale(0.96)' },
+            { transform: 'translate(0, 0) scale(1)' },
+          ],
+          { duration: 170, easing: OUT_EASE },
+        ),
+      );
+      const num = btn.querySelector('.step-num');
+      if (num?.animate) {
+        created.push(
+          num.animate(
+            [
+              { opacity: 0.15, transform: 'scale(0.86)' },
+              { opacity: 1, transform: 'scale(1)' },
+            ],
+            { duration: 170, easing: OUT_EASE, fill: 'backwards' },
+          ),
+        );
+      }
+    }
+    animsRef.current.set(stepIndex, created);
   };
 
   const shown = steps || r.steps.map((_, i) => i);
@@ -516,7 +590,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
                 className="step-dot"
                 aria-pressed={isDone}
                 aria-label={`${i + 1}. ${s.title}`}
-                onClick={() => toggleStep(i)}
+                onClick={(e) => toggleStep(i, e.currentTarget)}
               >
                 <span className="step-num" aria-hidden="true">
                   {i + 1}
@@ -601,18 +675,17 @@ function Credits({ recipe, lang, units }) {
             {s.site}
           </a>
         </span>
-        {/* Keep the amounts attribution intact, alongside the recipe source. */}
-        {credit ? (
-          <>
-            {'; '}
-            <span lang={credit.lang}>{credit.label}: {credit.src}</span>
-          </>
-        ) : recipe.conversions ? (
-          <>
-            {'; '}{t.conversions}: <span className="source-name" lang={r.conversions ? lang : 'en'}>{r.conversions || recipe.conversions}</span>
-          </>
-        ) : null}
       </p>
+      {/* Keep the amounts attribution intact, alongside the recipe source. */}
+      {credit ? (
+        <p className="small-credit" lang={credit.lang}>
+          {credit.label}: {credit.src}
+        </p>
+      ) : recipe.conversions ? (
+        <p className="small-credit">
+          {t.conversions}: <span className="source-name" lang={r.conversions ? lang : 'en'}>{r.conversions || recipe.conversions}</span>
+        </p>
+      ) : null}
     </footer>
   );
 }

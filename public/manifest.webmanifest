@@ -1,0 +1,24 @@
+{
+  "name": "Joseph's Recipe Book",
+  "short_name": "Recipe Book",
+  "description": "Joseph's baking recipes in a book you flip through: cups and spoons first, grams beside, a printable sheet for every recipe.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#fff4df",
+  "background_color": "#fff4df",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

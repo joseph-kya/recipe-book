@@ -51,6 +51,10 @@ export const ui = {
     pageOf: (i, n) => `Page ${i} of ${n}`,
     cover: 'Cover',
     bookLabel: "Recipe book. Swipe or use the arrow keys to turn pages.",
+    timerStart: (d) => `Start a ${d} timer`,
+    timerStop: (left) => `${left} left. Stop timer`,
+    timerDone: 'Time!',
+    timerReset: 'Time is up. Clear timer',
   },
   de: {
     bookTitle: ['Josephs', 'Rezeptbuch'],
@@ -101,6 +105,10 @@ export const ui = {
     pageOf: (i, n) => `Seite ${i} von ${n}`,
     cover: 'Titelseite',
     bookLabel: 'Rezeptbuch. Wischen oder Pfeiltasten zum Blättern.',
+    timerStart: (d) => `Timer für ${d} starten`,
+    timerStop: (left) => `Noch ${left}. Timer stoppen`,
+    timerDone: 'Fertig!',
+    timerReset: 'Zeit ist um. Timer löschen',
   },
 };
 

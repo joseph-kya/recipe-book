@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "a11y": "node scripts/a11y.mjs",
     "deploy": "sh scripts/deploy.sh",
-    "test": "node --test scripts/scale.test.mjs scripts/theme.test.mjs scripts/i18n.test.mjs"
+    "test": "node --test scripts/scale.test.mjs scripts/theme.test.mjs scripts/i18n.test.mjs scripts/timer.test.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

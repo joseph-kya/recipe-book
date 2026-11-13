@@ -7,6 +7,8 @@ import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
+import { formatRemaining, parseDuration, primeAudio, startTimer, stopTimer } from './timer.js';
+import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
 import { themeText } from './theme-i18n.js';
 import Scaler from './Scaler.jsx';
@@ -435,6 +437,44 @@ function TicketProgress({ doneCount, totalSteps }) {
   );
 }
 
+// A step that names a time gets a countdown: tap to start, tap again to stop.
+// Timers keep running across page turns and ring when they hit zero.
+function StepTimer({ timerKey, duration, t, measure }) {
+  const { state, remaining } = useTimer(measure ? null : timerKey);
+  const toggle = () => {
+    if (measure) return;
+    if (state === 'running') stopTimer(timerKey);
+    else if (state === 'done') stopTimer(timerKey);
+    else {
+      primeAudio();
+      startTimer(timerKey, duration.seconds);
+    }
+  };
+  const text =
+    state === 'running' ? formatRemaining(remaining) : state === 'done' ? t.timerDone : duration.label;
+  const label =
+    state === 'running'
+      ? t.timerStop(formatRemaining(remaining))
+      : state === 'done'
+        ? t.timerReset
+        : t.timerStart(duration.label);
+  return (
+    <button
+      type="button"
+      className={`step-timer step-timer--${state}`}
+      aria-label={label}
+      aria-live={state === 'done' ? 'assertive' : 'off'}
+      onClick={toggle}
+    >
+      <svg className="step-timer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" />
+        <path d="M12 9v4.5l3 2M9 3h6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      </svg>
+      <span className="step-timer-text">{text}</span>
+    </button>
+  );
+}
+
 function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const [doneSteps, setDoneSteps] = useState(() => new Set(doneStepsBySlug.get(recipe.slug)));
@@ -500,6 +540,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         {shown.map((i) => {
           const s = r.steps[i];
           const isDone = doneSteps.has(i);
+          const duration = parseDuration(s.text, s.cue);
           return (
             <li className={`step${isDone ? ' step--done' : ''}`} key={i} data-step={i}>
               <button
@@ -531,6 +572,9 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
                     <span aria-hidden="true">→ </span>
                     {s.cue}
                   </p>
+                )}
+                {duration && (
+                  <StepTimer timerKey={`${recipe.slug}:${i}`} duration={duration} t={t} measure={measure} />
                 )}
               </div>
             </li>

@@ -1471,6 +1471,60 @@ button {
   color: var(--cue);
 }
 
+/* step timer: a flat chip, tap to start, tap to stop */
+.step-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 2.75rem;
+  margin-top: var(--sp-2);
+  padding: 0 var(--sp-4) 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 2.5px solid var(--choc);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-m);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--press) var(--ease-out);
+}
+
+.step-timer:active {
+  transform: scale(0.96);
+}
+
+.step-timer-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.step-timer--running {
+  background: var(--mustard);
+}
+
+.step-timer--done {
+  background: var(--cherry);
+  color: var(--cherry-ink);
+  border-color: var(--cherry);
+  animation: timer-nudge 900ms var(--ease-out) 3;
+}
+
+@keyframes timer-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(0);
+  }
+}
+
 /* ---------- recipe: tips ---------- */
 .tips {
   display: grid;
@@ -1569,11 +1623,16 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .step-dot,
-  .step-body {
+  .step-body,
+  .step-timer {
     transition: none;
   }
-  .step-dot:active {
+  .step-dot:active,
+  .step-timer:active {
     transform: none;
+  }
+  .step-timer--done {
+    animation: none;
   }
 }
 

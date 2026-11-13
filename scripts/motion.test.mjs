@@ -164,29 +164,90 @@ test('cupcake spin switches instantly under reduced motion', (t) => {
   assert.equal(el.style.transform, '');
 });
 
-test('flipLabel animates with transform/opacity only, cancels on rapid tap, and stays static under reduced motion', (t) => {
+test('flipLabel rolls and squashes with transform/opacity only, cleans up outgoing text, cancels on rapid tap, and stays static under reduced motion', async (t) => {
   motionEnvironment(t, false);
-  const calls = [];
-  const el = {
+  const makeTarget = (role) => ({
+    role,
+    hidden: true,
+    textContent: '',
+    calls: [],
     animate(frames, options) {
-      const anim = { frames, options, finished: Promise.resolve(), cancelled: false, cancel() { this.cancelled = true; } };
-      calls.push(anim);
+      let resolve;
+      const finished = new Promise((r) => { resolve = r; });
+      const anim = {
+        role,
+        frames,
+        options,
+        finished,
+        cancelled: false,
+        finish() { resolve(); },
+        cancel() {
+          this.cancelled = true;
+          resolve();
+        },
+      };
+      this.calls.push(anim);
       return anim;
     },
-  };
+  });
+
+  const incoming = makeTarget('incoming');
+  const outgoing = makeTarget('outgoing');
+  const button = makeTarget('button');
   const ref = { current: null };
-  const first = flipLabel(el, { animRef: ref });
-  assert.equal(calls.length, 1);
-  assert.ok(first.options.duration <= 260);
-  assert.ok(first.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity', 'offset'].includes(k))));
-  assert.ok(first.frames.some((f) => /rotateX/.test(f.transform)));
 
-  const second = flipLabel(el, { animRef: ref });
-  assert.equal(first.cancelled, true);
+  const first = flipLabel(incoming, { button, outgoing, outgoingText: 'EN', animRef: ref });
+  assert.ok(first);
+  assert.equal(ref.current, first);
+  assert.equal(outgoing.hidden, false);
+  assert.equal(outgoing.textContent, 'EN');
+  assert.equal(incoming.calls.length, 1);
+  assert.equal(outgoing.calls.length, 1);
+  assert.equal(button.calls.length, 1);
+
+  assert.ok(first.duration >= 250 && first.duration <= 400, `expected 250-400ms, got ${first.duration}`);
+  for (const anim of first.animations) {
+    assert.ok(anim.options.duration >= 100 && anim.options.duration <= 400);
+    assert.ok(anim.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity', 'offset', 'easing'].includes(k))));
+  }
+  const inAnim = incoming.calls[0];
+  const outAnim = outgoing.calls[0];
+  const btnAnim = button.calls[0];
+  assert.ok(inAnim.frames.some((f) => /translateY/.test(f.transform) && /rotateX/.test(f.transform) && /scale\(/.test(f.transform)));
+  assert.ok(outAnim.frames.some((f) => /translateY\(-/.test(f.transform) && /rotateX/.test(f.transform)));
+  assert.ok(btnAnim.frames.some((f) => /scale\(1\.06, 0\.9\)/.test(f.transform)));
+
+  // Rapid tap cancels all first animations and replaces outgoing text without letting first cleanup hide it.
+  const second = flipLabel(incoming, { button, outgoing, outgoingText: 'DE', animRef: ref });
+  assert.ok(first.animations.every((a) => a.cancelled));
   assert.equal(ref.current, second);
+  assert.equal(outgoing.hidden, false);
+  assert.equal(outgoing.textContent, 'DE');
 
+  // Wait a microtask to ensure cancelled first animation's finally did not hide the active outgoing text.
+  await Promise.resolve();
+  assert.equal(outgoing.hidden, false);
+  assert.equal(outgoing.textContent, 'DE');
+
+  // Finishing the active outgoing animation hides and clears it.
+  outgoing.calls[1].finish();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(outgoing.hidden, true);
+  assert.equal(outgoing.textContent, '');
+
+  // Finishing remaining animations clears animRef.
+  second.animations.forEach((a) => a.finish());
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(ref.current, null);
+
+  // Reduced motion: cancels any active animation, keeps outgoing hidden, and skips WAAPI.
+  const third = flipLabel(incoming, { button, outgoing, outgoingText: 'EN', animRef: ref });
   motionEnvironment(t, true);
-  assert.equal(flipLabel(el, { animRef: ref }), null);
-  assert.equal(second.cancelled, true);
-  assert.equal(calls.length, 2);
+  assert.equal(flipLabel(incoming, { button, outgoing, outgoingText: 'DE', animRef: ref }), null);
+  assert.ok(third.animations.every((a) => a.cancelled));
+  assert.equal(outgoing.hidden, true);
+  assert.equal(outgoing.textContent, '');
+  assert.equal(incoming.calls.length, 3);
 });

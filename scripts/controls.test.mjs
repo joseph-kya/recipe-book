@@ -28,8 +28,14 @@ test('CSS keeps flat retro look, 44px mobile targets, and reduced-motion fallbac
   assert.doesNotMatch(stylesCss, /\.seg\b|\.seg-btn|\.method-tools|\.awake-icon/);
   assert.doesNotMatch(motionCss, /\.seg-indicator|\.seg-label-active|\.seg-btn/);
   assert.match(stylesCss, /min-width:\s*44px;\s*min-height:\s*44px;/);
-  assert.match(stylesCss, /\.ctl--toggle\b/);
+  assert.match(stylesCss, /\.ctl--toggle\b[\s\S]*overflow:\s*hidden;/);
+  assert.match(stylesCss, /\.ctl-flip-box\b/);
+  assert.match(stylesCss, /\.ctl-flip--out\[hidden\]\s*\{\s*display:\s*none;\s*\}/);
+  assert.match(controlsSrc, /className="ctl-flip-box"/);
+  assert.match(controlsSrc, /className="ctl-flip ctl-flip--out"\s+aria-hidden="true"\s+hidden/);
+  assert.match(controlsSrc, /className="ctl-flip ctl-flip--in"/);
   assert.match(stylesCss, /\.ctl--awake\[aria-pressed='true'\]/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl-flip/);
+  assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--toggle/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--awake/);
 });

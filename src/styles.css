@@ -1882,6 +1882,8 @@ button {
   font-size: var(--fs-s);
   line-height: 1;
   white-space: nowrap;
+  overflow: hidden;
+  transform-origin: center center;
   -webkit-tap-highlight-color: transparent;
   transition: transform var(--press) var(--ease-out), background-color 160ms ease;
 }
@@ -1890,9 +1892,29 @@ button {
   transform: scale(0.94);
 }
 
+.ctl-flip-box {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
 .ctl-flip {
   display: inline-block;
   transform-origin: center center;
+}
+
+.ctl-flip--out {
+  position: absolute;
+  inset-inline: -1.5rem;
+  inset-block: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ctl-flip--out[hidden] {
+  display: none;
 }
 
 /* Phone: an opaque menu-card keeps contrast independent of scrolling content. */
@@ -2051,7 +2073,8 @@ button {
   position: fixed;
   z-index: 20;
   left: 50%;
-  bottom: 1rem;
+  bottom: calc(1rem - 4px);
+  padding: 4px 6px;
   transform: translateX(-50%);
   gap: 0.75rem;
 }
@@ -2068,7 +2091,7 @@ button {
     right: 1.5rem;
   }
   .controls--wide .ctl-middle {
-    bottom: 1rem;
+    bottom: calc(1rem - 4px);
   }
 }
 

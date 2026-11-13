@@ -159,31 +159,118 @@ export function slidePill(group, indicator, active, { animate = false, animRef }
   }
 }
 
-// Flip a compact toggle's text on tap like a diner menu flap.
+// Roll and flip a compact toggle's label on tap with a springy little squash.
 // Cancels any in-flight flip on rapid taps and stays static under reduced motion.
-export function flipLabel(el, { animRef } = {}) {
+export function flipLabel(el, { button, outgoing, outgoingText, animRef } = {}) {
   animRef?.current?.cancel();
   if (animRef) animRef.current = null;
-  if (!el || reducedMotion() || !el.animate) return null;
 
-  const anim = el.animate(
+  const hideOutgoing = () => {
+    if (!outgoing) return;
+    outgoing.hidden = true;
+    outgoing.textContent = '';
+  };
+
+  if (!el || reducedMotion() || !el.animate) {
+    hideOutgoing();
+    return null;
+  }
+
+  const duration = 320;
+  const animations = [];
+  let cancelled = false;
+
+  const inAnim = el.animate(
     [
-      { opacity: 0.25, transform: 'perspective(160px) rotateX(-78deg) translateY(-2px)' },
-      { opacity: 1, transform: 'perspective(160px) rotateX(10deg) translateY(0)', offset: 0.72 },
-      { opacity: 1, transform: 'perspective(160px) rotateX(0deg) translateY(0)' },
+      {
+        opacity: 0,
+        transform: 'perspective(180px) translateY(95%) rotateX(-70deg) scale(0.88, 0.72)',
+        offset: 0,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
+      {
+        opacity: 1,
+        transform: 'perspective(180px) translateY(-14%) rotateX(12deg) scale(0.94, 1.1)',
+        offset: 0.48,
+        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+      },
+      {
+        opacity: 1,
+        transform: 'perspective(180px) translateY(5%) rotateX(-4deg) scale(1.06, 0.93)',
+        offset: 0.76,
+        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+      },
+      {
+        opacity: 1,
+        transform: 'perspective(180px) translateY(0) rotateX(0deg) scale(1, 1)',
+        offset: 1,
+      },
     ],
-    {
-      duration: 240,
-      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
-    },
+    { duration },
   );
+  animations.push(inAnim);
+
+  if (outgoing && outgoing.animate && outgoingText != null && outgoingText !== '') {
+    outgoing.textContent = outgoingText;
+    outgoing.hidden = false;
+    const outAnim = outgoing.animate(
+      [
+        {
+          opacity: 1,
+          transform: 'perspective(180px) translateY(0) rotateX(0deg) scale(1, 1)',
+          offset: 0,
+          easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
+        },
+        {
+          opacity: 0,
+          transform: 'perspective(180px) translateY(-100%) rotateX(68deg) scale(0.88, 0.72)',
+          offset: 1,
+        },
+      ],
+      { duration: 135, fill: 'forwards' },
+    );
+    animations.push(outAnim);
+    outAnim.finished.catch(() => {}).finally(() => {
+      if (!cancelled) hideOutgoing();
+    });
+  } else {
+    hideOutgoing();
+  }
+
+  if (button?.animate) {
+    const btnAnim = button.animate(
+      [
+        { transform: 'scale(1, 1)', offset: 0, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' },
+        { transform: 'scale(1.06, 0.9)', offset: 0.22, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+        { transform: 'scale(0.96, 1.05)', offset: 0.54, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+        { transform: 'scale(1.015, 0.985)', offset: 0.8, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+        { transform: 'scale(1, 1)', offset: 1 },
+      ],
+      { duration },
+    );
+    animations.push(btnAnim);
+  }
+
+  const controller = {
+    animations,
+    duration,
+    cancel() {
+      if (cancelled) return;
+      cancelled = true;
+      animations.forEach((anim) => anim.cancel());
+      hideOutgoing();
+      if (animRef?.current === controller) animRef.current = null;
+    },
+  };
+
   if (animRef) {
-    animRef.current = anim;
-    anim.finished.catch(() => {}).finally(() => {
-      if (animRef.current === anim) animRef.current = null;
+    animRef.current = controller;
+    Promise.allSettled(animations.map((anim) => anim.finished)).then(() => {
+      if (!cancelled && animRef.current === controller) animRef.current = null;
     });
   }
-  return anim;
+
+  return controller;
 }
 
 // Called only for a page's first live entry, after any parent page turn.

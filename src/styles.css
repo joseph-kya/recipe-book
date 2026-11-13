@@ -1842,13 +1842,17 @@ button {
   border-radius: 50%;
   border: var(--rule) solid transparent;
   color: inherit;
+  overflow: hidden;
+  transform-origin: center center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .ctl--awake .ctl-icon {
   display: block;
-  transition: transform 200ms var(--ease-out);
 }
 
 .ctl--awake[aria-pressed='true'] {
@@ -1857,12 +1861,20 @@ button {
   color: var(--choc);
 }
 
-.ctl--awake[aria-pressed='true'] .ctl-icon {
+.ctl--awake[aria-pressed='true'] .ctl-flip--in .ctl-icon {
+  transform: rotate(45deg);
+}
+
+.ctl--awake .ctl-flip--out .ctl-icon {
+  transform: none;
+}
+
+.ctl--awake .ctl-flip--out .ctl-icon--tilted {
   transform: rotate(45deg);
 }
 
 .ctl--awake:active {
-  transform: scale(0.94);
+  transform: translateY(2px) scale(1.04, 0.89);
 }
 
 .ctl--contents {
@@ -1908,12 +1920,15 @@ button {
   white-space: nowrap;
   overflow: hidden;
   transform-origin: center center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
+  transition: background-color 160ms ease;
 }
 
 .ctl--toggle:active {
-  transform: scale(0.94);
+  transform: translateY(2px) scale(1.04, 0.89);
 }
 
 .ctl-flip-box {
@@ -1923,7 +1938,8 @@ button {
 }
 
 .ctl-flip {
-  display: inline-block;
+  display: inline-grid;
+  place-items: center;
   transform-origin: center center;
 }
 
@@ -2198,7 +2214,10 @@ button {
   .ctl--awake .ctl-icon {
     transition-duration: 0ms;
   }
-  .ctl--awake[aria-pressed='true'] .ctl-icon {
+  .ctl--toggle:active,
+  .ctl--awake:active,
+  .ctl--awake[aria-pressed='true'] .ctl-flip--in .ctl-icon,
+  .ctl--awake .ctl-flip--out .ctl-icon--tilted {
     transform: none;
   }
   .toc-link:is(:hover, :active),

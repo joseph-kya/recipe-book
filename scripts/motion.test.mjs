@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { animateSpring, makeSpring, rubberband, unRubberband, rubberbandVelocity } from '../src/spring.js';
-import { enterPage, flipLabel, spinCupcake, swapContent } from '../src/motion.js';
+import { createTapHandlers, enterPage, flipLabel, pressControl, releaseControl, spinCupcake, swapContent } from '../src/motion.js';
 
 function mockGlobal(t, name, value) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
@@ -250,6 +250,110 @@ test('flipLabel rolls and squashes with transform/opacity only, cleans up outgoi
   assert.equal(outgoing.hidden, true);
   assert.equal(outgoing.textContent, '');
   assert.equal(incoming.calls.length, 3);
+});
+
+test('pressControl, releaseControl, createTapHandlers, and preserveOutgoing flip share transform-only springy tap physics', async (t) => {
+  motionEnvironment(t, false);
+  let clock = 100;
+  t.mock.method(performance, 'now', () => clock);
+
+  const makeTarget = () => ({
+    hidden: true,
+    textContent: '<svg />',
+    calls: [],
+    animate(frames, options) {
+      let resolve;
+      const finished = new Promise((r) => { resolve = r; });
+      const anim = {
+        frames,
+        options,
+        finished,
+        cancelled: false,
+        finish() { resolve(); },
+        cancel() {
+          this.cancelled = true;
+          resolve();
+        },
+      };
+      this.calls.push(anim);
+      return anim;
+    },
+  });
+
+  const button = makeTarget();
+  const incoming = makeTarget();
+  const outgoing = makeTarget();
+  const pressRef = { current: null };
+  const animRef = { current: null };
+  const downRef = { current: false };
+  const releasedAtRef = { current: -1 };
+
+  const handlers = createTapHandlers({
+    btnRef: { current: button },
+    pressRef,
+    releasedAtRef,
+    downRef,
+  });
+
+  // Secondary mouse button is ignored.
+  handlers.onPointerDown({ pointerType: 'mouse', button: 2 });
+  assert.equal(downRef.current, false);
+  assert.equal(button.calls.length, 0);
+
+  // Primary pointerdown triggers springy press-down squash with forwards fill.
+  handlers.onPointerDown({ pointerType: 'touch', button: 0 });
+  assert.equal(downRef.current, true);
+  assert.equal(button.calls.length, 1);
+  const pressAnim = button.calls[0];
+  assert.equal(pressAnim.options.fill, 'forwards');
+  assert.ok(pressAnim.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity', 'offset', 'easing'].includes(k))));
+  assert.ok(pressAnim.frames.some((f) => /translateY\(2/.test(f.transform) && /scale\(1\.0[46], 0\.8/.test(f.transform)));
+  // Even after press finishes while held, pressRef stays set until release cancels it.
+  pressAnim.finish();
+  await Promise.resolve();
+  assert.equal(pressRef.current, pressAnim);
+
+  // Pointerup cancels press squash and launches bouncy overshoot release (250-400ms).
+  clock += 40;
+  handlers.onPointerUp();
+  assert.equal(downRef.current, false);
+  assert.equal(pressAnim.cancelled, true);
+  assert.equal(releasedAtRef.current, clock);
+  assert.equal(button.calls.length, 2);
+  const releaseAnim = button.calls[1];
+  assert.ok(releaseAnim.options.duration >= 250 && releaseAnim.options.duration <= 400);
+  assert.ok(releaseAnim.frames.some((f) => /translateY\(-2px\)/.test(f.transform) && /scale\(0\.95, 1\.07\)/.test(f.transform)));
+
+  // Icon flip with preserveOutgoing preserves outgoing SVG markup while hiding/showing cleanly.
+  const flip = flipLabel(incoming, {
+    button: null,
+    outgoing,
+    preserveOutgoing: true,
+    animRef,
+    buttonAnimRef: pressRef,
+  });
+  assert.ok(flip);
+  assert.equal(outgoing.hidden, false);
+  assert.equal(outgoing.textContent, '<svg />');
+  outgoing.calls[0].finish();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(outgoing.hidden, true);
+  assert.equal(outgoing.textContent, '<svg />');
+
+  // Pointerleave while pressed releases smoothly without marking releasedAtRef.
+  handlers.onPointerDown({ pointerType: 'mouse', button: 0 });
+  assert.equal(releaseAnim.cancelled, true);
+  handlers.onPointerLeave();
+  assert.equal(downRef.current, false);
+  assert.equal(releasedAtRef.current, -1);
+  assert.equal(button.calls.length, 4);
+
+  // Reduced motion turns pressControl and releaseControl into instant no-ops.
+  motionEnvironment(t, true);
+  assert.equal(pressControl(button, { animRef: pressRef }), null);
+  assert.equal(releaseControl(button, { animRef: pressRef }), null);
+  assert.equal(pressRef.current, null);
 });
 
 test('swapContent animates visible units and language blocks with transform/opacity in 200-350ms, cancels rapid taps, and respects reduced motion', async (t) => {

@@ -159,19 +159,115 @@ export function slidePill(group, indicator, active, { animate = false, animRef }
   }
 }
 
+// Springy press-down squash on pointerdown for bottom bar toggle buttons.
+// Holds the squashed pose until releaseControl or cancellation; no-op under reduced motion.
+export function pressControl(button, { animRef } = {}) {
+  animRef?.current?.cancel();
+  if (animRef) animRef.current = null;
+  if (!button || reducedMotion() || !button.animate) return null;
+
+  const anim = button.animate(
+    [
+      { transform: 'translateY(0) scale(1, 1)', offset: 0, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      { transform: 'translateY(2.5px) scale(1.06, 0.85)', offset: 0.58, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+      { transform: 'translateY(2px) scale(1.04, 0.89)', offset: 1 },
+    ],
+    { duration: 120, fill: 'forwards' },
+  );
+
+  if (animRef) {
+    // Keep reference until releaseControl/cancel removes the forwards fill.
+    animRef.current = anim;
+  }
+  return anim;
+}
+
+// Bouncy release with slight overshoot back to rest (~320ms, transform-only).
+export function releaseControl(button, { animRef } = {}) {
+  animRef?.current?.cancel();
+  if (animRef) animRef.current = null;
+  if (!button || reducedMotion() || !button.animate) return null;
+
+  const anim = button.animate(
+    [
+      { transform: 'translateY(2px) scale(1.05, 0.89)', offset: 0, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      { transform: 'translateY(-2px) scale(0.95, 1.07)', offset: 0.36, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+      { transform: 'translateY(0.75px) scale(1.02, 0.98)', offset: 0.68, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+      { transform: 'translateY(-0.25px) scale(0.995, 1.008)', offset: 0.86, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+      { transform: 'translateY(0) scale(1, 1)', offset: 1 },
+    ],
+    { duration: 320 },
+  );
+
+  if (animRef) {
+    animRef.current = anim;
+    anim.finished?.catch(() => {}).finally(() => {
+      if (animRef.current === anim) animRef.current = null;
+    });
+  }
+  return anim;
+}
+
+// Shared pointer/keyboard handlers so pointerdown squashes immediately and release
+// bounces consistently across bottom-bar toggles without delaying click activation.
+export function createTapHandlers({ btnRef, pressRef, releasedAtRef, downRef }) {
+  return {
+    onPointerDown(e) {
+      if (e?.pointerType === 'mouse' && e.button !== 0) return;
+      downRef.current = true;
+      releasedAtRef.current = -1;
+      pressControl(btnRef.current, { animRef: pressRef });
+    },
+    onPointerUp() {
+      if (!downRef.current) return;
+      downRef.current = false;
+      releasedAtRef.current = performance.now();
+      releaseControl(btnRef.current, { animRef: pressRef });
+    },
+    onPointerCancel() {
+      if (!downRef.current) return;
+      downRef.current = false;
+      releasedAtRef.current = -1;
+      releaseControl(btnRef.current, { animRef: pressRef });
+    },
+    onPointerLeave() {
+      if (!downRef.current) return;
+      downRef.current = false;
+      releasedAtRef.current = -1;
+      releaseControl(btnRef.current, { animRef: pressRef });
+    },
+    onKeyDown(e) {
+      if (e?.key === 'Enter' || e?.key === ' ') {
+        releasedAtRef.current = -1;
+      }
+    },
+  };
+}
+
 // Roll and flip a compact toggle's label on tap with a springy little squash.
 // Cancels any in-flight flip on rapid taps and stays static under reduced motion.
-export function flipLabel(el, { button, outgoing, outgoingText, animRef } = {}) {
+export function flipLabel(el, {
+  button,
+  outgoing,
+  outgoingText,
+  preserveOutgoing = false,
+  animRef,
+  buttonAnimRef,
+} = {}) {
   animRef?.current?.cancel();
   if (animRef) animRef.current = null;
 
   const hideOutgoing = () => {
     if (!outgoing) return;
     outgoing.hidden = true;
-    outgoing.textContent = '';
+    if (!preserveOutgoing) outgoing.textContent = '';
   };
 
   if (!el || reducedMotion() || !el.animate) {
+    if (button) {
+      buttonAnimRef?.current?.cancel();
+      if (buttonAnimRef) buttonAnimRef.current = null;
+    }
     hideOutgoing();
     return null;
   }
@@ -210,8 +306,8 @@ export function flipLabel(el, { button, outgoing, outgoingText, animRef } = {}) 
   );
   animations.push(inAnim);
 
-  if (outgoing && outgoing.animate && outgoingText != null && outgoingText !== '') {
-    outgoing.textContent = outgoingText;
+  if (outgoing && outgoing.animate && (preserveOutgoing || (outgoingText != null && outgoingText !== ''))) {
+    if (!preserveOutgoing) outgoing.textContent = outgoingText;
     outgoing.hidden = false;
     const outAnim = outgoing.animate(
       [
@@ -237,18 +333,27 @@ export function flipLabel(el, { button, outgoing, outgoingText, animRef } = {}) 
     hideOutgoing();
   }
 
+  let btnAnim = null;
   if (button?.animate) {
-    const btnAnim = button.animate(
+    buttonAnimRef?.current?.cancel();
+    if (buttonAnimRef) buttonAnimRef.current = null;
+    btnAnim = button.animate(
       [
-        { transform: 'scale(1, 1)', offset: 0, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' },
-        { transform: 'scale(1.06, 0.9)', offset: 0.22, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
-        { transform: 'scale(0.96, 1.05)', offset: 0.54, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
-        { transform: 'scale(1.015, 0.985)', offset: 0.8, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
-        { transform: 'scale(1, 1)', offset: 1 },
+        { transform: 'translateY(0) scale(1, 1)', offset: 0, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' },
+        { transform: 'translateY(2px) scale(1.06, 0.9)', offset: 0.2, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        { transform: 'translateY(-2px) scale(0.95, 1.07)', offset: 0.5, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+        { transform: 'translateY(0.5px) scale(1.018, 0.982)', offset: 0.78, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' },
+        { transform: 'translateY(0) scale(1, 1)', offset: 1 },
       ],
       { duration },
     );
     animations.push(btnAnim);
+    if (buttonAnimRef) {
+      buttonAnimRef.current = btnAnim;
+      btnAnim.finished?.catch(() => {}).finally(() => {
+        if (buttonAnimRef.current === btnAnim) buttonAnimRef.current = null;
+      });
+    }
   }
 
   const controller = {
@@ -260,6 +365,7 @@ export function flipLabel(el, { button, outgoing, outgoingText, animRef } = {}) 
       animations.forEach((anim) => anim.cancel());
       hideOutgoing();
       if (animRef?.current === controller) animRef.current = null;
+      if (btnAnim && buttonAnimRef?.current === btnAnim) buttonAnimRef.current = null;
     },
   };
 

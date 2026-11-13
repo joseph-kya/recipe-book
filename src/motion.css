@@ -36,7 +36,7 @@
   from { opacity: 0; }
 }
 
-.controls button:not(:disabled),
+.controls button:not(:disabled):not(.ctl--toggle):not(.ctl--awake),
 .controls .ctl--contents,
 .book .toc-link,
 .book [role='group'] > button[aria-pressed] {
@@ -47,7 +47,7 @@
   transition: transform 160ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
-.controls button:not(:disabled):active,
+.controls button:not(:disabled):not(.ctl--toggle):not(.ctl--awake):active,
 .controls .ctl--contents:active,
 .book [role='group'] > button[aria-pressed]:active {
   transform: scale(0.96);
@@ -92,6 +92,7 @@
   .ctl-flip,
   .ctl-flip-box,
   .ctl--toggle,
+  .ctl--awake,
   .ctl--awake .ctl-icon,
   .book .toc-link,
   .book .toc-no,
@@ -105,6 +106,8 @@
   .controls button:not(:disabled):is(:active, :hover),
   .controls .ctl--contents:active,
   .ctl--awake[aria-pressed='true'] .ctl-icon,
+  .ctl--awake[aria-pressed='true'] .ctl-flip--in .ctl-icon,
+  .ctl--awake .ctl-flip--out .ctl-icon--tilted,
   .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
   .book [role='group'] > button[aria-pressed]:active,

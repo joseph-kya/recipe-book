@@ -24,7 +24,8 @@ export default function Scaler({ recipe, text, textLang, t }) {
   const groupRef = useRef(null);
   const animRef = useRef(null);
   const prevSelection = useRef({ factor, custom });
-  const labels = offered.map((f) => (y ? scaleStat(y.value, f) : factorLabel(f))).join('|');
+  const chipLabel = (f) => (y ? scaleStat(y.value, f) : factorLabel(f));
+  const labels = offered.map(chipLabel).join('|');
 
   useEffect(() => () => {
     animRef.current?.cancel();
@@ -105,7 +106,7 @@ export default function Scaler({ recipe, text, textLang, t }) {
     <div className="scaler-row">
       <div ref={groupRef} className="scaler" role="group" aria-label={y ? `${t.scale}: ${y.label}` : t.scale}>
         {offered.map((f) => {
-          const textLabel = y ? scaleStat(y.value, f) : factorLabel(f);
+          const textLabel = chipLabel(f);
           return (
             <button
               key={f}
@@ -150,7 +151,7 @@ export default function Scaler({ recipe, text, textLang, t }) {
                 // inside the field, arrows step the amount (never turn the page)
                 e.preventDefault();
                 e.stopPropagation();
-                step(e.key === 'ArrowUp' ? 1 : -1, false);
+                step(e.key === 'ArrowUp' ? 1 : -1);
               } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 e.stopPropagation(); // move the caret, not the book
               }

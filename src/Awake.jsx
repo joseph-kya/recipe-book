@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createTapHandlers, flipLabel } from './motion.js';
+import { SunIcon } from './ornaments.jsx';
 
 // Keep-screen-on toggle. Lives in the bottom control bar.
 const AWAKE_KEY = 'recipe-book:awake';
@@ -49,21 +50,6 @@ function useWakeLock() {
   }, [on]);
   useHoldWakeLock(on);
   return [on, setOn];
-}
-
-function SunIcon({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={className}>
-      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2.8" />
-      <path
-        d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 export function AwakeToggle({ label }) {

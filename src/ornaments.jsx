@@ -145,9 +145,17 @@ export function Checkers({ tone = 'choc', edge = 'top' }) {
   return <div className={`checkers checkers--${tone} checkers--${edge}`} aria-hidden="true" />;
 }
 
+function Icon({ className, children }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={className}>
+      {children}
+    </svg>
+  );
+}
+
 export function Arrow({ dir }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="arrow-icon">
+    <Icon className="arrow-icon">
       <path
         d={dir === 'left' ? 'M15 5 8 12l7 7' : 'M9 5l7 7-7 7'}
         fill="none"
@@ -156,6 +164,117 @@ export function Arrow({ dir }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
+    </Icon>
+  );
+}
+
+export function CheckIcon({ className, strokeWidth = 3.2 }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M5 12.5 9.5 17 19 7.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}
+
+export function CopyIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+      <path
+        d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+    </Icon>
+  );
+}
+
+export function CloseIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </Icon>
+  );
+}
+
+export function TimerIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" />
+      <path d="M12 9v4.5l3 2M9 3h6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </Icon>
+  );
+}
+
+export function PlayIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M7 5.5v13l11-6.5-11-6.5Z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}
+
+export function DownloadIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}
+
+export function ListIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+    </Icon>
+  );
+}
+
+export function SunIcon({ className }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2.8" />
+      <path
+        d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+    </Icon>
   );
 }

@@ -16,6 +16,10 @@
     "de": {
       "label": "Tassenumrechnung",
       "src": "ungefähr (King Arthur + Quark ~240 g/Tasse)"
+    },
+    "fr": {
+      "label": "Conversions en tasses",
+      "src": "approx. (King Arthur + fromage blanc ~240 g/tasse)"
     }
   },
   "en": {
@@ -284,5 +288,139 @@
       }
     ],
     "conversions": "Ungefähre Tassenangaben; Quark ~240 g/Tasse, Zucker 198 g/Tasse, Beeren ~140 g/Tasse"
+  },
+  "fr": {
+    "title": "Gratin au fromage blanc, citron et fruits rouges",
+    "title_lines": [
+      "Gratin Citron",
+      "& Fruits Rouges"
+    ],
+    "tagline": "Un flan façon Topfenauflauf pour le petit-déj, le dessert ou les deux.",
+    "sticker": [
+      "Demi-",
+      "fournée !"
+    ],
+    "intro": "Le gratin sucré au quark de REWE, divisé par deux et sans crumble : fromage blanc citronné, blancs en neige et fruits rouges juteux.",
+    "stats": [
+      {
+        "value": "30–40 min",
+        "label": "à 160 °C"
+      },
+      {
+        "value": "2",
+        "label": "portions ou 1 belle part"
+      },
+      {
+        "value": "~20 min",
+        "label": "préparation"
+      }
+    ],
+    "equipment": "Batteur électrique, râpe, deux saladiers, un petit plat à gratin (~20 × 15 cm).",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": "Le gratin",
+        "items": [
+          {
+            "amount": "~1½ tasse",
+            "metric": "200 g",
+            "name": "fruits rouges mélangés",
+            "note": "surgelés, ça marche aussi"
+          },
+          {
+            "amount": "½",
+            "metric": "",
+            "name": "citron bio",
+            "note": "uniquement le zeste"
+          },
+          {
+            "amount": "1",
+            "metric": "",
+            "name": "œuf",
+            "note": null
+          },
+          {
+            "amount": "1 pincée",
+            "metric": "",
+            "name": "sel",
+            "note": null
+          },
+          {
+            "amount": "2 c. à soupe",
+            "metric": "25 g",
+            "name": "sucre",
+            "note": "à diviser en deux"
+          },
+          {
+            "amount": "1 tasse bombée",
+            "metric": "250 g",
+            "name": "fromage blanc 0 % (Magerquark)",
+            "note": null
+          },
+          {
+            "amount": "1½ c. à soupe",
+            "metric": "1½ c. à soupe",
+            "name": "semoule de blé dur fine",
+            "note": null
+          },
+          {
+            "amount": "1 c. à café",
+            "metric": "1 c. à café",
+            "name": "levure chimique",
+            "note": null
+          },
+          {
+            "amount": "pour saupoudrer",
+            "metric": "",
+            "name": "sucre glace",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "Fruits rouges et zeste.",
+        "text": "Préchauffez le four à 160 °C en chaleur traditionnelle. Triez, lavez et égouttez les fruits rouges (surgelés : faites-les décongeler, puis égouttez-les). Râpez le zeste du citron.",
+        "cue": "Les fruits sont bien égouttés, pas baignés dans le jus."
+      },
+      {
+        "title": "Montez le blanc.",
+        "text": "Séparez l’œuf. Montez le blanc en neige ferme avec une pincée de sel et 1 c. à soupe de sucre.",
+        "cue": "Becs fermes."
+      },
+      {
+        "title": "La base au fromage blanc.",
+        "text": "Mélangez bien le fromage blanc, le jaune, le zeste, la semoule, la levure chimique et l’autre cuillère à soupe de sucre. Incorporez délicatement le blanc en neige.",
+        "cue": "Lisse et aérien, sans traces blanches."
+      },
+      {
+        "title": "Place aux fruits.",
+        "text": "Versez dans le plat et incorporez les fruits rouges délicatement.",
+        "cue": "Les fruits sont répartis, pas écrasés."
+      },
+      {
+        "title": "Cuisson.",
+        "text": "Enfournez 30–40 min.",
+        "cue": "Pris et légèrement doré."
+      },
+      {
+        "title": "Saupoudrez et dégustez.",
+        "text": "Saupoudrez de sucre glace et servez.",
+        "cue": "Tiède et bien pris au centre."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Nos ajustements.",
+        "text": "Les 4 portions de REWE divisées par deux (1 œuf au lieu de 2), sans le crumble, et dans un plat plus petit. La cuisson peut aller plus vite : surveillez dès 25 min."
+      },
+      {
+        "title": "Pas de chiffres.",
+        "text": "Les 464 kcal par portion de REWE incluent le crumble, on ne les affiche donc pas. Les mesures en tasses sont approximatives."
+      }
+    ],
+    "conversions": "Tasses approximatives ; fromage blanc ~240 g/tasse, sucre 198 g/tasse, fruits rouges ~140 g/tasse"
   }
 }

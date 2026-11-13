@@ -363,6 +363,186 @@ export const themeText = {
       },
     ],
   },
+  fr: {
+    changeColor: 'Changer de couleur',
+    names: { cherry: 'Cerise', blueplate: 'Assiette bleue', soda: 'Soda', butterscotch: 'Caramel au beurre', afterhours: 'Après la fermeture' },
+    ringBell: 'Sonner la clochette de service',
+    ding: 'Ding ! Commande prête.',
+    ringing: 'Dring dring dring ! Patience, la tarte arrive.',
+    bites: ['Miam. Une grosse bouchée.', 'Miam miam. Deux grosses bouchées.', 'Tout mangé !', 'Un cupcake tout frais !'],
+    tiers: [
+      // Tier 1 (finishes 1-4): cheeky diner base
+      {
+        allGone: [
+          'Pas une miette. Suspect, tout ça.',
+          'Hé, c’était le muffin d’expo !',
+          'Avalé tout rond. Même pas mâché.',
+          'Les calories de couverture comptent pas.',
+          'Direct dans le gosier, hein ?',
+        ],
+        muffinReply: [
+          'Je te manquais déjà ?',
+          'De retour sur le plateau.',
+          'Bien essayé, voleur de goûter.',
+          'J’ai neuf vies, moi.',
+          'Deuxième tournée, mon chou ?',
+        ],
+      },
+      // Tier 2 (finishes 5-9): flirty warmup
+      {
+        allGone: [
+          'Déjà de retour ? Tu as un faible.',
+          'T’as léché la caissette, avoue.',
+          'Quelqu’un aime bien le glaçage.',
+          'La douceur ? Tu connais pas.',
+          'Doucement là-dessus, bec sucré.',
+        ],
+        muffinReply: [
+          'Croque-moi. Encore.',
+          'Les yeux plus haut, merci.',
+          'Mollo sur le glaçage.',
+          'Oh, tu es bien impatient.',
+          'Attention, je suis tout chaud.',
+        ],
+      },
+      // Tier 3 (finishes 10-14): double entendres heating up
+      {
+        allGone: [
+          'Deux chiffres. Zéro retenue.',
+          'Droit par le sommet. Audacieux.',
+          'Foncé direct sur la cerise.',
+          'À fond dans le moule maintenant.',
+          'Encore les mains baladeuses sur la pâte ?',
+        ],
+        muffinReply: [
+          'Tout frais sorti du four !',
+          'Pas touche à la cerise !',
+          'Tu les aimes bien moelleux ?',
+          'Revenu pour la crème ?',
+          'Paye-moi un café d’abord.',
+        ],
+      },
+      // Tier 4 (finishes 15-19): bold flirting & roasts
+      {
+        allGone: [
+          'Tu te donnes à fond sur ces brioches.',
+          'Pas de serviette. Complètement sauvage.',
+          'Tout ça et toujours rien d’enfourné ?',
+          'Mangé la crème avant le gâteau.',
+          'On flirte ou on pâtisse là ?',
+        ],
+        muffinReply: [
+          'J’adore comment tu me tiens.',
+          'T’arrête surtout pas, chef.',
+          'Trop chaud pour toi ?',
+          'Mon glaçage, ton bazar.',
+          'Il commence à faire chaud ici.',
+        ],
+      },
+      // Tier 5 (finishes 20-24): spicy & judgy
+      {
+        allGone: [
+          'Ton pouce mérite une cigarette.',
+          'Jusqu’aux coudes dans la pâte, hein ?',
+          'Même pas un dîner avant, sérieux ?',
+          'Ce glaçage avait zéro chance.',
+          'Tu dévores des pixels par sport maintenant ?',
+        ],
+        muffinReply: [
+          'Plus fort. Non, plus doux.',
+          'Encore tiède. Approche.',
+          'Je suis fouetté. Littéralement.',
+          'De la crème sur la lèvre.',
+          'Tu te ressers ? Gourmand.',
+        ],
+      },
+      // Tier 6 (finishes 25-29): unapologetically suggestive
+      {
+        allGone: [
+          'Toujours zéro recette cuisinée.',
+          'Tout ce boulot pour un pauvre PNG ?',
+          'Avoue que tu craques pour mes miches.',
+          'Mie fondante, zéro maîtrise.',
+          'Mets donc ce pouce sur de la vraie pâte.',
+        ],
+        muffinReply: [
+          'Dis que je suis ton préféré.',
+          'Ooh, droit dans le cœur.',
+          'Tu fais lever ma pâte.',
+          'Petits doigts coquins.',
+          'Gaffe, je coule.',
+        ],
+      },
+      // Tier 7 (finishes 30-34): unhinged baker energy
+      {
+        allGone: [
+          'Va manger de vrais glucides, pitié.',
+          'En gros tu galoches un SVG.',
+          'Les recettes sont DEDANS, génie.',
+          'Croqué cru. Sans même préchauffer.',
+          'Encore faim ?! Incroyable.',
+        ],
+        muffinReply: [
+          'Prends les deux mains la prochaine fois.',
+          'Glacé et tout retourné.',
+          'Bas les yeux de ma caissette.',
+          'Tu me ruines. Recommence.',
+          'Serre-moi lentement encore.',
+        ],
+      },
+      // Tier 8 (finishes 35-39): mild swearing + ferally flirty
+      {
+        allGone: [
+          'Putain, tu détestes le bouton Ouvrir.',
+          'Qui t’a affamé comme ça, merde.',
+          'Glaçage pulvérisé, putain oui.',
+          'Franchement ? Épouse le muffin.',
+          'Zéro pitié. Terreur de la boulangerie.',
+        ],
+        muffinReply: [
+          'Putain, tu lâches rien.',
+          'Mange mes miettes, lâche.',
+          'Bien trop chaud pour ça.',
+          'Arrête de narguer, mords.',
+          'Putain oui, continue.',
+        ],
+      },
+      // Tier 9 (finishes 40-44): meltdown & peak innuendo
+      {
+        allGone: [
+          'Va toucher de la vraie farine, merde !',
+          'À ce stade, tu me dois un loyer.',
+          'Tous les deux, brûlants et en vrac.',
+          'T’as complètement pété les plombs.',
+          'Pur désir pâtissier déchaîné.',
+        ],
+        muffinReply: [
+          'Ma crème au beurre transpire.',
+          'Traite-moi de vilaine brioche.',
+          'On est fiancés maintenant ?!',
+          'Merde, t’abandonnes jamais.',
+          'Je suis plein. Encore.',
+        ],
+      },
+      // Tier 10 (finishes 45-50+): wildest final boss chaos
+      {
+        allGone: [
+          '45+ ?! T’as cassé la putain de boulangerie.',
+          'Zéro gâteau cuit. Pur délire fébrile.',
+          'Enragé sur un cupcake de dessin animé.',
+          'Cinquante nuances de crème au beurre, pitié.',
+          'Va cuire de vrais brownies, espèce de monstre !',
+        ],
+        muffinReply: [
+          'Ton vice officiel désormais.',
+          'OK. Prends toute ma crème.',
+          'Bordel, encore ?!',
+          'Passe-moi la bague au doigt.',
+          'T’as gagné. À toi pour toujours.',
+        ],
+      },
+    ],
+  },
 };
 
 let memoryFinishes = 0;

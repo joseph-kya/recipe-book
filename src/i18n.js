@@ -35,6 +35,7 @@ export const ui = {
     language: 'Language',
     languageEnglish: 'English',
     languageGerman: 'Deutsch',
+    languageFrench: 'Français',
     switchLang: 'EN — Language: English, switch to Deutsch',
     description: "Joseph's baking recipes in a book you flip through: cups and spoons first, grams beside, a printable sheet for every recipe.",
     shareDescription: "Joseph's baking recipes, cups and spoons first.",
@@ -113,7 +114,8 @@ export const ui = {
     language: 'Sprache',
     languageEnglish: 'Englisch',
     languageGerman: 'Deutsch',
-    switchLang: 'DE — Sprache: Deutsch, zu Englisch wechseln',
+    languageFrench: 'Französisch',
+    switchLang: 'DE — Sprache: Deutsch, zu Französisch wechseln',
     description: 'Josephs Backrezepte in einem Buch zum Durchblättern: Tassen und Löffel zuerst, Gramm daneben und zu jedem Rezept ein Blatt zum Ausdrucken.',
     shareDescription: 'Josephs Backrezepte, mit Tassen und Löffeln zuerst.',
     units: 'Einheiten',
@@ -158,18 +160,92 @@ export const ui = {
     cookBackToRecipe: 'Zurück zum Rezept',
     cookToggleDone: (i, done) => (done ? `Schritt ${i} erledigt. Zurücksetzen` : `Schritt ${i} als erledigt markieren`),
   },
+  fr: {
+    bookTitle: ['Les recettes', 'de Joseph'],
+    bookTitleFlat: 'Les recettes de Joseph',
+    open: 'Ouvrir',
+    contents: 'Sommaire',
+    recipeNo: 'N°',
+    ingredients: 'Ingrédients',
+    method: 'Préparation',
+    equipment: 'Matériel',
+    tips: 'Astuces',
+    macros: 'Macros',
+    macroProtein: 'Protéines',
+    macroCarbs: 'Glucides',
+    macroFat: 'Lipides',
+    macroPerServing: 'par portion',
+    macroBasis: { squares: 'par carré', rolls: 'par roulé', slices: 'par part' },
+    macroTotal: 'au total',
+    macroNote: 'env., données USDA',
+    source: 'Recette',
+    conversions: 'Conversions',
+    downloadPdf: 'Télécharger le PDF',
+    cont: '(suite)',
+    pdfLabel: (title, grams = false) => `Télécharger la fiche imprimable pour ${title} (PDF, en anglais, ${grams ? 'grammes' : 'tasses et cuillères'})`,
+    englishOnly: 'Pour l’instant uniquement en anglais.',
+    photoLabel: '',
+    photoCredit: 'Photo',
+    photoAlt: (title, site) => `${title}, photo de ${site}`,
+    prev: 'Page précédente',
+    next: 'Page suivante',
+    toContents: 'Sommaire',
+    language: 'Langue',
+    languageEnglish: 'Anglais',
+    languageGerman: 'Allemand',
+    languageFrench: 'Français',
+    switchLang: 'FR — Langue : français, passer à l’anglais',
+    description: 'Les recettes de pâtisserie de Joseph dans un carnet à feuilleter : tasses et cuillères d’abord, grammes à côté, et une fiche imprimable pour chaque recette.',
+    shareDescription: 'Les recettes de pâtisserie de Joseph, tasses et cuillères d’abord.',
+    units: 'Unités',
+    unitCups: 'tasses',
+    unitMetric: 'g',
+    unitCupsLong: 'tasses et cuillères d’abord',
+    unitMetricLong: 'grammes d’abord',
+    switchToMetric: 'tasses — Unités : passer aux grammes (g)',
+    switchToCups: 'g — Unités : grammes, passer aux tasses',
+    scale: 'Portions',
+    scaleNote: 'La taille du moule et le temps de cuisson peuvent changer.',
+    custom: 'perso',
+    customAmount: 'Quantité personnalisée',
+    less: 'Moins',
+    more: 'Plus',
+    pageOf: (i, n) => `Page ${i} sur ${n}`,
+    cover: 'Couverture',
+    bookLabel: 'Livre de recettes. Balayez ou utilisez les flèches pour tourner les pages.',
+    timerStart: (d) => `Lancer un minuteur de ${d}`,
+    timerPause: (left) => `Reste ${left}. Mettre le minuteur en pause`,
+    timerResume: (left) => `En pause, reste ${left}. Reprendre le minuteur`,
+    timerClear: 'Effacer le minuteur en pause',
+    timerDone: 'Prêt !',
+    timerReset: 'Temps écoulé. Effacer le minuteur',
+    timer: 'Minuteur',
+    timerLess: 'Une minute de moins',
+    timerMore: 'Une minute de plus',
+    keepAwake: 'Garder l’écran allumé pendant la pâtisserie',
+    copyList: 'Copier la liste',
+    copied: 'Copié',
+    clearTicks: 'Effacer',
+    clearTicksLabel: 'Effacer tous les ingrédients cochés',
+  },
 };
+
+export const LANGS = ['en', 'de', 'fr'];
+export const nextLang = (lang) => LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length];
 
 const KEY = 'recipe-book:lang';
 
-function initialLang() {
+export function initialLang() {
   try {
     const saved = localStorage.getItem(KEY);
-    if (saved === 'en' || saved === 'de') return saved;
+    if (LANGS.includes(saved)) return saved;
   } catch {
     /* storage blocked: fall through */
   }
-  return (navigator.language || '').toLowerCase().startsWith('de') ? 'de' : 'en';
+  const nav = (navigator.language || '').toLowerCase();
+  if (nav.startsWith('de')) return 'de';
+  if (nav.startsWith('fr')) return 'fr';
+  return 'en';
 }
 
 import { useRef } from 'react';
@@ -191,7 +267,7 @@ export function useLang() {
   }, [lang]);
 
   const setLang = useCallback((next) => {
-    if (next !== 'en' && next !== 'de') return;
+    if (!LANGS.includes(next)) return;
     if (next === requestedLang.current) return;
     requestedLang.current = next;
     setLangState(next);

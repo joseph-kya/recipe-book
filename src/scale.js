@@ -58,21 +58,26 @@ export function formatNumber(x, fractions = FRIENDLY) {
 const SPOONS = {
   en: { cup: ['cup', 'cups'], tbsp: ['tbsp', 'tbsp'], tsp: ['tsp', 'tsp'], pinch: ['pinch', 'pinches'] },
   de: { cup: ['Tasse', 'Tassen'], tbsp: ['EL', 'EL'], tsp: ['TL', 'TL'], pinch: ['Prise', 'Prisen'] },
+  fr: { cup: ['tasse', 'tasses'], tbsp: ['c. à soupe', 'c. à soupe'], tsp: ['c. à café', 'c. à café'], pinch: ['pincée', 'pincées'] },
 };
 const UNIT_OF = {
   cup: ['en', 'cup'], cups: ['en', 'cup'], tbsp: ['en', 'tbsp'], tsp: ['en', 'tsp'],
   Tasse: ['de', 'cup'], Tassen: ['de', 'cup'], EL: ['de', 'tbsp'], TL: ['de', 'tsp'],
+  tasse: ['fr', 'cup'], tasses: ['fr', 'cup'], 'c. à soupe': ['fr', 'tbsp'], 'c. à café': ['fr', 'tsp'],
 };
+const SPOON_UNIT = String.raw`cups?|tbsp|tsp|Tassen?|EL|TL|tasses?|c\. à soupe|c\. à café`;
+const CUP_UNIT = String.raw`cups?|Tassen?|tasses?`;
+const COUNT_QUAL = String.raw` large| small| medium| groß| klein| gros| petit| moyen`;
 const TSP = { cup: 48, tbsp: 3, tsp: 1 };
 
-const word = (lang, unit, n) => SPOONS[lang][unit][n > 1 ? 1 : 0];
+const word = (lang, unit, n) => SPOONS[lang][unit][(lang === 'fr' ? n >= 2 : n > 1) ? 1 : 0];
 
 // "1 cup + 1½ tsp" → total teaspoons, or null if any term is not a plain spoon term.
 function parseSpoons(text) {
   let total = 0;
   let lang = null;
   for (const term of text.split(' + ')) {
-    const m = term.trim().match(new RegExp(`^(${NUM}) (cups?|tbsp|tsp|Tassen?|EL|TL)$`));
+    const m = term.trim().match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
     if (!m) return null;
     const n = parseNumber(m[1]);
     if (n === null) return null;
@@ -128,7 +133,7 @@ export function roundMetric(x) {
   return Math.round(x / 5) * 5;
 }
 
-const decimal = (x, lang) => (lang === 'de' ? String(x).replace('.', ',') : String(x));
+const decimal = (x, lang) => (lang === 'de' || lang === 'fr' ? String(x).replace('.', ',') : String(x));
 
 // Countables scale to wholes or halves, never below ½.
 const countable = (x) => Math.max(0.5, Math.round(x * 2) / 2);
@@ -149,7 +154,7 @@ export const spoonTotal = (text) => parseSpoons(String(text).trim())?.total ?? n
 
 // "8 tbsp" → "16 tbsp": one spoon term kept in its own unit (used inside parentheses).
 function scaleSameUnit(text, factor) {
-  const m = String(text).match(new RegExp(`^(${NUM}) (cups?|tbsp|tsp|Tassen?|EL|TL)$`));
+  const m = String(text).match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
   if (!m) return null;
   const n = parseNumber(m[1]) * factor;
   const [l, unit] = UNIT_OF[m[2]];
@@ -180,7 +185,7 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   }
 
   // pinch + ¼ tsp: keep the pinch, scale the spoons
-  const pinchPlus = s.match(/^(pinch|Prise) \+ (.+)$/);
+  const pinchPlus = s.match(/^(pinch|Prise|pincée) \+ (.+)$/);
   if (pinchPlus) {
     const rest = parseSpoons(pinchPlus[2]);
     if (rest) {
@@ -192,20 +197,21 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
     }
   }
 
-  // 1 pinch, 2 Prisen
-  const pinch = s.match(/^(\d+) (pinch(?:es)?|Prisen?)$/);
+  // 1 pinch, 2 Prisen, 1 pincée
+  const pinch = s.match(/^(\d+) (pinch(?:es)?|Prisen?|pincées?)$/);
   if (pinch) {
     const n = Math.max(1, Math.round(parseNumber(pinch[1]) * factor));
-    const lang2 = /^P/.test(pinch[2]) ? 'de' : 'en';
+    const lang2 = /^Pr/.test(pinch[2]) ? 'de' : /^pincée/.test(pinch[2]) ? 'fr' : 'en';
     return `${n} ${word(lang2, 'pinch', n)}`;
   }
 
-  // qualified cups: "1 heaped cup", "scant ½ cup", "~1½ cups"
-  const qual = s.match(new RegExp(`^(~|scant |knapp )?(${NUM})( heaped| gehäufte?)? (cups?|Tassen?)$`));
-  if (qual && (qual[1] || qual[3])) {
+  // qualified cups: "1 heaped cup", "scant ½ cup", "~1½ cups", "1 tasse bombée"
+  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?$`));
+  if (qual && (qual[1] || qual[3] || qual[5])) {
     const n = parseNumber(qual[2]) * factor;
     const [l] = UNIT_OF[qual[4]];
-    return `${qual[1] || ''}${formatNumber(n, QUARTERS)}${qual[3] || ''} ${word(l, 'cup', n)}`;
+    const post = qual[5] ? (n >= 2 ? qual[5].replace(/s?$/, 's') : qual[5].replace(/s$/, '')) : '';
+    return `${qual[1] || ''}${formatNumber(n, QUARTERS)}${qual[3] || ''} ${word(l, 'cup', n)}${post}`;
   }
 
   // grams, millilitres and ranges of them: "175 g", "10–20 ml", "1.5 g"
@@ -222,7 +228,7 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   if (oz) return `${formatNumber(Math.max(0.5, Math.round(parseNumber(oz[1]) * factor * 2) / 2), HALVES)} oz`;
 
   // countables: "4", "½", "1 large", "4 (size M)" (the parenthetical is caught above)
-  const count = s.match(new RegExp(`^(${NUM})( large| small| medium| groß| klein)?$`));
+  const count = s.match(new RegExp(`^(${NUM})(${COUNT_QUAL})?$`));
   if (count) {
     const n = parseNumber(count[1]);
     if (n !== null) {
@@ -271,7 +277,7 @@ export function feasible(text, factor) {
 
   const paren = s.match(/^(.+?) \((.+)\)$/);
   if (paren) {
-    const inner = paren[2].match(new RegExp(`^(${NUM}) (cups?|tbsp|tsp|Tassen?|EL|TL)$`));
+    const inner = paren[2].match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
     const innerOk = inner ? quarterStep(parseNumber(inner[1]) * factor) : feasible(paren[2], factor);
     return feasible(paren[1], factor) && innerOk;
   }
@@ -279,16 +285,16 @@ export function feasible(text, factor) {
   const spoons = parseSpoons(s);
   if (spoons) return spoonsFeasible(spoons.total * factor);
 
-  const pinchPlus = s.match(/^(pinch|Prise) \+ (.+)$/);
+  const pinchPlus = s.match(/^(pinch|Prise|pincée) \+ (.+)$/);
   if (pinchPlus) {
     const rest = parseSpoons(pinchPlus[2]);
     return rest ? spoonsFeasible(rest.total * factor) : true;
   }
 
-  if (/^\d+ (pinch(?:es)?|Prisen?)$/.test(s)) return true;
+  if (/^\d+ (pinch(?:es)?|Prisen?|pincées?)$/.test(s)) return true;
 
-  const qual = s.match(new RegExp(`^(~|scant |knapp )?(${NUM})( heaped| gehäufte?)? (cups?|Tassen?)$`));
-  if (qual && (qual[1] || qual[3])) return quarterStep(parseNumber(qual[2]) * factor);
+  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?$`));
+  if (qual && (qual[1] || qual[3] || qual[5])) return quarterStep(parseNumber(qual[2]) * factor);
 
   const metric = s.match(/^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/);
   if (metric) {
@@ -301,7 +307,7 @@ export function feasible(text, factor) {
   const oz = s.match(new RegExp(`^(${NUM}) oz$`));
   if (oz) return quarterStep(parseNumber(oz[1]) * factor);
 
-  const count = s.match(new RegExp(`^(${NUM})( large| small| medium| groß| klein)?$`));
+  const count = s.match(new RegExp(`^(${NUM})(${COUNT_QUAL})?$`));
   if (count && parseNumber(count[1]) !== null) return isWhole(parseNumber(count[1]) * factor);
 
   return true;
@@ -315,7 +321,7 @@ export function yieldStat(text) {
 // Every factor at which every amount (cups and metric) in every language the
 // recipe is written in can be measured, and the yield stays whole. 1× always.
 export function feasibleFactors(recipe) {
-  const texts = ['en', 'de'].filter((l) => recipe[l]).map((l) => recipe[l]);
+  const texts = ['en', 'de', 'fr'].filter((l) => recipe[l]).map((l) => recipe[l]);
   return CANDIDATES.filter((f) => {
     if (f === 1) return true;
     return texts.every((t) => {

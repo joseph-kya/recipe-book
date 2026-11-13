@@ -107,6 +107,18 @@ test('formatShoppingList omits ticked items and reflects language, units, and sc
   assert.ok(deLines.includes('60 g Backkakao'));
   assert.ok(deLines.includes('500 g Weizenmehl'));
 
+  const frCupsDouble = formatShoppingList({
+    recipe: brownies,
+    lang: 'fr',
+    units: 'cups',
+    factor: 2,
+    gotItems: got,
+  });
+  const frLines = frCupsDouble.split('\n');
+  assert.equal(frLines[0], brownies.fr.title);
+  assert.ok(frLines.includes('⅔ tasse + 2 c. à café cacao en poudre non sucré'));
+  assert.ok(frLines.includes('4 tasses + 2 c. à soupe + 2 c. à café farine de blé'));
+
   // Ticking every item produces an empty string.
   const allGot = new Set(
     cinnamonRolls.en.groups.flatMap((g, gi) => g.items.map((_, ii) => `${gi}:${ii}`)),

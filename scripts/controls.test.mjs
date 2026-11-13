@@ -17,7 +17,7 @@ test('Controls uses compact single-button tap toggles for language and units ins
   assert.match(controlsSrc, /function TapToggle/);
   assert.match(controlsSrc, /className="lang-btn"/);
   assert.match(controlsSrc, /className="unit-btn"/);
-  assert.match(controlsSrc, /setLang\(lang === 'en' \? 'de' : 'en'\)/);
+  assert.match(controlsSrc, /setLang\(nextLang\(lang\)\)/);
   assert.match(controlsSrc, /setUnits\(units === 'cups' \? 'metric' : 'cups'\)/);
 });
 
@@ -49,7 +49,7 @@ test('CSS keeps flat retro look, 44px mobile targets, and reduced-motion fallbac
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--awake/);
 });
 
-test('EN/DE, cups/g, and sun toggles share pointerdown squash, bouncy release, and label flip without delaying clicks', () => {
+test('EN/DE/FR, cups/g, and sun toggles share pointerdown squash, bouncy release, and label flip without delaying clicks', () => {
   assert.match(controlsSrc, /createTapHandlers/);
   assert.match(controlsSrc, /flipLabel\(/);
   assert.match(controlsSrc, /\{\.\.\.tapHandlers\}/);

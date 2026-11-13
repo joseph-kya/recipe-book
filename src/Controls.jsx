@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { ui } from './i18n.js';
+import { nextLang, ui } from './i18n.js';
 import { createTapHandlers, flipLabel } from './motion.js';
 import { Arrow } from './ornaments.jsx';
 import { AwakeToggle } from './Awake.jsx';
@@ -100,7 +100,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
           text={lang.toUpperCase()}
           label={t.switchLang}
           className="lang-btn"
-          onToggle={() => setLang(lang === 'en' ? 'de' : 'en')}
+          onToggle={() => setLang(nextLang(lang))}
         />
         <TapToggle
           value={units}

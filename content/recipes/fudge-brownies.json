@@ -294,5 +294,149 @@
       }
     ],
     "conversions": "King Arthur Baking: Tabelle für Zutatengewichte"
+  },
+  "fr": {
+    "title": "Fudge Brownies",
+    "title_lines": [
+      "Fudge",
+      "Brownies"
+    ],
+    "tagline": "Un max de chocolat. Un minimum de mesures à la tasse.",
+    "sticker": [
+      "Pas de balance.",
+      "Pas de souci."
+    ],
+    "intro": "Des carrés denses, brillants et bien fondants, préparés dans un seul saladier avec un brin de patience. Le lait ribot garde la mie moelleuse ; le repos au frais garantit une découpe nette.",
+    "stats": [
+      {
+        "value": "30 min",
+        "label": "préparation"
+      },
+      {
+        "value": "35 min",
+        "label": "cuisson"
+      },
+      {
+        "value": "24",
+        "label": "carrés, 5 × 5 cm"
+      }
+    ],
+    "equipment": "Cadre ou moule 20 × 30 cm (ou moule à charnière de 26 cm), papier cuisson, cul-de-poule sur bain-marie frémissant, tamis.",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": null,
+        "items": [
+          {
+            "amount": "1 tasse + 1½ c. à café",
+            "metric": "175 g",
+            "name": "chocolat noir de couverture",
+            "note": "finement haché"
+          },
+          {
+            "amount": "½ tasse (8 c. à soupe)",
+            "metric": "115 g",
+            "name": "beurre doux",
+            "note": null
+          },
+          {
+            "amount": "¼ tasse + 1 c. à soupe + 2 c. à café",
+            "metric": "30 g",
+            "name": "cacao en poudre non sucré",
+            "note": null
+          },
+          {
+            "amount": "2 tasses + 1 c. à soupe + 1 c. à café",
+            "metric": "250 g",
+            "name": "farine de blé",
+            "note": "T45 ou T55"
+          },
+          {
+            "amount": "½ c. à café",
+            "metric": "½ c. à café",
+            "name": "sel",
+            "note": null
+          },
+          {
+            "amount": "4",
+            "metric": "4",
+            "name": "œufs",
+            "note": "calibre M"
+          },
+          {
+            "amount": "2 tasses",
+            "metric": "400 g",
+            "name": "sucre en poudre blanc",
+            "note": null
+          },
+          {
+            "amount": "1 c. à café",
+            "metric": "1 c. à café",
+            "name": "extrait de vanille",
+            "note": null
+          },
+          {
+            "amount": "¼ tasse (4 c. à soupe)",
+            "metric": "60 ml",
+            "name": "lait ribot",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "On chauffe tout ça.",
+        "text": "Préchauffez le four à 180 °C en chaleur traditionnelle (160 °C chaleur tournante). Chemisez une plaque de papier cuisson et posez dessus un cadre de 20 × 30 cm (un moule à charnière de 26 cm marche aussi).",
+        "cue": "Le four est bien chaud avant d’enfourner."
+      },
+      {
+        "title": "La magie du bain-marie.",
+        "text": "Faites fondre le chocolat haché et le beurre au bain-marie frémissant. Laissez tiédir. Mélangez cacao, farine et sel puis tamisez ensemble.",
+        "cue": "Lisse et brillant, tiède mais pas brûlant."
+      },
+      {
+        "title": "On rassemble.",
+        "text": "Fouettez les œufs, le sucre et la vanille jusqu’à ce que le mélange soit crémeux. Incorporez le mélange chocolat-beurre, puis les poudres en trois fois. Versez le lait ribot doucement à la fin.",
+        "cue": "Pâte épaisse et brillante, sans paquets de farine."
+      },
+      {
+        "title": "Au four.",
+        "text": "Étalez la pâte dans le cadre et enfournez environ 35 minutes.",
+        "cue": "Dessus pris et craquelé ; un cure-dent ressort avec des miettes humides."
+      },
+      {
+        "title": "Le plus dur : attendre.",
+        "text": "Laissez refroidir complètement. Réfrigérez 2 heures de plus pour une texture plus ferme, puis découpez en carrés de 5 × 5 cm. Se conserve jusqu’à 3 jours dans une boîte hermétique.",
+        "cue": "Bien froid = découpe nette."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Dosage malin.",
+        "text": "1 tasse ≈ 240 ml · 1 c. à soupe = 15 ml · 1 c. à café = 5 ml. Utilisez des tasses doseuses, pas des mugs. Remplissez farine et cacao à la cuillère sans tasser, puis arasez. Tassez le beurre sans bulles d’air."
+      },
+      {
+        "title": "Astuce chocolat.",
+        "text": "Le chocolat haché varie selon la taille des morceaux. Pour tomber juste : 1¾ tablette de 100 g (175 g). Toutes les mesures en tasses sont approximatives."
+      }
+    ],
+    "tagline_grams": "Un max de chocolat. Pesé au gramme près.",
+    "sticker_grams": [
+      "Au gramme près.",
+      "Pile poil."
+    ],
+    "tips_grams": [
+      {
+        "title": "Tout droit de la source.",
+        "text": "Toutes les quantités sont les grammes et ml de la recette d’origine. Cuillères : 1 c. à soupe = 15 ml · 1 c. à café = 5 ml. Pas de balance ? Prenez la version en tasses."
+      },
+      {
+        "title": "Astuce chocolat.",
+        "text": "175 g de couverture = 1¾ tablette de 100 g. Hachez-le finement pour qu’il fonde de façon uniforme avec le beurre."
+      }
+    ],
+    "conversions": "King Arthur Baking : tableau de poids des ingrédients"
   }
 }

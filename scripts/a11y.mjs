@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
-import { ui } from '../src/i18n.js';
+import { LANGS, nextLang, ui } from '../src/i18n.js';
 
 const baseURL = process.env.A11Y_URL || 'http://localhost:4173/';
 const recipeDirectory = new URL('../content/recipes/', import.meta.url);
@@ -29,10 +29,10 @@ let violations = 0;
 try {
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     const mobile = viewport.width === 390;
-    for (const lang of ['en', 'de']) {
+    for (const lang of LANGS) {
       const context = await browser.newContext({
         viewport, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: mobile ? 2 : 1,
-        locale: lang === 'de' ? 'de-DE' : 'en-US', reducedMotion: 'reduce',
+        locale: lang === 'de' ? 'de-DE' : lang === 'fr' ? 'fr-FR' : 'en-US', reducedMotion: 'reduce',
       });
       await context.addInitScript((value) => localStorage.setItem('recipe-book:lang', value), lang);
       const page = await context.newPage();
@@ -52,7 +52,7 @@ try {
         }
       }
       // Verify live language, units and wake-lock controls, plus pushState navigation.
-      const otherLang = lang === 'en' ? 'de' : 'en';
+      const otherLang = nextLang(lang);
       await page.locator('.lang-btn').click();
       await checkDocument(page, 'cinnamon-rolls', otherLang);
       await page.locator('.unit-btn').click();

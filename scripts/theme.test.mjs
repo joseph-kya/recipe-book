@@ -90,10 +90,11 @@ test('nextTheme cycles through every colourway and wraps around', () => {
   assert.equal(nextTheme('unknown'), 'cherry');
 });
 
-test('theme-i18n names every colourway in English and German', () => {
+test('theme-i18n names every colourway in English, German, and French', () => {
   for (const id of THEME_IDS) {
     assert.ok(themeText.en.names[id]?.trim(), `missing EN name for ${id}`);
     assert.ok(themeText.de.names[id]?.trim(), `missing DE name for ${id}`);
+    assert.ok(themeText.fr.names[id]?.trim(), `missing FR name for ${id}`);
   }
 });
 

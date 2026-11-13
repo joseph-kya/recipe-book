@@ -5,7 +5,7 @@ export { primeAudio } from './audio.js';
 // countdown. Timers live here, outside React, so they keep running while the
 // reader flips pages, and ring when they hit zero.
 
-const DURATION = /(\d+)(?:\s*(?:[–-]|to|bis)\s*(\d+))?\s*(minutes?|minuten|min\.?|hours?|stunden?|std\.?|h)\b/i;
+const DURATION = /(\d+)(?:\s*(?:[–-]|to|bis|à)\s*(\d+))?\s*(minutes?|minuten|min\.?|hours?|stunden?|std\.?|heures?|h)\b/i;
 
 // Finds the first duration named in a step. Ranges start at the low end: the
 // first moment to check the oven. Returns { seconds, label } or null.
@@ -15,7 +15,7 @@ export function parseDuration(...texts) {
     if (!m) continue;
     const low = Number(m[1]);
     if (!low) continue;
-    const hours = /^(h|hours?|stunden?|std)/i.test(m[3]);
+    const hours = /^(h|hours?|stunden?|std|heures?)/i.test(m[3]);
     const seconds = low * (hours ? 3600 : 60);
     const label = m[0].replace(/\s+/g, ' ').replace(/\.$/, '');
     return { seconds, label };

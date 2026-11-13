@@ -16,6 +16,10 @@
     "de": {
       "label": "Mengen",
       "src": "wie veröffentlicht; Tassen- und Grammangaben stammen von der Autorin"
+    },
+    "fr": {
+      "label": "Quantités",
+      "src": "telles que publiées ; les mesures en tasses et en grammes sont celles de l’autrice"
     }
   },
   "en": {
@@ -454,5 +458,224 @@
       }
     ],
     "conversions": "Tassen- und Grammangaben der Autorin (wie veröffentlicht)"
+  },
+  "fr": {
+    "title": "Les MEILLEURS roulés à la cannelle classiques",
+    "title_lines": [
+      "Roulés à la",
+      "cannelle"
+    ],
+    "tagline": "Deux scientifiques en alimentation. Douze roulés tout moelleux.",
+    "sticker": [
+      "12 roulés.",
+      "Science !"
+    ],
+    "intro": "Des roulés filants comme des nuages, avec une garniture façon sable mouillé qui reste bien en place. Tout est question de technique.",
+    "stats": [
+      {
+        "value": "1–2 h + 30–60 min",
+        "label": "pousse"
+      },
+      {
+        "value": "20–25 min",
+        "label": "cuisson à 177 °C (350 °F)"
+      },
+      {
+        "value": "12",
+        "label": "roulés"
+      }
+    ],
+    "equipment": "Robot pâtissier avec crochet pétrisseur, moule en métal beurré de 33 × 23 cm (13 × 9 po), rouleau à pâtisserie, spatule coudée, thermomètre.",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": "La pâte",
+        "items": [
+          {
+            "amount": "4 tasses",
+            "metric": "568 g",
+            "name": "farine de force non blanchie (T65 ou gruau)",
+            "note": "+ un peu pour étaler"
+          },
+          {
+            "amount": "⅓ tasse",
+            "metric": "65 g",
+            "name": "sucre en poudre",
+            "note": null
+          },
+          {
+            "amount": "3 c. à café",
+            "metric": "11 g",
+            "name": "levure sèche instantanée",
+            "note": null
+          },
+          {
+            "amount": "1¼ c. à café",
+            "metric": "10 g",
+            "name": "sel fin",
+            "note": "gros sel : pesez 10 g (environ 2 c. à café)"
+          },
+          {
+            "amount": "1 gros",
+            "metric": "1",
+            "name": "œuf",
+            "note": "à température ambiante"
+          },
+          {
+            "amount": "2 c. à soupe",
+            "metric": "24 g",
+            "name": "huile neutre",
+            "note": "tournesol, colza, végétale ou olive"
+          },
+          {
+            "amount": "1¼ tasse",
+            "metric": "300 ml",
+            "name": "lait",
+            "note": "entier ou demi-écrémé"
+          },
+          {
+            "amount": "2 c. à soupe",
+            "metric": "28 g",
+            "name": "beurre doux",
+            "note": "ramolli"
+          },
+          {
+            "amount": "selon besoin",
+            "metric": "10–20 ml",
+            "name": "eau",
+            "note": "un filet à la fois"
+          }
+        ]
+      },
+      {
+        "title": "La garniture façon sable mouillé",
+        "items": [
+          {
+            "amount": "1 tasse",
+            "metric": "220 g",
+            "name": "vergeoise brune",
+            "note": "tassée"
+          },
+          {
+            "amount": "4 c. à café",
+            "metric": "10 g",
+            "name": "cannelle moulue",
+            "note": null
+          },
+          {
+            "amount": "1½ c. à soupe",
+            "metric": "13 g",
+            "name": "farine T55",
+            "note": null
+          },
+          {
+            "amount": "1½ c. à soupe",
+            "metric": "22 ml",
+            "name": "eau",
+            "note": null
+          },
+          {
+            "amount": "¼ c. à café",
+            "metric": "1.5 g",
+            "name": "sel fin",
+            "note": "ajouté pour compenser le beurre doux"
+          },
+          {
+            "amount": "5 c. à soupe",
+            "metric": "70 g",
+            "name": "beurre doux",
+            "note": "à moitié fondu, puis lissé à la cuillère"
+          }
+        ]
+      },
+      {
+        "title": "Le glaçage",
+        "items": [
+          {
+            "amount": "4 oz",
+            "metric": "113 g",
+            "name": "fromage frais à tartiner (cream cheese)",
+            "note": "ramolli"
+          },
+          {
+            "amount": "2 c. à soupe",
+            "metric": "28 g",
+            "name": "beurre doux",
+            "note": "ramolli"
+          },
+          {
+            "amount": "¾ tasse",
+            "metric": "90 g",
+            "name": "sucre glace",
+            "note": null
+          },
+          {
+            "amount": "½ c. à café",
+            "metric": "½ c. à café",
+            "name": "extrait de vanille pure",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "Les secs en petits tas.",
+        "text": "Mettez la farine dans le bol du robot. Ajoutez le sucre, la levure et le sel en petits tas séparés par-dessus.",
+        "cue": "Le sel ne touche pas la levure."
+      },
+      {
+        "title": "Pétrissez sérieusement.",
+        "text": "Ajoutez l’œuf, l’huile, le lait et le beurre mou. Pétrissez au crochet à vitesse moyenne-basse pendant 10–15 min ; raclez les bords après 2 min, puis toutes les 3–5 min. Trop sec ou ferme ? Ajoutez l’eau, 10 ml à la fois.",
+        "cue": "La pâte grimpe au crochet puis se décolle du bol ; 24–26 °C (75–79 °F)."
+      },
+      {
+        "title": "Étirez et rabattez.",
+        "text": "Sur un plan de travail légèrement fariné, étirez et rabattez la pâte jusqu’à ce qu’elle soit bien lisse. Boulez, huilez légèrement et couvrez dans un saladier.",
+        "cue": "La peau de la boule se tend sans se déchirer."
+      },
+      {
+        "title": "Grande pousse, petit coup de frais.",
+        "text": "Laissez lever dans un endroit tiède pendant 1–2 heures, puis mettez au frais 15 min (sautez le froid si la cuisine est fraîche).",
+        "cue": "Presque triplé de volume."
+      },
+      {
+        "title": "Moule et sable mouillé.",
+        "text": "Beurrez le moule. Mélangez sucre, cannelle, farine et sel. Faites fondre le beurre à moitié seulement, remuez jusqu’à ce qu’il fonde complètement, puis incorporez-le avec l’eau.",
+        "cue": "Une pâte de sable mouillé : ni chaude (le gras se séparerait), ni froide (elle figerait)."
+      },
+      {
+        "title": "Étalez, tartinez, coupez, roulez.",
+        "text": "Ne pétrissez plus. Étalez en un rectangle de 43 × 35 cm (17 × 14 po), grand côté face à vous ; étalez la garniture jusqu’aux bords. Découpez 12 bandes (~3 × 35 cm) et roulez-les en spirales (ou roulez en boudin et tranchez en 12).",
+        "cue": "Un rectangle bien net, 12 bandes régulières."
+      },
+      {
+        "title": "Pousse épaule contre épaule.",
+        "text": "Disposez côté spirale vers le haut, serrés sans se chevaucher. Couvrez sans serrer et laissez pousser 30–60 min. Préchauffez à 177 °C (350 °F).",
+        "cue": "Une pression du doigt remonte lentement en laissant une légère empreinte. Creux profond = trop poussé."
+      },
+      {
+        "title": "Cuisson à cœur.",
+        "text": "Enfournez 20–25 min. Posez une feuille d’alu si le dessus dore trop vite. Laissez tiédir sur grille 15–20 min.",
+        "cue": "Bien dorés partout ; le roulé du centre atteint 92–94 °C (198–201 °F)."
+      },
+      {
+        "title": "Le glaçage.",
+        "text": "Fouettez le cream cheese et le beurre bien lisses, puis ajoutez le sucre glace et la vanille. Étalez une fine couche sur chaque roulé.",
+        "cue": "Lisse, épais et crémeux."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Passage au beurre doux.",
+        "text": "L’autrice utilise du beurre demi-sel ; ici on prend du beurre doux plus ¼ c. à café de sel dans la garniture. Sa tasse de farine est généreuse : 4 tasses = 568 g."
+      },
+      {
+        "title": "Moule en métal, pas de bain de crème.",
+        "text": "Le bain de crème rend les roulés mous ; en moule en verre, comptez 5–10 min de plus. Pâte collante ? Ajoutez de l’eau, jamais de farine. La veille : façonnez, couvrez, réfrigérez puis laissez lever."
+      }
+    ],
+    "conversions": "Mesures en tasses et en grammes de l’autrice (telles que publiées)"
   }
 }

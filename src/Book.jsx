@@ -742,7 +742,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
     const sp = spreads[idx];
     const content = sp && renderFace(sp[side], lang, units);
     // Key recipe faces by recipe + spread offset + side (not layoutKey or idx) so
-    // EN<->DE or cups<->g repagination updates content in-place without remounting.
+    // EN/DE/FR or cups<->g repagination updates content in-place without remounting.
     const baseKey = sp?.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp?.kind}-${side}`;
     const key = role === 'fading' ? `fade-${baseKey}` : baseKey;
     if (content) faces.push({ key, idx, side, role, content });

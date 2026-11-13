@@ -2,11 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseDuration, formatRemaining, formatMinutes, startTimer, stopTimer, finishTimer, getTimer, remainingSeconds, adjustTimer, getDuration, pauseTimer, resumeTimer, TIMERS_KEY } from '../src/timer.js';
 
-test('parseDuration reads minutes, ranges (low end) and hours in both languages', () => {
+test('parseDuration reads minutes, ranges (low end) and hours in all three languages', () => {
   assert.deepEqual(parseDuration('Bake for 20–25 min until set.'), { seconds: 1200, label: '20–25 min' });
   assert.deepEqual(parseDuration('35 Minuten backen.'), { seconds: 2100, label: '35 Minuten' });
+  assert.deepEqual(parseDuration('Enfournez 35 minutes.'), { seconds: 2100, label: '35 minutes' });
+  assert.deepEqual(parseDuration('Cuire 20 à 25 min.'), { seconds: 1200, label: '20 à 25 min' });
   assert.deepEqual(parseDuration('Let rise 1–2 hours.'), { seconds: 3600, label: '1–2 hours' });
   assert.deepEqual(parseDuration('2 Stunden gehen lassen.'), { seconds: 7200, label: '2 Stunden' });
+  assert.deepEqual(parseDuration('Laissez lever 1–2 heures.'), { seconds: 3600, label: '1–2 heures' });
+  assert.deepEqual(parseDuration('Laisser reposer 1 heure.'), { seconds: 3600, label: '1 heure' });
+  assert.deepEqual(parseDuration('Réfrigérez 2 h.'), { seconds: 7200, label: '2 h' });
   assert.equal(parseDuration('Fold in the flour.'), null);
   assert.equal(parseDuration('Preheat to 180 °C.', 'Bake 5 min')?.seconds, 300);
 });

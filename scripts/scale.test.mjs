@@ -23,7 +23,7 @@ const recipes = readdirSync(dir)
 
 // every amount and metric value, with the language its recipe text is in
 const amounts = recipes.flatMap((r) =>
-  ['en', 'de']
+  ['en', 'de', 'fr']
     .filter((lang) => r[lang])
     .flatMap((lang) =>
       r[lang].groups.flatMap((g) => g.items.flatMap((it) => [it.amount, it.metric].map((text) => ({ text, lang, slug: r.slug })))),
@@ -35,6 +35,7 @@ const LEAVE = ['to taste', 'as needed', 'a splash', 'a little', 'to dust', 'to s
 test('the real recipes give the tests something to chew on', () => {
   assert.ok(amounts.length > 100);
   assert.ok(amounts.some((a) => a.lang === 'de'));
+  assert.ok(amounts.some((a) => a.lang === 'fr'));
 });
 
 test('1× always returns the JSON text untouched', () => {
@@ -47,7 +48,7 @@ for (const factor of [0.5, 2]) {
       const before = spoonTotal(text);
       if (before === null) continue;
       const out = scaleAmount(text, factor, lang);
-      if (/pinch|Prise/.test(out)) {
+      if (/pinch|Prise|pincée/.test(out)) {
         assert.ok(before * factor < 0.2, `${text} → ${out}`);
         continue;
       }
@@ -62,7 +63,7 @@ for (const factor of [0.5, 2]) {
       const m = String(text).match(/^(\d+(?:\.\d+)?) (g|ml)$/);
       if (!m) continue;
       const expected = roundMetric(Number(m[1]) * factor);
-      const shown = lang === 'de' ? String(expected).replace('.', ',') : String(expected);
+      const shown = lang === 'de' || lang === 'fr' ? String(expected).replace('.', ',') : String(expected);
       assert.equal(scaleAmount(text, factor, lang), `${shown} ${m[2]}`);
     }
   });
@@ -113,6 +114,29 @@ test('German amounts scale in German units', () => {
   assert.equal(scaleAmount('1.5 g', 3, 'de'), '5 g');
 });
 
+test('French amounts scale in French units', () => {
+  const cases = [
+    ['1 tasse + 1½ c. à café', 2, '2 tasses + 1 c. à soupe'],
+    ['1 tasse + 1½ c. à café', 0.5, '½ tasse + ¾ c. à café'],
+    ['¼ tasse + 1 c. à soupe + 2 c. à café', 0.5, '2 c. à soupe + 2½ c. à café'],
+    ['2 tasses', 0.5, '1 tasse'],
+    ['½ tasse (8 c. à soupe)', 2, '1 tasse (16 c. à soupe)'],
+    ['1½ c. à soupe', 0.5, '2¼ c. à café'],
+    ['3 c. à soupe', 2, '6 c. à soupe'],
+    ['½ c. à café', 0.5, '¼ c. à café'],
+    ['1 tasse bombée', 2, '2 tasses bombées'],
+    ['1 tasse bombée', 0.5, '½ tasse bombée'],
+    ['à peine ½ tasse', 2, 'à peine 1 tasse'],
+    ['~1½ tasse', 2, '~3 tasses'],
+    ['1 pincée', 2, '2 pincées'],
+    ['pincée + ¼ c. à café', 2, 'pincée + ½ c. à café'],
+    ['pincée + ¼ c. à café', 0.5, '2 pincées'],
+    ['1 gros', 2, '2 gros'],
+  ];
+  for (const [text, f, want] of cases) assert.equal(scaleAmount(text, f, 'fr'), want, `${text} × ${f}`);
+  assert.equal(scaleAmount('1.5 g', 3, 'fr'), '5 g');
+});
+
 test('qualifiers, parentheticals, ranges, pinches and countables', () => {
   const cases = [
     ['1 heaped cup', 2, '2 heaped cups'],
@@ -159,7 +183,7 @@ test('metric rounding: whole units (at least 1) under 100, else nearest 5', () =
 
 /* ---------- feasibility: only factors a kitchen can really measure ---------- */
 
-const textsOf = (r) => ['en', 'de'].filter((l) => r[l]).map((l) => ({ lang: l, t: r[l] }));
+const textsOf = (r) => ['en', 'de', 'fr'].filter((l) => r[l]).map((l) => ({ lang: l, t: r[l] }));
 const itemsOf = (r) =>
   textsOf(r).flatMap(({ lang, t }) => t.groups.flatMap((g) => g.items.flatMap((it) => [it.amount, it.metric].map((text) => ({ text, lang })))));
 
@@ -187,8 +211,8 @@ test('no offered factor gives half grams, a new pinch, a non-whole countable or 
       for (const { text, lang } of itemsOf(r)) {
         const out = String(scaleAmount(text, f, lang));
         assert.ok(!/\d[.,]\d+ (g|ml)\b/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
-        if (!/pinch|Prise/.test(String(text))) assert.ok(!/pinch|Prise/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
-        if (/^\d+(?: large)?$|^½$/.test(String(text).trim())) assert.ok(/^\d+( large)?$/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
+        if (!/pinch|Prise|pincée/.test(String(text))) assert.ok(!/pinch|Prise|pincée/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
+        if (/^\d+(?: large| groß| gros)?$|^½$/.test(String(text).trim())) assert.ok(/^\d+( large| groß| gros)?$/.test(out), `${r.slug} ${text} × ${f} → ${out}`);
       }
       for (const { t } of textsOf(r)) {
         const y = yieldStat(t);
@@ -206,7 +230,7 @@ test('every offered spoon amount reads back in quarter steps, within 5%', () => 
       const n = m[1].replace(/[¼½¾⅓⅔]/, (c) => ({ '¼': '.25', '½': '.5', '¾': '.75', '⅓': '.333', '⅔': '.667' })[c]);
       const v = Number(n.startsWith('.') ? `0${n}` : n);
       // thirds only ever for whole cup sizes; spoons step in quarters
-      return /cup|Tasse/.test(part) ? Math.abs(v * 12 - Math.round(v * 12)) < 0.02 : Math.abs(v * 4 - Math.round(v * 4)) < 1e-9;
+      return /cup|Tasse|tasse/.test(part) ? Math.abs(v * 12 - Math.round(v * 12)) < 0.02 : Math.abs(v * 4 - Math.round(v * 4)) < 1e-9;
     });
   for (const r of recipes) {
     for (const f of offeredFactors(r).filter((x) => x !== 1)) {
@@ -223,10 +247,12 @@ test('every offered spoon amount reads back in quarter steps, within 5%', () => 
 
 /* ---------- custom amounts: exact factor, honest rounding ---------- */
 
-test('custom: countables to one decimal (0.6 egg), commas in German', () => {
+test('custom: countables to one decimal (0.6 egg), commas in German and French', () => {
   assert.equal(scaleAmount('1', 0.6, 'en', true), '0.6');
   assert.equal(scaleAmount('1 large', 0.6, 'en', true), '0.6 large');
   assert.equal(scaleAmount('4', 0.6, 'de', true), '2,4');
+  assert.equal(scaleAmount('4', 0.6, 'fr', true), '2,4');
+  assert.equal(scaleAmount('1 gros', 0.6, 'fr', true), '0,6 gros');
   assert.equal(scaleAmount('4 (size M)', 1.25, 'en', true), '5 (size M)');
   assert.equal(scaleStat('24', 1.25, true), '30');
 });
@@ -234,6 +260,7 @@ test('custom: countables to one decimal (0.6 egg), commas in German', () => {
 test('custom: spoons round to ¼, and under ¼ tsp is a pinch', () => {
   assert.equal(scaleAmount('¼ tsp', 0.6, 'en', true), '1 pinch');
   assert.equal(scaleAmount('½ TL', 0.3, 'de', true), '1 Prise');
+  assert.equal(scaleAmount('½ c. à café', 0.3, 'fr', true), '1 pincée');
   assert.equal(scaleAmount('1 tsp', 0.3, 'en', true), '¼ tsp');
   // 49.5 tsp × 1.7 = 84.15 tsp: 1¾ cups (84) and the 0.15 left rounds to ¼ tsp
   assert.equal(scaleAmount('1 cup + 1½ tsp', 1.7, 'en', true), '1¾ cups + ¼ tsp');

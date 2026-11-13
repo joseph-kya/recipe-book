@@ -16,6 +16,10 @@
     "de": {
       "label": "Tassenumrechnung",
       "src": "ungefähr (Topfen ~240 g/Tasse, Mehl ~120 g/Tasse)"
+    },
+    "fr": {
+      "label": "Conversions en tasses",
+      "src": "approx. (Topfen ~240 g/tasse, farine ~120 g/tasse)"
     }
   },
   "en": {
@@ -306,5 +310,150 @@
       }
     ],
     "conversions": "Ungefähre Tassenangaben; Topfen ~240 g/Tasse, Mehl ~120 g/Tasse"
+  },
+  "fr": {
+    "title": "Topfenschmarren",
+    "title_lines": [
+      "Topfen-",
+      "schmarren"
+    ],
+    "tagline": "Le cousin plus léger et riche en protéines du Kaiserschmarrn.",
+    "sticker": [
+      "1 belle",
+      "assiette !"
+    ],
+    "intro": "Du fromage blanc maigre (Magertopfen) et des blancs en neige, poêlés tout doucement et déchirés en morceaux bien moelleux.",
+    "stats": [
+      {
+        "value": "5 + 5 + 5 min",
+        "label": "à la poêle"
+      },
+      {
+        "value": "1",
+        "label": "belle portion"
+      },
+      {
+        "value": "470 kcal · 48 g protéines",
+        "label": "(estimation du site d’origine)"
+      }
+    ],
+    "equipment": "Poêle antiadhésive avec couvercle, deux bols, fouet ou batteur électrique, spatule.",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": "La pâte",
+        "items": [
+          {
+            "amount": "1 tasse bombée",
+            "metric": "250 g",
+            "name": "Magertopfen (fromage blanc 0 %)",
+            "note": null
+          },
+          {
+            "amount": "3 c. à soupe",
+            "metric": "3 c. à soupe",
+            "name": "crème fraîche épaisse",
+            "note": "facultatif"
+          },
+          {
+            "amount": "à peine ½ tasse",
+            "metric": "50 g",
+            "name": "farine d’épeautre",
+            "note": null
+          },
+          {
+            "amount": "2",
+            "metric": "",
+            "name": "œufs",
+            "note": null
+          },
+          {
+            "amount": "selon votre goût",
+            "metric": "",
+            "name": "édulcorant",
+            "note": null
+          },
+          {
+            "amount": "1 pincée",
+            "metric": "",
+            "name": "sel",
+            "note": null
+          },
+          {
+            "amount": "selon votre goût",
+            "metric": "",
+            "name": "zeste de citron râpé",
+            "note": null
+          },
+          {
+            "amount": "un filet",
+            "metric": "facultatif",
+            "name": "eau",
+            "note": "si la pâte est trop épaisse"
+          }
+        ]
+      },
+      {
+        "title": "Poêle et assiette",
+        "items": [
+          {
+            "amount": "un peu de",
+            "metric": "",
+            "name": "beurre ou huile de coco",
+            "note": null
+          },
+          {
+            "amount": "pour servir",
+            "metric": "",
+            "name": "fruits frais ou compote",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "Jaunes et fromage blanc.",
+        "text": "Séparez les œufs. Mélangez bien le fromage blanc avec les 2 jaunes (et la crème fraîche, si vous en mettez).",
+        "cue": "Bien lisse et crémeux."
+      },
+      {
+        "title": "On parfume.",
+        "text": "Ajoutez la farine, l’édulcorant, le zeste de citron et le sel. Trop épais ? Un filet d’eau suffit.",
+        "cue": "Épais, mais toujours onctueux."
+      },
+      {
+        "title": "Monter et incorporer.",
+        "text": "Montez les blancs en neige ferme et incorporez-les délicatement.",
+        "cue": "La pâte reste assez ferme : c’est normal."
+      },
+      {
+        "title": "Cuisson douce.",
+        "text": "Faites fondre le beurre à feu MOYEN. Étalez la pâte sur 0.5–1 cm d’épaisseur. Faites dorer ~5 min jusqu’à ce qu’elle commence à prendre, retournez et poursuivez ~5 min.",
+        "cue": "Tout au plus doré, jamais foncé."
+      },
+      {
+        "title": "Couvercle, on souffle.",
+        "text": "Coupez le feu, posez le couvercle et laissez reposer 5 min.",
+        "cue": "Bien cuit jusqu’au cœur."
+      },
+      {
+        "title": "Déchirer et garnir.",
+        "text": "Retirez le couvercle, déchirez en morceaux et servez avec des fruits ou de la compote.",
+        "cue": "Des morceaux dorés et bien moelleux."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Nos ajustements.",
+        "text": "Aucun sur la recette : quantités et étapes sont celles de Susanna. Les tasses sont nos conversions approximatives. Elle laisse l’édulcorant, la matière grasse et le zeste au goût."
+      },
+      {
+        "title": "Attention au feu.",
+        "text": "Son conseil numéro un : à feu trop vif, ça brûle et ça durcit. Restez bien à feu moyen."
+      }
+    ],
+    "conversions": "Tasses approximatives ; Topfen ~240 g/tasse, farine ~120 g/tasse"
   }
 }

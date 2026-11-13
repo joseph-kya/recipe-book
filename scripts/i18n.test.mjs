@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { textFor, amountsCreditFor } from '../src/recipe-i18n.js';
 import { scaleAmount, offeredFactors } from '../src/scale.js';
-import { ui } from '../src/i18n.js';
+import { parseDuration } from '../src/timer.js';
+import { LANGS, initialLang, nextLang, ui } from '../src/i18n.js';
 import {
   MUFFIN_FINISHES_KEY,
   MUFFIN_TIER_COUNT,
@@ -18,131 +19,182 @@ const directory = new URL('../content/recipes/', import.meta.url);
 const recipes = readdirSync(directory).filter((file) => file.endsWith('.json'))
   .map((file) => JSON.parse(readFileSync(new URL(file, directory), 'utf8')));
 const sharedText = new Set(['Fudge Brownies', 'Fudge', 'Brownies', 'Topfenschmarren', 'Topfen-', 'schmarren', 'Type 405']);
-const measurement = /^[\d\s.,~+–×¼½¾⅓⅔⅛()%°/-]*(?:g|ml|oz|EL|TL|h|min)?(?:[\d\s.,~+–×¼½¾⅓⅔⅛()%°/-]+(?:g|ml|oz|EL|TL|h|min)?)*$/;
+const measurement = /^[\d\s.,~+–×¼½¾⅓⅔()%°/-]*(?:g|ml|oz|EL|TL|h|min)?(?:[\d\s.,~+–×¼½¾⅓⅔()%°/-]+(?:g|ml|oz|EL|TL|h|min)?)*$/;
 const leaks = /Unsalted swap\.|Metal pan, no cream bath\.|as published, cups \+ grams are the author's own|ingredient weight chart|\b(cups?|tbsp|tsp|pinch|size M|to taste|as needed|to dust|to serve)\b/i;
-const quantities = (text) => text.match(/[\d¼½¾⅓⅔⅛]+(?:[.,]\d+)?/g);
+const deLeaksInFr = /\b(Tassen?|EL|TL|Prisen?|Größe M|nach Geschmack|nach Bedarf|zum Bestäuben|zum Servieren)\b/;
+const quantities = (text) => text.match(/[\d¼½¾⅓⅔]+(?:[.,]\d+)?/g);
 
-function complete(en, de, path) {
+function complete(en, translated, path) {
   if (Array.isArray(en)) {
-    assert.ok(Array.isArray(de), `${path}: missing array`);
-    assert.equal(de.length, en.length, `${path}: entry count`);
-    en.forEach((value, i) => complete(value, de[i], `${path}[${i}]`));
+    assert.ok(Array.isArray(translated), `${path}: missing array`);
+    assert.equal(translated.length, en.length, `${path}: entry count`);
+    en.forEach((value, i) => complete(value, translated[i], `${path}[${i}]`));
   } else if (en && typeof en === 'object') {
-    assert.ok(de && typeof de === 'object', `${path}: missing object`);
+    assert.ok(translated && typeof translated === 'object', `${path}: missing object`);
     for (const [key, value] of Object.entries(en)) {
-      assert.ok(Object.hasOwn(de, key), `${path}.${key}: missing key`);
-      complete(value, de[key], `${path}.${key}`);
+      assert.ok(Object.hasOwn(translated, key), `${path}.${key}: missing key`);
+      complete(value, translated[key], `${path}.${key}`);
     }
   } else if (typeof en === 'string') {
-    assert.equal(typeof de, 'string', `${path}: missing text`);
-    if (en.trim()) assert.ok(de.trim(), `${path}: empty translation`);
-    if (en === de && en.trim()) {
+    assert.equal(typeof translated, 'string', `${path}: missing text`);
+    if (en.trim()) assert.ok(translated.trim(), `${path}: empty translation`);
+    if (en === translated && en.trim()) {
       assert.ok(sharedText.has(en) || measurement.test(en), `${path}: untranslated English: ${en}`);
     }
   }
 }
 
-for (const recipe of recipes) {
-  test(`${recipe.slug}: complete German, no English fallback or known leaks`, () => {
-    complete(recipe.en, recipe.de, recipe.slug);
-    const selected = textFor(recipe, 'de');
-    assert.equal(selected.lang, 'de');
-    assert.equal(selected.fallback, false);
-    assert.equal(selected.text, recipe.de);
-    assert.equal(textFor(recipe, 'en').text, recipe.en);
-    assert.doesNotMatch(JSON.stringify(recipe.de), leaks);
-    if (recipe.amounts_credit?.en) {
-      complete(recipe.amounts_credit.en, recipe.amounts_credit.de, `${recipe.slug}.amounts_credit`);
-      const credit = amountsCreditFor(recipe, 'de');
-      assert.equal(credit.lang, 'de');
-      assert.equal(credit.label, recipe.amounts_credit.de.label);
-      assert.equal(credit.src, recipe.amounts_credit.de.src);
-      assert.doesNotMatch(JSON.stringify(credit), leaks);
-    } else if (recipe.conversions) {
-      assert.ok(recipe.de.conversions, `${recipe.slug}: visible conversion credit needs German`);
-    }
-    // Adding a language must not change the portion choices in English mode.
-    assert.deepEqual(offeredFactors(recipe), offeredFactors({ ...recipe, de: undefined }));
-    for (const [gi, group] of recipe.de.groups.entries()) {
-      for (const [ii, item] of group.items.entries()) {
-        for (const key of ['amount', 'metric']) {
-          assert.deepEqual(quantities(item[key]), quantities(recipe.en.groups[gi].items[ii][key]), `${recipe.slug}: ${key} quantities changed`);
-        }
-        for (const factor of [0.1, 0.5, 2, 10]) {
-          assert.doesNotMatch(scaleAmount(item.amount, factor, 'de', true), leaks);
-          assert.doesNotMatch(scaleAmount(item.metric, factor, 'de', true), leaks);
+for (const lang of ['de', 'fr']) {
+  const label = lang === 'de' ? 'German' : 'French';
+  for (const recipe of recipes) {
+    test(`${recipe.slug}: complete ${label}, no English fallback or known leaks`, () => {
+      complete(recipe.en, recipe[lang], `${recipe.slug}.${lang}`);
+      const selected = textFor(recipe, lang);
+      assert.equal(selected.lang, lang);
+      assert.equal(selected.fallback, false);
+      assert.equal(selected.text, recipe[lang]);
+      assert.equal(textFor(recipe, 'en').text, recipe.en);
+      assert.doesNotMatch(JSON.stringify(recipe[lang]), leaks);
+      if (lang === 'fr') assert.doesNotMatch(JSON.stringify(recipe.fr), deLeaksInFr);
+      if (recipe.amounts_credit?.en) {
+        complete(recipe.amounts_credit.en, recipe.amounts_credit[lang], `${recipe.slug}.amounts_credit.${lang}`);
+        const credit = amountsCreditFor(recipe, lang);
+        assert.equal(credit.lang, lang);
+        assert.equal(credit.label, recipe.amounts_credit[lang].label);
+        assert.equal(credit.src, recipe.amounts_credit[lang].src);
+        assert.doesNotMatch(JSON.stringify(credit), leaks);
+      } else if (recipe.conversions) {
+        assert.ok(recipe[lang].conversions, `${recipe.slug}: visible conversion credit needs ${label}`);
+      }
+      // Adding a language must not change the portion choices in English mode.
+      assert.deepEqual(offeredFactors(recipe), offeredFactors({ ...recipe, de: undefined, fr: undefined }));
+      for (const [gi, group] of recipe[lang].groups.entries()) {
+        for (const [ii, item] of group.items.entries()) {
+          for (const key of ['amount', 'metric']) {
+            assert.deepEqual(quantities(item[key]), quantities(recipe.en.groups[gi].items[ii][key]), `${recipe.slug}: ${key} quantities changed`);
+          }
+          for (const factor of [0.1, 0.5, 2, 10]) {
+            assert.doesNotMatch(scaleAmount(item.amount, factor, lang, true), leaks);
+            assert.doesNotMatch(scaleAmount(item.metric, factor, lang, true), leaks);
+          }
         }
       }
-    }
-  });
+      // Every English step timer must parse to the same duration in German and French,
+      // and French must match German's parsed step timers on every step.
+      const enTimers = recipe.en.steps.map((s) => parseDuration(s.text, s.cue)?.seconds ?? null);
+      const langTimers = recipe[lang].steps.map((s) => parseDuration(s.text, s.cue)?.seconds ?? null);
+      enTimers.forEach((sec, idx) => {
+        if (sec !== null) assert.equal(langTimers[idx], sec, `${recipe.slug}: ${lang} step ${idx + 1} timer mismatch`);
+      });
+      if (lang === 'fr') {
+        const deTimers = recipe.de.steps.map((s) => parseDuration(s.text, s.cue)?.seconds ?? null);
+        assert.deepEqual(langTimers, deTimers, `${recipe.slug}: fr step timers differ from de`);
+      }
+    });
+  }
 }
 
-test('German chrome covers every English UI and theme key', () => {
-  function keys(en, de) {
+test('German and French chrome cover every English UI and theme key', () => {
+  function keys(en, other, lang) {
     for (const [key, value] of Object.entries(en)) {
-      assert.ok(Object.hasOwn(de, key), `missing German UI key: ${key}`);
+      assert.ok(Object.hasOwn(other, key), `missing ${lang} UI key: ${key}`);
       if (value === null) continue;
-      if (typeof value === 'object') keys(value, de[key]);
-      else assert.equal(typeof de[key], typeof value, key);
+      if (typeof value === 'object') keys(value, other[key], lang);
+      else assert.equal(typeof other[key], typeof value, `${lang}.${key}`);
     }
   }
-  keys(ui.en, ui.de);
-  keys(themeText.en, themeText.de);
+  assert.deepEqual(LANGS, ['en', 'de', 'fr']);
+  assert.equal(nextLang('en'), 'de');
+  assert.equal(nextLang('de'), 'fr');
+  assert.equal(nextLang('fr'), 'en');
+  assert.equal(nextLang('unknown'), 'en');
+
+  for (const lang of ['de', 'fr']) {
+    keys(ui.en, ui[lang], lang);
+    keys(themeText.en, themeText[lang], lang);
+    assert.equal(themeText[lang].bites.length, 4);
+    assert.equal(themeText[lang].tiers.length, MUFFIN_TIER_COUNT);
+  }
   assert.equal(themeText.en.changeColor, 'Change color');
   assert.equal(themeText.de.changeColor, 'Farbe wechseln');
+  assert.equal(themeText.fr.changeColor, 'Changer de couleur');
   assert.equal(themeText.en.bites.length, 4);
-  assert.equal(themeText.de.bites.length, 4);
   assert.equal(themeText.en.tiers.length, MUFFIN_TIER_COUNT);
-  assert.equal(themeText.de.tiers.length, MUFFIN_TIER_COUNT);
   assert.equal(MUFFIN_TIER_COUNT, 10);
 
   const allEnGone = new Set();
   const allDeGone = new Set();
+  const allFrGone = new Set();
   const allEnReply = new Set();
   const allDeReply = new Set();
+  const allFrReply = new Set();
 
   for (let tierIndex = 0; tierIndex < MUFFIN_TIER_COUNT; tierIndex++) {
     const enTier = themeText.en.tiers[tierIndex];
     const deTier = themeText.de.tiers[tierIndex];
+    const frTier = themeText.fr.tiers[tierIndex];
     assert.ok(enTier.allGone.length >= 5, `tier ${tierIndex} needs at least 5 finish lines`);
-    assert.equal(deTier.allGone.length, enTier.allGone.length, `tier ${tierIndex} finish line count mismatch`);
+    assert.equal(deTier.allGone.length, enTier.allGone.length, `tier ${tierIndex} DE finish line count mismatch`);
+    assert.equal(frTier.allGone.length, enTier.allGone.length, `tier ${tierIndex} FR finish line count mismatch`);
     assert.ok(enTier.muffinReply.length >= 5, `tier ${tierIndex} needs at least 5 muffin replies`);
-    assert.equal(deTier.muffinReply.length, enTier.muffinReply.length, `tier ${tierIndex} reply count mismatch`);
+    assert.equal(deTier.muffinReply.length, enTier.muffinReply.length, `tier ${tierIndex} DE reply count mismatch`);
+    assert.equal(frTier.muffinReply.length, enTier.muffinReply.length, `tier ${tierIndex} FR reply count mismatch`);
 
     for (let i = 0; i < enTier.allGone.length; i++) {
       const en = enTier.allGone[i];
       const de = deTier.allGone[i];
-      assert.ok(en.trim().length > 0 && de.trim().length > 0);
+      const fr = frTier.allGone[i];
+      assert.ok(en.trim().length > 0 && de.trim().length > 0 && fr.trim().length > 0);
       assert.notEqual(en, de);
+      assert.notEqual(en, fr);
+      assert.notEqual(de, fr);
       assert.ok(!allEnGone.has(en), `duplicate EN finish line: ${en}`);
       assert.ok(!allDeGone.has(de), `duplicate DE finish line: ${de}`);
+      assert.ok(!allFrGone.has(fr), `duplicate FR finish line: ${fr}`);
       allEnGone.add(en);
       allDeGone.add(de);
+      allFrGone.add(fr);
     }
 
     for (let i = 0; i < enTier.muffinReply.length; i++) {
       const en = enTier.muffinReply[i];
       const de = deTier.muffinReply[i];
-      assert.ok(en.trim().length > 0 && de.trim().length > 0);
+      const fr = frTier.muffinReply[i];
+      assert.ok(en.trim().length > 0 && de.trim().length > 0 && fr.trim().length > 0);
       assert.notEqual(en, de);
+      assert.notEqual(en, fr);
+      assert.notEqual(de, fr);
       assert.ok(!allEnReply.has(en), `duplicate EN muffin reply: ${en}`);
       assert.ok(!allDeReply.has(de), `duplicate DE muffin reply: ${de}`);
+      assert.ok(!allFrReply.has(fr), `duplicate FR muffin reply: ${fr}`);
       allEnReply.add(en);
       allDeReply.add(de);
+      allFrReply.add(fr);
     }
   }
 
   assert.equal(ui.de.languageEnglish, 'Englisch');
-  assert.match(ui.en.switchLang, /\bEN\b/);
-  assert.match(ui.de.switchLang, /\bDE\b/);
+  assert.equal(ui.en.languageFrench, 'Français');
+  assert.equal(ui.de.languageFrench, 'Französisch');
+  assert.equal(ui.fr.languageEnglish, 'Anglais');
+  assert.equal(ui.fr.languageGerman, 'Allemand');
+  assert.equal(ui.fr.languageFrench, 'Français');
+  assert.match(ui.en.switchLang, /\bEN\b[\s\S]*Deutsch/);
+  assert.match(ui.de.switchLang, /\bDE\b[\s\S]*Französisch/);
+  assert.match(ui.fr.switchLang, /\bFR\b[\s\S]*anglais/);
   assert.match(ui.en.switchToMetric, /\bcups\b/);
   assert.match(ui.en.switchToCups, /\bg\b/);
   assert.match(ui.de.switchToMetric, /\bTassen\b/);
   assert.match(ui.de.switchToCups, /\bg\b/);
-  assert.ok(ui.en.keepAwake.trim().length > 0 && ui.de.keepAwake.trim().length > 0);
+  assert.match(ui.fr.switchToMetric, /\btasses\b/);
+  assert.match(ui.fr.switchToCups, /\bg\b/);
+  assert.ok(ui.en.keepAwake.trim().length > 0 && ui.de.keepAwake.trim().length > 0 && ui.fr.keepAwake.trim().length > 0);
   assert.match(ui.de.photoAlt('Zimtschnecken', 'Scientifically Sweet'), /Foto von/);
+  assert.match(ui.fr.photoAlt('Roulés à la cannelle', 'Scientifically Sweet'), /photo de/);
   assert.match(ui.de.pdfLabel('Zimtschnecken'), /herunterladen/);
+  assert.match(ui.fr.pdfLabel('Roulés à la cannelle'), /Télécharger[\s\S]*en anglais/);
   assert.match(ui.de.pageOf(2, 5), /Seite 2 von 5/);
+  assert.match(ui.fr.pageOf(2, 5), /Page 2 sur 5/);
 });
 
 test('tierForFinishes escalates every 5 finishes up to tier 10 (45-50+)', () => {
@@ -213,3 +265,45 @@ test('pickNextIndex picks across the full pool and never repeats twice in a row'
     }
   }
 });
+
+test('initialLang honors saved en/de/fr and detects de-* / fr-* from navigator.language', () => {
+  const origStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  const origNav = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  const store = new Map();
+  let navLang = 'en-US';
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: { getItem: (k) => (store.has(k) ? store.get(k) : null) },
+  });
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { get language() { return navLang; } },
+  });
+  try {
+    navLang = 'fr-FR';
+    assert.equal(initialLang(), 'fr');
+    navLang = 'fr';
+    assert.equal(initialLang(), 'fr');
+    navLang = 'de-AT';
+    assert.equal(initialLang(), 'de');
+    navLang = 'es-ES';
+    assert.equal(initialLang(), 'en');
+
+    store.set('recipe-book:lang', 'fr');
+    navLang = 'en-US';
+    assert.equal(initialLang(), 'fr');
+
+    store.set('recipe-book:lang', 'de');
+    assert.equal(initialLang(), 'de');
+
+    store.set('recipe-book:lang', 'it');
+    navLang = 'fr-CA';
+    assert.equal(initialLang(), 'fr');
+  } finally {
+    if (origStorage) Object.defineProperty(globalThis, 'localStorage', origStorage);
+    else delete globalThis.localStorage;
+    if (origNav) Object.defineProperty(globalThis, 'navigator', origNav);
+    else delete globalThis.navigator;
+  }
+});
+

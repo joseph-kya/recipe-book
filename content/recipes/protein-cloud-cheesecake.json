@@ -16,6 +16,10 @@
     "de": {
       "label": "Tassenumrechnung",
       "src": "ungefähr (King Arthur + Quark ~240 g/Tasse)"
+    },
+    "fr": {
+      "label": "Conversions en tasses",
+      "src": "approx. (King Arthur + fromage blanc ~240 g/tasse)"
     }
   },
   "en": {
@@ -308,5 +312,151 @@
       }
     ],
     "conversions": "Ungefähre Tassenangaben; Quark ~240 g/Tasse, Maisstärke ~8 g/EL"
+  },
+  "fr": {
+    "title": "Cheesecake nuage protéiné",
+    "title_lines": [
+      "Cheesecake",
+      "nuage"
+    ],
+    "tagline": "Aérien, léger, riche en protéines. Sans pâte, sans chichi.",
+    "sticker": [
+      "8 parts",
+      "Aérien !"
+    ],
+    "intro": "Le fameux « Wölkchenkuchen » viral de LECKER : fromage blanc et blancs montés en neige, cuits tout doucement au bain-marie.",
+    "stats": [
+      {
+        "value": "~1 h 15 min",
+        "label": "au total"
+      },
+      {
+        "value": "10 + 45 min",
+        "label": "au four"
+      },
+      {
+        "value": "~100 kcal · 8 g protéines",
+        "label": "par part (estimation LECKER)"
+      }
+    ],
+    "equipment": "Moule à charnière de 18 cm (7 po), papier cuisson, papier alu, grand plat à rôtir, batteur électrique, mini-hachoir.",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": "L’appareil",
+        "items": [
+          {
+            "amount": "½ tasse",
+            "metric": "100 g",
+            "name": "érythritol",
+            "note": "à diviser en 5 c. à soupe + 3 c. à soupe"
+          },
+          {
+            "amount": "4",
+            "metric": "4 (calibre M)",
+            "name": "œufs",
+            "note": null
+          },
+          {
+            "amount": "1 pincée",
+            "metric": "",
+            "name": "sel",
+            "note": null
+          },
+          {
+            "amount": "pincée + ¼ c. à café",
+            "metric": "",
+            "name": "levure chimique",
+            "note": "la pincée pour les blancs"
+          },
+          {
+            "amount": "¾ tasse + 1 c. à soupe",
+            "metric": "200 g",
+            "name": "fromage blanc 0 % (Magerquark)",
+            "note": null
+          },
+          {
+            "amount": "3½ c. à soupe",
+            "metric": "50 g",
+            "name": "fromage frais allégé",
+            "note": "~10 % de MG"
+          },
+          {
+            "amount": "5 c. à soupe",
+            "metric": "75 ml",
+            "name": "lait",
+            "note": null
+          },
+          {
+            "amount": "¼ c. à café",
+            "metric": "",
+            "name": "extrait de vanille",
+            "note": null
+          },
+          {
+            "amount": "⅓ tasse",
+            "metric": "40 g",
+            "name": "farine de blé",
+            "note": "T45"
+          },
+          {
+            "amount": "3 c. à soupe",
+            "metric": "25 g",
+            "name": "fécule de maïs (Maïzena)",
+            "note": null
+          },
+          {
+            "amount": "pour saupoudrer",
+            "metric": "facultatif",
+            "name": "sucre glace",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "Faites couler le bain.",
+        "text": "Four à 170 °C (150 °C chaleur tournante), grille au milieu. Posez-y le grand plat avec ~3 cm d’eau chaude. Chemisez le fond et les bords du moule de papier cuisson ; enveloppez l’extérieur bien serré dans du papier alu.",
+        "cue": "L’alu épouse bien le tour, aucune fuite d’eau possible."
+      },
+      {
+        "title": "Mixez et montez.",
+        "text": "Réduisez séparément les 5 c. à soupe et les 3 c. à soupe d’érythritol en poudre. Séparez les œufs. Montez les blancs avec le sel et la pincée de levure en neige ferme, en versant les 5 c. à soupe de poudre en pluie.",
+        "cue": "Becs fermes et brillants qui tiennent tout seuls."
+      },
+      {
+        "title": "La base crémeuse.",
+        "text": "Battez les jaunes, les 3 c. à soupe de poudre, le fromage blanc, le fromage frais, le lait et la vanille. Mélangez farine, fécule et ¼ c. à café de levure chimique, puis incorporez.",
+        "cue": "Bien lisse, sans grumeaux."
+      },
+      {
+        "title": "Incorporez le nuage.",
+        "text": "Incorporez les blancs en neige en trois fois à la maryse. Versez dans le moule.",
+        "cue": "Plus de traces blanches, mais toujours bien aérien."
+      },
+      {
+        "title": "Au bain-marie.",
+        "text": "Posez le moule dans le bain d’eau chaude. Enfournez 10 min, baissez à 150 °C (130 °C chaleur tournante) et poursuivez ~45 min. N’ouvrez surtout pas la porte !",
+        "cue": "La porte reste fermée du début à la fin."
+      },
+      {
+        "title": "Refroidir, démouler, trancher.",
+        "text": "Laissez refroidir complètement puis démoulez. Saupoudrez d’un voile de sucre glace si vous voulez et coupez 8 parts.",
+        "cue": "Bien refroidi avant de couper."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Nos ajustements.",
+        "text": "Quantités, temps et températures viennent de LECKER. Les mesures en tasses sont nos conversions approximatives ; diviser l’érythritol en 5 + 3 c. à soupe avant de le mixer est notre astuce sans balance."
+      },
+      {
+        "title": "Plutôt du sucre ?",
+        "text": "Selon LECKER, le sucre classique remplace l’érythritol à parts égales, sans le mixer. On passe alors à ~150 kcal et 8 g de protéines par part (leur estimation)."
+      }
+    ],
+    "conversions": "Tasses approximatives ; fromage blanc ~240 g/tasse, fécule de maïs ~8 g/c. à soupe"
   }
 }

@@ -74,19 +74,20 @@ test('the CSS carries the same values as src/theme.js and sets color-scheme expl
     for (const [k, v] of Object.entries(THEMES[id])) {
       assert.match(block, new RegExp(`${kebab(k)}:\\s*${v};`, 'i'), `${id} ${kebab(k)} should be ${v}`);
     }
-    if (id === 'cherry') assert.match(block, /color-scheme:\s*light;/);
-    if (id === 'afterhours') assert.match(block, /color-scheme:\s*dark;/);
+    if (id === 'cherry' || id === 'paper') assert.match(block, /color-scheme:\s*light;/);
+    if (id === 'ink') assert.match(block, /color-scheme:\s*dark;/);
   }
   assert.doesNotMatch(css, /prefers-color-scheme/);
 });
 
 test('nextTheme cycles through every colourway and wraps around', () => {
-  assert.deepEqual(THEME_IDS, ['cherry', 'blueplate', 'soda', 'butterscotch', 'afterhours']);
+  assert.deepEqual(THEME_IDS, ['cherry', 'blueplate', 'soda', 'butterscotch', 'paper', 'ink']);
   assert.equal(nextTheme('cherry'), 'blueplate');
   assert.equal(nextTheme('blueplate'), 'soda');
   assert.equal(nextTheme('soda'), 'butterscotch');
-  assert.equal(nextTheme('butterscotch'), 'afterhours');
-  assert.equal(nextTheme('afterhours'), 'cherry');
+  assert.equal(nextTheme('butterscotch'), 'paper');
+  assert.equal(nextTheme('paper'), 'ink');
+  assert.equal(nextTheme('ink'), 'cherry');
   assert.equal(nextTheme('unknown'), 'cherry');
 });
 

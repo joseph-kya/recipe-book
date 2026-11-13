@@ -22,7 +22,7 @@
   /* the picture is 4:3; its width follows from the height it may take */
   width: min(100%, calc(var(--photo-h, 270px) * 4 / 3 + 2 * (var(--sp-2) + var(--rule))));
   padding: var(--sp-2);
-  background: var(--cream);
+  background: var(--photo-mat, var(--cream));
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-s);
   box-shadow: 4px 4px 0 var(--shadow);

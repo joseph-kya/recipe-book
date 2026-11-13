@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { transition } from './motion.js';
 
-// Five diner colourways. Each is a full token set, not a hue swap; the CSS in
+// Six colourways: four diner palettes plus two restrained monochrome themes
+// (paper and ink). Each is a full token set, not a hue swap; the CSS in
 // src/theme.css mirrors these values (scripts/theme.test.mjs checks both that
 // they match and that every text pairing passes WCAG AA).
 //   primary          headings, links, primary buttons
@@ -68,16 +69,27 @@ export const THEMES = {
     tableInk: '#fff2e0', tableActiveInk: '#3a2216',
     cupcakeCherry: '#c8233a', cupcakeCream: '#fff2e0',
   },
-  afterhours: {
-    primary: '#ff5780', primaryInk: '#ff7a9b', primaryDeep: '#ffd6e0',
-    card: '#0e3a42', accent: '#944a00', accent2: '#661938',
-    ink: '#f6ead4', inkSoft: '#cfc1aa', cue: '#7cdbd3',
-    ground: '#101522', paper: '#171e30', table: '#080b14', tableTile: '#0e1322', frosting: '#a85d4b',
-    shadow: '#050811', highlight: '#f6ead4',
-    cover: '#13182a', coverInk: '#f6ead4', coverChecker: '#ff5780', coverCheckerAlt: '#13182a',
-    coverTitleShadow: '#8c143a', coverBtn: '#ff5780', coverBtnInk: '#101522',
-    tableInk: '#f6ead4', tableActiveInk: '#080b14',
-    cupcakeCherry: '#ff3b6b', cupcakeCream: '#e8c490',
+  paper: {
+    primary: '#222222', primaryInk: '#1f1f1f', primaryDeep: '#171717',
+    card: '#ebebeb', accent: '#d4d4d4', accent2: '#e4e4e4',
+    ink: '#171717', inkSoft: '#525252', cue: '#404040',
+    ground: '#ffffff', paper: '#f5f5f5', table: '#262626', tableTile: '#2f2f2f', frosting: '#737373',
+    shadow: '#171717', highlight: '#ffffff',
+    cover: '#f4f4f4', coverInk: '#171717', coverChecker: '#222222', coverCheckerAlt: '#ffffff',
+    coverTitleShadow: '#cfcfcf', coverBtn: '#171717', coverBtnInk: '#ffffff',
+    tableInk: '#f4f4f4', tableActiveInk: '#171717',
+    cupcakeCherry: '#333333', cupcakeCream: '#ffffff',
+  },
+  ink: {
+    primary: '#e6e4de', primaryInk: '#e6e4de', primaryDeep: '#f2f0ea',
+    card: '#2b2b2b', accent: '#8f6218', accent2: '#262626',
+    ink: '#f2f0ea', inkSoft: '#b8b6af', cue: '#ccc9c1',
+    ground: '#181818', paper: '#222222', table: '#0d0d0d', tableTile: '#121212', frosting: '#666666',
+    shadow: '#080808', highlight: '#f2f0ea',
+    cover: '#181818', coverInk: '#f2f0ea', coverChecker: '#2e2e2e', coverCheckerAlt: '#181818',
+    coverTitleShadow: '#080808', coverBtn: '#8f6218', coverBtnInk: '#f2f0ea',
+    tableInk: '#e6e4de', tableActiveInk: '#181818',
+    cupcakeCherry: '#c49134', cupcakeCream: '#d6d4ce',
   },
 };
 
@@ -95,10 +107,11 @@ const current = () => {
 // Set the attribute the CSS reads and the browser bar colour. index.html does
 // the same before first paint, so a saved colourway never flashes the default.
 export function applyTheme(id) {
+  const safe = THEME_IDS.includes(id) ? id : DEFAULT_THEME;
   const root = document.documentElement;
-  if (id === DEFAULT_THEME) delete root.dataset.theme;
-  else root.dataset.theme = id;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[id].ground);
+  if (safe === DEFAULT_THEME) delete root.dataset.theme;
+  else root.dataset.theme = safe;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[safe].ground);
 }
 
 export function useTheme() {

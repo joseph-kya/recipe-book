@@ -5,7 +5,7 @@ export const MUFFIN_TIER_COUNT = 10;
 export const themeText = {
   en: {
     changeColor: 'Change color',
-    names: { cherry: 'Cherry', blueplate: 'Blue plate', soda: 'Soda', butterscotch: 'Butterscotch', afterhours: 'After hours' },
+    names: { cherry: 'Cherry', blueplate: 'Blue plate', soda: 'Soda', butterscotch: 'Butterscotch', paper: 'Paper', ink: 'Ink' },
     ringBell: 'Ring the service bell',
     ding: 'Ding! Order up.',
     ringing: 'Ring ring ring! Patience, the pie is coming.',
@@ -185,7 +185,7 @@ export const themeText = {
   },
   de: {
     changeColor: 'Farbe wechseln',
-    names: { cherry: 'Kirsche', blueplate: 'Blauer Teller', soda: 'Soda', butterscotch: 'Karamell', afterhours: 'Nach Ladenschluss' },
+    names: { cherry: 'Kirsche', blueplate: 'Blauer Teller', soda: 'Soda', butterscotch: 'Karamell', paper: 'Papier', ink: 'Tinte' },
     ringBell: 'Tischglocke läuten',
     ding: 'Ding! Bestellung fertig.',
     ringing: 'Kling kling kling! Geduld, der Kuchen kommt.',
@@ -365,7 +365,7 @@ export const themeText = {
   },
   fr: {
     changeColor: 'Changer de couleur',
-    names: { cherry: 'Cerise', blueplate: 'Assiette bleue', soda: 'Soda', butterscotch: 'Caramel au beurre', afterhours: 'Après la fermeture' },
+    names: { cherry: 'Cerise', blueplate: 'Assiette bleue', soda: 'Soda', butterscotch: 'Caramel au beurre', paper: 'Papier', ink: 'Encre' },
     ringBell: 'Sonner la clochette de service',
     ding: 'Ding ! Commande prête.',
     ringing: 'Dring dring dring ! Patience, la tarte arrive.',

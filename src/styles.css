@@ -322,14 +322,20 @@ button {
   left: 0;
   transform-origin: right center;
   border-radius: var(--r-m) 0 0 var(--r-m);
-  box-shadow: inset -22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent);
+  box-shadow:
+    inset -22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent),
+    inset 1px 1px 0 var(--page-edge, transparent),
+    inset 0 -1px 0 var(--page-edge, transparent);
 }
 
 .book--wide .face--R {
   left: 50%;
   transform-origin: left center;
   border-radius: 0 var(--r-m) var(--r-m) 0;
-  box-shadow: inset 22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent);
+  box-shadow:
+    inset 22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent),
+    inset -1px 1px 0 var(--page-edge, transparent),
+    inset 0 -1px 0 var(--page-edge, transparent);
 }
 
 /* ---------- shared bits ---------- */
@@ -431,11 +437,11 @@ button {
 }
 
 .checkers--choc {
-  --c: var(--choc);
+  --c: var(--checker-choc, var(--choc));
 }
 
 .checkers--cherry {
-  --c: var(--cherry);
+  --c: var(--checker-cherry, var(--cherry));
 }
 
 .checkers--bottom {
@@ -484,8 +490,8 @@ button {
 }
 
 .btn--cherry {
-  background: var(--cherry);
-  color: var(--cream);
+  background: var(--btn-primary, var(--cherry));
+  color: var(--btn-primary-ink, var(--cream));
 }
 
 .btn--cream {
@@ -525,6 +531,10 @@ button {
   flex-direction: column;
   background: var(--cover);
   color: var(--cover-ink);
+}
+
+.book--wide .cover {
+  box-shadow: inset 1px 0 0 var(--page-edge, transparent);
 }
 
 .cover .checkers {
@@ -634,7 +644,7 @@ button {
 }
 
 .cover-cupcake .cupcake-cup {
-  fill: var(--mustard);
+  fill: var(--cover-cupcake-cup, var(--mustard));
 }
 
 /* A bite squishes the cupcake; the last bite pops crumbs; a fresh one springs back. Flat, no extras. */
@@ -1944,7 +1954,7 @@ button {
 
 .tip {
   padding: var(--sp-3) var(--sp-4);
-  background: var(--mustard);
+  background: var(--tip-bg, var(--mustard));
   border: 2.5px solid var(--choc);
   border-radius: var(--r-m);
   font-size: var(--fs-s);
@@ -1952,7 +1962,7 @@ button {
 }
 
 .tip + .tip {
-  background: var(--pink);
+  background: var(--tip-bg-alt, var(--pink));
   transform: rotate(1deg);
 }
 
@@ -2526,29 +2536,29 @@ button {
   border-radius: 50%;
   background: var(--paper);
   color: var(--choc);
-  box-shadow: 3px 3px 0 var(--choc);
+  box-shadow: 3px 3px 0 var(--card-shadow, var(--choc));
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform var(--press) var(--ease-out);
 }
 
 .cook-close:focus-visible {
-  box-shadow: 0 0 0 3px var(--ring-in, var(--cream)), 3px 3px 0 var(--choc);
+  box-shadow: 0 0 0 3px var(--ring-in, var(--cream)), 3px 3px 0 var(--card-shadow, var(--choc));
 }
 
 .cook-close:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--choc);
+  box-shadow: 1px 1px 0 var(--card-shadow, var(--choc));
 }
 
 @media (hover: hover) and (pointer: fine) {
   .cook-close:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--choc);
+    box-shadow: 4px 4px 0 var(--card-shadow, var(--choc));
   }
   .cook-close:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--choc);
+    box-shadow: 1px 1px 0 var(--card-shadow, var(--choc));
   }
 }
 
@@ -2596,7 +2606,7 @@ button {
   background: var(--paper);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-l);
-  box-shadow: 6px 6px 0 var(--choc);
+  box-shadow: 6px 6px 0 var(--card-shadow, var(--choc));
 }
 
 .cook-card-top {

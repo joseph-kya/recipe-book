@@ -1110,6 +1110,94 @@ button {
   line-height: 1;
 }
 
+.menu-actions {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.book--wide .menu-actions {
+  flex-wrap: nowrap;
+}
+
+.menu-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-3);
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.menu-action-btn.is-copied {
+  background: var(--choc);
+  color: var(--cream);
+}
+
+.menu-action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.menu-action-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-action-btn:not(:disabled):not(.is-copied):hover {
+    background: var(--paper);
+  }
+}
+
+.menu-action-box {
+  display: inline-grid;
+  place-items: center;
+}
+
+.menu-action-label,
+.menu-action-done {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: opacity 140ms var(--ease-out);
+}
+
+.menu-action-done {
+  opacity: 0;
+}
+
+.menu-action-btn.is-copied .menu-action-label {
+  opacity: 0;
+}
+
+.menu-action-btn.is-copied .menu-action-done {
+  opacity: 1;
+}
+
+.menu-action-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
 .ing-group + .ing-group {
   margin-top: var(--sp-2);
 }
@@ -1126,23 +1214,78 @@ button {
 
 /* Name and amount share a line when both fit. A long amount drops to its own
    right-aligned line instead of breaking into ragged pieces. */
-.ing {
+.ing + .ing {
+  border-top: 2px dotted color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.ing-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--sp-2) 0;
+  border: 0;
+  border-radius: var(--r-s);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ing-tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  border: 2px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--ground) 55%, transparent);
+  color: var(--cream);
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out),
+    transform var(--press) var(--ease-out);
+}
+
+.ing-tick-svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  opacity: 0;
+  transform: scale(0.75);
+  transition:
+    opacity 140ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+.ing-btn:active .ing-tick {
+  transform: scale(0.9);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ing-btn:hover .ing-tick {
+    border-color: var(--choc);
+  }
+}
+
+.ing-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: var(--sp-3);
   row-gap: 2px;
-  padding: var(--sp-2) 0;
-}
-
-.ing + .ing {
-  border-top: 2px dotted color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .ing-what {
   flex: 1 1 9rem;
   min-width: 0;
   overflow-wrap: break-word;
+  transition: opacity 180ms var(--ease-out);
 }
 
 /* Name: medium ink. Cups: the big cherry number. Metric and note: small footnotes. */
@@ -1169,6 +1312,32 @@ button {
   align-items: start;
   text-align: right;
   overflow-wrap: normal;
+  transition: opacity 180ms var(--ease-out);
+}
+
+.ing--got .ing-tick {
+  background: var(--choc);
+  border-color: var(--choc);
+}
+
+.ing--got .ing-tick-svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ing--got .ing-what,
+.ing--got .ing-how {
+  opacity: 0.82;
+}
+
+.ing--got .ing-amount {
+  color: var(--choc-soft);
+}
+
+.ing--got .ing-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: color-mix(in srgb, var(--cherry) 70%, transparent);
 }
 
 .ing-how-live,
@@ -1249,36 +1418,45 @@ button {
   padding-top: var(--sp-2);
 }
 
-/* A row: name and amount on one line, the note on its own line beneath,
+/* A row: tick, name and amount on one line, the note on its own line beneath,
    across the full card width so it never breaks mid-phrase. */
-.book--wide .ing {
+.book--wide .ing-btn {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: var(--sp-3);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: var(--sp-2);
   align-items: baseline;
+  min-height: 0;
   padding: 5px 0;
 }
 
+.book--wide .ing-tick {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  margin-top: 2px;
+}
+
+.book--wide .ing-main,
 .book--wide .ing-what {
   display: contents;
 }
 
 .book--wide .ing-name {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
   font-size: var(--fs-s);
   line-height: 1.3;
 }
 
 .book--wide .ing-how {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
   margin: 0;
   align-items: baseline;
 }
 
 .book--wide .ing-note {
-  grid-column: 1 / -1;
+  grid-column: 2 / -1;
   grid-row: 2;
   margin-top: 1px;
   font-size: var(--fs-xs);
@@ -1379,7 +1557,7 @@ button {
   .book--wide .menu-title {
     font-size: var(--fs-l);
   }
-  .book--wide .ing {
+  .book--wide .ing-btn {
     padding: 3px 0;
   }
   .book--wide .ticket {
@@ -1410,8 +1588,12 @@ button {
     padding-left: var(--sp-3);
     padding-right: var(--sp-3);
   }
-  .book--wide .ing {
+  .book--wide .ing-btn {
     column-gap: var(--sp-2);
+  }
+  .book--wide .menu-action-btn {
+    font-size: var(--fs-xs);
+    padding: 0 0.65rem;
   }
 }
 
@@ -1772,12 +1954,21 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ing-tick,
+  .ing-tick-svg,
+  .ing-what,
+  .ing-how,
+  .menu-action-btn,
+  .menu-action-label,
+  .menu-action-done,
   .step-dot,
   .step-body,
   .step-timer-main,
   .step-timer-adj {
     transition: none;
   }
+  .ing-btn:active .ing-tick,
+  .menu-action-btn:active:not(:disabled),
   .step-dot:active,
   .step-timer-main:active,
   .step-timer-adj:active {

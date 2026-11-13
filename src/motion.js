@@ -448,7 +448,7 @@ const LANG_ROLL_SELECTOR = [
   '.photo-credit',
 ].join(', ');
 
-const LANG_FADE_SELECTOR = '.tagline, .scaler-chip--custom, .credits .btn';
+const LANG_FADE_SELECTOR = '.tagline, .scaler-chip--custom, .menu-action-btn, .credits .btn';
 
 export function swapContent(faces, kind, animRef) {
   animRef?.current?.cancel();

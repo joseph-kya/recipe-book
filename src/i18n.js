@@ -64,6 +64,10 @@ export const ui = {
     timerLess: 'One minute less',
     timerMore: 'One minute more',
     keepAwake: 'Keep the screen on while baking',
+    copyList: 'Copy list',
+    copied: 'Copied',
+    clearTicks: 'Clear',
+    clearTicksLabel: 'Clear all ticked ingredients',
   },
   de: {
     bookTitle: ['Josephs', 'Rezeptbuch'],
@@ -127,6 +131,10 @@ export const ui = {
     timerLess: 'Eine Minute weniger',
     timerMore: 'Eine Minute mehr',
     keepAwake: 'Bildschirm beim Backen anlassen',
+    copyList: 'Liste kopieren',
+    copied: 'Kopiert',
+    clearTicks: 'Zurücksetzen',
+    clearTicksLabel: 'Zurücksetzen: alle abgehakten Zutaten',
   },
 };
 

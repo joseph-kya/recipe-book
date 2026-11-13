@@ -1,38 +1,41 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { ui } from './i18n.js';
+import { slidePill } from './motion.js';
 import { Arrow } from './ornaments.jsx';
 
 function Segments({ label, options, value, onChange }) {
   const ref = useRef(null);
+  const animRef = useRef(null);
+  const prevValue = useRef(value);
   const labels = options.map((option) => option.short).join('|');
+
+  useEffect(() => () => animRef.current?.cancel(), []);
 
   useLayoutEffect(() => {
     const group = ref.current;
     const buttons = [...group.querySelectorAll('button')];
     const indicator = group.querySelector('.seg-indicator');
     let disposed = false;
-    const measure = () => {
+    const animate = prevValue.current !== value;
+    prevValue.current = value;
+
+    const measure = (shouldAnimate = false) => {
       if (disposed) return;
       const active = group.querySelector('[aria-pressed="true"]');
-      // Layout dimensions ignore the button's press transform. The absolute
-      // indicator uses the group's padding box as its coordinate system.
-      // Animate width on this tiny absolute element: the isolated layout cost
-      // is acceptable to keep the pill's caps circular at every width.
-      indicator.style.width = `${active.offsetWidth}px`;
-      indicator.style.transform = `translateX(${active.offsetLeft}px)`;
-      group.dataset.ready = 'true';
+      slidePill(group, indicator, active, { animate: shouldAnimate, animRef });
     };
-    measure();
-    const observer = new ResizeObserver(measure);
+    measure(animate);
+    const observer = new ResizeObserver(() => measure(false));
     observer.observe(group);
     buttons.forEach((button) => observer.observe(button));
     // Observe intrinsic label widths as well as the responsive group width.
-    document.fonts.ready.then(measure);
-    document.fonts.addEventListener('loadingdone', measure);
+    const onFonts = () => measure(false);
+    document.fonts?.ready.then(onFonts);
+    document.fonts?.addEventListener('loadingdone', onFonts);
     return () => {
       disposed = true;
       observer.disconnect();
-      document.fonts.removeEventListener('loadingdone', measure);
+      document.fonts?.removeEventListener('loadingdone', onFonts);
     };
   }, [value, labels]);
 

@@ -19,7 +19,7 @@ const TURN_SPRING = makeSpring({ response: TURN_RESPONSE, damping: 1 });
 // v0 = ω·distance it becomes x(t) = 1 − e^(−ωt), a pure ease-out with the same settle.
 const TURN_OMEGA = (2 * Math.PI) / TURN_RESPONSE;
 const EDGE_SPRING = makeSpring({ response: 0.32, damping: 0.86 });
-const NARROW_MAX_DEG = 115; // past ~95° a phone page is already off-screen
+const NARROW_MAX_DEG = 94; // past 90° a phone page is off-screen left and backface-culled
 
 function useMedia(query) {
   return useSyncExternalStore(

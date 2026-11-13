@@ -5,6 +5,70 @@ let activeTransition;
 export const reducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Glide a segmented/scaler pill indicator using only compositor-friendly transform.
+// Reads the live visual rect before updating width so rapid reversals mid-flight
+// retarget seamlessly without animating layout width.
+export function slidePill(group, indicator, active, { animate = false, animRef } = {}) {
+  if (!group || !indicator) return;
+  const wasReady = group.dataset.ready === 'true';
+  const wasHidden = indicator.dataset.hidden === 'true';
+
+  if (!active) {
+    animRef?.current?.cancel();
+    if (animRef) animRef.current = null;
+    indicator.dataset.hidden = 'true';
+    return;
+  }
+
+  let prevX = 0;
+  let prevW = 0;
+  if (animate && wasReady && !wasHidden && !reducedMotion() && indicator.animate) {
+    const groupRect = group.getBoundingClientRect();
+    const indRect = indicator.getBoundingClientRect();
+    prevX = indRect.left - groupRect.left - group.clientLeft;
+    prevW = indRect.width;
+  }
+
+  animRef?.current?.cancel();
+  if (animRef) animRef.current = null;
+  delete indicator.dataset.hidden;
+
+  const nextX = active.offsetLeft;
+  const nextW = active.offsetWidth;
+  indicator.style.width = `${nextW}px`;
+  indicator.style.transform = `translateX(${nextX}px)`;
+  group.dataset.ready = 'true';
+
+  if (
+    animate &&
+    wasReady &&
+    !wasHidden &&
+    !reducedMotion() &&
+    indicator.animate &&
+    prevW > 0 &&
+    nextW > 0 &&
+    (Math.abs(prevX - nextX) > 0.5 || Math.abs(prevW - nextW) > 0.5)
+  ) {
+    const scaleX = prevW / nextW;
+    const anim = indicator.animate(
+      [
+        { transform: `translateX(${prevX}px) scaleX(${scaleX})` },
+        { transform: `translateX(${nextX}px) scaleX(1)` },
+      ],
+      {
+        duration: 230,
+        easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
+      },
+    );
+    if (animRef) {
+      animRef.current = anim;
+      anim.finished.catch(() => {}).finally(() => {
+        if (animRef.current === anim) animRef.current = null;
+      });
+    }
+  }
+}
+
 // Called only for a page's first live entry, after any parent page turn.
 // Animate wrappers so press transforms and the cupcake's printed tilt stay free.
 export function enterPage(root, kind) {

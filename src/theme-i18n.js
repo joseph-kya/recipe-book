@@ -5,7 +5,7 @@ export const MUFFIN_TIER_COUNT = 10;
 export const themeText = {
   en: {
     changeColor: 'Change color',
-    names: { cherry: 'Cherry', blueplate: 'Blue plate', soda: 'Soda', butterscotch: 'Butterscotch' },
+    names: { cherry: 'Cherry', blueplate: 'Blue plate', soda: 'Soda', butterscotch: 'Butterscotch', afterhours: 'After hours' },
     ringBell: 'Ring the service bell',
     ding: 'Ding! Order up.',
     ringing: 'Ring ring ring! Patience, the pie is coming.',
@@ -185,7 +185,7 @@ export const themeText = {
   },
   de: {
     changeColor: 'Farbe wechseln',
-    names: { cherry: 'Kirsche', blueplate: 'Blauer Teller', soda: 'Soda', butterscotch: 'Karamell' },
+    names: { cherry: 'Kirsche', blueplate: 'Blauer Teller', soda: 'Soda', butterscotch: 'Karamell', afterhours: 'Nach Ladenschluss' },
     ringBell: 'Tischglocke läuten',
     ding: 'Ding! Bestellung fertig.',
     ringing: 'Kling kling kling! Geduld, der Kuchen kommt.',

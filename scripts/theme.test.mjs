@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { THEMES, THEME_IDS, nextTheme } from '../src/theme.js';
+import { themeText } from '../src/theme-i18n.js';
 
 const lum = (hex) => {
   const [r, g, b] = hex.replace('#', '').match(/../g).map((h) => {
@@ -21,7 +22,7 @@ export const contrast = (a, b) => {
 const PAIRS = [
   ['primary', 'ground', 4.5, 'headings, eyebrows, links on the page'],
   ['primary', 'paper', 4.5, 'step titles on the method ticket'],
-  ['ground', 'primary', 4.5, 'cover title, primary button text'],
+  ['ground', 'primary', 4.5, 'primary button text'],
   ['primaryInk', 'card', 4.5, 'amounts and group titles on the ingredient card'],
   ['primaryDeep', 'accent', 4.5, 'small primary text on the accent'],
   ['ink', 'ground', 4.5, 'body text'],
@@ -34,9 +35,12 @@ const PAIRS = [
   ['cue', 'paper', 4.5, 'handwritten cues'],
   ['ground', 'ink', 4.5, 'stat chips, pressed toggles and chips'],
   ['accent', 'ink', 4.5, 'stat values on the chips'],
-  ['ground', 'table', 4.5, 'wide-screen controls on the table'],
+  ['tableInk', 'table', 4.5, 'wide-screen controls on the table'],
+  ['coverInk', 'cover', 4.5, 'cover title'],
+  ['coverBtnInk', 'coverBtn', 4.5, 'cover open button'],
   ['ink', 'ground', 3, 'focus outline on the page'],
-  ['ground', 'primary', 3, 'focus outline on the cover'],
+  ['coverInk', 'cover', 3, 'focus outline on the cover'],
+  ['tableInk', 'table', 3, 'focus outline on the wide-screen table'],
 ];
 
 for (const id of THEME_IDS) {
@@ -59,7 +63,7 @@ test("index.html's pre-paint script knows every colourway's page colour", () => 
   }
 });
 
-test('the CSS carries the same values as src/theme.js', () => {
+test('the CSS carries the same values as src/theme.js and sets color-scheme explicitly', () => {
   const kebab = (k) => `--${k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
   const css = readFileSync(new URL('../src/theme.css', import.meta.url), 'utf8');
   for (const id of THEME_IDS) {
@@ -70,16 +74,27 @@ test('the CSS carries the same values as src/theme.js', () => {
     for (const [k, v] of Object.entries(THEMES[id])) {
       assert.match(block, new RegExp(`${kebab(k)}:\\s*${v};`, 'i'), `${id} ${kebab(k)} should be ${v}`);
     }
+    if (id === 'cherry') assert.match(block, /color-scheme:\s*light;/);
+    if (id === 'afterhours') assert.match(block, /color-scheme:\s*dark;/);
   }
+  assert.doesNotMatch(css, /prefers-color-scheme/);
 });
 
 test('nextTheme cycles through every colourway and wraps around', () => {
-  assert.deepEqual(THEME_IDS, ['cherry', 'blueplate', 'soda', 'butterscotch']);
+  assert.deepEqual(THEME_IDS, ['cherry', 'blueplate', 'soda', 'butterscotch', 'afterhours']);
   assert.equal(nextTheme('cherry'), 'blueplate');
   assert.equal(nextTheme('blueplate'), 'soda');
   assert.equal(nextTheme('soda'), 'butterscotch');
-  assert.equal(nextTheme('butterscotch'), 'cherry');
+  assert.equal(nextTheme('butterscotch'), 'afterhours');
+  assert.equal(nextTheme('afterhours'), 'cherry');
   assert.equal(nextTheme('unknown'), 'cherry');
+});
+
+test('theme-i18n names every colourway in English and German', () => {
+  for (const id of THEME_IDS) {
+    assert.ok(themeText.en.names[id]?.trim(), `missing EN name for ${id}`);
+    assert.ok(themeText.de.names[id]?.trim(), `missing DE name for ${id}`);
+  }
 });
 
 test('cover uses the cupcake button instead of colour-dot swatches', () => {

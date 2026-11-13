@@ -1,4 +1,4 @@
-/* The cupcake follows the colourway, with a fixed cherry-red accent
+/* The cupcake follows the colourway, with a cherry-red accent
    (the cover sets its own cup colour, see .cover-cupcake). */
 .cupcake-line {
   stroke: var(--ink);
@@ -7,10 +7,10 @@
   fill: var(--primary);
 }
 .cupcake-cherry {
-  fill: #c8233a;
+  fill: var(--cupcake-cherry);
 }
 .cupcake-cream {
-  fill: var(--ground);
+  fill: var(--cupcake-cream);
 }
 .cupcake-frosting {
   fill: var(--frosting);
@@ -22,6 +22,7 @@
    the cover's cupcake button; Cherry is the default. */
 
 :root {
+  color-scheme: light;
   --primary: #c8233a;
   --primary-ink: #a11b2e;
   --primary-deep: #8e1626;
@@ -36,6 +37,19 @@
   --table: #3a2216;
   --table-tile: #43291c;
   --frosting: #7a4a35;
+  --shadow: #3a2216;
+  --highlight: #fff4df;
+  --cover: #c8233a;
+  --cover-ink: #fff4df;
+  --cover-checker: #3a2216;
+  --cover-checker-alt: #fff4df;
+  --cover-title-shadow: #3a2216;
+  --cover-btn: #fff4df;
+  --cover-btn-ink: #3a2216;
+  --table-ink: #fff4df;
+  --table-active-ink: #3a2216;
+  --cupcake-cherry: #c8233a;
+  --cupcake-cream: #fff4df;
 }
 
 html[data-theme='blueplate'] {
@@ -53,6 +67,19 @@ html[data-theme='blueplate'] {
   --table: #1b2340;
   --table-tile: #222c4f;
   --frosting: #7a4a35;
+  --shadow: #1b2340;
+  --highlight: #fbf4e4;
+  --cover: #1d5fa8;
+  --cover-ink: #fbf4e4;
+  --cover-checker: #1b2340;
+  --cover-checker-alt: #fbf4e4;
+  --cover-title-shadow: #1b2340;
+  --cover-btn: #fbf4e4;
+  --cover-btn-ink: #1b2340;
+  --table-ink: #fbf4e4;
+  --table-active-ink: #1b2340;
+  --cupcake-cherry: #c8233a;
+  --cupcake-cream: #fbf4e4;
 }
 
 html[data-theme='soda'] {
@@ -70,6 +97,19 @@ html[data-theme='soda'] {
   --table: #1f2f27;
   --table-tile: #263a30;
   --frosting: #f7c9cf;
+  --shadow: #1f2f27;
+  --highlight: #fdf5e6;
+  --cover: #1a7356;
+  --cover-ink: #fdf5e6;
+  --cover-checker: #1f2f27;
+  --cover-checker-alt: #fdf5e6;
+  --cover-title-shadow: #1f2f27;
+  --cover-btn: #fdf5e6;
+  --cover-btn-ink: #1f2f27;
+  --table-ink: #fdf5e6;
+  --table-active-ink: #1f2f27;
+  --cupcake-cherry: #c8233a;
+  --cupcake-cream: #fdf5e6;
 }
 
 html[data-theme='butterscotch'] {
@@ -87,4 +127,49 @@ html[data-theme='butterscotch'] {
   --table: #1f3a3d;
   --table-tile: #24454a;
   --frosting: #7a4a35;
+  --shadow: #3a2216;
+  --highlight: #fff2e0;
+  --cover: #b04a12;
+  --cover-ink: #fff2e0;
+  --cover-checker: #3a2216;
+  --cover-checker-alt: #fff2e0;
+  --cover-title-shadow: #3a2216;
+  --cover-btn: #fff2e0;
+  --cover-btn-ink: #3a2216;
+  --table-ink: #fff2e0;
+  --table-active-ink: #3a2216;
+  --cupcake-cherry: #c8233a;
+  --cupcake-cream: #fff2e0;
+}
+
+html[data-theme='afterhours'] {
+  color-scheme: dark;
+  --primary: #ff5780;
+  --primary-ink: #ff7a9b;
+  --primary-deep: #ffd6e0;
+  --card: #0e3a42;
+  --accent: #944a00;
+  --accent2: #661938;
+  --ink: #f6ead4;
+  --ink-soft: #cfc1aa;
+  --cue: #7cdbd3;
+  --ground: #101522;
+  --paper: #171e30;
+  --table: #080b14;
+  --table-tile: #0e1322;
+  --frosting: #a85d4b;
+  --shadow: #050811;
+  --highlight: #f6ead4;
+  --cover: #13182a;
+  --cover-ink: #f6ead4;
+  --cover-checker: #ff5780;
+  --cover-checker-alt: #13182a;
+  --cover-title-shadow: #8c143a;
+  --cover-btn: #ff5780;
+  --cover-btn-ink: #101522;
+  --table-ink: #f6ead4;
+  --table-active-ink: #080b14;
+  --cupcake-cherry: #ff3b6b;
+  --cupcake-cream: #e8c490;
+  --on-primary: var(--ground);
 }

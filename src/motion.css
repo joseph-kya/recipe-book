@@ -69,13 +69,13 @@
    Front (right page) has its spine on the left (90deg); back (left page) has its spine on the right (270deg). */
 .book--wide .face--front > .shade,
 .book--narrow .face--front > .shade {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
-    color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--shadow) 50%, transparent), transparent 24%,
+    color-mix(in srgb, var(--highlight) 18%, transparent) 78%, color-mix(in srgb, var(--shadow) 16%, transparent));
 }
 
 .book--wide .face--back > .shade {
-  background: linear-gradient(270deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
-    color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
+  background: linear-gradient(270deg, color-mix(in srgb, var(--shadow) 50%, transparent), transparent 24%,
+    color-mix(in srgb, var(--highlight) 18%, transparent) 78%, color-mix(in srgb, var(--shadow) 16%, transparent));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -139,7 +139,7 @@
   ::view-transition-group(book-controls) {
     border-radius: var(--r-pill);
     overflow: hidden;
-    box-shadow: 4px 4px 0 var(--choc);
+    box-shadow: 4px 4px 0 var(--shadow);
   }
 }
 @media (max-width: 359px) {

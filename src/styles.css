@@ -256,17 +256,17 @@ button {
 }
 
 .face--R .shade {
-  background: linear-gradient(to right, color-mix(in srgb, var(--ink) 65%, transparent), color-mix(in srgb, var(--ink) 12%, transparent) 70%);
+  background: linear-gradient(to right, color-mix(in srgb, var(--shadow) 65%, transparent), color-mix(in srgb, var(--shadow) 12%, transparent) 70%);
 }
 
 .face--L .shade {
-  background: linear-gradient(to left, color-mix(in srgb, var(--ink) 65%, transparent), color-mix(in srgb, var(--ink) 12%, transparent) 70%);
+  background: linear-gradient(to left, color-mix(in srgb, var(--shadow) 65%, transparent), color-mix(in srgb, var(--shadow) 12%, transparent) 70%);
 }
 
 /* Phone: one page, the spine is the left edge of the screen.
    Dark diner-ink stage prevents a cream flash when flexing at book edges. */
 .stage--narrow {
-  background: var(--choc);
+  background: var(--shadow);
 }
 
 .book--narrow {
@@ -322,14 +322,14 @@ button {
   left: 0;
   transform-origin: right center;
   border-radius: var(--r-m) 0 0 var(--r-m);
-  box-shadow: inset -22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent);
+  box-shadow: inset -22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent);
 }
 
 .book--wide .face--R {
   left: 50%;
   transform-origin: left center;
   border-radius: 0 var(--r-m) var(--r-m) 0;
-  box-shadow: inset 22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent);
+  box-shadow: inset 22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent);
 }
 
 /* ---------- shared bits ---------- */
@@ -475,7 +475,7 @@ button {
 /* An outer shadow always paints behind the face, even inside a transform's
    stacking context. Never use a negative-z-index child for this shadow. */
 .btn {
-  --btn-shadow: 4px 4px 0 var(--choc);
+  --btn-shadow: 4px 4px 0 var(--shadow);
   box-shadow: var(--btn-shadow);
 }
 
@@ -489,22 +489,22 @@ button {
 }
 
 .btn--cream {
-  background: var(--cream);
-  color: var(--choc);
+  background: var(--cover-btn);
+  color: var(--cover-btn-ink);
 }
 
 .btn:active {
-  --btn-shadow: 1px 1px 0 var(--choc);
+  --btn-shadow: 1px 1px 0 var(--shadow);
   transform: translate(3px, 3px);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
-    --btn-shadow: 5px 5px 0 var(--choc);
+    --btn-shadow: 5px 5px 0 var(--shadow);
     transform: translate(-1px, -1px);
   }
   .btn:active {
-    --btn-shadow: 1px 1px 0 var(--choc);
+    --btn-shadow: 1px 1px 0 var(--shadow);
     transform: translate(3px, 3px);
   }
 }
@@ -520,16 +520,16 @@ button {
 
 /* ---------- cover: the title, an ornament, Open ---------- */
 .cover {
-  --ring-out: var(--cream);
+  --ring-out: var(--cover-ink);
   display: flex;
   flex-direction: column;
-  background: var(--cherry);
-  color: var(--cream);
+  background: var(--cover);
+  color: var(--cover-ink);
 }
 
 .cover .checkers {
-  --c: var(--choc);
-  background: repeating-conic-gradient(var(--c) 0 25%, var(--cream) 0 50%) 0 0 / 14px 14px;
+  --c: var(--cover-checker);
+  background: repeating-conic-gradient(var(--c) 0 25%, var(--cover-checker-alt) 0 50%) 0 0 / 14px 14px;
   flex: none;
 }
 
@@ -560,8 +560,8 @@ button {
   font-size: clamp(3rem, 15vw, 4.75rem);
   line-height: 0.98;
   letter-spacing: -0.01em;
-  color: var(--cream);
-  text-shadow: 4px 4px 0 var(--choc);
+  color: var(--cover-ink);
+  text-shadow: 4px 4px 0 var(--cover-title-shadow);
 }
 
 .book--wide .cover-title {
@@ -589,7 +589,7 @@ button {
 }
 
 .cover-cupcake-btn {
-  --ring-in: var(--choc);
+  --ring-in: var(--shadow);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -674,7 +674,7 @@ button {
   font-weight: 700;
   font-size: var(--fs-l);
   line-height: 1.05;
-  color: var(--cream);
+  color: var(--cover-ink);
   text-align: center;
   text-wrap: balance;
   transform: translate(-50%, -50%) rotate(-4deg);
@@ -690,7 +690,7 @@ button {
   font-weight: 700;
   font-size: var(--fs-s);
   line-height: 1.1;
-  color: var(--cream);
+  color: var(--cover-ink);
   text-align: left;
   text-wrap: balance;
   pointer-events: none;
@@ -877,7 +877,7 @@ button {
   border: var(--rule) solid var(--choc);
   border-radius: 50%;
   background: var(--mint);
-  box-shadow: 5px 5px 0 var(--choc);
+  box-shadow: 5px 5px 0 var(--shadow);
 }
 
 .contents-cupcake {
@@ -1100,7 +1100,7 @@ button {
   background: var(--mint);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-l);
-  box-shadow: 6px 6px 0 var(--choc);
+  box-shadow: 6px 6px 0 var(--shadow);
 }
 
 .menu-title {
@@ -1657,7 +1657,7 @@ button {
 
 .step-timer--done {
   background: var(--cherry);
-  color: var(--cherry-ink);
+  color: var(--on-primary, var(--cherry-ink));
   border-color: var(--cherry);
   animation: timer-nudge 900ms var(--ease-out) 3;
 }
@@ -1891,7 +1891,7 @@ button {
 }
 
 .controls--wide .ctl--contents:active {
-  background-color: color-mix(in srgb, var(--ground) 14%, transparent);
+  background-color: color-mix(in srgb, var(--table-ink) 14%, transparent);
 }
 
 .controls--narrow .ctl--contents[aria-current='page'] {
@@ -1986,7 +1986,7 @@ button {
   background: var(--cream);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-pill);
-  box-shadow: 4px 4px 0 var(--choc);
+  box-shadow: 4px 4px 0 var(--shadow);
 }
 
 /* Reading down a recipe: the bar slides below the screen edge (its own height,
@@ -2090,7 +2090,7 @@ button {
 
 /* Wide: arrows beside the book, the rest on the table below it. */
 .controls--wide {
-  color: var(--cream);
+  color: var(--table-ink);
 }
 
 .controls--wide :is(.ctl--contents, .ctl-count, .ctl--toggle) {
@@ -2165,18 +2165,18 @@ button {
 }
 
 .controls--wide .ctl--toggle {
-  border-color: var(--cream);
-  color: var(--cream);
+  border-color: var(--table-ink);
+  color: var(--table-ink);
 }
 
 .controls--wide .ctl--contents[aria-current='page'] {
-  background: var(--cream);
-  color: var(--choc);
+  background: var(--table-ink);
+  color: var(--table-active-ink);
 }
 
 .controls--wide {
-  --ring-in: var(--choc);
-  --ring-out: var(--cream);
+  --ring-in: var(--shadow);
+  --ring-out: var(--table-ink);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2192,7 +2192,7 @@ button {
     text-underline-offset: 4px;
   }
   .controls--wide :is(.ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
-    background-color: color-mix(in srgb, var(--ground) 14%, transparent);
+    background-color: color-mix(in srgb, var(--table-ink) 14%, transparent);
   }
   .controls--narrow :is(.ctl--contents:not([aria-current='page']), .ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
     background-color: color-mix(in srgb, var(--ink) 8%, transparent);

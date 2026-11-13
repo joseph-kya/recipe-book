@@ -5,28 +5,40 @@ import { Arrow } from './ornaments.jsx';
 import { AwakeToggle } from './Awake.jsx';
 
 function TapToggle({ value, text, label, className, onToggle }) {
-  const labelRef = useRef(null);
+  const btnRef = useRef(null);
+  const inRef = useRef(null);
+  const outRef = useRef(null);
   const animRef = useRef(null);
-  const prevValue = useRef(value);
+  const prev = useRef({ value, text });
 
   useEffect(() => () => animRef.current?.cancel(), []);
 
   useLayoutEffect(() => {
-    if (prevValue.current === value) return;
-    prevValue.current = value;
-    flipLabel(labelRef.current, { animRef });
-  }, [value]);
+    const old = prev.current;
+    prev.current = { value, text };
+    if (old.value === value) return;
+    flipLabel(inRef.current, {
+      button: btnRef.current,
+      outgoing: outRef.current,
+      outgoingText: old.text,
+      animRef,
+    });
+  }, [value, text]);
 
   return (
     <button
+      ref={btnRef}
       type="button"
       className={`ctl ctl--toggle ${className}`}
       aria-label={label}
       title={label}
       onClick={onToggle}
     >
-      <span ref={labelRef} className="ctl-flip">
-        {text}
+      <span className="ctl-flip-box">
+        <span ref={outRef} className="ctl-flip ctl-flip--out" aria-hidden="true" hidden />
+        <span ref={inRef} className="ctl-flip ctl-flip--in">
+          {text}
+        </span>
       </span>
     </button>
   );

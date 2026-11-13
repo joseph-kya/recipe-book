@@ -90,6 +90,8 @@
   .controls button,
   .controls .ctl,
   .ctl-flip,
+  .ctl-flip-box,
+  .ctl--toggle,
   .ctl--awake .ctl-icon,
   .book .toc-link,
   .book .toc-no,

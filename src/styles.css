@@ -594,6 +594,9 @@ button {
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
   transition: transform 140ms var(--ease-out);
 }
 
@@ -625,6 +628,30 @@ button {
 
 .cover-cupcake .cupcake-cup {
   fill: var(--mustard);
+}
+
+/* A bite squishes the cupcake; a fresh one pops back in. Flat, no extras. */
+.cover-cupcake--bitten {
+  animation: cupcake-chomp 260ms var(--ease-out);
+}
+.cover-cupcake--fresh {
+  animation: cupcake-fresh 320ms var(--ease-out);
+}
+@keyframes cupcake-chomp {
+  0% { transform: rotate(-8deg) scale(1); }
+  35% { transform: rotate(-12deg) scale(0.9, 1.06); }
+  100% { transform: rotate(-8deg) scale(1); }
+}
+@keyframes cupcake-fresh {
+  0% { transform: rotate(-8deg) scale(0.7); }
+  60% { transform: rotate(-8deg) scale(1.08); }
+  100% { transform: rotate(-8deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-cupcake--bitten,
+  .cover-cupcake--fresh {
+    animation: none;
+  }
 }
 
 /* First-entry motion is owned by the book, so remounts never replay it. */

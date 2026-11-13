@@ -1,14 +1,36 @@
+import { useId } from 'react';
+
 // Small inline SVG ornaments from the Retro Diner sheet. All decorative.
 
-export function Cupcake({ className = '' }) {
+// Bites taken out of the cover cupcake, in order (hold the cupcake to take one).
+export const CUPCAKE_BITES = [
+  { cx: 82, cy: 30, r: 13 },
+  { cx: 20, cy: 56, r: 14 },
+  { cx: 78, cy: 74, r: 13 },
+];
+
+export function Cupcake({ className = '', bites = 0 }) {
+  const maskId = useId();
+  const taken = CUPCAKE_BITES.slice(0, bites);
   return (
     <svg className={`cupcake ${className}`} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      {taken.length > 0 && (
+        <mask id={maskId}>
+          <rect width="100" height="100" fill="#fff" />
+          {taken.map((b, i) => (
+            <circle key={i} cx={b.cx} cy={b.cy} r={b.r} fill="#000" />
+          ))}
+        </mask>
+      )}
       {/* colours come from the colourway (src/theme.css), not the markup */}
-      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round">
+      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round" mask={taken.length ? `url(#${maskId})` : undefined}>
         <path d="M22 38 h56 l-8 50 h-40 z" className="cupcake-cup" />
         <path d="M30 38 l4 50 M42 38 l1 50 M58 38 l-1 50 M70 38 l-4 50" strokeWidth="2" fill="none" />
         <ellipse cx="50" cy="34" rx="32" ry="9" className="cupcake-cream" />
         <path d="M28 32 q8-16 22-12 q14-6 22 12" className="cupcake-frosting" />
+      </g>
+      {/* the cherry always survives: it sits on top, outside the bites */}
+      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round">
         <circle cx="50" cy="14" r="6" className="cupcake-cherry" />
         <path d="M50 8 q3-6 8-6" fill="none" />
       </g>

@@ -2,6 +2,13 @@
    into the theme's primary and accent, ringed in cream on the cover colour.
    The chosen one wears a springy outer ring; focus uses the shared diner ring. */
 
+.theme-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .theme-picker {
   display: flex;
   align-items: center;
@@ -9,8 +16,35 @@
   padding: 4px 8px;
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--choc) 26%, transparent);
-  border: 2px solid color-mix(in srgb, var(--cream) 38%, transparent);
-  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--choc) 22%, transparent);
+  border: 2px solid color-mix(in srgb, var(--cream) 42%, transparent);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--choc) 22%, transparent),
+    0 1px 0 color-mix(in srgb, white 14%, transparent);
+}
+
+.theme-nameplate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px 4px 8px;
+  border-radius: var(--r-pill);
+  background: var(--choc);
+  color: var(--cream);
+  border: 2px solid color-mix(in srgb, var(--cream) 78%, transparent);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--choc) 52%, transparent);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.theme-nameplate-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  flex: none;
+  background: linear-gradient(135deg, var(--sw-a) 0 50%, var(--sw-b) 50% 100%);
+  box-shadow: 0 0 0 1.5px var(--cream);
 }
 
 .theme-swatch {

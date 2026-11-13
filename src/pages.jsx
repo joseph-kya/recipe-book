@@ -2,7 +2,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { reducedMotion } from './motion.js';
-import { Checkers, Cupcake } from './ornaments.jsx';
+import { Arrow, Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
@@ -21,6 +21,27 @@ const OUT_EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 let coverEntered = false;
 let contentsLeftEntered = false;
 
+// Interruptible WAAPI bounce: if an ornament is tapped mid-flight, start from its
+// live presentation transform instead of snapping back to rest.
+function popOrnament(animRef, entries) {
+  if (prefersReducedMotion()) return;
+  const active = animRef.current.some((a) => a?.playState === 'running');
+  const starts = entries.map(([el, rest]) => {
+    if (!el?.animate) return null;
+    if (!active) return rest;
+    const cs = getComputedStyle(el);
+    const frame = { transform: cs.transform && cs.transform !== 'none' ? cs.transform : rest.transform };
+    if (rest.opacity !== undefined) frame.opacity = Number(cs.opacity);
+    return frame;
+  });
+  animRef.current.forEach((a) => a?.cancel());
+  animRef.current = entries.map(([el, , frames, options], i) => {
+    const start = starts[i];
+    if (!start) return null;
+    return el.animate([start, ...frames], options);
+  });
+}
+
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
 export function Cover({ lang }) {
@@ -35,7 +56,7 @@ export function Cover({ lang }) {
     const animations = [];
     const hit = root.querySelector('.cover-cupcake-hit');
     const cupcake = root.querySelector('.cover-cupcake');
-    const picker = root.querySelector('.theme-picker');
+    const picker = root.querySelector('.theme-picker-wrap');
     if (hit?.animate) {
       animations.push(
         hit.animate(
@@ -78,31 +99,31 @@ export function Cover({ lang }) {
   }, []);
 
   const popCupcake = () => {
-    if (prefersReducedMotion()) return;
     const cupcake = rootRef.current?.querySelector('.cover-cupcake');
     const ring = rootRef.current?.querySelector('.cover-cupcake-ring');
     if (!cupcake?.animate) return;
-    popAnimRef.current.forEach((a) => a?.cancel());
-    popAnimRef.current = [
-      cupcake.animate(
+    popOrnament(popAnimRef, [
+      [
+        cupcake,
+        { transform: 'rotate(-8deg) scale(1)' },
         [
-          { transform: 'rotate(-8deg) scale(1)' },
           { transform: 'rotate(5deg) scale(1.1)', offset: 0.36 },
           { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
           { transform: 'rotate(-8deg) scale(1)' },
         ],
-        { duration: 340, easing: OUT_EASE }
-      ),
-      ring?.animate(
+        { duration: 340, easing: OUT_EASE },
+      ],
+      [
+        ring,
+        { transform: 'scale(1) rotate(0deg)', opacity: 0.58 },
         [
-          { transform: 'scale(1) rotate(0deg)', opacity: 0.9 },
-          { transform: 'scale(1.14) rotate(12deg)', opacity: 0.45, offset: 0.4 },
-          { transform: 'scale(0.98) rotate(-4deg)', opacity: 0.85, offset: 0.76 },
-          { transform: 'scale(1) rotate(0deg)', opacity: 0.9 },
+          { transform: 'scale(1.12) rotate(10deg)', opacity: 0.92, offset: 0.38 },
+          { transform: 'scale(0.98) rotate(-4deg)', opacity: 0.72, offset: 0.76 },
+          { transform: 'scale(1) rotate(0deg)', opacity: 0.58 },
         ],
-        { duration: 360, easing: OUT_EASE }
-      ),
-    ];
+        { duration: 360, easing: OUT_EASE },
+      ],
+    ]);
   };
 
   return (
@@ -209,31 +230,31 @@ function ContentsLeft({ lang }) {
   }, []);
 
   const popMedallion = () => {
-    if (prefersReducedMotion()) return;
     const medallion = rootRef.current?.querySelector('.contents-medallion');
     const cupcake = rootRef.current?.querySelector('.contents-cupcake');
     if (!medallion?.animate) return;
-    popAnimRef.current.forEach((a) => a?.cancel());
-    popAnimRef.current = [
-      medallion.animate(
+    popOrnament(popAnimRef, [
+      [
+        medallion,
+        { transform: 'scale(1) rotate(0deg)' },
         [
-          { transform: 'scale(1) rotate(0deg)' },
           { transform: 'scale(1.06) rotate(4deg)', offset: 0.38 },
           { transform: 'scale(0.99) rotate(-2deg)', offset: 0.72 },
           { transform: 'scale(1) rotate(0deg)' },
         ],
-        { duration: 300, easing: OUT_EASE }
-      ),
-      cupcake?.animate(
+        { duration: 300, easing: OUT_EASE },
+      ],
+      [
+        cupcake,
+        { transform: 'rotate(-8deg) scale(1)' },
         [
-          { transform: 'rotate(-8deg) scale(1)' },
           { transform: 'rotate(-2deg) scale(1.07)', offset: 0.38 },
           { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
           { transform: 'rotate(-8deg) scale(1)' },
         ],
-        { duration: 300, easing: OUT_EASE }
-      ),
-    ];
+        { duration: 300, easing: OUT_EASE },
+      ],
+    ]);
   };
 
   return (
@@ -256,6 +277,14 @@ function ContentsLeft({ lang }) {
 function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
   const range = recipes.length > 1 ? `1–${recipes.length}` : '1';
+  const [, setStepTick] = useState(0);
+
+  useEffect(() => {
+    const sync = () => setStepTick((n) => n + 1);
+    stepListeners.add(sync);
+    return () => stepListeners.delete(sync);
+  }, []);
+
   return (
     <div className="page-body contents">
       <Checkers tone="choc" edge="top" />
@@ -271,6 +300,9 @@ function ContentsList({ lang, withTitle = false }) {
         <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);
+            const totalSteps = text.steps.length;
+            const doneCount = doneStepsBySlug.get(r.slug)?.size ?? 0;
+            const allDone = doneCount > 0 && doneCount === totalSteps;
             return (
               <li key={r.slug}>
                 <a href={`#/${r.route}`} className="toc-link">
@@ -290,8 +322,27 @@ function ContentsList({ lang, withTitle = false }) {
                       </span>
                     )}
                   </span>
-                  <span className="toc-arrow" aria-hidden="true">
-                    ›
+                  <span className="toc-trailing" aria-hidden="true">
+                    {doneCount > 0 && (
+                      <span className={`toc-progress${allDone ? ' toc-progress--done' : ''}`}>
+                        {allDone && (
+                          <svg className="toc-progress-icon" viewBox="0 0 24 24" focusable="false">
+                            <path
+                              d="M5 12.5 9.5 17 19 7.5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                        <span>{doneCount}/{totalSteps}</span>
+                      </span>
+                    )}
+                    <span className="toc-arrow">
+                      <Arrow dir="right" />
+                    </span>
                   </span>
                 </a>
               </li>

@@ -659,18 +659,29 @@ button {
     radial-gradient(circle at 35% 30%, color-mix(in srgb, white 26%, transparent), transparent 62%),
     var(--pink);
   border: var(--rule) solid var(--choc);
-  box-shadow: 5px 5px 0 var(--choc);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, white 50%, transparent),
+    5px 5px 0 var(--choc);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform 220ms cubic-bezier(0.32, 1.32, 0.56, 1);
 }
 
+.cover-cupcake-hit::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--choc) 28%, transparent);
+  pointer-events: none;
+}
+
 .cover-cupcake-ring {
   position: absolute;
-  inset: -10px;
+  inset: -13px;
   border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--cream) 46%, transparent);
-  opacity: 0.9;
+  border: 2px dashed color-mix(in srgb, var(--cream) 56%, transparent);
+  opacity: 0.58;
   pointer-events: none;
   transition:
     transform 240ms cubic-bezier(0.32, 1.32, 0.56, 1),
@@ -679,7 +690,7 @@ button {
 
 .cover-cupcake {
   position: relative;
-  width: 66%;
+  width: 64%;
   transform: rotate(-8deg);
   filter: drop-shadow(2px 3px 0 color-mix(in srgb, var(--choc) 26%, transparent));
   transition: transform 220ms cubic-bezier(0.32, 1.32, 0.56, 1);
@@ -698,7 +709,8 @@ button {
 }
 
 .cover-cupcake-hit:active .cover-cupcake-ring {
-  transform: scale(0.94);
+  transform: scale(0.95);
+  opacity: 0.85;
   transition-duration: 85ms;
   transition-timing-function: var(--ease-out);
 }
@@ -712,6 +724,7 @@ button {
   }
   .cover-cupcake-hit:hover .cover-cupcake-ring {
     transform: rotate(10deg) scale(1.04);
+    opacity: 0.92;
   }
   .cover-cupcake-hit:active {
     transform: translate(2px, 2px) scale(0.95);
@@ -720,7 +733,8 @@ button {
     transform: rotate(-11deg) scale(0.94);
   }
   .cover-cupcake-hit:active .cover-cupcake-ring {
-    transform: scale(0.94);
+    transform: scale(0.95);
+    opacity: 0.85;
   }
 }
 
@@ -730,7 +744,7 @@ button {
 }
 
 .book--wide .cover-cupcake {
-  width: 66%;
+  width: 64%;
 }
 
 .cover-cupcake .cupcake-cup {
@@ -755,18 +769,18 @@ button {
 /* Compact/short phones (e.g. 320x568): keep the whole cover framed above the bar. */
 @media (max-width: 359px), (max-height: 660px) {
   .book--narrow .cover-inner {
-    gap: var(--sp-3);
+    gap: var(--sp-2);
     padding-top: var(--sp-4);
   }
   .book--narrow .cover-title {
-    font-size: clamp(2.25rem, 12.5vw, 3.5rem);
+    font-size: clamp(2.15rem, 12vw, 3.4rem);
   }
   :lang(de) .book--narrow .cover-title {
-    font-size: clamp(2.15rem, 11.5vw, 3.25rem);
+    font-size: clamp(2.05rem, 11vw, 3.15rem);
   }
   .book--narrow .cover-cupcake-hit {
-    width: 6rem;
-    height: 6rem;
+    width: 5.75rem;
+    height: 5.75rem;
   }
 }
 
@@ -928,7 +942,9 @@ button {
   background: var(--paper);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-l);
-  box-shadow: 6px 6px 0 var(--choc);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, white 80%, transparent),
+    6px 6px 0 var(--choc);
 }
 
 .toc li + li {
@@ -963,7 +979,7 @@ button {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
   border: 2px solid color-mix(in srgb, var(--choc) 20%, transparent);
   opacity: 0;
   transform: scale(0.985);
@@ -982,7 +998,6 @@ button {
 .toc-link:active::before {
   opacity: 1;
   transform: scale(0.99);
-  background: color-mix(in srgb, var(--accent) 32%, transparent);
   transition-duration: 85ms;
 }
 
@@ -994,7 +1009,9 @@ button {
   border-radius: 50%;
   background: var(--mustard);
   border: var(--rule) solid var(--choc);
-  box-shadow: 2px 2px 0 var(--choc);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, white 35%, transparent),
+    2px 2px 0 var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-l);
   transition: transform 220ms cubic-bezier(0.32, 1.32, 0.56, 1);
@@ -1029,6 +1046,39 @@ button {
   color: var(--choc-soft);
 }
 
+.toc-trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+.toc-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  background: var(--choc);
+  color: var(--mustard);
+  border: 2px solid var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.toc-progress--done {
+  background: var(--mint);
+  color: var(--cherry-ink);
+}
+
+.toc-progress-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
+}
+
 .toc-arrow {
   display: grid;
   place-items: center;
@@ -1038,17 +1088,27 @@ button {
   background: var(--cream);
   border: 2px solid var(--choc);
   box-shadow: 2px 2px 0 var(--choc);
-  font-family: var(--badge);
-  font-size: var(--fs-l);
-  line-height: 1;
   color: var(--choc);
   transition: transform 200ms cubic-bezier(0.32, 1.32, 0.56, 1);
+}
+
+.toc-arrow .arrow-icon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
 }
 
 .toc-link:active .toc-arrow {
   transform: translate(1px, 1px) scale(0.94);
   transition-duration: 85ms;
   transition-timing-function: var(--ease-out);
+}
+
+@media (max-width: 359px) {
+  .toc-progress {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {

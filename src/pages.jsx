@@ -458,6 +458,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
                   metric: scaleAmount(raw.metric, factor, textLang, custom),
                 };
                 const { primary, secondary, metricFirst } = amountsFor(it, units);
+                const alt = secondary ? amountsFor(it, units === 'cups' ? 'metric' : 'cups') : null;
                 return (
                   <li className="ing" key={ii} data-item={`${gi}:${ii}`}>
                     <span className="ing-what">
@@ -465,8 +466,16 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
                       {it.note && <span className="ing-note">{it.note}</span>}
                     </span>
                     <span className="ing-how">
-                      <span className="ing-amount">{metricFirst ? primary : <Amount text={primary} />}</span>
-                      {secondary && <span className="ing-metric">{secondary}</span>}
+                      <span className="ing-how-live" data-swappable={secondary ? 'true' : undefined}>
+                        <span className="ing-amount">{metricFirst ? primary : <Amount text={primary} />}</span>
+                        {secondary && <span className="ing-metric">{secondary}</span>}
+                      </span>
+                      {alt && (
+                        <span className="ing-how-sizer" aria-hidden="true">
+                          <span className="ing-amount">{alt.metricFirst ? alt.primary : <Amount text={alt.primary} />}</span>
+                          {alt.secondary && <span className="ing-metric">{alt.secondary}</span>}
+                        </span>
+                      )}
                     </span>
                   </li>
                 );
@@ -767,16 +776,16 @@ function RecipePage({ recipe, lang, units, segs, first }) {
       <Checkers tone="choc" edge="top" />
       <div className={`page-pad${closing ? ' page-pad--closing' : ''}`}>
         {!first && <RunningHead recipe={recipe} lang={lang} />}
-        {segs.map((seg, i) => {
+        {segs.map((seg) => {
           const props = { recipe, lang };
-          if (seg.kind === 'hero') return <RecipeHero key={i} {...props} />;
-          if (seg.kind === 'menu') return <Ingredients key={i} {...props} units={units} items={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'ticket') return <Method key={i} {...props} steps={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'tips') return <Tips key={i} {...props} items={seg.items} />;
-          if (seg.kind === 'ornament') return hasPhoto ? null : <Cupcake key={i} className="closing-cupcake" />;
-          if (seg.kind === 'macros') return <Macros key={i} {...props} />;
-          if (seg.kind === 'photo') return <Photo key={i} {...props} height={seg.h} />;
-          return <Credits key={i} {...props} units={units} />;
+          if (seg.kind === 'hero') return <RecipeHero key={seg.kind} {...props} />;
+          if (seg.kind === 'menu') return <Ingredients key={seg.kind} {...props} units={units} items={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'ticket') return <Method key={seg.kind} {...props} steps={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'tips') return <Tips key={seg.kind} {...props} items={seg.items} />;
+          if (seg.kind === 'ornament') return hasPhoto ? null : <Cupcake key={seg.kind} className="closing-cupcake" />;
+          if (seg.kind === 'macros') return <Macros key={seg.kind} {...props} />;
+          if (seg.kind === 'photo') return <Photo key={seg.kind} {...props} height={seg.h} />;
+          return <Credits key={seg.kind} {...props} units={units} />;
         })}
       </div>
       <Checkers tone="cherry" edge="bottom" />

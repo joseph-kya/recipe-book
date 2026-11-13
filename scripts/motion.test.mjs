@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { animateSpring, makeSpring, rubberband, unRubberband, rubberbandVelocity } from '../src/spring.js';
-import { enterPage, flipLabel, spinCupcake } from '../src/motion.js';
+import { enterPage, flipLabel, spinCupcake, swapContent } from '../src/motion.js';
 
 function mockGlobal(t, name, value) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
@@ -250,4 +250,90 @@ test('flipLabel rolls and squashes with transform/opacity only, cleans up outgoi
   assert.equal(outgoing.hidden, true);
   assert.equal(outgoing.textContent, '');
   assert.equal(incoming.calls.length, 3);
+});
+
+test('swapContent animates visible units and language blocks with transform/opacity in 200-350ms, cancels rapid taps, and respects reduced motion', async (t) => {
+  motionEnvironment(t, false);
+  const makeNode = ({ top = 100, bottom = 140, height = 40, children = {} } = {}) => {
+    const calls = [];
+    return {
+      calls,
+      getBoundingClientRect: () => ({ top, bottom, height }),
+      querySelector: (sel) => children[sel] || null,
+      animate(frames, options) {
+        let resolve;
+        const finished = new Promise((r) => { resolve = r; });
+        const anim = {
+          frames,
+          options,
+          finished,
+          cancelled: false,
+          finish() { resolve(); },
+          cancel() { this.cancelled = true; resolve(); },
+        };
+        calls.push(anim);
+        return anim;
+      },
+    };
+  };
+
+  const makeUnitItem = (top) => {
+    const amt = makeNode({ top, bottom: top + 20, height: 20 });
+    const met = makeNode({ top: top + 20, bottom: top + 34, height: 14 });
+    return makeNode({
+      top,
+      bottom: top + 34,
+      height: 34,
+      children: { '.ing-amount': amt, '.ing-metric': met },
+    });
+  };
+
+  const visibleItems = Array.from({ length: 12 }, (_, i) => makeUnitItem(80 + i * 40));
+  const offscreenItem = makeUnitItem(1400);
+  const rollNodes = Array.from({ length: 10 }, (_, i) => makeNode({ top: 100 + i * 30, bottom: 124 + i * 30, height: 24 }));
+  const fadeNodes = [makeNode({ top: 150, bottom: 174, height: 24 })];
+  const face = {
+    querySelector: (sel) => (sel === '.face-scroll'
+      ? { getBoundingClientRect: () => ({ top: 0, bottom: 800, height: 800 }) }
+      : null),
+    querySelectorAll: (sel) => {
+      if (sel === '[data-swappable="true"]') return [...visibleItems, offscreenItem];
+      if (sel.includes('.tagline')) return [...rollNodes, ...fadeNodes];
+      if (sel === '.tagline, .scaler-chip--custom, .credits .btn') return fadeNodes;
+      return rollNodes;
+    },
+  };
+
+  const ref = { current: null };
+  const unitsCtrl = swapContent([face], 'units', ref);
+  assert.ok(unitsCtrl);
+  assert.equal(ref.current, unitsCtrl);
+  assert.equal(offscreenItem.querySelector('.ing-amount').calls.length, 0);
+  assert.ok(unitsCtrl.duration >= 200 && unitsCtrl.duration <= 350, `expected 200-350ms, got ${unitsCtrl.duration}`);
+  for (const anim of unitsCtrl.animations) {
+    assert.ok(anim.options.delay + anim.options.duration <= 350);
+    assert.ok(anim.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity'].includes(k))));
+  }
+
+  // Rapid tap cancels the previous swap before launching the next.
+  const langCtrl = swapContent([face], 'lang', ref);
+  assert.ok(unitsCtrl.animations.every((a) => a.cancelled));
+  assert.ok(langCtrl);
+  assert.ok(langCtrl.duration >= 200 && langCtrl.duration <= 350, `expected 200-350ms, got ${langCtrl.duration}`);
+  for (const anim of langCtrl.animations) {
+    assert.ok(anim.options.delay + anim.options.duration <= 350);
+    assert.ok(anim.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity'].includes(k))));
+  }
+
+  langCtrl.animations.forEach((a) => a.finish());
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(ref.current, null);
+
+  // Reduced motion cancels active swaps and produces no WAAPI animations.
+  const active = swapContent([face], 'units', ref);
+  motionEnvironment(t, true);
+  assert.equal(swapContent([face], 'lang', ref), null);
+  assert.ok(active.animations.every((a) => a.cancelled));
+  assert.equal(ref.current, null);
 });

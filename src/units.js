@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from 'react';
-import { transition } from './motion.js';
 
 // Which amount leads: 'cups' (cups and spoons big, grams small) or 'metric'
 // (grams big, cups small). Only metric values already in the JSON are ever shown.
@@ -22,8 +21,7 @@ export function useUnits() {
     if (next !== 'cups' && next !== 'metric') return;
     if (next === requestedUnits.current) return;
     requestedUnits.current = next;
-    // Capture the full reading surface, including any changed page breaks.
-    transition(() => setUnitsState(next));
+    setUnitsState(next);
     try {
       localStorage.setItem(KEY, next);
     } catch {

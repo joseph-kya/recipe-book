@@ -310,6 +310,143 @@ export function enterPage(root, kind) {
   return finish;
 }
 
+// Staggered soft roll/crossfade for in-place content swaps (EN<->DE, cups<->g).
+// Transform + opacity only, zero layout shift, ~210-340ms total settle, and
+// reduced-motion safe. Rapid taps cancel any in-flight swap immediately.
+const LANG_ROLL_SELECTOR = [
+  '.cover-title',
+  '.cover-open',
+  '.contents-title',
+  '.toc-text',
+  '.running-title',
+  '.hero .eyebrow',
+  '.recipe-title',
+  '.fallback-note',
+  '.stats',
+  '.intro',
+  '.menu-title',
+  '.scaler-unit',
+  '.scale-note',
+  '.ing-group-title',
+  '.ing-what',
+  '.ing-how-live',
+  '.ticket-title',
+  '.equipment',
+  '.step-body',
+  '.tip-title',
+  '.tip > p',
+  '.macros-head',
+  '.macros-cell',
+  '.credits .source',
+  '.credits .small-credit',
+  '.photo-credit',
+].join(', ');
+
+const LANG_FADE_SELECTOR = '.tagline, .scaler-chip--custom, .credits .btn';
+
+export function swapContent(faces, kind, animRef) {
+  animRef?.current?.cancel();
+  if (animRef) animRef.current = null;
+  if (!faces?.length || reducedMotion()) return null;
+
+  const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+  const DURATION = 210;
+  const STEP = 16;
+  const MAX_STAGGER_STEPS = 7; // max delay 112ms -> 112 + 210 = 322ms (200-350ms)
+  const animations = [];
+  let cancelled = false;
+  let maxEnd = 0;
+
+  const isVisible = (el, viewRect) => {
+    if (!viewRect || typeof el.getBoundingClientRect !== 'function') return true;
+    const r = el.getBoundingClientRect();
+    return r.height > 0 && r.bottom >= viewRect.top - 40 && r.top <= viewRect.bottom + 40;
+  };
+
+  for (const face of faces) {
+    if (!face?.querySelectorAll) continue;
+    const scroller = face.querySelector?.('.face-scroll') || face;
+    const viewRect = typeof scroller.getBoundingClientRect === 'function' ? scroller.getBoundingClientRect() : null;
+    const hasView = viewRect && viewRect.height > 0;
+
+    if (kind === 'units') {
+      const items = [...face.querySelectorAll('[data-swappable="true"]')].filter((el) =>
+        isVisible(el, hasView ? viewRect : null),
+      );
+      items.forEach((item, i) => {
+        const delay = Math.min(i, MAX_STAGGER_STEPS) * STEP;
+        const amt = item.querySelector?.('.ing-amount');
+        const met = item.querySelector?.('.ing-metric');
+        if (amt?.animate) {
+          animations.push(
+            amt.animate(
+              [
+                { opacity: 0, transform: 'perspective(180px) translateY(5px) rotateX(-26deg)' },
+                { opacity: 1, transform: 'perspective(180px) translateY(0) rotateX(0deg)' },
+              ],
+              { duration: DURATION, delay, easing: EASE, fill: 'backwards' },
+            ),
+          );
+          maxEnd = Math.max(maxEnd, delay + DURATION);
+        }
+        if (met?.animate) {
+          const metDelay = delay + 16;
+          animations.push(
+            met.animate(
+              [
+                { opacity: 0, transform: 'perspective(180px) translateY(-4px) rotateX(22deg)' },
+                { opacity: 1, transform: 'perspective(180px) translateY(0) rotateX(0deg)' },
+              ],
+              { duration: DURATION, delay: metDelay, easing: EASE, fill: 'backwards' },
+            ),
+          );
+          maxEnd = Math.max(maxEnd, metDelay + DURATION);
+        }
+      });
+    } else if (kind === 'lang') {
+      const rolls = new Set(face.querySelectorAll(LANG_ROLL_SELECTOR));
+      const fades = new Set(face.querySelectorAll(LANG_FADE_SELECTOR));
+      const all = [...face.querySelectorAll(`${LANG_ROLL_SELECTOR}, ${LANG_FADE_SELECTOR}`)].filter((el) =>
+        isVisible(el, hasView ? viewRect : null),
+      );
+      all.forEach((el, i) => {
+        if (!el?.animate) return;
+        const delay = Math.min(i, MAX_STAGGER_STEPS) * STEP;
+        const frames = fades.has(el) && !rolls.has(el)
+          ? [{ opacity: 0 }, { opacity: 1 }]
+          : [
+              { opacity: 0, transform: 'translateY(5px)' },
+              { opacity: 1, transform: 'translateY(0)' },
+            ];
+        animations.push(el.animate(frames, { duration: DURATION, delay, easing: EASE, fill: 'backwards' }));
+        maxEnd = Math.max(maxEnd, delay + DURATION);
+      });
+    }
+  }
+
+  if (!animations.length) return null;
+
+  const controller = {
+    animations,
+    duration: maxEnd,
+    cancel() {
+      if (cancelled) return;
+      cancelled = true;
+      animations.forEach((anim) => anim.cancel());
+      if (animRef?.current === controller) animRef.current = null;
+    },
+  };
+
+  if (animRef) {
+    animRef.current = controller;
+    Promise.allSettled(animations.map((anim) => anim.finished)).then(() => {
+      if (!cancelled && animRef.current === controller) animRef.current = null;
+    });
+  }
+
+  return controller;
+}
+
 // Commit immediately, even when a previous snapshot is still being captured.
 // A skipped transition's deferred callback must never replay an older choice.
 export function transition(update) {

@@ -5,6 +5,10 @@ import { readFileSync } from 'node:fs';
 const controlsSrc = readFileSync(new URL('../src/Controls.jsx', import.meta.url), 'utf8');
 const pagesSrc = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
 const awakeSrc = readFileSync(new URL('../src/Awake.jsx', import.meta.url), 'utf8');
+const bookSrc = readFileSync(new URL('../src/Book.jsx', import.meta.url), 'utf8');
+const i18nSrc = readFileSync(new URL('../src/i18n.js', import.meta.url), 'utf8');
+const unitsSrc = readFileSync(new URL('../src/units.js', import.meta.url), 'utf8');
+const paginateSrc = readFileSync(new URL('../src/paginate.js', import.meta.url), 'utf8');
 const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 const motionCss = readFileSync(new URL('../src/motion.css', import.meta.url), 'utf8');
 
@@ -38,4 +42,20 @@ test('CSS keeps flat retro look, 44px mobile targets, and reduced-motion fallbac
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl-flip/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--toggle/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--awake/);
+});
+
+test('language and unit toggles commit immediately without blocking ViewTransition or layout jumps', () => {
+  assert.doesNotMatch(i18nSrc, /transition\(/);
+  assert.doesNotMatch(unitsSrc, /transition\(/);
+  assert.match(bookSrc, /\$\{wide\}-\$\{sp\.recipe\.slug\}-\$\{sp\.offset\}-\$\{side\}/);
+  assert.match(bookSrc, /\[wide,\s*lang,\s*scales,\s*runPaginate,\s*s\]/);
+  assert.match(bookSrc, /planCache:\s*new Map\(\)/);
+  assert.match(bookSrc, /swapContent\(restFaces,\s*kind,\s*swapAnimRef\)/);
+  assert.match(pagesSrc, /className="ing-how-sizer"\s+aria-hidden="true"/);
+  assert.match(pagesSrc, /key=\{seg\.kind\}/);
+  assert.match(paginateSrc, /function measureRecipe\(/);
+  assert.match(stylesCss, /overflow-anchor:\s*none;/);
+  assert.match(stylesCss, /\.ing-how-live,\s*\.ing-how-sizer\s*\{\s*grid-area:\s*1\s*\/\s*1;\s*\}/);
+  assert.match(stylesCss, /\.unit-btn \.ctl-flip-box::after/);
+  assert.match(stylesCss, /\.controls--wide \.ctl--contents::after/);
 });

@@ -142,7 +142,6 @@ function initialLang() {
   return (navigator.language || '').toLowerCase().startsWith('de') ? 'de' : 'en';
 }
 
-import { transition } from './motion.js';
 import { useRef } from 'react';
 
 export function useLang() {
@@ -165,7 +164,7 @@ export function useLang() {
     if (next !== 'en' && next !== 'de') return;
     if (next === requestedLang.current) return;
     requestedLang.current = next;
-    transition(() => setLangState(next));
+    setLangState(next);
     try {
       localStorage.setItem(KEY, next);
     } catch {

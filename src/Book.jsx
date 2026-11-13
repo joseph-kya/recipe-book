@@ -91,11 +91,14 @@ export default function Book({ lang, setLang, units, setUnits }) {
         el.style.transform = `rotateY(${180 - 180 * p}deg)`;
         shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
       } else if (role === 'under-r') {
-        el.style.transform = s.wide ? '' : `scale(${0.98 + 0.02 * p})`;
+        el.style.transform = s.wide ? '' : `scale(${0.972 + 0.028 * p})`;
         shade.style.opacity = String(0.42 * (1 - p));
       } else if (role === 'under-l') {
         el.style.transform = '';
         shade.style.opacity = String(0.42 * p);
+      } else if (role === 'rest' && !s.wide && !s.reduce && Math.abs(s.rb) > 0.25) {
+        el.style.transform = `rotateY(${clamp(s.rb * 0.04, -3.5, 3.5)}deg)`;
+        shade.style.opacity = String(clamp(Math.abs(s.rb) / 360, 0, 0.14));
       } else {
         el.style.transform = '';
         shade.style.opacity = '0';
@@ -104,7 +107,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
     // A closed book sits centred on its cover; it slides over as it opens.
     let shift = 0;
     if (s.wide) shift = s.turn ? (s.turn.lo === 0 ? 1 - p : 0) : s.index === 0 ? 1 : 0;
-    book.style.transform = `translateX(${-25 * shift}%) translateX(${s.rb}px)`;
+    const rbX = s.wide ? s.rb : s.rb * 0.7;
+    book.style.transform = `translateX(${-25 * shift}%) translateX(${rbX}px)`;
   }, [s]);
 
   /* ---------- settling and the URL ---------- */

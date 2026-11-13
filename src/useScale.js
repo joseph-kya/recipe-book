@@ -41,7 +41,10 @@ export function ScaleProvider({ children }) {
     else next[slug] = value;
     if (JSON.stringify(next[slug]) === JSON.stringify(latest.current[slug])) return;
     latest.current = next;
-    if (animate) transition(() => setScales(next));
+    // Crossfade wide spreads where scaling can repaginate; on phone screens keep
+    // preset taps instant so the pill glide and amount wave play unblurred.
+    const isWide = typeof document !== 'undefined' && document.querySelector('.book--wide');
+    if (animate && isWide) transition(() => setScales(next));
     else setScales(next);
     try {
       localStorage.setItem(KEY, JSON.stringify(next));

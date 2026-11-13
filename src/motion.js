@@ -39,28 +39,35 @@ export function slidePill(group, indicator, active, { animate = false, animRef }
   indicator.style.transform = `translateX(${nextX}px)`;
   group.dataset.ready = 'true';
 
-  if (
-    animate &&
-    wasReady &&
-    !wasHidden &&
-    !reducedMotion() &&
-    indicator.animate &&
-    prevW > 0 &&
-    nextW > 0 &&
-    (Math.abs(prevX - nextX) > 0.5 || Math.abs(prevW - nextW) > 0.5)
-  ) {
-    const scaleX = prevW / nextW;
-    const anim = indicator.animate(
-      [
-        { transform: `translateX(${prevX}px) scaleX(${scaleX})` },
-        { transform: `translateX(${nextX}px) scaleX(1)` },
-      ],
-      {
-        duration: 230,
-        easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
-      },
-    );
-    if (animRef) {
+  if (animate && wasReady && !reducedMotion() && indicator.animate) {
+    let anim = null;
+    if (!wasHidden && prevW > 0 && nextW > 0 && (Math.abs(prevX - nextX) > 0.5 || Math.abs(prevW - nextW) > 0.5)) {
+      const scaleX = prevW / nextW;
+      anim = indicator.animate(
+        [
+          { transform: `translateX(${prevX}px) scaleX(${scaleX})` },
+          { transform: `translateX(${nextX}px) scaleX(1)` },
+        ],
+        {
+          duration: 230,
+          easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
+        },
+      );
+    } else if (wasHidden && nextW > 0) {
+      // Returning from custom mode: emerge cleanly from the pill's center.
+      const insetX = nextX + nextW * 0.05;
+      anim = indicator.animate(
+        [
+          { opacity: 0, transform: `translateX(${insetX}px) scale(0.9)` },
+          { opacity: 1, transform: `translateX(${nextX}px) scale(1)` },
+        ],
+        {
+          duration: 210,
+          easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
+        },
+      );
+    }
+    if (anim && animRef) {
       animRef.current = anim;
       anim.finished.catch(() => {}).finally(() => {
         if (animRef.current === anim) animRef.current = null;

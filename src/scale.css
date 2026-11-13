@@ -131,11 +131,24 @@
   background: var(--cream);
   border: 2px solid var(--choc);
   box-shadow: 2px 2px 0 var(--choc);
+  transform-origin: left center;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
+    opacity 150ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.94);
+  }
 }
 
 .scaler-chip--custom:active {
   box-shadow: 1px 1px 0 var(--choc);
   transform: translate(1px, 1px) scale(0.95);
+  transition-duration: 85ms;
+  transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -147,6 +160,8 @@
   .scaler-chip--custom:active {
     box-shadow: 1px 1px 0 var(--choc);
     transform: translate(1px, 1px) scale(0.95);
+    transition-duration: 85ms;
+    transition-timing-function: var(--ease-out);
   }
 }
 

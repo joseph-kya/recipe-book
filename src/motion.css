@@ -129,7 +129,8 @@
 
 /* A static gradient paints once; only its opacity follows the moving leaf.
    Front (right page) has its spine on the left (90deg); back (left page) has its spine on the right (270deg). */
-.book--wide .face--front > .shade {
+.book--wide .face--front > .shade,
+.book--narrow .face--front > .shade {
   background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
     color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
 }
@@ -160,10 +161,11 @@
   .scaler-chip,
   .scaler-step,
   .scaler-custom,
+  .scaler-field,
   .scale-note { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
-  .book .btn:hover .btn-icon,
+  .book .btn:is(:active, :hover) .btn-icon,
   .controls button:not(:disabled):is(:active, :hover),
   .controls .ctl--turn:not(:disabled):is(:hover, :active) .arrow-icon,
   .controls .ctl--contents:active,
@@ -209,4 +211,20 @@
   ::view-transition-group(book-controls) {
     border-radius: var(--r-l);
   }
+}
+
+/* Keep the wide portion scaler on its own layer during a spread crossfade so
+   the sliding pill never ghosts beneath the outgoing recipe snapshot. */
+.book--wide:not(.measure) .face--rest .scaler-row {
+  view-transition-name: recipe-scaler;
+}
+::view-transition-group(recipe-scaler),
+::view-transition-new(recipe-scaler) {
+  animation: none;
+}
+::view-transition-new(recipe-scaler) {
+  mix-blend-mode: normal;
+}
+::view-transition-old(recipe-scaler) {
+  display: none;
 }

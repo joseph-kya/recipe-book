@@ -43,9 +43,6 @@
   background: var(--cream);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
-  box-shadow:
-    inset 0 2px 0 color-mix(in srgb, var(--ink) 6%, transparent),
-    2px 2px 0 var(--choc);
 }
 
 .scaler-indicator {
@@ -87,8 +84,7 @@
   line-height: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1));
+  transition: transform var(--press) var(--ease-out);
 }
 
 .scaler-label-active {
@@ -113,9 +109,7 @@
 }
 
 .scaler-chip:active {
-  transform: scale(0.93);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
+  transform: scale(0.95);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -124,70 +118,30 @@
   }
 }
 
-/* "custom": its own chip after the presets, morphing in-place into the stepper */
+/* "custom": its own chip after the presets, so the row can wrap it neatly */
 .scaler-chip--custom {
   flex: none;
   padding: 0 var(--sp-3);
   background: var(--cream);
   border: 2px solid var(--choc);
-  box-shadow: 2px 2px 0 var(--choc);
-  transform-origin: left center;
-  opacity: 1;
-  transform: scale(1);
-  transition:
-    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
-    opacity 150ms var(--ease-out);
-
-  @starting-style {
-    opacity: 0;
-    transform: scale(0.94);
-  }
-}
-
-.scaler-chip--custom:active {
-  box-shadow: 1px 1px 0 var(--choc);
-  transform: translate(1px, 1px) scale(0.95);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-chip--custom:hover {
     background: var(--paper);
-    box-shadow: 3px 3px 0 var(--choc);
-    transform: translate(-1px, -1px);
-  }
-  .scaler-chip--custom:active {
-    box-shadow: 1px 1px 0 var(--choc);
-    transform: translate(1px, 1px) scale(0.95);
-    transition-duration: 85ms;
-    transition-timing-function: var(--ease-out);
   }
 }
 
-/* the active custom stepper: choc pill framing a cream readout window */
+/* the custom stepper: − [field] +, one cream pill like the chips */
 .scaler-custom {
   display: flex;
   flex: none;
   align-items: center;
   gap: 2px;
   padding: 2px;
-  background: var(--choc);
-  color: var(--cream);
+  background: var(--cream);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
-  box-shadow: 1px 1px 0 var(--choc);
-  transform-origin: left center;
-  opacity: 1;
-  transform: scale(1);
-  transition:
-    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
-    opacity 150ms var(--ease-out);
-
-  @starting-style {
-    opacity: 0;
-    transform: scale(0.94);
-  }
 }
 
 .scaler-step {
@@ -196,41 +150,39 @@
   border: 0;
   border-radius: var(--r-pill);
   background: transparent;
-  color: var(--cream);
+  color: var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-l);
   line-height: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
-    opacity 140ms var(--ease-out);
+    transform var(--press) var(--ease-out),
+    background-color 140ms ease;
 }
 
 .scaler-step:active:not(:disabled) {
-  transform: scale(0.9);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
+  transform: scale(0.95);
 }
 
 .scaler-step:disabled {
-  opacity: 0.38;
+  opacity: 0.4;
   cursor: default;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-step:not(:disabled):hover {
-    background: color-mix(in srgb, white 14%, transparent);
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
 
 .scaler-field {
-  width: 3.35rem;
+  width: 3.5rem;
   height: 2.75rem;
-  padding: 0 4px;
+  padding: 0;
   border: 0;
-  border-radius: var(--r-pill);
-  background: var(--cream);
+  border-radius: var(--r-s);
+  background: transparent;
   color: var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-m);
@@ -245,16 +197,16 @@
 
 .scaler-field:focus-visible,
 .scaler-field:focus {
-  outline: 3px solid var(--mustard);
-  outline-offset: -3px;
-  box-shadow: none;
+  outline: 3px solid var(--choc);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--mustard);
 }
 
 .scaler-x {
   padding-right: var(--sp-2);
   font-family: var(--badge);
   font-size: var(--fs-m);
-  color: var(--mustard);
+  color: var(--choc);
 }
 
 /* only when scaled: one short line, in the card's handwritten voice */
@@ -265,30 +217,16 @@
   font-size: var(--fs-s);
   line-height: 1.3;
   color: var(--choc-soft);
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 180ms var(--ease-out),
-    transform 180ms var(--ease-out);
-
-  @starting-style {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scaler-indicator,
   .scaler-label-active,
   .scaler-chip,
-  .scaler-step,
-  .scaler-custom,
-  .scale-note {
+  .scaler-step {
     transition: none;
-    animation: none;
   }
   .scaler-chip:active,
-  .scaler-chip--custom:is(:hover, :active),
   .scaler-step:active:not(:disabled) {
     transform: none;
   }

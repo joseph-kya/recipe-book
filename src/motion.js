@@ -49,21 +49,20 @@ export function slidePill(group, indicator, active, { animate = false, animRef }
           { transform: `translateX(${nextX}px) scaleX(1)` },
         ],
         {
-          duration: 230,
-          easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
+          duration: 210,
+          easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
         },
       );
     } else if (wasHidden && nextW > 0) {
-      // Returning from custom mode: emerge cleanly from the pill's center.
-      const insetX = nextX + nextW * 0.05;
+      // Returning from custom mode: fade cleanly into place.
       anim = indicator.animate(
         [
-          { opacity: 0, transform: `translateX(${insetX}px) scale(0.9)` },
-          { opacity: 1, transform: `translateX(${nextX}px) scale(1)` },
+          { opacity: 0, transform: `translateX(${nextX}px)` },
+          { opacity: 1, transform: `translateX(${nextX}px)` },
         ],
         {
-          duration: 210,
-          easing: 'cubic-bezier(0.32, 1.26, 0.56, 1)',
+          duration: 150,
+          easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
         },
       );
     }

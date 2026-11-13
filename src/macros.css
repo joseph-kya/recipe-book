@@ -1,21 +1,16 @@
 /* One measured ticket: no scaling state, hidden content or fixed heights. */
 .macros {
-  width: auto;
+  width: 100%;
   flex-shrink: 0;
-  margin: var(--sp-3) 5px 0 0;
+  margin-top: var(--sp-4);
   color: var(--choc);
   text-align: left;
-}
-
-.tips + .macros {
-  margin-top: var(--sp-4);
 }
 
 .macros-title {
   font-family: var(--badge);
   font-size: var(--fs-l);
   line-height: 1.2;
-  letter-spacing: 0.01em;
 }
 
 .macros-basis,
@@ -34,44 +29,26 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: var(--sp-2) 0 0;
-  border: var(--rule) solid var(--choc);
-  border-radius: var(--r-m);
+  border: 2px solid var(--choc);
   background: var(--paper);
-  box-shadow: 5px 5px 0 var(--choc);
-  overflow: hidden;
 }
 
 .macros-cell {
   min-width: 0;
   padding: var(--sp-2) var(--sp-1);
-  border-top: 5px solid color-mix(in srgb, var(--mint) 78%, var(--choc));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
 }
 
-.macros-cell:first-child {
-  background: color-mix(in srgb, var(--mustard) 36%, var(--paper));
-  border-top-color: var(--mustard);
-}
-
-.macros-cell:nth-child(2) {
-  border-top-color: var(--cherry);
-}
-
-.macros-cell:nth-child(4) {
-  border-top-color: color-mix(in srgb, var(--pink) 76%, var(--cherry));
-}
-
 .macros-cell + .macros-cell {
-  border-left: 2px dashed color-mix(in srgb, var(--choc) 45%, transparent);
+  border-left: 1px dashed var(--choc);
 }
 
 .macros-cell dt {
   font-size: var(--fs-xs);
   font-weight: 800;
-  letter-spacing: 0.02em;
   line-height: 1.2;
   hyphens: manual;
 }
@@ -79,8 +56,8 @@
 .macros-cell dd {
   margin: 2px 0 0;
   font-family: var(--badge);
-  font-size: var(--fs-xl);
-  line-height: 1.08;
+  font-size: var(--fs-l);
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -89,7 +66,6 @@
   font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--choc-soft);
-  margin-left: 1px;
 }
 
 .macros-head {

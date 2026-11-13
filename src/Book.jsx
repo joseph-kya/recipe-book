@@ -91,14 +91,11 @@ export default function Book({ lang, setLang, units, setUnits }) {
         el.style.transform = `rotateY(${180 - 180 * p}deg)`;
         shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
       } else if (role === 'under-r') {
-        el.style.transform = s.wide ? '' : `scale(${0.972 + 0.028 * p})`;
-        shade.style.opacity = String(0.42 * (1 - p));
+        el.style.transform = '';
+        shade.style.opacity = String(0.4 * (1 - p));
       } else if (role === 'under-l') {
         el.style.transform = '';
-        shade.style.opacity = String(0.42 * p);
-      } else if (role === 'rest' && !s.wide && !s.reduce && Math.abs(s.rb) > 0.25) {
-        el.style.transform = `rotateY(${clamp(s.rb * 0.04, -3.5, 3.5)}deg)`;
-        shade.style.opacity = String(clamp(Math.abs(s.rb) / 360, 0, 0.14));
+        shade.style.opacity = String(0.4 * p);
       } else {
         el.style.transform = '';
         shade.style.opacity = '0';

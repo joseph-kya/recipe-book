@@ -1,50 +1,10 @@
 /* Colourway swatches on the cover: four small rounds under Open, each split
    into the theme's primary and accent, ringed in cream on the cover colour.
-   The chosen one wears a springy outer ring; focus uses the shared diner ring. */
-
-.theme-picker-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
+   The chosen one wears a thicker ring; focus uses the shared diner ring. */
 
 .theme-picker {
   display: flex;
-  align-items: center;
   gap: var(--sp-2);
-  padding: 4px 8px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--choc) 26%, transparent);
-  border: 2px solid color-mix(in srgb, var(--cream) 42%, transparent);
-  box-shadow:
-    inset 0 2px 0 color-mix(in srgb, var(--choc) 22%, transparent),
-    0 1px 0 color-mix(in srgb, white 14%, transparent);
-}
-
-.theme-nameplate {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 11px 4px 8px;
-  border-radius: var(--r-pill);
-  background: var(--choc);
-  color: var(--cream);
-  border: 2px solid color-mix(in srgb, var(--cream) 78%, transparent);
-  box-shadow: 2px 2px 0 color-mix(in srgb, var(--choc) 52%, transparent);
-  font-family: var(--badge);
-  font-size: var(--fs-xs);
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-}
-
-.theme-nameplate-dot {
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: 50%;
-  flex: none;
-  background: linear-gradient(135deg, var(--sw-a) 0 50%, var(--sw-b) 50% 100%);
-  box-shadow: 0 0 0 1.5px var(--cream);
 }
 
 .theme-swatch {
@@ -57,77 +17,45 @@
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 200ms cubic-bezier(0.32, 1.32, 0.56, 1);
+  transition: transform var(--press) var(--ease-out);
 }
 
 /* the visible dot sits inside the 44px target */
 .theme-swatch::before {
   content: '';
   position: absolute;
-  inset: 9px;
+  inset: 8px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--sw-a) 0 50%, var(--sw-b) 50% 100%);
   box-shadow:
     0 0 0 2px var(--cream),
     2px 2px 0 2px var(--choc);
-  transform: scale(0.95);
-  transition: transform 220ms cubic-bezier(0.32, 1.32, 0.56, 1);
+  transition: box-shadow 160ms var(--ease-out);
 }
 
 .theme-swatch[aria-checked='true']::before {
-  transform: scale(1.06);
-}
-
-/* active ring animates only transform + opacity */
-.theme-swatch::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: 50%;
-  border: 3px solid var(--cream);
-  box-shadow: 2px 2px 0 var(--choc);
-  opacity: 0;
-  transform: scale(0.86);
-  pointer-events: none;
-  transition:
-    transform 220ms cubic-bezier(0.32, 1.32, 0.56, 1),
-    opacity 150ms var(--ease-out);
-}
-
-.theme-swatch[aria-checked='true']::after {
-  opacity: 1;
-  transform: scale(1);
+  box-shadow:
+    0 0 0 4px var(--cream),
+    3px 3px 0 4px var(--choc);
 }
 
 .theme-swatch:active {
-  transform: scale(0.91);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
+  transform: scale(0.94);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .theme-swatch:not([aria-checked='true']):hover {
-    transform: translateY(-1.5px) scale(1.08);
-  }
-  .theme-swatch:not([aria-checked='true']):hover::before {
-    transform: scale(1);
-  }
-  .theme-swatch:active {
-    transform: scale(0.91);
+    transform: scale(1.06);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .theme-swatch,
-  .theme-swatch::before,
-  .theme-swatch::after {
+  .theme-swatch::before {
     transition: none;
   }
   .theme-swatch:active,
-  .theme-swatch:hover,
-  .theme-swatch::before,
-  .theme-swatch[aria-checked='true']::before,
-  .theme-swatch[aria-checked='true']::after {
+  .theme-swatch:hover {
     transform: none;
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { reducedMotion, slidePill } from './motion.js';
+import { slidePill } from './motion.js';
 import { clampFactor, CUSTOM_MAX, CUSTOM_MIN, factorLabel, scaleStat, yieldStat } from './scale.js';
 import { useScale } from './useScale.js';
 
@@ -23,13 +23,11 @@ export default function Scaler({ recipe, text, textLang, t }) {
   const opening = useRef(false);
   const groupRef = useRef(null);
   const animRef = useRef(null);
-  const fieldAnimRef = useRef(null);
   const prevSelection = useRef({ factor, custom });
   const labels = offered.map((f) => (y ? scaleStat(y.value, f) : factorLabel(f))).join('|');
 
   useEffect(() => () => {
     animRef.current?.cancel();
-    fieldAnimRef.current?.cancel();
   }, []);
 
   useLayoutEffect(() => {
@@ -90,23 +88,13 @@ export default function Scaler({ recipe, text, textLang, t }) {
     timer.current = setTimeout(() => commit(e.target.value), 350);
   };
 
-  const step = (dir, animate = true) => {
+  const step = (dir) => {
     clearTimeout(timer.current);
     const unit = y ? 1 : 0.1;
     const current = Number.isFinite(parse(draft)) ? parse(draft) : shown;
     const next = clampFactor(round1(current + dir * unit) / base);
     setDraft(String(round1(next * base)));
     setCustom(next, { animate: false });
-    if (animate && !reducedMotion() && field.current?.animate && next !== factor) {
-      fieldAnimRef.current?.cancel();
-      fieldAnimRef.current = field.current.animate(
-        [
-          { transform: dir > 0 ? 'translateY(-1.5px) scale(1.06)' : 'translateY(1.5px) scale(0.95)' },
-          { transform: 'translateY(0) scale(1)' },
-        ],
-        { duration: 160, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
-      );
-    }
   };
 
   const min = round1(CUSTOM_MIN * base);

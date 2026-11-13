@@ -1,8 +1,7 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
-import { reducedMotion } from './motion.js';
-import { Arrow, Checkers, Cupcake } from './ornaments.jsx';
+import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
@@ -12,122 +11,12 @@ import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 import ThemePicker from './ThemePicker.jsx';
 
-const prefersReducedMotion = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const SPRING_EASE = 'cubic-bezier(0.32, 1.32, 0.56, 1)';
-const OUT_EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
-
-let coverEntered = false;
-let contentsLeftEntered = false;
-
-// Interruptible WAAPI bounce: if an ornament is tapped mid-flight, start from its
-// live presentation transform instead of snapping back to rest.
-function popOrnament(animRef, entries) {
-  if (prefersReducedMotion()) return;
-  const active = animRef.current.some((a) => a?.playState === 'running');
-  const starts = entries.map(([el, rest]) => {
-    if (!el?.animate) return null;
-    if (!active) return rest;
-    const cs = getComputedStyle(el);
-    const frame = { transform: cs.transform && cs.transform !== 'none' ? cs.transform : rest.transform };
-    if (rest.opacity !== undefined) frame.opacity = Number(cs.opacity);
-    return frame;
-  });
-  animRef.current.forEach((a) => a?.cancel());
-  animRef.current = entries.map(([el, , frames, options], i) => {
-    const start = starts[i];
-    if (!start) return null;
-    return el.animate([start, ...frames], options);
-  });
-}
-
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
 export function Cover({ lang }) {
   const t = ui[lang];
-  const rootRef = useRef(null);
-  const popAnimRef = useRef([]);
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || coverEntered || prefersReducedMotion() || !root.closest('.face--rest')) return;
-    coverEntered = true;
-    const animations = [];
-    const hit = root.querySelector('.cover-cupcake-hit');
-    const cupcake = root.querySelector('.cover-cupcake');
-    const picker = root.querySelector('.theme-picker-wrap');
-    if (hit?.animate) {
-      animations.push(
-        hit.animate(
-          [
-            { opacity: 0, transform: 'scale(0.92)' },
-            { opacity: 1, transform: 'scale(1)' },
-          ],
-          { delay: 65, duration: 230, easing: OUT_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    if (cupcake?.animate) {
-      animations.push(
-        cupcake.animate(
-          [{ transform: 'rotate(-14deg) scale(0.94)' }, { transform: 'rotate(-8deg) scale(1)' }],
-          { delay: 65, duration: 250, easing: SPRING_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    if (picker?.animate) {
-      animations.push(
-        picker.animate(
-          [
-            { opacity: 0, transform: 'translateY(6px) scale(0.96)' },
-            { opacity: 1, transform: 'translateY(0) scale(1)' },
-          ],
-          { delay: 120, duration: 180, easing: OUT_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    const finish = () => {
-      animations.forEach((a) => a.cancel());
-      root.removeEventListener('pointerdown', finish, true);
-      root.removeEventListener('focusin', finish, true);
-    };
-    root.addEventListener('pointerdown', finish, true);
-    root.addEventListener('focusin', finish, true);
-    Promise.allSettled(animations.map((a) => a.finished)).then(finish);
-    return finish;
-  }, []);
-
-  const popCupcake = () => {
-    const cupcake = rootRef.current?.querySelector('.cover-cupcake');
-    const ring = rootRef.current?.querySelector('.cover-cupcake-ring');
-    if (!cupcake?.animate) return;
-    popOrnament(popAnimRef, [
-      [
-        cupcake,
-        { transform: 'rotate(-8deg) scale(1)' },
-        [
-          { transform: 'rotate(5deg) scale(1.1)', offset: 0.36 },
-          { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
-          { transform: 'rotate(-8deg) scale(1)' },
-        ],
-        { duration: 340, easing: OUT_EASE },
-      ],
-      [
-        ring,
-        { transform: 'scale(1) rotate(0deg)', opacity: 0.58 },
-        [
-          { transform: 'scale(1.12) rotate(10deg)', opacity: 0.92, offset: 0.38 },
-          { transform: 'scale(0.98) rotate(-4deg)', opacity: 0.72, offset: 0.76 },
-          { transform: 'scale(1) rotate(0deg)', opacity: 0.58 },
-        ],
-        { duration: 360, easing: OUT_EASE },
-      ],
-    ]);
-  };
-
   return (
-    <div ref={rootRef} className="page-body cover">
+    <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
         <h1 className="cover-title">
@@ -142,23 +31,10 @@ export function Cover({ lang }) {
             </span>
           ))}
         </h1>
-        <span className="cover-cupcake-hit" onClick={popCupcake}>
-          <span className="cover-cupcake-ring" aria-hidden="true" />
-          <Cupcake className="cover-cupcake" />
-        </span>
+        <Cupcake className="cover-cupcake" />
         <div className="cover-open">
           <a className="btn btn--cream" href="#/contents">
-            <span>{t.open}</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="btn-icon">
-              <path
-                d="M9 5l7 7-7 7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            {t.open}
           </a>
         </div>
         <ThemePicker lang={lang} />
@@ -173,101 +49,14 @@ export function Cover({ lang }) {
 // Wide: the left page of the contents spread carries its heading and an ornament.
 function ContentsLeft({ lang }) {
   const t = ui[lang];
-  const rootRef = useRef(null);
-  const popAnimRef = useRef([]);
-  const range = recipes.length > 1 ? `1–${recipes.length}` : '1';
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || contentsLeftEntered || prefersReducedMotion() || !root.closest('.face--rest')) return;
-    contentsLeftEntered = true;
-    const animations = [];
-    const medallion = root.querySelector('.contents-medallion');
-    const title = root.querySelector('.contents-title');
-    const count = root.querySelector('.contents-count');
-    if (medallion?.animate) {
-      animations.push(
-        medallion.animate(
-          [
-            { opacity: 0, transform: 'scale(0.93) rotate(-4deg)' },
-            { opacity: 1, transform: 'scale(1) rotate(0deg)' },
-          ],
-          { duration: 250, easing: SPRING_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    if (title?.animate) {
-      animations.push(
-        title.animate(
-          [
-            { opacity: 0, transform: 'translateY(8px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-          { delay: 45, duration: 200, easing: OUT_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    if (count?.animate) {
-      animations.push(
-        count.animate(
-          [
-            { opacity: 0, transform: 'translateY(6px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-          { delay: 95, duration: 180, easing: OUT_EASE, fill: 'backwards' }
-        )
-      );
-    }
-    const finish = () => {
-      animations.forEach((a) => a.cancel());
-      root.removeEventListener('pointerdown', finish, true);
-      root.removeEventListener('focusin', finish, true);
-    };
-    root.addEventListener('pointerdown', finish, true);
-    root.addEventListener('focusin', finish, true);
-    Promise.allSettled(animations.map((a) => a.finished)).then(finish);
-    return finish;
-  }, []);
-
-  const popMedallion = () => {
-    const medallion = rootRef.current?.querySelector('.contents-medallion');
-    const cupcake = rootRef.current?.querySelector('.contents-cupcake');
-    if (!medallion?.animate) return;
-    popOrnament(popAnimRef, [
-      [
-        medallion,
-        { transform: 'scale(1) rotate(0deg)' },
-        [
-          { transform: 'scale(1.06) rotate(4deg)', offset: 0.38 },
-          { transform: 'scale(0.99) rotate(-2deg)', offset: 0.72 },
-          { transform: 'scale(1) rotate(0deg)' },
-        ],
-        { duration: 300, easing: OUT_EASE },
-      ],
-      [
-        cupcake,
-        { transform: 'rotate(-8deg) scale(1)' },
-        [
-          { transform: 'rotate(-2deg) scale(1.07)', offset: 0.38 },
-          { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
-          { transform: 'rotate(-8deg) scale(1)' },
-        ],
-        { duration: 300, easing: OUT_EASE },
-      ],
-    ]);
-  };
-
   return (
-    <div ref={rootRef} className="page-body contents-left">
+    <div className="page-body contents-left">
       <Checkers tone="choc" edge="top" />
       <div className="contents-left-inner">
-        <div className="contents-medallion" aria-hidden="true" onClick={popMedallion}>
+        <div className="contents-medallion" aria-hidden="true">
           <Cupcake className="contents-cupcake" />
         </div>
         <h1 className="contents-title">{t.contents}</h1>
-        <p className="contents-count">
-          {t.recipeNo} <b>{range}</b>
-        </p>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -276,7 +65,6 @@ function ContentsLeft({ lang }) {
 
 function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
-  const range = recipes.length > 1 ? `1–${recipes.length}` : '1';
   const [, setStepTick] = useState(0);
 
   useEffect(() => {
@@ -289,14 +77,7 @@ function ContentsList({ lang, withTitle = false }) {
     <div className="page-body contents">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
-        {withTitle && (
-          <div className="contents-head">
-            <h1 className="contents-title">{t.contents}</h1>
-            <p className="contents-count">
-              {t.recipeNo} <b>{range}</b>
-            </p>
-          </div>
-        )}
+        {withTitle && <h1 className="contents-title">{t.contents}</h1>}
         <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);
@@ -322,28 +103,11 @@ function ContentsList({ lang, withTitle = false }) {
                       </span>
                     )}
                   </span>
-                  <span className="toc-trailing" aria-hidden="true">
-                    {doneCount > 0 && (
-                      <span className={`toc-progress${allDone ? ' toc-progress--done' : ''}`}>
-                        {allDone && (
-                          <svg className="toc-progress-icon" viewBox="0 0 24 24" focusable="false">
-                            <path
-                              d="M5 12.5 9.5 17 19 7.5"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
-                        <span>{doneCount}/{totalSteps}</span>
-                      </span>
-                    )}
-                    <span className="toc-arrow">
-                      <Arrow dir="right" />
+                  {doneCount > 0 && (
+                    <span className={`toc-progress${allDone ? ' toc-progress--done' : ''}`} aria-hidden="true">
+                      {doneCount}/{totalSteps}
                     </span>
-                  </span>
+                  )}
                 </a>
               </li>
             );
@@ -397,32 +161,6 @@ function RunningHead({ recipe, lang }) {
 function RecipeHero({ recipe, lang }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
-  const statsRef = useRef(null);
-  const prevFactorRef = useRef(factor);
-
-  // Sync the scalable yield pill in the hero with the ingredient card's scaling wave.
-  useEffect(() => {
-    const prev = prevFactorRef.current;
-    prevFactorRef.current = factor;
-    if (prev === factor || reducedMotion()) return;
-    const list = statsRef.current;
-    if (!list || list.closest('.measure')) return;
-    const anims = [];
-    for (const el of list.querySelectorAll('[data-scaled-stat="true"]')) {
-      if (!el.animate) continue;
-      anims.push(
-        el.animate(
-          [
-            { transform: 'scale(1.07) translateY(-1px)' },
-            { transform: 'scale(1) translateY(0)' },
-          ],
-          { duration: 210, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
-        ),
-      );
-    }
-    return () => anims.forEach((a) => a.cancel());
-  }, [factor]);
-
   return (
     <header className="hero" data-unit="hero">
       <p className="eyebrow">
@@ -447,16 +185,13 @@ function RecipeHero({ recipe, lang }) {
         {r.tagline}
       </p>
       <FallbackNote fallback={fallback} t={t} />
-      <ul ref={statsRef} className="stats" lang={textLang}>
-        {r.stats.map((s, i) => {
-          const scalable = /^\d+$/.test(s.value.trim());
-          return (
-            <li key={i} data-scaled-stat={scalable ? 'true' : undefined}>
-              {/* a plain-number yield ("24" squares) follows the portion scale */}
-              <b>{scaleStat(s.value, factor, custom, textLang)}</b> {s.label}
-            </li>
-          );
-        })}
+      <ul className="stats" lang={textLang}>
+        {r.stats.map((s, i) => (
+          <li key={i}>
+            {/* a plain-number yield ("24" squares) follows the portion scale */}
+            <b>{scaleStat(s.value, factor, custom, textLang)}</b> {s.label}
+          </li>
+        ))}
       </ul>
       {r.intro && (
         <p className="intro" lang={textLang}>
@@ -482,52 +217,10 @@ function Amount({ text }) {
 }
 
 const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
-const ING_STAGGER = [0, 20, 38, 54, 68, 80];
 
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
-  const menuRef = useRef(null);
-  const prevRef = useRef({ factor, units });
-
-  // Purposeful state-indication wave when portion scale or unit system changes.
-  useEffect(() => {
-    const prev = prevRef.current;
-    prevRef.current = { factor, units };
-    if (measure || reducedMotion()) return;
-    const factorChanged = prev.factor !== factor;
-    const unitsChanged = prev.units !== units;
-    if (!factorChanged && !unitsChanged) return;
-    const root = menuRef.current;
-    if (!root) return;
-    const rows = [...root.querySelectorAll('.ing')];
-    const anims = [];
-    rows.forEach((row, idx) => {
-      const delay = ING_STAGGER[Math.min(idx, ING_STAGGER.length - 1)];
-      const targets = unitsChanged
-        ? row.querySelectorAll('.ing-amount, .ing-metric')
-        : row.querySelectorAll('.ing-amount');
-      for (const el of targets) {
-        if (!el.animate) continue;
-        anims.push(
-          el.animate(
-            [
-              { transform: 'translateY(-3px) scale(1.05)', opacity: 0.65 },
-              { transform: 'translateY(0) scale(1)', opacity: 1 },
-            ],
-            {
-              duration: 210,
-              delay,
-              easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)',
-              fill: 'backwards',
-            },
-          ),
-        );
-      }
-    });
-    return () => anims.forEach((a) => a.cancel());
-  }, [factor, units, measure]);
-
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
@@ -551,7 +244,7 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
     </h2>
   );
   return (
-    <section ref={menuRef} className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
+    <section className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
       {measure ? (
         <>
           {normalHead}
@@ -605,88 +298,12 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
 const doneStepsBySlug = new Map();
 const stepListeners = new Set();
 
-function TicketProgress({ doneCount, totalSteps, measure }) {
-  const pillRef = useRef(null);
-  const iconRef = useRef(null);
-  const ringRef = useRef(null);
-  const prevCountRef = useRef(doneCount);
-
-  useEffect(() => {
-    const prev = prevCountRef.current;
-    prevCountRef.current = doneCount;
-    if (measure || doneCount === 0 || prev === doneCount || reducedMotion()) return;
-    const el = pillRef.current;
-    if (!el?.animate) return;
-    const allDone = doneCount === totalSteps;
-    const becameDone = allDone && prev < totalSteps;
-    const anims = [
-      el.animate(
-        prev === 0
-          ? [
-              { opacity: 0, transform: 'scale(0.92)' },
-              { opacity: 1, transform: 'scale(1)' },
-            ]
-          : becameDone
-            ? [
-                { transform: 'scale(0.94)' },
-                { transform: 'scale(1.1)', offset: 0.45 },
-                { transform: 'scale(1)' },
-              ]
-            : [
-                { transform: 'scale(1.07)' },
-                { transform: 'scale(1)' },
-              ],
-        { duration: becameDone ? 240 : 190, easing: 'cubic-bezier(0.22, 1.28, 0.36, 1)' },
-      ),
-    ];
-    if (becameDone && iconRef.current?.animate) {
-      anims.push(
-        iconRef.current.animate(
-          [
-            { opacity: 0, transform: 'scale(0.65) rotate(-14deg)' },
-            { opacity: 1, transform: 'scale(1.14) rotate(4deg)', offset: 0.55 },
-            { opacity: 1, transform: 'scale(1) rotate(0deg)' },
-          ],
-          { delay: 40, duration: 210, easing: SPRING_EASE, fill: 'backwards' },
-        ),
-      );
-    }
-    if (becameDone && ringRef.current?.animate) {
-      anims.push(
-        ringRef.current.animate(
-          [
-            { opacity: 0.72, transform: 'scale(0.95)' },
-            { opacity: 0, transform: 'scale(1.42)' },
-          ],
-          { delay: 20, duration: 340, easing: OUT_EASE, fill: 'both' },
-        ),
-      );
-    }
-    return () => anims.forEach((a) => a.cancel());
-  }, [doneCount, totalSteps, measure]);
-
+function TicketProgress({ doneCount, totalSteps }) {
   if (doneCount === 0) return null;
   const allDone = doneCount === totalSteps;
   return (
-    <span
-      ref={pillRef}
-      className={`ticket-progress${allDone ? ' ticket-progress--done' : ''}`}
-      aria-hidden="true"
-    >
-      {allDone && <span ref={ringRef} className="ticket-progress-ring" />}
-      {allDone && (
-        <svg ref={iconRef} className="ticket-progress-icon" viewBox="0 0 24 24" focusable="false">
-          <path
-            d="M5 12.5 9.5 17 19 7.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      )}
-      <span>{doneCount}/{totalSteps}</span>
+    <span className={`ticket-progress${allDone ? ' ticket-progress--done' : ''}`} aria-hidden="true">
+      {doneCount}/{totalSteps}
     </span>
   );
 }
@@ -694,7 +311,6 @@ function TicketProgress({ doneCount, totalSteps, measure }) {
 function Method({ recipe, lang, steps, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const [doneSteps, setDoneSteps] = useState(() => new Set(doneStepsBySlug.get(recipe.slug)));
-  const animsRef = useRef(new Map());
 
   useEffect(() => {
     setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
@@ -706,12 +322,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
     return () => stepListeners.delete(sync);
   }, [recipe.slug, measure]);
 
-  useEffect(() => () => {
-    for (const list of animsRef.current.values()) list.forEach((a) => a.cancel());
-    animsRef.current.clear();
-  }, []);
-
-  const toggleStep = (stepIndex, btn) => {
+  const toggleStep = (stepIndex) => {
     if (measure) return;
     const wasDone = doneSteps.has(stepIndex);
     const next = new Set(doneStepsBySlug.get(recipe.slug) || doneSteps);
@@ -719,58 +330,6 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
     else next.add(stepIndex);
     doneStepsBySlug.set(recipe.slug, next);
     for (const sync of stepListeners) sync(recipe.slug);
-
-    if (reducedMotion() || !btn?.animate) return;
-    animsRef.current.get(stepIndex)?.forEach((a) => a.cancel());
-    const created = [];
-    if (!wasDone) {
-      created.push(
-        btn.animate(
-          [
-            { transform: 'translate(2px, 2px) scale(0.96)' },
-            { transform: 'translate(2px, 2px) scale(1.09)', offset: 0.45 },
-            { transform: 'translate(2px, 2px) scale(1)' },
-          ],
-          { duration: 220, easing: SPRING_EASE },
-        ),
-      );
-      const check = btn.querySelector('.step-check');
-      if (check?.animate) {
-        created.push(
-          check.animate(
-            [
-              { opacity: 0.2, transform: 'scale(0.8) rotate(-10deg)' },
-              { opacity: 1, transform: 'scale(1.08) rotate(2deg)', offset: 0.55 },
-              { opacity: 1, transform: 'scale(1) rotate(0deg)' },
-            ],
-            { delay: 15, duration: 205, easing: SPRING_EASE, fill: 'backwards' },
-          ),
-        );
-      }
-    } else {
-      created.push(
-        btn.animate(
-          [
-            { transform: 'translate(1px, 1px) scale(0.96)' },
-            { transform: 'translate(0, 0) scale(1)' },
-          ],
-          { duration: 170, easing: OUT_EASE },
-        ),
-      );
-      const num = btn.querySelector('.step-num');
-      if (num?.animate) {
-        created.push(
-          num.animate(
-            [
-              { opacity: 0.15, transform: 'scale(0.86)' },
-              { opacity: 1, transform: 'scale(1)' },
-            ],
-            { duration: 170, easing: OUT_EASE, fill: 'backwards' },
-          ),
-        );
-      }
-    }
-    animsRef.current.set(stepIndex, created);
   };
 
   const shown = steps || r.steps.map((_, i) => i);
@@ -782,7 +341,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         <h2 className="ticket-title" lang={textLang}>
           {r.method_headline}
         </h2>
-        <TicketProgress doneCount={doneCount} totalSteps={totalSteps} measure={measure} />
+        <TicketProgress doneCount={doneCount} totalSteps={totalSteps} />
       </div>
       <p className="equipment" data-head="normal">
         <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
@@ -795,7 +354,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         {r.method_headline}
         <ContMark t={t} lang={lang} />
       </h2>
-      <TicketProgress doneCount={doneCount} totalSteps={totalSteps} measure={measure} />
+      <TicketProgress doneCount={doneCount} totalSteps={totalSteps} />
     </div>
   );
   return (
@@ -821,7 +380,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
                 className="step-dot"
                 aria-pressed={isDone}
                 aria-label={`${i + 1}. ${s.title}`}
-                onClick={(e) => toggleStep(i, e.currentTarget)}
+                onClick={() => toggleStep(i)}
               >
                 <span className="step-num" aria-hidden="true">
                   {i + 1}

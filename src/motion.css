@@ -1,7 +1,6 @@
 /* Capture only the reading surface. Controls stay live during a text swap. */
 :root {
   view-transition-name: none;
-  --ease-spring: cubic-bezier(0.32, 1.32, 0.56, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -27,15 +26,14 @@
 
 ::view-transition-new(recipe-content) {
   animation-name: content-in;
-  animation-duration: 200ms;
 }
 
 @keyframes content-out {
-  to { opacity: 0; transform: scale(0.996); }
+  to { opacity: 0; }
 }
 
 @keyframes content-in {
-  from { opacity: 0; transform: scale(0.996); }
+  from { opacity: 0; }
 }
 
 /* The measured face slides and resizes via WAAPI transform (never animating layout
@@ -88,11 +86,9 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .seg-btn[aria-pressed='false']:hover {
-    background: color-mix(in srgb, var(--ink) 7%, transparent);
-  }
-  .controls--wide .seg-btn[aria-pressed='false']:hover {
-    background: color-mix(in srgb, var(--ground) 10%, transparent);
+  .seg-btn:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
@@ -100,31 +96,29 @@
 .controls .ctl--contents,
 .book .toc-link,
 .book [role='group'] > button[aria-pressed] {
-  transition: transform 200ms var(--ease-spring);
+  transition: transform 160ms var(--ease-out);
 }
 
 .controls .ctl--turn {
-  transition: transform 200ms var(--ease-spring), opacity 200ms var(--ease-out);
+  transition: transform 160ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
 .controls button:not(:disabled):active,
 .controls .ctl--contents:active,
 .book [role='group'] > button[aria-pressed]:active {
-  transform: scale(0.95);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
+  transform: scale(0.96);
+  transition-duration: 90ms;
 }
 
 .book .toc-link:active {
-  transform: scale(0.98);
-  transition-duration: 85ms;
-  transition-timing-function: var(--ease-out);
+  transform: scale(0.985);
+  transition-duration: 90ms;
 }
 
 .controls--narrow {
   transition:
-    transform 260ms var(--ease-drawer),
-    opacity 180ms var(--ease-out);
+    transform 240ms var(--ease-drawer),
+    opacity 150ms var(--ease-out);
 }
 
 /* A static gradient paints once; only its opacity follows the moving leaf.
@@ -149,32 +143,24 @@
   .scaler-indicator,
   .scaler-label-active,
   .book .btn,
-  .book .btn-icon,
   .controls button,
   .controls .ctl,
-  .controls .arrow-icon,
   .seg-label-active,
   .book .toc-link,
   .book .toc-no,
   .book .toc-text,
   .book [role='group'] > button[aria-pressed],
   .scaler-chip,
-  .scaler-step,
-  .scaler-custom,
-  .scaler-field,
-  .scale-note { transition: none; animation: none; }
+  .scaler-step { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
-  .book .btn:is(:active, :hover) .btn-icon,
   .controls button:not(:disabled):is(:active, :hover),
-  .controls .ctl--turn:not(:disabled):is(:hover, :active) .arrow-icon,
   .controls .ctl--contents:active,
   .seg:has(> .seg-btn:active) .seg-label-active,
   .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
   .book [role='group'] > button[aria-pressed]:active,
   .scaler-chip:active,
-  .scaler-chip--custom:is(:hover, :active),
   .scaler-step:active:not(:disabled) { transform: none; }
 
   .controls--narrow { transition: opacity 150ms var(--ease-out); }
@@ -189,10 +175,6 @@
 ::view-transition-new(book-controls) {
   animation: none;
 }
-::view-transition-group(book-controls) {
-  border-radius: var(--r-pill);
-  overflow: hidden;
-}
 ::view-transition-new(book-controls) {
   mix-blend-mode: normal;
 }
@@ -204,7 +186,9 @@
    the live nav: its keyboard focus rings must remain free to paint outside. */
 @media (max-width: 959px), (max-height: 559px) {
   ::view-transition-group(book-controls) {
-    box-shadow: 4px 5px 0 var(--choc);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--choc);
   }
 }
 @media (max-width: 359px) {

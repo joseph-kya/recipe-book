@@ -102,18 +102,22 @@ test('unavailable storage does not prevent pause and resume', () => {
   stopTimer('private:1');
 });
 
-test('bell and timer audio wait for resume and reuse one WebKit context', async () => {
+test('bell, timer and bite audio wait for resume and reuse one WebKit context', async () => {
   const instances = [];
   let completeResume;
   let tones = 0;
+  let bursts = 0;
+  let filters = 0;
+  const param = () => ({ setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
   class Context {
     state = 'suspended'; currentTime = 0; sampleRate = 44100; destination = {};
     constructor() { instances.push(this); }
     resume() { return new Promise((resolve) => { completeResume = () => { this.state = 'running'; resolve(); }; }); }
-    createBuffer() { return {}; }
-    createBufferSource() { return { connect() {}, disconnect() {}, start() {} }; }
-    createOscillator() { return { frequency: {}, connect: () => ({ connect() {} }), start: () => tones++, stop() {} }; }
-    createGain() { return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }; }
+    createBuffer(ch, len) { const arr = new Float32Array(len); return { length: len, getChannelData: () => arr }; }
+    createBufferSource() { return { connect: (n) => n, disconnect() {}, start: () => bursts++, stop() {} }; }
+    createBiquadFilter() { filters++; return { frequency: param(), Q: {}, connect: (n) => n, disconnect() {} }; }
+    createOscillator() { return { frequency: param(), connect: (n) => n, start: () => tones++, stop() {} }; }
+    createGain() { return { gain: param(), connect: (n) => n, disconnect() {} }; }
   }
   globalThis.webkitAudioContext = Context;
   const session = {};
@@ -132,11 +136,19 @@ test('bell and timer audio wait for resume and reuse one WebKit context', async 
     await sound.ring();
     assert.equal(instances.length, 1);
     assert.equal(tones, 6);
+    const burstsBeforeBites = bursts;
+    await sound.bite(0);
+    await sound.bite(1);
+    await sound.bite(2);
+    assert.equal(instances.length, 1);
+    assert.equal(tones, 9);
+    assert.equal(bursts - burstsBeforeBites, 3);
+    assert.equal(filters, 6);
     instances[0].state = 'interrupted';
     const again = sound.ring();
     completeResume();
     await again;
-    assert.equal(tones, 9);
+    assert.equal(tones, 12);
   } finally {
     delete globalThis.webkitAudioContext;
     if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);

@@ -9,7 +9,7 @@ import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
 import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, pauseTimer, resumeTimer, startTimer, stopTimer } from './timer.js';
-import { ring as ringDing } from './audio.js';
+import { bite as biteSound, ring as ringDing } from './audio.js';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
 import { MUFFIN_TIER_COUNT, pickNextIndex, recordMuffinFinish, themeText, tierForFinishes } from './theme-i18n.js';
@@ -75,6 +75,7 @@ export function Cover({ lang }) {
     bitesRef.current = n;
     setBites(n);
     setFresh(false);
+    void biteSound(n - 1);
     if (n >= CUPCAKE_BITES.length) {
       const totalFinishes = recordMuffinFinish();
       const tier = tierForFinishes(totalFinishes);
@@ -106,6 +107,7 @@ export function Cover({ lang }) {
   };
   const holdStart = (e) => {
     if (e.button !== 0 || celebrating) return;
+    primeAudio();
     heldRef.current = false;
     clearTimeout(holdRef.current);
     holdRef.current = setTimeout(takeBite, 450);

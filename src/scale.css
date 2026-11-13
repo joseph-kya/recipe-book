@@ -90,9 +90,7 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
-    background-color 160ms ease,
-    color 160ms ease;
+    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1));
 }
 
 .scaler-label-active {
@@ -111,8 +109,7 @@
   opacity: 1;
 }
 
-.scaler:not([data-ready]) .scaler-chip[aria-pressed='true'],
-.scaler-chip--custom[aria-pressed='true'] {
+.scaler:not([data-ready]) .scaler-chip[aria-pressed='true'] {
   background: var(--choc);
   color: var(--cream);
 }
@@ -129,7 +126,7 @@
   }
 }
 
-/* "custom": its own chip after the presets, so the row can wrap it neatly */
+/* "custom": its own chip after the presets, morphing in-place into the stepper */
 .scaler-chip--custom {
   flex: none;
   padding: 0 var(--sp-3);
@@ -138,29 +135,28 @@
   box-shadow: 2px 2px 0 var(--choc);
 }
 
-.scaler-chip--custom[aria-pressed='true'] {
-  box-shadow: 1px 1px 0 var(--choc);
-}
-
-/* the custom stepper: − [field] +, one cream pill like the chips */
+/* the active custom stepper: choc pill framing a cream readout window */
 .scaler-custom {
   display: flex;
   flex: none;
   align-items: center;
   gap: 2px;
   padding: 2px;
-  background: var(--cream);
+  background: var(--choc);
+  color: var(--cream);
   border: 2px solid var(--choc);
   border-radius: var(--r-pill);
-  box-shadow: 2px 2px 0 var(--choc);
+  box-shadow: 1px 1px 0 var(--choc);
   transform-origin: left center;
-  animation: scaler-pop 220ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)) both;
-}
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
+    opacity 150ms var(--ease-out);
 
-@keyframes scaler-pop {
-  from {
+  @starting-style {
     opacity: 0;
-    transform: translateY(3px) scale(0.93);
+    transform: scale(0.94);
   }
 }
 
@@ -170,7 +166,7 @@
   border: 0;
   border-radius: var(--r-pill);
   background: transparent;
-  color: var(--choc);
+  color: var(--cream);
   font-family: var(--badge);
   font-size: var(--fs-l);
   line-height: 1;
@@ -178,51 +174,57 @@
   -webkit-tap-highlight-color: transparent;
   transition:
     transform 200ms var(--ease-spring, cubic-bezier(0.32, 1.32, 0.56, 1)),
-    background-color 160ms ease;
+    opacity 140ms var(--ease-out);
 }
 
 .scaler-step:active:not(:disabled) {
-  transform: scale(0.92);
+  transform: scale(0.9);
   transition-duration: 85ms;
   transition-timing-function: var(--ease-out);
 }
 
 .scaler-step:disabled {
-  opacity: 0.4;
+  opacity: 0.38;
   cursor: default;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .scaler-step:not(:disabled):hover {
-    background: color-mix(in srgb, var(--ink) 10%, transparent);
+    background: color-mix(in srgb, white 14%, transparent);
   }
 }
 
 .scaler-field {
-  width: 4rem;
+  width: 3.35rem;
   height: 2.75rem;
-  padding: 0;
+  padding: 0 4px;
   border: 0;
-  border-radius: var(--r-s);
-  background: transparent;
+  border-radius: var(--r-pill);
+  background: var(--cream);
   color: var(--choc);
   font-family: var(--badge);
   font-size: var(--fs-m);
+  font-variant-numeric: tabular-nums;
   text-align: center;
+}
+
+.scaler-field::selection {
+  background: var(--mustard);
+  color: var(--choc);
 }
 
 .scaler-field:focus-visible,
 .scaler-field:focus {
-  outline: 3px solid var(--choc);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--mustard);
+  outline: 3px solid var(--mustard);
+  outline-offset: -3px;
+  box-shadow: none;
 }
 
 .scaler-x {
   padding-right: var(--sp-2);
   font-family: var(--badge);
   font-size: var(--fs-m);
-  color: var(--choc);
+  color: var(--mustard);
 }
 
 /* only when scaled: one short line, in the card's handwritten voice */
@@ -233,6 +235,16 @@
   font-size: var(--fs-s);
   line-height: 1.3;
   color: var(--choc-soft);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -240,7 +252,8 @@
   .scaler-label-active,
   .scaler-chip,
   .scaler-step,
-  .scaler-custom {
+  .scaler-custom,
+  .scale-note {
     transition: none;
     animation: none;
   }

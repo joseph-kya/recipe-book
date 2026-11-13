@@ -159,6 +159,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
     (target, velocity = 0) => {
       if (s.anim) s.anim.stop();
       s.target = target;
+      setTurn((prev) => (prev && prev.target !== target ? { ...prev, target } : prev));
       s.anim = animateSpring({
         from: s.p,
         to: target,
@@ -239,7 +240,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
       s.pendingTarget = t > k ? 1 : 0;
       setFade(null);
       setIndex(k);
-      setTurn({ ...s.turn });
+      setTurn({ ...s.turn, target: s.pendingTarget });
     },
     [s, finishNow, runSpring, syncHash, announceFor, settle],
   );
@@ -470,7 +471,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
       d.pStart = s.p;
       d.returnTarget = s.p;
       setFade(null);
-      setTurn({ ...s.turn });
+      setTurn({ ...s.turn, target: s.target });
     } else {
       d.mode = 'edge';
       d.rb0 = unRubberband(s.rb, d.width);
@@ -632,6 +633,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   const t = ui[lang];
   const atRest = !turn;
+  const activeIndex = turn ? (turn.target === 1 ? turn.hi : turn.lo) : index;
 
   return (
     <div
@@ -692,13 +694,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
         setLang={setLang}
         units={units}
         setUnits={setUnits}
-        index={index}
+        index={activeIndex}
         last={spreads.length - 1}
         wide={wide}
         away={!wide && barAway}
         onShow={() => setBarAway(false)}
-        onPrev={() => navigate(destination() - 1)}
-        onNext={() => navigate(destination() + 1)}
+        onPrev={(instant = false) => navigate(destination() - 1, { instant })}
+        onNext={(instant = false) => navigate(destination() + 1, { instant })}
       />
       <p className="sr-only" aria-live="polite">
         {announce}

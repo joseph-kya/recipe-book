@@ -19,7 +19,7 @@
 /* Colourways. src/theme.js is the source; scripts/theme.test.mjs checks that
    these blocks match it and that every text pairing passes WCAG AA.
    html[data-theme] is set before first paint by index.html and on change by
-   the cover's picker; Cherry is the default. */
+   the cover's cupcake button; Cherry is the default. */
 
 :root {
   --primary: #c8233a;

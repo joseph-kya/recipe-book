@@ -1,20 +1,39 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
+import { spinCupcake } from './motion.js';
 import { Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
+import { nextTheme, useTheme } from './theme.js';
+import { themeText } from './theme-i18n.js';
 import Scaler from './Scaler.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
-import ThemePicker from './ThemePicker.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
 export function Cover({ lang }) {
   const t = ui[lang];
+  const themeCopy = themeText[lang] || themeText.en;
+  const [theme, setTheme] = useTheme();
+  const [announced, setAnnounced] = useState(null);
+  const spinRef = useRef(null);
+  const spinAnimRef = useRef(null);
+
+  useEffect(() => () => {
+    spinAnimRef.current?.stop();
+  }, []);
+
+  const cycleTheme = () => {
+    const next = nextTheme(theme);
+    setTheme(next);
+    setAnnounced(next);
+    spinCupcake(spinRef.current, spinAnimRef);
+  };
+
   return (
     <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
@@ -31,13 +50,24 @@ export function Cover({ lang }) {
             </span>
           ))}
         </h1>
-        <Cupcake className="cover-cupcake" />
+        <button
+          type="button"
+          className="cover-cupcake-btn"
+          aria-label={themeCopy.changeColor}
+          onClick={cycleTheme}
+        >
+          <span className="cover-cupcake-spin" ref={spinRef}>
+            <Cupcake className="cover-cupcake" />
+          </span>
+        </button>
         <div className="cover-open">
           <a className="btn btn--cream" href="#/contents">
             {t.open}
           </a>
         </div>
-        <ThemePicker lang={lang} />
+        <span className="sr-only" aria-live="polite">
+          {announced ? themeCopy.names[announced] : ''}
+        </span>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

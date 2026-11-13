@@ -1,9 +1,93 @@
 import { flushSync } from 'react-dom';
+import { makeSpring } from './spring.js';
 
 let activeTransition;
 
+const CUPCAKE_SPIN_SPRING = makeSpring({ response: 0.36, damping: 0.66 });
+const CUPCAKE_SQUASH_SPRING = makeSpring({ response: 0.33, damping: 0.62 });
+
 export const reducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// One springy 360° cupcake spin with subtle squash-and-stretch on tap.
+// Retargets from live angle/velocity on rapid taps; instant no-op under reduced motion.
+export function spinCupcake(el, stateRef) {
+  const prev = stateRef?.current;
+  if (prev?.raf) cancelAnimationFrame(prev.raf);
+  if (!el || reducedMotion()) {
+    if (el) el.style.transform = '';
+    if (stateRef) stateRef.current = null;
+    return null;
+  }
+
+  let rx = prev ? prev.rx : 0;
+  let rv = prev ? prev.rv : 0;
+  const target = (prev ? prev.target : 0) + 360;
+  let qx = prev ? prev.qx : -0.045;
+  let qv = prev ? Math.min(prev.qv + 1.8, 3.0) : 1.9;
+  let last = performance.now();
+  let stopped = false;
+  const STEP = 1 / 240;
+
+  const state = {
+    rx,
+    rv,
+    target,
+    qx,
+    qv,
+    raf: 0,
+    stop() {
+      stopped = true;
+      cancelAnimationFrame(state.raf);
+      el.style.transform = '';
+      if (stateRef?.current === state) stateRef.current = null;
+    },
+  };
+  if (stateRef) stateRef.current = state;
+
+  const paint = () => {
+    const sx = (1 - qx).toFixed(4);
+    const sy = (1 + qx).toFixed(4);
+    el.style.transform = `rotate(${rx.toFixed(2)}deg) scale(${sx}, ${sy})`;
+  };
+
+  const frame = (now) => {
+    if (stopped) return;
+    let dt = Math.min((now - last) / 1000, 1 / 20);
+    last = now;
+    while (dt > 0) {
+      const h = Math.min(STEP, dt);
+      const ra = -CUPCAKE_SPIN_SPRING.k * (rx - target) - CUPCAKE_SPIN_SPRING.c * rv;
+      rv += ra * h;
+      rx += rv * h;
+      const qa = -CUPCAKE_SQUASH_SPRING.k * qx - CUPCAKE_SQUASH_SPRING.c * qv;
+      qv += qa * h;
+      qx += qv * h;
+      dt -= h;
+    }
+    state.rx = rx;
+    state.rv = rv;
+    state.qx = qx;
+    state.qv = qv;
+
+    if (
+      Math.abs(rx - target) < 0.5 &&
+      Math.abs(rv) < 5 &&
+      Math.abs(qx) < 0.002 &&
+      Math.abs(qv) < 0.02
+    ) {
+      el.style.transform = '';
+      if (stateRef?.current === state) stateRef.current = null;
+      return;
+    }
+    paint();
+    if (!stopped) state.raf = requestAnimationFrame(frame);
+  };
+
+  paint();
+  state.raf = requestAnimationFrame(frame);
+  return state;
+}
 
 // Glide a segmented/scaler pill indicator using only compositor-friendly transform.
 // Reads the live visual rect before updating width so rapid reversals mid-flight

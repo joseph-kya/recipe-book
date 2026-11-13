@@ -48,6 +48,8 @@ export const THEME_IDS = Object.keys(THEMES);
 export const DEFAULT_THEME = 'cherry';
 const KEY = 'recipe-book:theme';
 
+export const nextTheme = (id) => THEME_IDS[(THEME_IDS.indexOf(id) + 1) % THEME_IDS.length];
+
 const current = () => {
   const t = typeof document !== 'undefined' && document.documentElement.dataset.theme;
   return THEME_IDS.includes(t) ? t : DEFAULT_THEME;

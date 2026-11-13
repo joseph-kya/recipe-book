@@ -143,6 +143,7 @@
   .scaler-indicator,
   .scaler-label-active,
   .book .btn,
+  .cover-cupcake-btn,
   .controls button,
   .controls .ctl,
   .seg-label-active,
@@ -154,6 +155,7 @@
   .scaler-step { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
+  .cover-cupcake-btn:is(:active, :hover),
   .controls button:not(:disabled):is(:active, :hover),
   .controls .ctl--contents:active,
   .seg:has(> .seg-btn:active) .seg-label-active,
@@ -210,5 +212,21 @@
   mix-blend-mode: normal;
 }
 ::view-transition-old(recipe-scaler) {
+  display: none;
+}
+
+/* Keep the cover cupcake on its own layer during a theme crossfade so it
+   spins cleanly without ghosting against the outgoing cover snapshot. */
+.book:not(.measure) .face--rest .cover-cupcake-btn {
+  view-transition-name: cover-cupcake;
+}
+::view-transition-group(cover-cupcake),
+::view-transition-new(cover-cupcake) {
+  animation: none;
+}
+::view-transition-new(cover-cupcake) {
+  mix-blend-mode: normal;
+}
+::view-transition-old(cover-cupcake) {
   display: none;
 }

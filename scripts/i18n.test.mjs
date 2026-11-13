@@ -80,6 +80,8 @@ test('German chrome covers every English UI and theme key', () => {
   }
   keys(ui.en, ui.de);
   keys(themeText.en, themeText.de);
+  assert.equal(themeText.en.changeColor, 'Change color');
+  assert.equal(themeText.de.changeColor, 'Farbe wechseln');
   assert.equal(ui.de.languageEnglish, 'Englisch');
   assert.match(ui.de.photoAlt('Zimtschnecken', 'Scientifically Sweet'), /Foto von/);
   assert.match(ui.de.pdfLabel('Zimtschnecken'), /herunterladen/);

@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { THEMES, THEME_IDS } from '../src/theme.js';
+import { THEMES, THEME_IDS, nextTheme } from '../src/theme.js';
 
 const lum = (hex) => {
   const [r, g, b] = hex.replace('#', '').match(/../g).map((h) => {
@@ -71,4 +71,20 @@ test('the CSS carries the same values as src/theme.js', () => {
       assert.match(block, new RegExp(`${kebab(k)}:\\s*${v};`, 'i'), `${id} ${kebab(k)} should be ${v}`);
     }
   }
+});
+
+test('nextTheme cycles through every colourway and wraps around', () => {
+  assert.deepEqual(THEME_IDS, ['cherry', 'blueplate', 'soda', 'butterscotch']);
+  assert.equal(nextTheme('cherry'), 'blueplate');
+  assert.equal(nextTheme('blueplate'), 'soda');
+  assert.equal(nextTheme('soda'), 'butterscotch');
+  assert.equal(nextTheme('butterscotch'), 'cherry');
+  assert.equal(nextTheme('unknown'), 'cherry');
+});
+
+test('cover uses the cupcake button instead of colour-dot swatches', () => {
+  const pages = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(pages, /ThemePicker|theme-swatch|theme-picker/);
+  assert.match(pages, /className="cover-cupcake-btn"/);
+  assert.match(pages, /aria-label=\{themeCopy\.changeColor\}/);
 });

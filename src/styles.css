@@ -582,6 +582,39 @@ button {
   font-size: min(13.5vw, 4.75rem);
 }
 
+.cover-cupcake-btn {
+  --ring-in: var(--choc);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: var(--sp-1);
+  border: 0;
+  border-radius: var(--r-l);
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms var(--ease-out);
+}
+
+.cover-cupcake-btn:active {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-cupcake-btn:hover {
+    transform: scale(1.05);
+  }
+  .cover-cupcake-btn:active {
+    transform: scale(0.95);
+  }
+}
+
+.cover-cupcake-spin {
+  display: block;
+}
+
 .cover-cupcake {
   width: 6.5rem;
   transform: rotate(-8deg);

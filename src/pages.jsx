@@ -26,7 +26,7 @@ let contentsLeftEntered = false;
 export function Cover({ lang }) {
   const t = ui[lang];
   const rootRef = useRef(null);
-  const popAnimRef = useRef(null);
+  const popAnimRef = useRef([]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -68,17 +68,28 @@ export function Cover({ lang }) {
   const popCupcake = () => {
     if (prefersReducedMotion()) return;
     const cupcake = rootRef.current?.querySelector('.cover-cupcake');
+    const ring = rootRef.current?.querySelector('.cover-cupcake-ring');
     if (!cupcake?.animate) return;
-    popAnimRef.current?.cancel();
-    popAnimRef.current = cupcake.animate(
-      [
-        { transform: 'rotate(-8deg) scale(1)' },
-        { transform: 'rotate(5deg) scale(1.12)', offset: 0.38 },
-        { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
-        { transform: 'rotate(-8deg) scale(1)' },
-      ],
-      { duration: 380, easing: OUT_EASE }
-    );
+    popAnimRef.current.forEach((a) => a?.cancel());
+    popAnimRef.current = [
+      cupcake.animate(
+        [
+          { transform: 'rotate(-8deg) scale(1)' },
+          { transform: 'rotate(5deg) scale(1.12)', offset: 0.38 },
+          { transform: 'rotate(-10deg) scale(0.98)', offset: 0.72 },
+          { transform: 'rotate(-8deg) scale(1)' },
+        ],
+        { duration: 380, easing: OUT_EASE }
+      ),
+      ring?.animate(
+        [
+          { transform: 'scale(1) rotate(0deg)', opacity: 0.9 },
+          { transform: 'scale(1.18) rotate(14deg)', opacity: 0.35, offset: 0.45 },
+          { transform: 'scale(1) rotate(18deg)', opacity: 0.9 },
+        ],
+        { duration: 420, easing: OUT_EASE }
+      ),
+    ];
   };
 
   return (
@@ -98,11 +109,22 @@ export function Cover({ lang }) {
           ))}
         </h1>
         <span className="cover-cupcake-hit" onClick={popCupcake}>
+          <span className="cover-cupcake-ring" aria-hidden="true" />
           <Cupcake className="cover-cupcake" />
         </span>
         <div className="cover-open">
           <a className="btn btn--cream" href="#/contents">
-            {t.open}
+            <span>{t.open}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="btn-icon">
+              <path
+                d="M9 5l7 7-7 7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </a>
         </div>
         <ThemePicker lang={lang} />
@@ -118,7 +140,7 @@ export function Cover({ lang }) {
 function ContentsLeft({ lang }) {
   const t = ui[lang];
   const rootRef = useRef(null);
-  const popAnimRef = useRef(null);
+  const popAnimRef = useRef([]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -212,6 +234,11 @@ function ContentsList({ lang, withTitle = false }) {
                     <span className="toc-title" lang={textLang}>
                       {text.title}
                     </span>
+                    {text.tagline && (
+                      <span className="toc-tagline" lang={textLang}>
+                        {text.tagline}
+                      </span>
+                    )}
                   </span>
                   <span className="toc-arrow" aria-hidden="true">
                     ›

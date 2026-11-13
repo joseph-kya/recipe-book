@@ -524,21 +524,36 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--cream) 12%, transparent), transparent 62%), var(--cherry);
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--cream) 16%, transparent), transparent 60%),
+    var(--cherry);
   color: var(--cream);
 }
 
 .cover::before {
   content: '';
   position: absolute;
-  inset: 24px var(--sp-3);
-  border: 2px solid color-mix(in srgb, var(--cream) 28%, transparent);
+  inset: 22px var(--sp-3);
+  border: 2px solid color-mix(in srgb, var(--cream) 36%, transparent);
   border-radius: var(--r-m);
   pointer-events: none;
 }
 
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 28px calc(var(--sp-3) + 6px);
+  border: 1.5px dashed color-mix(in srgb, var(--cream) 26%, transparent);
+  border-radius: calc(var(--r-m) - 4px);
+  pointer-events: none;
+}
+
 .book--wide .cover::before {
-  inset: 28px var(--sp-4);
+  inset: 26px var(--sp-4);
+}
+
+.book--wide .cover::after {
+  inset: 32px calc(var(--sp-4) + 6px);
 }
 
 .cover .checkers {
@@ -599,14 +614,32 @@ button {
 }
 
 .cover-cupcake-hit {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--sp-2);
+  border-radius: 50%;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
+.cover-cupcake-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--cream) 42%, transparent);
+  opacity: 0.9;
+  pointer-events: none;
+  transition:
+    transform 240ms cubic-bezier(0.32, 1.32, 0.56, 1),
+    opacity 180ms var(--ease-out);
+}
+
 .cover-cupcake {
+  position: relative;
   width: 6.5rem;
   transform: rotate(-8deg);
   filter: drop-shadow(3px 4px 0 var(--choc));
@@ -619,12 +652,24 @@ button {
   transition-timing-function: var(--ease-out);
 }
 
+.cover-cupcake-hit:active .cover-cupcake-ring {
+  transform: scale(0.94);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-out);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .cover-cupcake-hit:hover .cover-cupcake {
-    transform: rotate(-3deg) scale(1.07);
+    transform: rotate(-2deg) scale(1.07);
+  }
+  .cover-cupcake-hit:hover .cover-cupcake-ring {
+    transform: rotate(12deg) scale(1.06);
   }
   .cover-cupcake-hit:active .cover-cupcake {
     transform: rotate(-11deg) scale(0.94);
+  }
+  .cover-cupcake-hit:active .cover-cupcake-ring {
+    transform: scale(0.94);
   }
 }
 
@@ -642,6 +687,7 @@ button {
 }
 
 .cover-open .btn {
+  min-width: 9.25rem;
   transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -659,7 +705,7 @@ button {
   letter-spacing: -0.015em;
   color: var(--cherry);
   text-shadow: 2px 2px 0 color-mix(in srgb, var(--choc) 14%, transparent);
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-4);
 }
 
 .contents .contents-title::after {
@@ -742,14 +788,21 @@ button {
   .contents-medallion:hover {
     transform: rotate(3deg) scale(1.04);
   }
+  .contents-medallion:hover .contents-cupcake {
+    transform: rotate(-4deg) scale(1.03);
+  }
   .contents-medallion:active {
     transform: scale(0.96);
+  }
+  .contents-medallion:active .contents-cupcake {
+    transform: rotate(-10deg) scale(0.96);
   }
 }
 
 .contents-cupcake {
   width: 76%;
   transform: rotate(-8deg);
+  transition: transform 240ms cubic-bezier(0.32, 1.32, 0.56, 1);
 }
 
 .book--wide .contents {
@@ -763,34 +816,42 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-block: var(--sp-6);
+  padding-block: var(--sp-5);
 }
 
-
-.book--wide .toc-link {
-  min-height: max(3.5rem, calc(var(--ph) * 0.125));
-  padding: calc(var(--ph) * 0.018) var(--sp-2);
+.toc {
+  margin-right: 6px;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper);
+  border: var(--rule) solid var(--choc);
+  border-radius: var(--r-l);
+  box-shadow: 6px 6px 0 var(--choc);
 }
 
 .toc li + li {
-  border-top: 2px dotted color-mix(in srgb, var(--ink) 50%, transparent);
+  border-top: 2px dotted color-mix(in srgb, var(--ink) 38%, transparent);
 }
 
-/* The whole row is the link: badge, title and trailing cue, at least 44px tall. */
+/* The whole row is the link: badge, title + handwritten tagline and cue, >=44px tall. */
 .toc-link {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: 3rem 1fr auto;
-  gap: var(--sp-4);
+  grid-template-columns: 2.875rem 1fr auto;
+  gap: var(--sp-3);
   align-items: center;
   min-height: 4.5rem;
   padding: var(--sp-3) var(--sp-2);
-  margin: 0 calc(var(--sp-2) * -1);
+  margin: 2px 0;
   border-radius: var(--r-m);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform 180ms var(--ease-out);
+}
+
+.book--wide .toc-link {
+  min-height: max(3.75rem, calc(var(--ph) * 0.115));
+  padding: clamp(0.5rem, calc(var(--ph) * 0.015), 0.9rem) var(--sp-2);
 }
 
 /* Hover/press plate animates only opacity + transform (no background-color paint). */
@@ -799,10 +860,10 @@ button {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  border: 2px solid color-mix(in srgb, var(--choc) 18%, transparent);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border: 2px solid color-mix(in srgb, var(--choc) 20%, transparent);
   opacity: 0;
-  transform: scale(0.98);
+  transform: scale(0.985);
   z-index: -1;
   pointer-events: none;
   transition:
@@ -818,15 +879,15 @@ button {
 .toc-link:active::before {
   opacity: 1;
   transform: scale(0.99);
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
   transition-duration: 90ms;
 }
 
 .toc-no {
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 2.875rem;
+  height: 2.875rem;
   border-radius: 50%;
   background: var(--mustard);
   border: var(--rule) solid var(--choc);
@@ -837,13 +898,15 @@ button {
 }
 
 .toc-link:active .toc-no {
-  transform: translate(1px, 1px) scale(0.95);
+  transform: translate(1px, 1px) scale(0.94);
   transition-duration: 90ms;
   transition-timing-function: var(--ease-out);
 }
 
 .toc-text {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -854,12 +917,25 @@ button {
   line-height: 1.15;
 }
 
+.toc-tagline {
+  display: block;
+  font-family: var(--hand);
+  font-size: var(--fs-s);
+  line-height: 1.28;
+  color: var(--choc-soft);
+}
+
 .toc-arrow {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--choc) 8%, transparent);
   font-family: var(--badge);
-  font-size: var(--fs-xl);
+  font-size: var(--fs-l);
   line-height: 1;
-  color: color-mix(in srgb, var(--choc) 55%, transparent);
-  padding-inline-end: var(--sp-1);
+  color: var(--choc-soft);
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -879,10 +955,36 @@ button {
   }
   .toc-link:hover .toc-arrow {
     color: var(--cherry-ink);
-    transform: translateX(4px);
+    background: color-mix(in srgb, var(--cream) 75%, transparent);
+    transform: translateX(3px);
   }
   .toc-link:active {
     transform: scale(0.985);
+  }
+}
+
+@media (max-height: 700px) {
+  .book--wide .toc-link {
+    min-height: 3.1rem;
+    padding-block: 0.35rem;
+  }
+  .book--wide .toc-no {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--fs-m);
+  }
+  .book--wide .toc-title {
+    font-size: var(--fs-m);
+  }
+  .book--wide .toc-tagline {
+    font-size: var(--fs-xs);
+    line-height: 1.2;
+  }
+}
+
+@media (max-height: 600px) {
+  .book--wide .toc-tagline {
+    display: none;
   }
 }
 
@@ -1933,7 +2035,9 @@ button {
   .btn,
   .btn-icon,
   .cover-cupcake,
+  .cover-cupcake-ring,
   .contents-medallion,
+  .contents-cupcake,
   .toc-link,
   .toc-link::before,
   .toc-no,
@@ -1943,9 +2047,11 @@ button {
   .arrow-icon {
     transition-duration: 0ms;
   }
-  .cover-cupcake-hit:is(:hover, :active) .cover-cupcake {
+  .cover-cupcake-hit:is(:hover, :active) .cover-cupcake,
+  .contents-medallion:is(:hover, :active) .contents-cupcake {
     transform: rotate(-8deg);
   }
+  .cover-cupcake-hit:is(:hover, :active) .cover-cupcake-ring,
   .contents-medallion:is(:hover, :active),
   .toc-link:is(:hover, :active),
   .toc-link:is(:hover, :active)::before,

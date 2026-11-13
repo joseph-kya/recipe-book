@@ -326,7 +326,7 @@ function ContentsList({ lang, withTitle = false }) {
    can run across several printed-book pages. `measure` renders every head
    variant for the paginator to clone from. */
 
-function useRecipeText(recipe, lang) {
+export function useRecipeText(recipe, lang) {
   const { text, lang: textLang, fallback } = textFor(recipe, lang);
   return { r: text, textLang, fallback, t: ui[lang] };
 }
@@ -636,6 +636,42 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
 const doneStepsBySlug = new Map();
 const stepListeners = new Set();
 
+export function getDoneSteps(slug) {
+  return new Set(doneStepsBySlug.get(slug));
+}
+
+export function setStepDone(slug, stepIndex, done = true) {
+  const next = new Set(doneStepsBySlug.get(slug));
+  if (done) next.add(stepIndex);
+  else next.delete(stepIndex);
+  doneStepsBySlug.set(slug, next);
+  for (const sync of stepListeners) sync(slug);
+}
+
+export function toggleStepDone(slug, stepIndex) {
+  const next = new Set(doneStepsBySlug.get(slug));
+  if (next.has(stepIndex)) next.delete(stepIndex);
+  else next.add(stepIndex);
+  doneStepsBySlug.set(slug, next);
+  for (const sync of stepListeners) sync(slug);
+}
+
+export function useDoneSteps(slug, disabled = false) {
+  const [doneSteps, setDoneSteps] = useState(() => getDoneSteps(slug));
+
+  useEffect(() => {
+    setDoneSteps(getDoneSteps(slug));
+    if (disabled) return;
+    const sync = (changedSlug) => {
+      if (changedSlug === slug) setDoneSteps(getDoneSteps(slug));
+    };
+    stepListeners.add(sync);
+    return () => stepListeners.delete(sync);
+  }, [slug, disabled]);
+
+  return doneSteps;
+}
+
 function TicketProgress({ doneCount, totalSteps }) {
   if (doneCount === 0) return null;
   const allDone = doneCount === totalSteps;
@@ -649,7 +685,7 @@ function TicketProgress({ doneCount, totalSteps }) {
 // A step that names a time gets a countdown: tap to start, pause or resume.
 // Timers keep running across page turns and ring when they hit zero.
 // −/+ move it a minute at a time, before or while it runs.
-function StepTimer({ timerKey, duration, t, measure }) {
+export function StepTimer({ timerKey, duration, t, measure = false }) {
   const { state, remaining, seconds } = useTimer(measure ? null : timerKey, duration.seconds);
   const toggle = () => {
     if (measure) return;
@@ -714,28 +750,33 @@ function StepTimer({ timerKey, duration, t, measure }) {
   );
 }
 
-function Method({ recipe, lang, steps, cont = false, measure = false }) {
-  const { r, textLang, t } = useRecipeText(recipe, lang);
-  const [doneSteps, setDoneSteps] = useState(() => new Set(doneStepsBySlug.get(recipe.slug)));
+export function StepBody({ recipe, step, stepIndex, t, measure = false, headingLevel = 3 }) {
+  const duration = parseDuration(step.text, step.cue);
+  const Heading = headingLevel === 2 ? 'h2' : 'h3';
+  return (
+    <div className="step-body">
+      <Heading className="step-title">{step.title}</Heading>
+      <p>{step.text}</p>
+      {step.cue && (
+        <p className="cue">
+          <span aria-hidden="true">→ </span>
+          {step.cue}
+        </p>
+      )}
+      {duration && (
+        <StepTimer timerKey={`${recipe.slug}:${stepIndex}`} duration={duration} t={t} measure={measure} />
+      )}
+    </div>
+  );
+}
 
-  useEffect(() => {
-    setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
-    if (measure) return;
-    const sync = (slug) => {
-      if (slug === recipe.slug) setDoneSteps(new Set(doneStepsBySlug.get(recipe.slug)));
-    };
-    stepListeners.add(sync);
-    return () => stepListeners.delete(sync);
-  }, [recipe.slug, measure]);
+function Method({ recipe, lang, steps, cont = false, measure = false, onStartCooking }) {
+  const { r, textLang, t } = useRecipeText(recipe, lang);
+  const doneSteps = useDoneSteps(recipe.slug, measure);
 
   const toggleStep = (stepIndex) => {
     if (measure) return;
-    const wasDone = doneSteps.has(stepIndex);
-    const next = new Set(doneStepsBySlug.get(recipe.slug) || doneSteps);
-    if (wasDone) next.delete(stepIndex);
-    else next.add(stepIndex);
-    doneStepsBySlug.set(recipe.slug, next);
-    for (const sync of stepListeners) sync(recipe.slug);
+    toggleStepDone(recipe.slug, stepIndex);
   };
 
   const shown = steps || r.steps.map((_, i) => i);
@@ -752,6 +793,24 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
       <p className="equipment" data-head="normal">
         <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
       </p>
+      <div className="ticket-cook" data-head="normal">
+        <button
+          type="button"
+          className="btn btn--cherry cook-start-btn"
+          onClick={measure ? undefined : (e) => onStartCooking?.(recipe, e.currentTarget)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="btn-icon">
+            <path
+              d="M7 5.5v13l11-6.5-11-6.5Z"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {t.startCooking}
+        </button>
+      </div>
     </>
   );
   const contHead = (
@@ -779,7 +838,6 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         {shown.map((i) => {
           const s = r.steps[i];
           const isDone = doneSteps.has(i);
-          const duration = parseDuration(s.text, s.cue);
           return (
             <li className={`step${isDone ? ' step--done' : ''}`} key={i} data-step={i}>
               <button
@@ -803,19 +861,7 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
                   />
                 </svg>
               </button>
-              <div className="step-body">
-                <h3 className="step-title">{s.title}</h3>
-                <p>{s.text}</p>
-                {s.cue && (
-                  <p className="cue">
-                    <span aria-hidden="true">→ </span>
-                    {s.cue}
-                  </p>
-                )}
-                {duration && (
-                  <StepTimer timerKey={`${recipe.slug}:${i}`} duration={duration} t={t} measure={measure} />
-                )}
-              </div>
+              <StepBody recipe={recipe} step={s} stepIndex={i} t={t} measure={measure} />
             </li>
           );
         })}
@@ -893,14 +939,14 @@ function Credits({ recipe, lang, units }) {
 /* ---------- Recipe pages ---------- */
 
 // Phone: the whole recipe on one scrolling page.
-function RecipeFull({ recipe, lang, units }) {
+function RecipeFull({ recipe, lang, units, onStartCooking }) {
   return (
     <div className="page-body recipe">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
         <RecipeHero recipe={recipe} lang={lang} />
         <Ingredients recipe={recipe} lang={lang} units={units} />
-        <Method recipe={recipe} lang={lang} />
+        <Method recipe={recipe} lang={lang} onStartCooking={onStartCooking} />
         <Tips recipe={recipe} lang={lang} />
         <Macros recipe={recipe} lang={lang} />
         <Credits recipe={recipe} lang={lang} units={units} />
@@ -912,7 +958,7 @@ function RecipeFull({ recipe, lang, units }) {
 }
 
 // Wide: one fixed-height book page holding the segments the paginator gave it.
-function RecipePage({ recipe, lang, units, segs, first }) {
+function RecipePage({ recipe, lang, units, segs, first, onStartCooking }) {
   const closing = !first && isClosing(segs);
   // the photo, when the paginator found room for it, stands in for the cupcake
   const hasPhoto = segs.some((seg) => seg.kind === 'photo');
@@ -925,7 +971,7 @@ function RecipePage({ recipe, lang, units, segs, first }) {
           const props = { recipe, lang };
           if (seg.kind === 'hero') return <RecipeHero key={seg.kind} {...props} />;
           if (seg.kind === 'menu') return <Ingredients key={seg.kind} {...props} units={units} items={seg.items} cont={seg.cont} />;
-          if (seg.kind === 'ticket') return <Method key={seg.kind} {...props} steps={seg.items} cont={seg.cont} />;
+          if (seg.kind === 'ticket') return <Method key={seg.kind} {...props} steps={seg.items} cont={seg.cont} onStartCooking={onStartCooking} />;
           if (seg.kind === 'tips') return <Tips key={seg.kind} {...props} items={seg.items} />;
           if (seg.kind === 'ornament') return hasPhoto ? null : <Cupcake key={seg.kind} className="closing-cupcake" />;
           if (seg.kind === 'macros') return <Macros key={seg.kind} {...props} />;
@@ -968,7 +1014,7 @@ export function RecipeMeasure({ recipe, lang, units }) {
 
 /* ---------- One face of the book from its layout descriptor ---------- */
 
-export function renderFace(desc, lang, units) {
+export function renderFace(desc, lang, units, onStartCooking) {
   if (!desc) return null;
   switch (desc.type) {
     case 'cover':
@@ -978,12 +1024,12 @@ export function renderFace(desc, lang, units) {
     case 'contentsList':
       return <ContentsList lang={lang} withTitle={desc.withTitle} />;
     case 'recipeFull':
-      return <RecipeFull recipe={desc.recipe} lang={lang} units={units} />;
+      return <RecipeFull recipe={desc.recipe} lang={lang} units={units} onStartCooking={onStartCooking} />;
     case 'recipePage':
       return desc.segs ? (
-        <RecipePage recipe={desc.recipe} lang={lang} units={units} segs={desc.segs} first={desc.first} />
+        <RecipePage recipe={desc.recipe} lang={lang} units={units} segs={desc.segs} first={desc.first} onStartCooking={onStartCooking} />
       ) : (
-        <RecipeFull recipe={desc.recipe} lang={lang} units={units} />
+        <RecipeFull recipe={desc.recipe} lang={lang} units={units} onStartCooking={onStartCooking} />
       );
     case 'blank':
       return <BlankPage />;

@@ -5,22 +5,10 @@ import { createTapHandlers, flipLabel } from './motion.js';
 const AWAKE_KEY = 'recipe-book:awake';
 const canWake = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
-// Holds a screen wake lock while on, re-acquiring it when the tab comes back.
-function useWakeLock() {
-  const [on, setOn] = useState(() => {
-    try {
-      return canWake && localStorage.getItem(AWAKE_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
+// Holds a screen wake lock while active, re-acquiring it when the tab comes back.
+export function useHoldWakeLock(active) {
   useEffect(() => {
-    try {
-      localStorage.setItem(AWAKE_KEY, on ? '1' : '0');
-    } catch {
-      /* private mode */
-    }
-    if (!on || !canWake) return;
+    if (!active || !canWake) return;
     let lock = null;
     let disposed = false;
     const acquire = async () => {
@@ -41,7 +29,25 @@ function useWakeLock() {
       document.removeEventListener('visibilitychange', acquire);
       lock?.release().catch(() => {});
     };
+  }, [active]);
+}
+
+function useWakeLock() {
+  const [on, setOn] = useState(() => {
+    try {
+      return canWake && localStorage.getItem(AWAKE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(AWAKE_KEY, on ? '1' : '0');
+    } catch {
+      /* private mode */
+    }
   }, [on]);
+  useHoldWakeLock(on);
   return [on, setOn];
 }
 

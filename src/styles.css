@@ -1492,7 +1492,9 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem;
+  min-height: 44px;
+  min-width: 44px;
+  flex-shrink: 0;
   border: 0;
   background: none;
   color: inherit;
@@ -1503,8 +1505,8 @@ button {
 }
 
 .step-timer-main {
-  gap: var(--sp-2);
-  padding: 0 var(--sp-3);
+  gap: var(--sp-1);
+  padding: 0 var(--sp-2);
 }
 
 .step-timer-adj {
@@ -1535,6 +1537,10 @@ button {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
+}
+
+.step-timer--paused {
+  background: var(--paper);
 }
 
 .step-timer--running {
@@ -1721,33 +1727,34 @@ button {
   gap: 0.35rem;
 }
 
-/* keep-awake: a flat round toggle, filled while the screen is held on */
-.ctl--awake {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  border: var(--rule) solid transparent;
-  color: inherit;
-  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
+/* Keep the sun with the method, leaving all seven navigation targets room. */
+.method-tools {
+  min-height: 44px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
 }
-
-.ctl--awake[aria-pressed='true'] {
-  background: var(--mustard);
-  border-color: var(--choc);
+.method-tools .equipment { flex: 1; min-width: 0; }
+.awake {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--r-s);
+  background: transparent;
   color: var(--choc);
+  cursor: pointer;
+  transition: transform var(--press) var(--ease-out);
 }
-
-.ctl--awake:active {
-  transform: scale(0.94);
-}
-
+.awake-icon { width: 22px; height: 22px; }
+.awake[aria-pressed='true'] { background: var(--mustard); }
+.awake:active { transform: scale(0.94); }
 @media (prefers-reduced-motion: reduce) {
-  .ctl--awake {
-    transition: none;
-  }
-  .ctl--awake:active {
-    transform: none;
-  }
+  .awake { transition: none; }
+  .awake:active { transform: none; }
 }
 
 .ctl--contents {

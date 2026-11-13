@@ -7,7 +7,9 @@ import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
-import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, startTimer, stopTimer } from './timer.js';
+import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, pauseTimer, resumeTimer, startTimer, stopTimer } from './timer.js';
+import { ring as ringDing } from './audio.js';
+import { AwakeToggle } from './Awake.jsx';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
 import { themeText } from './theme-i18n.js';
@@ -124,6 +126,7 @@ function ServiceBell({ lang }) {
   useEffect(() => () => clearTimeout(holdRef.current), []);
 
   const ding = () => {
+    void ringDing();
     if (heldRef.current) {
       heldRef.current = false;
       return;
@@ -437,15 +440,18 @@ function TicketProgress({ doneCount, totalSteps }) {
   );
 }
 
-// A step that names a time gets a countdown: tap to start, tap again to stop.
+// A step that names a time gets a countdown: tap to start, pause or resume.
 // Timers keep running across page turns and ring when they hit zero.
 // −/+ move it a minute at a time, before or while it runs.
 function StepTimer({ timerKey, duration, t, measure }) {
   const { state, remaining, seconds } = useTimer(measure ? null : timerKey, duration.seconds);
   const toggle = () => {
     if (measure) return;
-    if (state === 'running') stopTimer(timerKey);
-    else if (state === 'done') stopTimer(timerKey);
+    if (state === 'running') pauseTimer(timerKey);
+    else if (state === 'paused') {
+      primeAudio();
+      resumeTimer(timerKey);
+    } else if (state === 'done') stopTimer(timerKey);
     else {
       primeAudio();
       startTimer(timerKey, seconds);
@@ -457,14 +463,16 @@ function StepTimer({ timerKey, duration, t, measure }) {
     adjustTimer(timerKey, delta, duration.seconds);
   };
   const idleText = seconds === duration.seconds ? duration.label : formatMinutes(seconds);
-  const text = state === 'running' ? formatRemaining(remaining) : state === 'done' ? t.timerDone : idleText;
+  const text = state === 'running' || state === 'paused' ? formatRemaining(remaining) : state === 'done' ? t.timerDone : idleText;
   const label =
     state === 'running'
-      ? t.timerStop(formatRemaining(remaining))
-      : state === 'done'
-        ? t.timerReset
-        : t.timerStart(idleText);
-  const canLess = state === 'running' ? remaining > MIN_SECONDS : seconds > MIN_SECONDS;
+      ? t.timerPause(formatRemaining(remaining))
+      : state === 'paused'
+        ? t.timerResume(formatRemaining(remaining))
+        : state === 'done'
+          ? t.timerReset
+          : t.timerStart(idleText);
+  const canLess = state === 'running' || state === 'paused' ? remaining > MIN_SECONDS : seconds > MIN_SECONDS;
   return (
     <div className={`step-timer step-timer--${state}`} role="group" aria-label={t.timer}>
       {state !== 'done' && (
@@ -484,10 +492,16 @@ function StepTimer({ timerKey, duration, t, measure }) {
           <path d="M12 9v4.5l3 2M9 3h6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
         </svg>
         <span className="step-timer-text">{text}</span>
+        {(state === 'running' || state === 'paused') && <span aria-hidden="true">{state === 'paused' ? '▶' : 'Ⅱ'}</span>}
       </button>
       {state !== 'done' && (
         <button type="button" className="step-timer-adj" aria-label={t.timerMore} onClick={() => nudge(STEP_SECONDS)}>
           <span aria-hidden="true">+</span>
+        </button>
+      )}
+      {state === 'paused' && (
+        <button type="button" className="step-timer-adj" aria-label={t.timerClear} onClick={() => stopTimer(timerKey)}>
+          <span aria-hidden="true">×</span>
         </button>
       )}
     </div>
@@ -529,9 +543,10 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         </h2>
         <TicketProgress doneCount={doneCount} totalSteps={totalSteps} />
       </div>
-      <p className="equipment" data-head="normal">
-        <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
-      </p>
+      <div className="method-tools" data-head="normal">
+        <p className="equipment"><b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span></p>
+        {measure ? <span className="awake" aria-hidden="true" /> : <AwakeToggle label={t.keepAwake} />}
+      </div>
     </>
   );
   const contHead = (

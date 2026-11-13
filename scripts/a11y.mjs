@@ -51,10 +51,16 @@ try {
           if (['serious', 'critical'].includes(violation.impact)) failures++;
         }
       }
-      // Verify live language changes and pushState navigation, beyond deep links.
+      // Verify live language, units and wake-lock controls, plus pushState navigation.
       const otherLang = lang === 'en' ? 'de' : 'en';
-      await page.locator(`.lang-btn[lang="${otherLang}"]`).click();
+      await page.locator('.lang-btn').click();
       await checkDocument(page, 'cinnamon-rolls', otherLang);
+      await page.locator('.unit-btn').click();
+      assert.equal(await page.locator('.unit-btn').innerText(), 'g');
+      await page.locator('.ctl--awake').click();
+      assert.equal(await page.locator('.ctl--awake').getAttribute('aria-pressed'), 'true');
+      await page.locator('.ctl--awake').click();
+      assert.equal(await page.locator('.ctl--awake').getAttribute('aria-pressed'), 'false');
       await page.goto(new URL('#/', baseURL).href);
       await checkDocument(page, '', otherLang);
       await page.waitForTimeout(500);

@@ -1727,34 +1727,34 @@ button {
   gap: 0.35rem;
 }
 
-/* Keep the sun with the method, leaving all seven navigation targets room. */
-.method-tools {
-  min-height: 44px;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-2);
+/* keep-awake: a flat round toggle, filled while the screen is held on */
+.ctl--awake {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: var(--rule) solid transparent;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
 }
-.method-tools .equipment { flex: 1; min-width: 0; }
-.awake {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: var(--r-s);
-  background: transparent;
+
+.ctl--awake .ctl-icon {
+  display: block;
+  transition: transform 200ms var(--ease-out);
+}
+
+.ctl--awake[aria-pressed='true'] {
+  background: var(--mustard);
+  border-color: var(--choc);
   color: var(--choc);
-  cursor: pointer;
-  transition: transform var(--press) var(--ease-out);
 }
-.awake-icon { width: 22px; height: 22px; }
-.awake[aria-pressed='true'] { background: var(--mustard); }
-.awake:active { transform: scale(0.94); }
-@media (prefers-reduced-motion: reduce) {
-  .awake { transition: none; }
-  .awake:active { transform: none; }
+
+.ctl--awake[aria-pressed='true'] .ctl-icon {
+  transform: rotate(45deg);
+}
+
+.ctl--awake:active {
+  transform: scale(0.94);
 }
 
 .ctl--contents {
@@ -1787,43 +1787,28 @@ button {
   text-align: center;
 }
 
-.seg {
-  --seg-inset: 3px;
-  position: relative;
-  isolation: isolate;
-  flex: 0 0 auto;
-  display: flex;
-  padding: var(--seg-inset);
-  border: 2px solid var(--choc);
-  border-radius: var(--r-pill);
-}
-
-.seg-btn {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  white-space: nowrap;
+/* Compact tap toggles for language (EN/DE) and units (cups/g). */
+.ctl--toggle {
   min-width: 3rem;
   min-height: 3rem;
   padding: 0 12px;
-  border: 0;
+  border: 2px solid var(--choc);
   border-radius: var(--r-pill);
-  background: none;
   font-family: var(--badge);
   font-size: var(--fs-s);
-  cursor: pointer;
-  transition: transform var(--press) var(--ease-out);
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
 }
 
-.seg-btn:active {
-  transform: scale(0.95);
+.ctl--toggle:active {
+  transform: scale(0.94);
 }
 
-.seg:not([data-ready]) .seg-btn[aria-pressed='true'] {
-  background: var(--choc);
-  color: var(--cream);
+.ctl-flip {
+  display: inline-block;
+  transform-origin: center center;
 }
 
 /* Phone: an opaque menu-card keeps contrast independent of scrolling content. */
@@ -1886,46 +1871,35 @@ button {
 }
 
 .controls--narrow .ctl-middle {
-  gap: var(--sp-1);
+  gap: var(--sp-2);
 }
 
-/* Seven real targets fit at 360px, including the wider German units label.
-   Only the phone variants tighten; desktop segments remain content-sized. */
+/* Six real targets fit comfortably at 360px and 390px in both EN and DE. */
 @media (min-width: 360px) and (max-width: 479px) {
   .controls--narrow {
     left: 0.375rem;
     right: 0.375rem;
-    gap: 2px;
+    gap: var(--sp-1);
     padding: var(--sp-1);
   }
-  .controls--narrow .ctl-middle { gap: 2px; }
+  .controls--narrow .ctl-middle {
+    gap: 0.375rem;
+  }
   .controls--narrow .ctl {
     min-width: 44px;
     min-height: 44px;
+  }
+  .controls--narrow :is(.ctl--turn, .ctl--contents, .ctl--awake) {
     width: 44px;
     height: 44px;
   }
-  .controls--narrow .seg-btn {
-    min-width: 44px;
-    min-height: 44px;
+  .controls--narrow .ctl--toggle {
+    padding: 0 11px;
     font-size: 0.875rem;
   }
 }
 
-/* Tighter bar padding leaves 10px around labels even at 360px, while the
-   Contents icon and every other target retain their full 44px hit area. */
-@media (min-width: 360px) and (max-width: 389px) {
-  .controls--narrow {
-    left: 2px;
-    right: 2px;
-    gap: 0;
-    padding: 4px 2px;
-  }
-  .controls--narrow .ctl-middle { gap: 0; }
-  .controls--narrow .seg-btn { padding-inline: 10px; }
-}
-
-/* Compact phones: arrows and Contents on one row, the two toggles on the next. */
+/* Compact phones: arrows and Contents on one row, toggles and sun on the next. */
 @media (max-width: 359px) {
   :root { --bar-clear: 10.5rem; }
   .controls--narrow {
@@ -1942,14 +1916,14 @@ button {
   }
   .controls--narrow .ctl--contents {
     order: 2;
-    /* takes the rest of row one, so both toggles share row two */
+    /* takes the rest of row one, so toggles and sun share row two */
     flex: 1 0 calc(100% - 7rem);
     width: auto;
   }
   .controls--narrow .ctl--next {
     order: 3;
   }
-  .controls--narrow .seg {
+  .controls--narrow :is(.ctl--toggle, .ctl--awake) {
     order: 4;
   }
 }
@@ -1959,7 +1933,7 @@ button {
   color: var(--cream);
 }
 
-.controls--wide :is(.ctl--contents, .ctl-count, .seg-btn) {
+.controls--wide :is(.ctl--contents, .ctl-count, .ctl--toggle) {
   font-family: var(--badge);
   font-size: var(--fs-s);
   font-weight: 400;
@@ -2014,13 +1988,9 @@ button {
   }
 }
 
-.controls--wide .seg {
+.controls--wide .ctl--toggle {
   border-color: var(--cream);
-}
-
-.controls--wide .seg:not([data-ready]) .seg-btn[aria-pressed='true'] {
-  background: var(--cream);
-  color: var(--choc);
+  color: var(--cream);
 }
 
 .controls--wide .ctl--contents[aria-current='page'] {
@@ -2045,8 +2015,11 @@ button {
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
   }
-  .controls--narrow .ctl--contents:not([aria-current='page']):hover {
-    background-color: color-mix(in srgb, var(--ink) 10%, transparent);
+  .controls--wide :is(.ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
+    background-color: color-mix(in srgb, var(--ground) 14%, transparent);
+  }
+  .controls--narrow :is(.ctl--contents:not([aria-current='page']), .ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
+    background-color: color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
 
@@ -2059,8 +2032,14 @@ button {
   }
   .btn,
   .toc-text,
-  .ctl--turn {
+  .ctl--turn,
+  .ctl--toggle,
+  .ctl--awake,
+  .ctl--awake .ctl-icon {
     transition-duration: 0ms;
+  }
+  .ctl--awake[aria-pressed='true'] .ctl-icon {
+    transform: none;
   }
   .toc-link:is(:hover, :active),
   .toc-link:is(:hover, :active) .toc-no {

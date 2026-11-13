@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-// Keep-screen-on toggle. Lives in the method header, out of the bottom bar.
+// Keep-screen-on toggle. Lives in the bottom control bar.
 const AWAKE_KEY = 'recipe-book:awake';
 const canWake = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
@@ -48,8 +48,8 @@ export function AwakeToggle({ label }) {
   const [on, setOn] = useWakeLock();
   if (!canWake) return null;
   return (
-    <button type="button" className="awake" aria-pressed={on} aria-label={label} title={label} onClick={() => setOn((v) => !v)}>
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="awake-icon">
+    <button type="button" className="ctl ctl--awake" aria-pressed={on} aria-label={label} title={label} onClick={() => setOn((v) => !v)}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="ctl-icon">
         <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2.8" />
         <path
           d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"

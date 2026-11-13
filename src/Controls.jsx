@@ -1,63 +1,34 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { ui } from './i18n.js';
-import { slidePill } from './motion.js';
+import { flipLabel } from './motion.js';
 import { Arrow } from './ornaments.jsx';
+import { AwakeToggle } from './Awake.jsx';
 
-function Segments({ label, options, value, onChange }) {
-  const ref = useRef(null);
+function TapToggle({ value, text, label, className, onToggle }) {
+  const labelRef = useRef(null);
   const animRef = useRef(null);
   const prevValue = useRef(value);
-  const labels = options.map((option) => option.short).join('|');
 
   useEffect(() => () => animRef.current?.cancel(), []);
 
   useLayoutEffect(() => {
-    const group = ref.current;
-    const buttons = [...group.querySelectorAll('button')];
-    const indicator = group.querySelector('.seg-indicator');
-    let disposed = false;
-    const animate = prevValue.current !== value;
+    if (prevValue.current === value) return;
     prevValue.current = value;
-
-    const measure = (shouldAnimate = false) => {
-      if (disposed) return;
-      const active = group.querySelector('[aria-pressed="true"]');
-      slidePill(group, indicator, active, { animate: shouldAnimate, animRef });
-    };
-    measure(animate);
-    const observer = new ResizeObserver(() => measure(false));
-    observer.observe(group);
-    buttons.forEach((button) => observer.observe(button));
-    // Observe intrinsic label widths as well as the responsive group width.
-    const onFonts = () => measure(false);
-    document.fonts?.ready.then(onFonts);
-    document.fonts?.addEventListener('loadingdone', onFonts);
-    return () => {
-      disposed = true;
-      observer.disconnect();
-      document.fonts?.removeEventListener('loadingdone', onFonts);
-    };
-  }, [value, labels]);
+    flipLabel(labelRef.current, { animRef });
+  }, [value]);
 
   return (
-    <div ref={ref} className="seg" role="group" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={`seg-btn ${option.className}`}
-          aria-pressed={value === option.value}
-          onClick={() => onChange(option.value)}
-          lang={option.lang}
-        >
-          {option.short}
-          <span className="seg-label-active" aria-hidden="true">{option.short}</span>
-          <span className="sr-only"> – {option.long}</span>
-        </button>
-      ))}
-      {/* Keep text unscaled; its active-colour copy crossfades over the pill. */}
-      <span className="seg-indicator" aria-hidden="true" />
-    </div>
+    <button
+      type="button"
+      className={`ctl ctl--toggle ${className}`}
+      aria-label={label}
+      title={label}
+      onClick={onToggle}
+    >
+      <span ref={labelRef} className="ctl-flip">
+        {text}
+      </span>
+    </button>
   );
 }
 
@@ -97,14 +68,21 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
         <span className="ctl-count" aria-hidden="true">
           {index + 1}/{last + 1}
         </span>
-        <Segments label={t.language} value={lang} onChange={setLang} options={[
-          { value: 'en', short: 'EN', long: t.languageEnglish, lang: 'en', className: 'lang-btn' },
-          { value: 'de', short: 'DE', long: t.languageGerman, lang: 'de', className: 'lang-btn' },
-        ]} />
-        <Segments label={t.units} value={units} onChange={setUnits} options={[
-          { value: 'cups', short: t.unitCups, long: t.unitCupsLong, className: 'unit-btn' },
-          { value: 'metric', short: t.unitMetric, long: t.unitMetricLong, className: 'unit-btn' },
-        ]} />
+        <TapToggle
+          value={lang}
+          text={lang.toUpperCase()}
+          label={t.switchLang}
+          className="lang-btn"
+          onToggle={() => setLang(lang === 'en' ? 'de' : 'en')}
+        />
+        <TapToggle
+          value={units}
+          text={units === 'cups' ? t.unitCups : t.unitMetric}
+          label={units === 'cups' ? t.switchToMetric : t.switchToCups}
+          className="unit-btn"
+          onToggle={() => setUnits(units === 'cups' ? 'metric' : 'cups')}
+        />
+        <AwakeToggle label={t.keepAwake} />
       </div>
 
       <button

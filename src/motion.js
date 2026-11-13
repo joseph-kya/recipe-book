@@ -159,6 +159,33 @@ export function slidePill(group, indicator, active, { animate = false, animRef }
   }
 }
 
+// Flip a compact toggle's text on tap like a diner menu flap.
+// Cancels any in-flight flip on rapid taps and stays static under reduced motion.
+export function flipLabel(el, { animRef } = {}) {
+  animRef?.current?.cancel();
+  if (animRef) animRef.current = null;
+  if (!el || reducedMotion() || !el.animate) return null;
+
+  const anim = el.animate(
+    [
+      { opacity: 0.25, transform: 'perspective(160px) rotateX(-78deg) translateY(-2px)' },
+      { opacity: 1, transform: 'perspective(160px) rotateX(10deg) translateY(0)', offset: 0.72 },
+      { opacity: 1, transform: 'perspective(160px) rotateX(0deg) translateY(0)' },
+    ],
+    {
+      duration: 240,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+    },
+  );
+  if (animRef) {
+    animRef.current = anim;
+    anim.finished.catch(() => {}).finally(() => {
+      if (animRef.current === anim) animRef.current = null;
+    });
+  }
+  return anim;
+}
+
 // Called only for a page's first live entry, after any parent page turn.
 // Animate wrappers so press transforms and the cupcake's printed tilt stay free.
 export function enterPage(root, kind) {

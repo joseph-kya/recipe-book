@@ -9,7 +9,6 @@ import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, pauseTimer, resumeTimer, startTimer, stopTimer } from './timer.js';
 import { ring as ringDing } from './audio.js';
-import { AwakeToggle } from './Awake.jsx';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
 import { themeText } from './theme-i18n.js';
@@ -543,10 +542,9 @@ function Method({ recipe, lang, steps, cont = false, measure = false }) {
         </h2>
         <TicketProgress doneCount={doneCount} totalSteps={totalSteps} />
       </div>
-      <div className="method-tools" data-head="normal">
-        <p className="equipment"><b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span></p>
-        {measure ? <span className="awake" aria-hidden="true" /> : <AwakeToggle label={t.keepAwake} />}
-      </div>
+      <p className="equipment" data-head="normal">
+        <b>{t.equipment}:</b> <span lang={textLang}>{r.equipment}</span>
+      </p>
     </>
   );
   const contHead = (

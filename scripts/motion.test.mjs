@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { animateSpring, makeSpring, rubberband, unRubberband, rubberbandVelocity } from '../src/spring.js';
-import { enterPage, spinCupcake } from '../src/motion.js';
+import { enterPage, flipLabel, spinCupcake } from '../src/motion.js';
 
 function mockGlobal(t, name, value) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
@@ -162,4 +162,31 @@ test('cupcake spin switches instantly under reduced motion', (t) => {
   assert.equal(spinCupcake(el, ref), null);
   assert.equal(requested, false);
   assert.equal(el.style.transform, '');
+});
+
+test('flipLabel animates with transform/opacity only, cancels on rapid tap, and stays static under reduced motion', (t) => {
+  motionEnvironment(t, false);
+  const calls = [];
+  const el = {
+    animate(frames, options) {
+      const anim = { frames, options, finished: Promise.resolve(), cancelled: false, cancel() { this.cancelled = true; } };
+      calls.push(anim);
+      return anim;
+    },
+  };
+  const ref = { current: null };
+  const first = flipLabel(el, { animRef: ref });
+  assert.equal(calls.length, 1);
+  assert.ok(first.options.duration <= 260);
+  assert.ok(first.frames.every((f) => Object.keys(f).every((k) => ['transform', 'opacity', 'offset'].includes(k))));
+  assert.ok(first.frames.some((f) => /rotateX/.test(f.transform)));
+
+  const second = flipLabel(el, { animRef: ref });
+  assert.equal(first.cancelled, true);
+  assert.equal(ref.current, second);
+
+  motionEnvironment(t, true);
+  assert.equal(flipLabel(el, { animRef: ref }), null);
+  assert.equal(second.cancelled, true);
+  assert.equal(calls.length, 2);
 });

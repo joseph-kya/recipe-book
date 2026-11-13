@@ -83,6 +83,13 @@ test('German chrome covers every English UI and theme key', () => {
   assert.equal(themeText.en.changeColor, 'Change color');
   assert.equal(themeText.de.changeColor, 'Farbe wechseln');
   assert.equal(ui.de.languageEnglish, 'Englisch');
+  assert.match(ui.en.switchLang, /\bEN\b/);
+  assert.match(ui.de.switchLang, /\bDE\b/);
+  assert.match(ui.en.switchToMetric, /\bcups\b/);
+  assert.match(ui.en.switchToCups, /\bg\b/);
+  assert.match(ui.de.switchToMetric, /\bTassen\b/);
+  assert.match(ui.de.switchToCups, /\bg\b/);
+  assert.ok(ui.en.keepAwake.trim().length > 0 && ui.de.keepAwake.trim().length > 0);
   assert.match(ui.de.photoAlt('Zimtschnecken', 'Scientifically Sweet'), /Foto von/);
   assert.match(ui.de.pdfLabel('Zimtschnecken'), /herunterladen/);
   assert.match(ui.de.pageOf(2, 5), /Seite 2 von 5/);

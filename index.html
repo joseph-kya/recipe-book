@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Joseph's Recipe Book</title>
+    <meta name="description" content="Joseph's baking recipes in a book you flip through: cups and spoons first, grams beside, a printable sheet for every recipe." />
+    <meta name="theme-color" content="#fff4df" />
+    <!-- The saved colourway, before first paint (src/theme.js keeps it in step). -->
+    <script>
+      try {
+        var grounds = { blueplate: '#fbf4e4', soda: '#fdf5e6', butterscotch: '#fff2e0', paper: '#ffffff', ink: '#181818' };
+        var saved = localStorage.getItem('recipe-book:theme');
+        if (grounds[saved]) {
+          document.documentElement.setAttribute('data-theme', saved);
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', grounds[saved]);
+        }
+      } catch (e) {}
+    </script>
+    <meta property="og:title" content="Joseph's Recipe Book" />
+    <meta property="og:description" content="Joseph's baking recipes, cups and spoons first." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <!-- The two display faces paint the first screen: fetch them with the HTML. -->
+    <link rel="preload" href="./assets/Shrikhand-Regular-BEzUR0JX.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./assets/LilitaOne-Regular-D7nIaIyc.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" crossorigin src="./assets/index-CBZlAnAn.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CijAa0Wk.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

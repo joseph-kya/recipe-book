@@ -11,15 +11,15 @@ import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining,
 import { ring as ringDing } from './audio.js';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
-import { pickNextIndex, themeText } from './theme-i18n.js';
+import { MUFFIN_TIER_COUNT, pickNextIndex, recordMuffinFinish, themeText, tierForFinishes } from './theme-i18n.js';
 import Scaler from './Scaler.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 
 /* ---------- Cover: the title, an ornament, Open ---------- */
 
-let lastGoneIndex = -1;
-let lastReplyIndex = -1;
+const lastGoneByTier = Array(MUFFIN_TIER_COUNT).fill(-1);
+const lastReplyByTier = Array(MUFFIN_TIER_COUNT).fill(-1);
 
 export function Cover({ lang }) {
   const t = ui[lang];
@@ -34,6 +34,7 @@ export function Cover({ lang }) {
   const [fresh, setFresh] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [replying, setReplying] = useState(false);
+  const [finishTier, setFinishTier] = useState(0);
   const [goneIndex, setGoneIndex] = useState(0);
   const [replyIndex, setReplyIndex] = useState(0);
   const holdRef = useRef(0);
@@ -74,22 +75,27 @@ export function Cover({ lang }) {
     setBites(n);
     setFresh(false);
     if (n >= CUPCAKE_BITES.length) {
-      const nextGone = pickNextIndex(copyRef.current.allGone.length, lastGoneIndex);
-      lastGoneIndex = nextGone;
+      const totalFinishes = recordMuffinFinish();
+      const tier = tierForFinishes(totalFinishes);
+      const tierPool = copyRef.current.tiers[tier];
+      const nextGone = pickNextIndex(tierPool.allGone.length, lastGoneByTier[tier]);
+      lastGoneByTier[tier] = nextGone;
+      setFinishTier(tier);
       setGoneIndex(nextGone);
       setCelebrating(true);
-      setAnnounced(copyRef.current.allGone[nextGone]);
+      setAnnounced(tierPool.allGone[nextGone]);
       clearTimeout(respawnRef.current);
       respawnRef.current = setTimeout(() => {
-        const nextReply = pickNextIndex(copyRef.current.muffinReply.length, lastReplyIndex);
-        lastReplyIndex = nextReply;
+        const replyPool = copyRef.current.tiers[tier].muffinReply;
+        const nextReply = pickNextIndex(replyPool.length, lastReplyByTier[tier]);
+        lastReplyByTier[tier] = nextReply;
         setReplyIndex(nextReply);
         setCelebrating(false);
         bitesRef.current = 0;
         setBites(0);
         setFresh(true);
         setReplying(true);
-        setAnnounced(`${copyRef.current.bites[CUPCAKE_BITES.length]} ${copyRef.current.muffinReply[nextReply]}`);
+        setAnnounced(`${copyRef.current.bites[CUPCAKE_BITES.length]} ${replyPool[nextReply]}`);
         clearTimeout(replyTimerRef.current);
         replyTimerRef.current = setTimeout(() => setReplying(false), 2400);
       }, 1350);
@@ -152,12 +158,12 @@ export function Cover({ lang }) {
           {celebrating && (
             <div className="cover-cupcake-celebrate" aria-hidden="true">
               <CupcakeCrumbs />
-              <span className="cover-cupcake-gone">{themeCopy.allGone[goneIndex]}</span>
+              <span className="cover-cupcake-gone">{themeCopy.tiers[finishTier].allGone[goneIndex]}</span>
             </div>
           )}
           {replying && (
             <span className="cover-cupcake-reply" aria-hidden="true">
-              {themeCopy.muffinReply[replyIndex]}
+              {themeCopy.tiers[finishTier].muffinReply[replyIndex]}
             </span>
           )}
         </div>

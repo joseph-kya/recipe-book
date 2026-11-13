@@ -4,7 +4,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { textFor, amountsCreditFor } from '../src/recipe-i18n.js';
 import { scaleAmount, offeredFactors } from '../src/scale.js';
 import { ui } from '../src/i18n.js';
-import { pickNextIndex, themeText } from '../src/theme-i18n.js';
+import {
+  MUFFIN_FINISHES_KEY,
+  MUFFIN_TIER_COUNT,
+  getMuffinFinishes,
+  pickNextIndex,
+  recordMuffinFinish,
+  themeText,
+  tierForFinishes,
+} from '../src/theme-i18n.js';
 
 const directory = new URL('../content/recipes/', import.meta.url);
 const recipes = readdirSync(directory).filter((file) => file.endsWith('.json'))
@@ -84,22 +92,46 @@ test('German chrome covers every English UI and theme key', () => {
   assert.equal(themeText.de.changeColor, 'Farbe wechseln');
   assert.equal(themeText.en.bites.length, 4);
   assert.equal(themeText.de.bites.length, 4);
-  assert.equal(themeText.en.allGone.length, 20);
-  assert.equal(themeText.de.allGone.length, 20);
-  assert.equal(new Set(themeText.en.allGone).size, 20);
-  assert.equal(new Set(themeText.de.allGone).size, 20);
-  for (let i = 0; i < 20; i++) {
-    assert.ok(themeText.en.allGone[i].trim().length > 0 && themeText.de.allGone[i].trim().length > 0);
-    assert.notEqual(themeText.en.allGone[i], themeText.de.allGone[i]);
+  assert.equal(themeText.en.tiers.length, MUFFIN_TIER_COUNT);
+  assert.equal(themeText.de.tiers.length, MUFFIN_TIER_COUNT);
+  assert.equal(MUFFIN_TIER_COUNT, 10);
+
+  const allEnGone = new Set();
+  const allDeGone = new Set();
+  const allEnReply = new Set();
+  const allDeReply = new Set();
+
+  for (let tierIndex = 0; tierIndex < MUFFIN_TIER_COUNT; tierIndex++) {
+    const enTier = themeText.en.tiers[tierIndex];
+    const deTier = themeText.de.tiers[tierIndex];
+    assert.ok(enTier.allGone.length >= 5, `tier ${tierIndex} needs at least 5 finish lines`);
+    assert.equal(deTier.allGone.length, enTier.allGone.length, `tier ${tierIndex} finish line count mismatch`);
+    assert.ok(enTier.muffinReply.length >= 5, `tier ${tierIndex} needs at least 5 muffin replies`);
+    assert.equal(deTier.muffinReply.length, enTier.muffinReply.length, `tier ${tierIndex} reply count mismatch`);
+
+    for (let i = 0; i < enTier.allGone.length; i++) {
+      const en = enTier.allGone[i];
+      const de = deTier.allGone[i];
+      assert.ok(en.trim().length > 0 && de.trim().length > 0);
+      assert.notEqual(en, de);
+      assert.ok(!allEnGone.has(en), `duplicate EN finish line: ${en}`);
+      assert.ok(!allDeGone.has(de), `duplicate DE finish line: ${de}`);
+      allEnGone.add(en);
+      allDeGone.add(de);
+    }
+
+    for (let i = 0; i < enTier.muffinReply.length; i++) {
+      const en = enTier.muffinReply[i];
+      const de = deTier.muffinReply[i];
+      assert.ok(en.trim().length > 0 && de.trim().length > 0);
+      assert.notEqual(en, de);
+      assert.ok(!allEnReply.has(en), `duplicate EN muffin reply: ${en}`);
+      assert.ok(!allDeReply.has(de), `duplicate DE muffin reply: ${de}`);
+      allEnReply.add(en);
+      allDeReply.add(de);
+    }
   }
-  assert.equal(themeText.en.muffinReply.length, 20);
-  assert.equal(themeText.de.muffinReply.length, 20);
-  assert.equal(new Set(themeText.en.muffinReply).size, 20);
-  assert.equal(new Set(themeText.de.muffinReply).size, 20);
-  for (let i = 0; i < 20; i++) {
-    assert.ok(themeText.en.muffinReply[i].trim().length > 0 && themeText.de.muffinReply[i].trim().length > 0);
-    assert.notEqual(themeText.en.muffinReply[i], themeText.de.muffinReply[i]);
-  }
+
   assert.equal(ui.de.languageEnglish, 'Englisch');
   assert.match(ui.en.switchLang, /\bEN\b/);
   assert.match(ui.de.switchLang, /\bDE\b/);
@@ -113,23 +145,71 @@ test('German chrome covers every English UI and theme key', () => {
   assert.match(ui.de.pageOf(2, 5), /Seite 2 von 5/);
 });
 
+test('tierForFinishes escalates every 5 finishes up to tier 10 (45-50+)', () => {
+  for (const [finishes, expectedTier] of [
+    [0, 0], [1, 0], [4, 0],
+    [5, 1], [9, 1],
+    [10, 2], [14, 2],
+    [15, 3], [19, 3],
+    [20, 4], [24, 4],
+    [25, 5], [29, 5],
+    [30, 6], [34, 6],
+    [35, 7], [39, 7],
+    [40, 8], [44, 8],
+    [45, 9], [49, 9], [50, 9], [99, 9],
+    [-3, 0], [NaN, 0],
+  ]) {
+    assert.equal(tierForFinishes(finishes), expectedTier, `finishes=${finishes}`);
+  }
+});
+
+test('muffin finishes persist in localStorage and handle blocked or corrupt storage', () => {
+  const store = new Map();
+  const mockStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+  };
+
+  assert.equal(getMuffinFinishes(mockStorage), 0);
+  for (let expected = 1; expected <= 50; expected++) {
+    assert.equal(recordMuffinFinish(mockStorage), expected);
+    assert.equal(store.get(MUFFIN_FINISHES_KEY), String(expected));
+    assert.equal(getMuffinFinishes(mockStorage), expected);
+  }
+  assert.equal(tierForFinishes(getMuffinFinishes(mockStorage)), 9);
+
+  store.set(MUFFIN_FINISHES_KEY, 'not-a-number');
+  assert.equal(getMuffinFinishes(mockStorage), 0);
+  store.set(MUFFIN_FINISHES_KEY, '-7');
+  assert.equal(getMuffinFinishes(mockStorage), 0);
+
+  const blockedStorage = {
+    getItem: () => { throw new Error('blocked'); },
+    setItem: () => { throw new Error('blocked'); },
+  };
+  const firstFallback = recordMuffinFinish(blockedStorage);
+  assert.equal(recordMuffinFinish(blockedStorage), firstFallback + 1);
+});
+
 test('pickNextIndex picks across the full pool and never repeats twice in a row', () => {
   assert.equal(pickNextIndex(1, 0, () => 0.5), 0);
-  const firstPool = new Set();
-  for (let i = 0; i < 20; i++) {
-    firstPool.add(pickNextIndex(20, -1, () => i / 20));
-  }
-  assert.equal(firstPool.size, 20);
-
-  for (let last = 0; last < 20; last++) {
-    const seen = new Set();
-    for (let step = 0; step < 19; step++) {
-      const next = pickNextIndex(20, last, () => step / 19);
-      assert.notEqual(next, last);
-      assert.ok(next >= 0 && next < 20);
-      seen.add(next);
+  for (const size of [5, 20]) {
+    const firstPool = new Set();
+    for (let i = 0; i < size; i++) {
+      firstPool.add(pickNextIndex(size, -1, () => i / size));
     }
-    assert.equal(seen.size, 19);
-    assert.notEqual(pickNextIndex(20, last, () => 0.999999), last);
+    assert.equal(firstPool.size, size);
+
+    for (let last = 0; last < size; last++) {
+      const seen = new Set();
+      for (let step = 0; step < size - 1; step++) {
+        const next = pickNextIndex(size, last, () => step / (size - 1));
+        assert.notEqual(next, last);
+        assert.ok(next >= 0 && next < size);
+        seen.add(next);
+      }
+      assert.equal(seen.size, size - 1);
+      assert.notEqual(pickNextIndex(size, last, () => 0.999999), last);
+    }
   }
 });

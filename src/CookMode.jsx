@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useHoldWakeLock } from './Awake.jsx';
 import { reducedMotion } from './motion.js';
-import { Arrow, Checkers, Cupcake } from './ornaments.jsx';
-import { StepBody, setStepDone, toggleStepDone, useDoneSteps, useRecipeText } from './pages.jsx';
+import { Arrow, Checkers, CloseIcon, Cupcake } from './ornaments.jsx';
+import { StepBody, StepDot, setStepDone, toggleStepDone, useDoneSteps, useRecipeText } from './pages.jsx';
 import { animateSpring, makeSpring, rubberband } from './spring.js';
 
 const REBOUND_SPRING = makeSpring({ response: 0.28, damping: 0.88 });
@@ -281,10 +281,9 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     reboundCard(d.offset, v);
   };
 
-  const progressRatio = totalSteps > 0 ? Math.min(1, (isDoneScreen ? totalSteps : stepIndex + 1) / totalSteps) : 1;
-  const announcement = isDoneScreen
-    ? t.cookDoneTitle
-    : `${t.cookStepOf(stepIndex + 1, totalSteps)}: ${currentStep.title}`;
+  const progressRatio = totalSteps > 0 ? Math.min(1, (stepIndex + 1) / totalSteps) : 1;
+  const stepLabel = !isDoneScreen ? t.cookStepOf(stepIndex + 1, totalSteps) : '';
+  const announcement = isDoneScreen ? t.cookDoneTitle : `${stepLabel}: ${currentStep.title}`;
 
   return (
     <div
@@ -302,11 +301,7 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
           <h1 className="cook-recipe-title" lang={textLang}>
             {r.title}
           </h1>
-          {!isDoneScreen && (
-            <span className="cook-progress">
-              {t.cookStepOf(stepIndex + 1, totalSteps)}
-            </span>
-          )}
+          {!isDoneScreen && <span className="cook-progress">{stepLabel}</span>}
         </div>
         <button
           type="button"
@@ -315,15 +310,7 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
           title={t.cookClose}
           onClick={onClose}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="cook-close-icon">
-            <path
-              d="M6 6l12 12M18 6 6 18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
+          <CloseIcon className="cook-close-icon" />
         </button>
       </header>
 
@@ -350,29 +337,14 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
         ) : (
           <div ref={cardRef} className={`cook-card${isCurrentDone ? ' cook-card--step-done' : ''}`} lang={textLang}>
             <div className="cook-card-top">
-              <button
-                type="button"
-                className="step-dot"
-                aria-pressed={isCurrentDone}
-                aria-label={t.cookToggleDone(stepIndex + 1, isCurrentDone)}
-                onClick={() => toggleStepDone(recipe.slug, stepIndex)}
-              >
-                <span className="step-num" aria-hidden="true">
-                  {stepIndex + 1}
-                </span>
-                <svg className="step-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path
-                    d="M5 12.5 9.5 17 19 7.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+              <StepDot
+                stepIndex={stepIndex}
+                done={isCurrentDone}
+                label={t.cookToggleDone(stepIndex + 1, isCurrentDone)}
+                onToggle={() => toggleStepDone(recipe.slug, stepIndex)}
+              />
               <span className="cook-card-count" aria-hidden="true">
-                {t.cookStepOf(stepIndex + 1, totalSteps)}
+                {stepLabel}
               </span>
             </div>
             <StepBody recipe={recipe} step={currentStep} stepIndex={stepIndex} t={t} headingLevel={2} />

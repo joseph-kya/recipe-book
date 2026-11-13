@@ -5,7 +5,7 @@ import { ui } from '../src/i18n.js';
 
 const cookSrc = readFileSync(new URL('../src/CookMode.jsx', import.meta.url), 'utf8');
 const awakeSrc = readFileSync(new URL('../src/Awake.jsx', import.meta.url), 'utf8');
-const pagesSrc = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
+const methodSrc = readFileSync(new URL('../src/Method.jsx', import.meta.url), 'utf8');
 const bookSrc = readFileSync(new URL('../src/Book.jsx', import.meta.url), 'utf8');
 const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 
@@ -45,7 +45,7 @@ test('Cook mode UI strings exist in both English and German', () => {
 test('CookMode reuses WakeLock, StepBody/StepTimer, step tick-off state, and motion helpers', () => {
   assert.match(awakeSrc, /export function useHoldWakeLock\(/);
   assert.match(cookSrc, /useHoldWakeLock\(true\)/);
-  assert.match(cookSrc, /import \{ StepBody, setStepDone, toggleStepDone, useDoneSteps, useRecipeText \} from '\.\/pages\.jsx';/);
+  assert.match(cookSrc, /import \{ StepBody, StepDot, setStepDone, toggleStepDone, useDoneSteps, useRecipeText \} from '\.\/pages\.jsx';/);
   assert.match(cookSrc, /<StepBody recipe=\{recipe\} step=\{currentStep\} stepIndex=\{stepIndex\} t=\{t\} headingLevel=\{2\} \/>/);
   assert.match(cookSrc, /setStepDone\(recipe\.slug, cur, true\)/);
   assert.match(cookSrc, /toggleStepDone\(recipe\.slug, stepIndex\)/);
@@ -68,8 +68,8 @@ test('CookMode implements accessible modal dialog, keyboard, and swipe navigatio
 });
 
 test('Method button fits pagination measurement and Book isolates background while Cook mode is open', () => {
-  assert.match(pagesSrc, /<div className="ticket-cook" data-head="normal">[\s\S]*className="btn btn--cherry cook-start-btn"/);
-  assert.match(pagesSrc, /onClick=\{measure \? undefined : \(e\) => onStartCooking\?\.\(recipe, e\.currentTarget\)\}/);
+  assert.match(methodSrc, /<div className="ticket-cook" data-head="normal">[\s\S]*className="btn btn--cherry cook-start-btn"/);
+  assert.match(methodSrc, /onClick=\{measure \? undefined : \(e\) => onStartCooking\?\.\(recipe, e\.currentTarget\)\}/);
   assert.match(bookSrc, /inert=\{cookOpen\}/);
   assert.match(bookSrc, /aria-hidden=\{cookOpen \|\| undefined\}/);
   assert.match(bookSrc, /if \(s\.cookOpen\) return;/);

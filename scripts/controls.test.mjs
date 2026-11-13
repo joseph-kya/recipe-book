@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const controlsSrc = readFileSync(new URL('../src/Controls.jsx', import.meta.url), 'utf8');
 const pagesSrc = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
+const ingredientsSrc = readFileSync(new URL('../src/Ingredients.jsx', import.meta.url), 'utf8');
 const awakeSrc = readFileSync(new URL('../src/Awake.jsx', import.meta.url), 'utf8');
 const bookSrc = readFileSync(new URL('../src/Book.jsx', import.meta.url), 'utf8');
 const i18nSrc = readFileSync(new URL('../src/i18n.js', import.meta.url), 'utf8');
@@ -68,7 +69,7 @@ test('language and unit toggles commit immediately without blocking ViewTransiti
   assert.match(bookSrc, /\[wide,\s*lang,\s*scales,\s*runPaginate,\s*s\]/);
   assert.match(bookSrc, /planCache:\s*new Map\(\)/);
   assert.match(bookSrc, /swapContent\(restFaces,\s*kind,\s*swapAnimRef\)/);
-  assert.match(pagesSrc, /className="ing-how-sizer"\s+aria-hidden="true"/);
+  assert.match(ingredientsSrc, /className="ing-how-sizer"\s+aria-hidden="true"/);
   assert.match(pagesSrc, /key=\{seg\.kind\}/);
   assert.match(paginateSrc, /function measureRecipe\(/);
   assert.match(stylesCss, /overflow-anchor:\s*none;/);

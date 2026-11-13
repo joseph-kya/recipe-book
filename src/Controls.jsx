@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { nextLang, ui } from './i18n.js';
 import { createTapHandlers, flipLabel } from './motion.js';
-import { Arrow } from './ornaments.jsx';
+import { Arrow, ListIcon } from './ornaments.jsx';
 import { AwakeToggle } from './Awake.jsx';
 
 function TapToggle({ value, text, label, className, onToggle }) {
@@ -81,15 +81,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
       <div className="ctl-middle">
         <a className="ctl ctl--contents" href="#/contents" aria-current={index === 1 ? 'page' : undefined}>
           {/* phones show the list icon; the word stays the link's name */}
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="ctl-icon">
-            <path
-              d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.8"
-              strokeLinecap="round"
-            />
-          </svg>
+          <ListIcon className="ctl-icon" />
           <span className="ctl-label">{t.toContents}</span>
         </a>
         <span className="ctl-count" aria-hidden="true">

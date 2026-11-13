@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { spinCupcake } from './motion.js';
@@ -7,6 +7,7 @@ import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
+import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
 import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, pauseTimer, resumeTimer, startTimer, stopTimer } from './timer.js';
 import { ring as ringDing } from './audio.js';
 import { useTimer } from './useTimer.js';
@@ -419,9 +420,49 @@ function Amount({ text }) {
 
 const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
 
+const EMPTY_GOT = new Set();
+const noopSubscribe = () => () => {};
+
+function useGotItems(slug, measure = false) {
+  return useSyncExternalStore(
+    measure ? noopSubscribe : subscribeShopping,
+    () => (measure ? EMPTY_GOT : getGotItems(slug)),
+  );
+}
+
 function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
+  const gotItems = useGotItems(recipe.slug, measure);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef(0);
+
+  useEffect(() => {
+    setCopied(false);
+    clearTimeout(copyTimerRef.current);
+  }, [recipe.slug]);
+
+  useEffect(() => () => clearTimeout(copyTimerRef.current), []);
+
+  const totalCount = r.groups.reduce((sum, g) => sum + g.items.length, 0);
+  const gotCount = r.groups.reduce(
+    (sum, g, gi) => sum + g.items.filter((_, ii) => gotItems.has(`${gi}:${ii}`)).length,
+    0,
+  );
+  const remainingCount = totalCount - gotCount;
+
+  const handleCopy = async () => {
+    if (measure) return;
+    const text = formatShoppingList({ recipe, lang, units, factor, custom, gotItems });
+    if (!text) return;
+    const result = await shareOrCopyList({ title: r.title, text });
+    if (result === 'copied' || result === 'shared') {
+      setCopied(true);
+      clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const shown = items || allItems(r);
   const byGroup = new Map();
   for (const [gi, ii] of shown) {
@@ -436,6 +477,57 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
       </h2>
       <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
       {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
+      <div className="menu-actions">
+        <button
+          type="button"
+          className={`menu-action-btn menu-action-btn--copy${copied ? ' is-copied' : ''}`}
+          aria-label={t.copyList}
+          disabled={remainingCount === 0}
+          onClick={handleCopy}
+        >
+          <span className="menu-action-box">
+            <span className="menu-action-label">
+              <svg className="menu-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+                <path
+                  d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                />
+              </svg>
+              {t.copyList}
+            </span>
+            <span className="menu-action-done" aria-hidden="true">
+              <svg className="menu-action-icon" viewBox="0 0 24 24" focusable="false">
+                <path
+                  d="M5 12.5 9.5 17 19 7.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {t.copied}
+            </span>
+          </span>
+        </button>
+        {gotCount > 0 && (
+          <button
+            type="button"
+            className="menu-action-btn menu-action-btn--clear"
+            aria-label={t.clearTicksLabel}
+            onClick={() => !measure && clearGotItems(recipe.slug)}
+          >
+            {t.clearTicks}
+          </button>
+        )}
+        <span className="sr-only" aria-live="polite">
+          {copied ? t.copied : ''}
+        </span>
+      </div>
     </div>
   );
   const contHead = (
@@ -476,24 +568,60 @@ function Ingredients({ recipe, lang, units, items, cont = false, measure = false
                 };
                 const { primary, secondary, metricFirst } = amountsFor(it, units);
                 const alt = secondary ? amountsFor(it, units === 'cups' ? 'metric' : 'cups') : null;
+                const itemId = `${gi}:${ii}`;
+                const isGot = !measure && gotItems.has(itemId);
                 return (
-                  <li className="ing" key={ii} data-item={`${gi}:${ii}`}>
-                    <span className="ing-what">
-                      <span className="ing-name">{it.name}</span>
-                      {it.note && <span className="ing-note">{it.note}</span>}
-                    </span>
-                    <span className="ing-how">
-                      <span className="ing-how-live" data-swappable={secondary ? 'true' : undefined}>
-                        <span className="ing-amount">{metricFirst ? primary : <Amount text={primary} />}</span>
-                        {secondary && <span className="ing-metric">{secondary}</span>}
+                  <li className={`ing${isGot ? ' ing--got' : ''}`} key={ii} data-item={itemId}>
+                    <button
+                      type="button"
+                      className="ing-btn"
+                      aria-pressed={isGot}
+                      onClick={() => !measure && toggleGotItem(recipe.slug, itemId)}
+                    >
+                      <span className="ing-tick" aria-hidden="true">
+                        <svg className="ing-tick-svg" viewBox="0 0 24 24" focusable="false">
+                          <path
+                            d="M5 12.5 9.5 17 19 7.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
                       </span>
-                      {alt && (
-                        <span className="ing-how-sizer" aria-hidden="true">
-                          <span className="ing-amount">{alt.metricFirst ? alt.primary : <Amount text={alt.primary} />}</span>
-                          {alt.secondary && <span className="ing-metric">{alt.secondary}</span>}
+                      <span className="ing-main">
+                        <span className="ing-what">
+                          <span className="ing-name">{it.name}</span>
+                          {it.note && (
+                            <span className="ing-note">
+                              <span className="sr-only">, </span>
+                              {it.note}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
+                        <span className="ing-how">
+                          <span className="ing-how-live" data-swappable={secondary ? 'true' : undefined}>
+                            <span className="ing-amount">
+                              <span className="sr-only">, </span>
+                              {metricFirst ? primary : <Amount text={primary} />}
+                            </span>
+                            {secondary && (
+                              <span className="ing-metric">
+                                <span className="sr-only">, </span>
+                                {secondary}
+                              </span>
+                            )}
+                          </span>
+                          {alt && (
+                            <span className="ing-how-sizer" aria-hidden="true">
+                              <span className="ing-amount">{alt.metricFirst ? alt.primary : <Amount text={alt.primary} />}</span>
+                              {alt.secondary && <span className="ing-metric">{alt.secondary}</span>}
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                    </button>
                   </li>
                 );
               })}

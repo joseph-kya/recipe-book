@@ -227,6 +227,17 @@ export const ui = {
     copied: 'Copié',
     clearTicks: 'Effacer',
     clearTicksLabel: 'Effacer tous les ingrédients cochés',
+    startCooking: 'Aux fourneaux',
+    cookMode: 'Mode cuisine',
+    cookDialogLabel: (title) => `${title} — Mode cuisine`,
+    cookStepOf: (i, n) => `Étape ${i} sur ${n}`,
+    cookPrev: 'Précédent',
+    cookNext: 'Suivant',
+    cookClose: 'Quitter le mode cuisine',
+    cookDoneTitle: 'C’est prêt — régalez-vous !',
+    cookDoneBody: 'Toutes les étapes sont terminées.',
+    cookBackToRecipe: 'Retour à la recette',
+    cookToggleDone: (i, done) => (done ? `Étape ${i} terminée. Marquer comme non terminée` : `Marquer l’étape ${i} comme terminée`),
   },
 };
 

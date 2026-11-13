@@ -94,12 +94,23 @@ test('cover cupcake bites are noticeably big, finish on the last bite, celebrate
   const pages = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
   const styles = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 
-  const bitesBlock = ornaments.match(/export const CUPCAKE_BITES = \[([\s\S]*?)\];/);
-  assert.ok(bitesBlock, 'CUPCAKE_BITES exported');
-  const radii = [...bitesBlock[1].matchAll(/r:\s*(\d+)/g)].map((m) => Number(m[1]));
-  assert.equal(radii.length, 3);
-  assert.ok(radii[0] >= 20 && radii[1] >= 20, `expected big held bites, got ${radii.slice(0, 2)}`);
-  assert.ok(radii[2] >= 50, `expected final bite to finish the cupcake, got ${radii[2]}`);
+  const helperMatch = ornaments.match(/function scallopedBite[\s\S]*?\n\}/);
+  const bitesMatch = ornaments.match(/export const CUPCAKE_BITES = \[[\s\S]*?\];/);
+  assert.ok(helperMatch && bitesMatch, 'scallopedBite and CUPCAKE_BITES defined');
+  const bites = new Function(`${helperMatch[0]}\n${bitesMatch[0].replace('export const ', 'const ')}\nreturn CUPCAKE_BITES;`)();
+  assert.equal(bites.length, 3);
+  assert.ok(bites[0].r >= 20 && bites[1].r >= 20, `expected big held bites, got ${bites.slice(0, 2).map((b) => b.r)}`);
+  assert.ok(bites[2].r >= 50, `expected final bite to finish the cupcake, got ${bites[2].r}`);
+  for (const [idx, bite] of bites.slice(0, 2).entries()) {
+    const arcs = [...bite.edge.matchAll(/A([\d.]+) ([\d.]+) 0 0 0/g)];
+    assert.ok(arcs.length >= 4, `bite ${idx + 1} should have several rounded tooth marks, got ${arcs.length}`);
+    assert.ok(new Set(arcs.map((m) => m[1])).size >= 3, `bite ${idx + 1} tooth marks should be slightly varied`);
+    assert.ok(bite.mask.startsWith(bite.edge) && bite.mask.endsWith('Z'), `bite ${idx + 1} mask closes its scalloped edge`);
+  }
+  assert.notEqual(bites[0].edge, bites[1].edge, 'successive bites should vary');
+  assert.doesNotMatch(ornaments, /<mask[\s\S]*?<circle[\s\S]*?<\/mask>/, 'bites should not be plain circle cut-outs');
+  assert.match(ornaments, /clipPath=\{`url\(#\$\{clipId\}\)`\}/);
+  assert.doesNotMatch(ornaments, /filter=|drop-shadow|linearGradient|radialGradient/);
   assert.match(ornaments, /mask=\{finished \? mask : undefined\}/);
   assert.match(ornaments, /export function CupcakeCrumbs/);
 

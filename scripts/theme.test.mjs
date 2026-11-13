@@ -114,6 +114,9 @@ test('cover cupcake bites are noticeably big, finish on the last bite, celebrate
   assert.match(ornaments, /mask=\{finished \? mask : undefined\}/);
   assert.match(ornaments, /export function CupcakeCrumbs/);
 
+  assert.match(pages, /bite as biteSound/);
+  assert.match(pages, /const holdStart[\s\S]*primeAudio\(\)/);
+  assert.match(pages, /const takeBite[\s\S]*biteSound\(n - 1\)[\s\S]*if \(n >= CUPCAKE_BITES\.length\)/);
   assert.match(pages, /<CupcakeCrumbs \/>/);
   assert.match(pages, /recordMuffinFinish\(\)/);
   assert.match(pages, /tierForFinishes\(totalFinishes\)/);

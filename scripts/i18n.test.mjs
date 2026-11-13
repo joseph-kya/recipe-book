@@ -82,6 +82,12 @@ test('German chrome covers every English UI and theme key', () => {
   keys(themeText.en, themeText.de);
   assert.equal(themeText.en.changeColor, 'Change color');
   assert.equal(themeText.de.changeColor, 'Farbe wechseln');
+  assert.equal(themeText.en.bites.length, 4);
+  assert.equal(themeText.de.bites.length, 4);
+  assert.ok(themeText.en.allGone.trim().length > 0 && themeText.de.allGone.trim().length > 0);
+  assert.notEqual(themeText.en.allGone, themeText.de.allGone);
+  assert.ok(themeText.en.muffinReply.trim().length > 0 && themeText.de.muffinReply.trim().length > 0);
+  assert.notEqual(themeText.en.muffinReply, themeText.de.muffinReply);
   assert.equal(ui.de.languageEnglish, 'Englisch');
   assert.match(ui.en.switchLang, /\bEN\b/);
   assert.match(ui.de.switchLang, /\bDE\b/);

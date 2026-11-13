@@ -6,7 +6,9 @@ export const themeText = {
     ringBell: 'Ring the service bell',
     ding: 'Ding! Order up.',
     ringing: 'Ring ring ring! Patience, the pie is coming.',
-    bites: ['Nom. One bite.', 'Nom nom. Two bites.', 'Three bites. Just crumbs and a cherry.', 'A fresh cupcake!'],
+    bites: ['Nom. One big bite.', 'Nom nom. Two big bites.', 'All gone!', 'A fresh cupcake! Missed me?'],
+    allGone: 'all gone!',
+    muffinReply: 'missed me?',
   },
   de: {
     changeColor: 'Farbe wechseln',
@@ -14,6 +16,8 @@ export const themeText = {
     ringBell: 'Tischglocke läuten',
     ding: 'Ding! Bestellung fertig.',
     ringing: 'Kling kling kling! Geduld, der Kuchen kommt.',
-    bites: ['Mmm. Ein Bissen.', 'Mmm mmm. Zwei Bissen.', 'Drei Bissen. Nur noch Krümel und eine Kirsche.', 'Ein frischer Cupcake!'],
+    bites: ['Mmm. Ein großer Bissen.', 'Mmm mmm. Zwei große Bissen.', 'Alles weg!', 'Ein frischer Cupcake! Vermisst?'],
+    allGone: 'alles weg!',
+    muffinReply: 'vermisst?',
   },
 };

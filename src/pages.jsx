@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { spinCupcake } from './motion.js';
-import { Bell, CUPCAKE_BITES, Checkers, Cupcake } from './ornaments.jsx';
+import { Bell, CUPCAKE_BITES, Checkers, Cupcake, CupcakeCrumbs } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
@@ -25,15 +25,25 @@ export function Cover({ lang }) {
   const [announced, setAnnounced] = useState(null);
   const spinRef = useRef(null);
   const spinAnimRef = useRef(null);
-  // Press and hold the cupcake to take a bite; after three, the next hold brings a fresh one.
+  // Press and hold the cupcake to take a bite; the last bite finishes it,
+  // celebrates briefly, then the muffin replies and springs back fresh.
   const [bites, setBites] = useState(0);
   const [fresh, setFresh] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
+  const [replying, setReplying] = useState(false);
   const holdRef = useRef(0);
+  const respawnRef = useRef(0);
+  const replyTimerRef = useRef(0);
   const heldRef = useRef(false);
+  const bitesRef = useRef(0);
+  const copyRef = useRef(themeCopy);
+  copyRef.current = themeCopy;
 
   useEffect(() => () => {
     spinAnimRef.current?.stop();
     clearTimeout(holdRef.current);
+    clearTimeout(respawnRef.current);
+    clearTimeout(replyTimerRef.current);
   }, []);
 
   const cycleTheme = () => {
@@ -41,6 +51,7 @@ export function Cover({ lang }) {
       heldRef.current = false;
       return;
     }
+    if (celebrating) return;
     const next = nextTheme(theme);
     setTheme(next);
     setAnnounced(themeCopy.names[next]);
@@ -49,18 +60,47 @@ export function Cover({ lang }) {
 
   const takeBite = () => {
     heldRef.current = true;
-    const n = bites >= CUPCAKE_BITES.length ? 0 : bites + 1;
+    clearTimeout(replyTimerRef.current);
+    setReplying(false);
+    const current = bitesRef.current;
+    if (current >= CUPCAKE_BITES.length) return;
+    const n = current + 1;
+    bitesRef.current = n;
     setBites(n);
-    setFresh(n === 0);
-    setAnnounced(themeCopy.bites[n === 0 ? CUPCAKE_BITES.length : n - 1]);
+    setFresh(false);
+    if (n >= CUPCAKE_BITES.length) {
+      setCelebrating(true);
+      setAnnounced(copyRef.current.bites[n - 1]);
+      clearTimeout(respawnRef.current);
+      respawnRef.current = setTimeout(() => {
+        setCelebrating(false);
+        bitesRef.current = 0;
+        setBites(0);
+        setFresh(true);
+        setReplying(true);
+        setAnnounced(copyRef.current.bites[CUPCAKE_BITES.length]);
+        clearTimeout(replyTimerRef.current);
+        replyTimerRef.current = setTimeout(() => setReplying(false), 2400);
+      }, 950);
+    } else {
+      setAnnounced(copyRef.current.bites[n - 1]);
+    }
   };
   const holdStart = (e) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || celebrating) return;
     heldRef.current = false;
     clearTimeout(holdRef.current);
     holdRef.current = setTimeout(takeBite, 450);
   };
   const holdEnd = () => clearTimeout(holdRef.current);
+
+  const cupcakeClass = celebrating
+    ? 'cover-cupcake cover-cupcake--gone'
+    : bites
+      ? 'cover-cupcake cover-cupcake--bitten'
+      : fresh
+        ? 'cover-cupcake cover-cupcake--fresh'
+        : 'cover-cupcake';
 
   return (
     <div className="page-body cover">
@@ -78,25 +118,38 @@ export function Cover({ lang }) {
             </span>
           ))}
         </h1>
-        <button
-          type="button"
-          className="cover-cupcake-btn"
-          aria-label={themeCopy.changeColor}
-          onClick={cycleTheme}
-          onPointerDown={holdStart}
-          onPointerUp={holdEnd}
-          onPointerCancel={holdEnd}
-          onPointerLeave={holdEnd}
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          <span className="cover-cupcake-spin" ref={spinRef}>
-            <Cupcake
-              key={bites}
-              className={`cover-cupcake${bites ? ' cover-cupcake--bitten' : fresh ? ' cover-cupcake--fresh' : ''}`}
-              bites={bites}
-            />
-          </span>
-        </button>
+        <div className="cover-cupcake-stage">
+          <button
+            type="button"
+            className="cover-cupcake-btn"
+            aria-label={themeCopy.changeColor}
+            onClick={cycleTheme}
+            onPointerDown={holdStart}
+            onPointerUp={holdEnd}
+            onPointerCancel={holdEnd}
+            onPointerLeave={holdEnd}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            <span className="cover-cupcake-spin" ref={spinRef}>
+              <Cupcake
+                key={bites}
+                className={cupcakeClass}
+                bites={bites}
+              />
+            </span>
+          </button>
+          {celebrating && (
+            <div className="cover-cupcake-celebrate" aria-hidden="true">
+              <CupcakeCrumbs />
+              <span className="cover-cupcake-gone">{themeCopy.allGone}</span>
+            </div>
+          )}
+          {replying && (
+            <span className="cover-cupcake-reply" aria-hidden="true">
+              {themeCopy.muffinReply}
+            </span>
+          )}
+        </div>
         <div className="cover-open">
           <a className="btn btn--cream" href="#/contents">
             {t.open}

@@ -88,3 +88,38 @@ test('cover uses the cupcake button instead of colour-dot swatches', () => {
   assert.match(pages, /className="cover-cupcake-btn"/);
   assert.match(pages, /aria-label=\{themeCopy\.changeColor\}/);
 });
+
+test('cover cupcake bites are noticeably big, finish on the last bite, celebrate in Kalam, reply and respawn', () => {
+  const ornaments = readFileSync(new URL('../src/ornaments.jsx', import.meta.url), 'utf8');
+  const pages = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+
+  const bitesBlock = ornaments.match(/export const CUPCAKE_BITES = \[([\s\S]*?)\];/);
+  assert.ok(bitesBlock, 'CUPCAKE_BITES exported');
+  const radii = [...bitesBlock[1].matchAll(/r:\s*(\d+)/g)].map((m) => Number(m[1]));
+  assert.equal(radii.length, 3);
+  assert.ok(radii[0] >= 20 && radii[1] >= 20, `expected big held bites, got ${radii.slice(0, 2)}`);
+  assert.ok(radii[2] >= 50, `expected final bite to finish the cupcake, got ${radii[2]}`);
+  assert.match(ornaments, /mask=\{finished \? mask : undefined\}/);
+  assert.match(ornaments, /export function CupcakeCrumbs/);
+
+  assert.match(pages, /<CupcakeCrumbs \/>/);
+  assert.match(pages, /className="cover-cupcake-gone"[\s\S]*themeCopy\.allGone/);
+  assert.match(pages, /className="cover-cupcake-reply"[\s\S]*themeCopy\.muffinReply/);
+  assert.match(pages, /setFresh\(true\)/);
+  assert.match(pages, /setReplying\(true\)/);
+
+  // Kalam font, flat retro look (no box-shadow/text-shadow/filter), transform/opacity only, reduced-motion safe.
+  assert.match(styles, /\.cover-cupcake-gone\s*\{[\s\S]*font-family:\s*var\(--hand\);/);
+  assert.match(styles, /\.cover-cupcake-reply\s*\{[\s\S]*font-family:\s*var\(--hand\);/);
+  const keyframeNames = ['cupcake-chomp', 'cupcake-fresh', 'cupcake-crumb-pop', 'cupcake-gone-pop', 'cupcake-reply-pop'];
+  for (const name of keyframeNames) {
+    const m = styles.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?)\\n\\}`));
+    assert.ok(m, `missing @keyframes ${name}`);
+    assert.doesNotMatch(m[1], /box-shadow|text-shadow|filter|glow/);
+    for (const prop of [...m[1].matchAll(/([a-z-]+)\s*:/g)].map((x) => x[1])) {
+      assert.ok(prop === 'transform' || prop === 'opacity', `${name} uses non-composited property: ${prop}`);
+    }
+    assert.match(styles, new RegExp(`@media \\(prefers-reduced-motion: reduce\\)[\\s\\S]*${name === 'cupcake-chomp' ? 'cover-cupcake--bitten' : name === 'cupcake-fresh' ? 'cover-cupcake--fresh' : name === 'cupcake-crumb-pop' ? 'cover-crumb' : name === 'cupcake-gone-pop' ? 'cover-cupcake-gone' : 'cover-cupcake-reply'}[\\s\\S]*animation:\\s*none;`));
+  }
+});

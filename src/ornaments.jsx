@@ -4,14 +4,16 @@ import { useId } from 'react';
 
 // Bites taken out of the cover cupcake, in order (hold the cupcake to take one).
 export const CUPCAKE_BITES = [
-  { cx: 82, cy: 30, r: 13 },
-  { cx: 20, cy: 56, r: 14 },
-  { cx: 78, cy: 74, r: 13 },
+  { cx: 70, cy: 36, r: 22 },
+  { cx: 28, cy: 52, r: 23 },
+  { cx: 50, cy: 50, r: 60 },
 ];
 
 export function Cupcake({ className = '', bites = 0 }) {
   const maskId = useId();
   const taken = CUPCAKE_BITES.slice(0, bites);
+  const finished = bites >= CUPCAKE_BITES.length;
+  const mask = taken.length ? `url(#${maskId})` : undefined;
   return (
     <svg className={`cupcake ${className}`} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
       {taken.length > 0 && (
@@ -23,17 +25,50 @@ export function Cupcake({ className = '', bites = 0 }) {
         </mask>
       )}
       {/* colours come from the colourway (src/theme.css), not the markup */}
-      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round" mask={taken.length ? `url(#${maskId})` : undefined}>
+      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round" mask={mask}>
         <path d="M22 38 h56 l-8 50 h-40 z" className="cupcake-cup" />
         <path d="M30 38 l4 50 M42 38 l1 50 M58 38 l-1 50 M70 38 l-4 50" strokeWidth="2" fill="none" />
         <ellipse cx="50" cy="34" rx="32" ry="9" className="cupcake-cream" />
         <path d="M28 32 q8-16 22-12 q14-6 22 12" className="cupcake-frosting" />
       </g>
-      {/* the cherry always survives: it sits on top, outside the bites */}
-      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round">
+      {/* the cherry survives bites 1–2, then goes with the last bite */}
+      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round" mask={finished ? mask : undefined}>
         <circle cx="50" cy="14" r="6" className="cupcake-cherry" />
         <path d="M50 8 q3-6 8-6" fill="none" />
       </g>
+    </svg>
+  );
+}
+
+const CRUMBS = [
+  { kind: 'chunk', dx: '-34px', dy: '-32px', rot: '-26deg', fill: 'var(--mustard)' },
+  { kind: 'circle', r: 3.6, dx: '36px', dy: '-28px', rot: '32deg', fill: 'var(--cream)' },
+  { kind: 'chunk', dx: '-42px', dy: '6px', rot: '-42deg', fill: 'var(--cream)' },
+  { kind: 'circle', r: 3.2, dx: '42px', dy: '10px', rot: '22deg', fill: 'var(--mustard)' },
+  { kind: 'circle', r: 3.5, dx: '-26px', dy: '34px', rot: '-18deg', fill: 'var(--mustard)' },
+  { kind: 'chunk', dx: '28px', dy: '36px', rot: '38deg', fill: 'var(--cream)' },
+  { kind: 'circle', r: 2.6, dx: '-4px', dy: '-42px', rot: '14deg', fill: 'var(--choc)' },
+  { kind: 'circle', r: 2.6, dx: '6px', dy: '42px', rot: '-28deg', fill: 'var(--choc)' },
+];
+
+export function CupcakeCrumbs({ className = '' }) {
+  return (
+    <svg className={`cover-crumbs ${className}`} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      {CRUMBS.map((c, i) => (
+        <g
+          key={i}
+          className="cover-crumb cupcake-line"
+          style={{ '--dx': c.dx, '--dy': c.dy, '--rot': c.rot }}
+          strokeWidth="2.4"
+          strokeLinejoin="round"
+        >
+          {c.kind === 'chunk' ? (
+            <path d="M46 47 l7 -1 l2 6 l-6 2 z" fill={c.fill} />
+          ) : (
+            <circle cx="50" cy="50" r={c.r} fill={c.fill} />
+          )}
+        </g>
+      ))}
     </svg>
   );
 }

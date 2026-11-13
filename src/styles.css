@@ -581,6 +581,12 @@ button {
   font-size: min(13.5vw, 4.75rem);
 }
 
+.cover-cupcake-stage {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
 .cover-cupcake-btn {
   --ring-in: var(--choc);
   display: inline-flex;
@@ -630,27 +636,101 @@ button {
   fill: var(--mustard);
 }
 
-/* A bite squishes the cupcake; a fresh one pops back in. Flat, no extras. */
+/* A bite squishes the cupcake; the last bite pops crumbs; a fresh one springs back. Flat, no extras. */
 .cover-cupcake--bitten {
   animation: cupcake-chomp 260ms var(--ease-out);
 }
+.cover-cupcake--gone {
+  opacity: 0;
+  transform: rotate(-8deg) scale(0.7);
+}
 .cover-cupcake--fresh {
-  animation: cupcake-fresh 320ms var(--ease-out);
+  animation: cupcake-fresh 420ms var(--ease-out);
+}
+.cover-cupcake-celebrate {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cover-crumbs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cover-crumb {
+  transform-origin: 50% 50%;
+  animation: cupcake-crumb-pop 760ms var(--ease-out) both;
+}
+.cover-cupcake-gone {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: var(--fs-l);
+  line-height: 1.05;
+  color: var(--cream);
+  white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-4deg);
+  animation: cupcake-gone-pop 920ms var(--ease-out) both;
+}
+.cover-cupcake-reply {
+  position: absolute;
+  left: calc(100% + var(--sp-2));
+  top: 0.35rem;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: var(--fs-s);
+  line-height: 1.1;
+  color: var(--cream);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(-5deg);
+  transform-origin: left center;
+  animation: cupcake-reply-pop 2400ms var(--ease-out) both;
 }
 @keyframes cupcake-chomp {
   0% { transform: rotate(-8deg) scale(1); }
-  35% { transform: rotate(-12deg) scale(0.9, 1.06); }
+  35% { transform: rotate(-12deg) scale(0.88, 1.08); }
   100% { transform: rotate(-8deg) scale(1); }
 }
 @keyframes cupcake-fresh {
-  0% { transform: rotate(-8deg) scale(0.7); }
-  60% { transform: rotate(-8deg) scale(1.08); }
-  100% { transform: rotate(-8deg) scale(1); }
+  0% { opacity: 0; transform: rotate(-14deg) scale(0.45); }
+  55% { opacity: 1; transform: rotate(-5deg) scale(1.12); }
+  80% { transform: rotate(-9deg) scale(0.97); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+@keyframes cupcake-crumb-pop {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+  20% { opacity: 1; transform: translate(calc(var(--dx) * 0.55), calc(var(--dy) * 0.55)) scale(1.15) rotate(calc(var(--rot) * 0.5)); }
+  70% { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * 1.12), calc(var(--dy) * 1.12)) scale(0.75) rotate(var(--rot)); }
+}
+@keyframes cupcake-gone-pop {
+  0% { opacity: 0; transform: translate(-50%, -42%) rotate(-4deg) scale(0.72); }
+  22% { opacity: 1; transform: translate(-50%, -52%) rotate(-4deg) scale(1.08); }
+  38%, 82% { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -54%) rotate(-4deg) scale(0.92); }
+}
+@keyframes cupcake-reply-pop {
+  0% { opacity: 0; transform: translate(-4px, 4px) rotate(-5deg) scale(0.8); }
+  10% { opacity: 1; transform: translate(0, 0) rotate(-5deg) scale(1.06); }
+  18%, 85% { opacity: 1; transform: translate(0, 0) rotate(-5deg) scale(1); }
+  100% { opacity: 0; transform: translate(0, -3px) rotate(-5deg) scale(0.96); }
 }
 @media (prefers-reduced-motion: reduce) {
   .cover-cupcake--bitten,
-  .cover-cupcake--fresh {
+  .cover-cupcake--fresh,
+  .cover-crumb,
+  .cover-cupcake-gone,
+  .cover-cupcake-reply {
     animation: none;
+  }
+  .cover-crumb {
+    opacity: 0.9;
+    transform: translate(calc(var(--dx) * 0.72), calc(var(--dy) * 0.72)) rotate(var(--rot));
   }
 }
 
@@ -673,6 +753,10 @@ button {
   }
   .book--narrow .cover-cupcake {
     width: 5.25rem;
+  }
+  .book--narrow .cover-cupcake-reply {
+    left: calc(100% + var(--sp-1));
+    font-size: var(--fs-xs);
   }
 }
 

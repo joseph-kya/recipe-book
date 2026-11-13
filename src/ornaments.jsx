@@ -96,11 +96,11 @@ export function Cupcake({ className = '', bites = 0 }) {
 
 const CRUMBS = [
   { kind: 'chunk', dx: '-34px', dy: '-32px', rot: '-26deg', fill: 'var(--mustard)' },
-  { kind: 'circle', r: 3.6, dx: '36px', dy: '-28px', rot: '32deg', fill: 'var(--cream)' },
-  { kind: 'chunk', dx: '-42px', dy: '6px', rot: '-42deg', fill: 'var(--cream)' },
+  { kind: 'circle', r: 3.6, dx: '36px', dy: '-28px', rot: '32deg', fill: 'var(--cupcake-cream)' },
+  { kind: 'chunk', dx: '-42px', dy: '6px', rot: '-42deg', fill: 'var(--cupcake-cream)' },
   { kind: 'circle', r: 3.2, dx: '42px', dy: '10px', rot: '22deg', fill: 'var(--mustard)' },
   { kind: 'circle', r: 3.5, dx: '-26px', dy: '34px', rot: '-18deg', fill: 'var(--mustard)' },
-  { kind: 'chunk', dx: '28px', dy: '36px', rot: '38deg', fill: 'var(--cream)' },
+  { kind: 'chunk', dx: '28px', dy: '36px', rot: '38deg', fill: 'var(--cupcake-cream)' },
   { kind: 'circle', r: 2.6, dx: '-4px', dy: '-42px', rot: '14deg', fill: 'var(--choc)' },
   { kind: 'circle', r: 2.6, dx: '6px', dy: '42px', rot: '-28deg', fill: 'var(--choc)' },
 ];

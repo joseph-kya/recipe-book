@@ -25,7 +25,7 @@
   background: var(--cream);
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-s);
-  box-shadow: 4px 4px 0 var(--choc);
+  box-shadow: 4px 4px 0 var(--shadow);
   transform: rotate(-1deg);
 }
 

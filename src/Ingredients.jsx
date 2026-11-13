@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { CheckIcon, ShoppingListIcon } from './ornaments.jsx';
+import { CheckIcon, ResetIcon, ShoppingListIcon } from './ornaments.jsx';
 import { ContMark, cx, useRecipeText } from './recipeUI.jsx';
 import { scaleAmount } from './scale.js';
 import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
@@ -127,9 +127,10 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
             type="button"
             className="menu-action-btn menu-action-btn--clear"
             aria-label={t.clearTicksLabel}
+            title={t.clearTicksLabel}
             onClick={() => !measure && clearGotItems(recipe.slug)}
           >
-            {t.clearTicks}
+            <ResetIcon className="menu-action-icon" />
           </button>
         )}
         <span className="sr-only" aria-live="polite">

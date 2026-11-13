@@ -1156,6 +1156,7 @@ button {
     color 140ms ease;
 }
 
+.menu-action-btn--clear,
 .menu-action-btn--copy {
   width: 2.75rem;
   padding: 0;
@@ -1342,7 +1343,7 @@ button {
 
 .ing--got .ing-what,
 .ing--got .ing-how {
-  opacity: 0.82;
+  opacity: var(--got-opacity, 0.82);
 }
 
 .ing--got .ing-amount {
@@ -1611,10 +1612,6 @@ button {
   }
   .book--wide .ing-btn {
     column-gap: var(--sp-2);
-  }
-  .book--wide .menu-action-btn--clear {
-    font-size: var(--fs-xs);
-    padding: 0 0.65rem;
   }
 }
 

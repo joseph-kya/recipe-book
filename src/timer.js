@@ -33,7 +33,41 @@ export function formatRemaining(seconds) {
 // --- store ---------------------------------------------------------------
 
 const timers = new Map(); // key -> { endAt, total, done, handle }
+const chosen = new Map(); // key -> seconds picked with −/+ before starting
 const listeners = new Set();
+
+export const STEP_SECONDS = 60;
+export const MIN_SECONDS = 60;
+
+// The duration a step will start with: the parsed one unless the reader changed it.
+export function getDuration(key, fallback) {
+  return chosen.get(key) ?? fallback;
+}
+
+// Moves a timer by delta seconds. Running: shifts the end (never below one
+// minute left). Idle: changes the duration it will start with.
+export function adjustTimer(key, delta, fallback, now = Date.now()) {
+  const entry = timers.get(key);
+  if (entry && !entry.done) {
+    const left = Math.max(0, (entry.endAt - now) / 1000);
+    const next = Math.max(MIN_SECONDS, left + delta);
+    entry.endAt = now + next * 1000;
+    entry.total = Math.max(MIN_SECONDS, entry.total + (next - left));
+    clearTimeout(entry.handle);
+    if (typeof setTimeout === 'function') entry.handle = setTimeout(() => finishTimer(key), next * 1000);
+    notify(key);
+    return next;
+  }
+  const next = Math.max(MIN_SECONDS, getDuration(key, fallback) + delta);
+  chosen.set(key, next);
+  notify(key);
+  return next;
+}
+
+export function formatMinutes(seconds) {
+  const m = Math.round(seconds / 60);
+  return m >= 60 && m % 60 === 0 ? `${m / 60} h` : `${m} min`;
+}
 
 function notify(key) {
   for (const fn of listeners) fn(key);

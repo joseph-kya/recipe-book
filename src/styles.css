@@ -1471,14 +1471,12 @@ button {
   color: var(--cue);
 }
 
-/* step timer: a flat chip, tap to start, tap to stop */
+/* step timer: a flat chip, tap to start, tap to stop, −/+ a minute either side */
 .step-timer {
   display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
+  align-items: stretch;
   min-height: 2.75rem;
   margin-top: var(--sp-2);
-  padding: 0 var(--sp-4) 0 var(--sp-3);
   border-radius: var(--r-pill);
   border: 2.5px solid var(--choc);
   background: var(--cream);
@@ -1486,13 +1484,51 @@ button {
   font-family: var(--badge);
   font-size: var(--fs-m);
   font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.step-timer-main,
+.step-timer-adj {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform var(--press) var(--ease-out);
 }
 
-.step-timer:active {
-  transform: scale(0.96);
+.step-timer-main {
+  gap: var(--sp-2);
+  padding: 0 var(--sp-3);
+}
+
+.step-timer-adj {
+  width: 2.75rem;
+  font-size: 1.35em;
+  line-height: 1;
+}
+
+.step-timer-adj:first-child {
+  border-right: 2.5px solid currentColor;
+}
+
+.step-timer-adj:last-child {
+  border-left: 2.5px solid currentColor;
+}
+
+.step-timer-adj:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.step-timer-main:active,
+.step-timer-adj:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
 .step-timer-icon {
@@ -1624,11 +1660,13 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .step-dot,
   .step-body,
-  .step-timer {
+  .step-timer-main,
+  .step-timer-adj {
     transition: none;
   }
   .step-dot:active,
-  .step-timer:active {
+  .step-timer-main:active,
+  .step-timer-adj:active {
     transform: none;
   }
   .step-timer--done {
@@ -1681,6 +1719,35 @@ button {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+/* keep-awake: a flat round toggle, filled while the screen is held on */
+.ctl--awake {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: var(--rule) solid transparent;
+  color: inherit;
+  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
+}
+
+.ctl--awake[aria-pressed='true'] {
+  background: var(--mustard);
+  border-color: var(--choc);
+  color: var(--choc);
+}
+
+.ctl--awake:active {
+  transform: scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctl--awake {
+    transition: none;
+  }
+  .ctl--awake:active {
+    transform: none;
+  }
 }
 
 .ctl--contents {

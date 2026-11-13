@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDuration, formatRemaining, startTimer, stopTimer, finishTimer, getTimer, remainingSeconds } from '../src/timer.js';
+import { parseDuration, formatRemaining, formatMinutes, startTimer, stopTimer, finishTimer, getTimer, remainingSeconds, adjustTimer, getDuration } from '../src/timer.js';
 
 test('parseDuration reads minutes, ranges (low end) and hours in both languages', () => {
   assert.deepEqual(parseDuration('Bake for 20–25 min until set.'), { seconds: 1200, label: '20–25 min' });
@@ -28,4 +28,20 @@ test('timer store starts, counts, finishes and stops', () => {
   assert.equal(getTimer(key).done, true);
   stopTimer(key);
   assert.equal(getTimer(key), null);
+});
+
+test('adjustTimer moves idle durations and running ends a minute at a time, never below one minute', () => {
+  const key = 'test:adj';
+  assert.equal(getDuration(key, 1200), 1200);
+  assert.equal(adjustTimer(key, 60, 1200), 1260);
+  assert.equal(adjustTimer(key, -60, 1200), 1200);
+  assert.equal(adjustTimer(key, -1200, 1200), 60);
+  startTimer(key, getDuration(key, 1200), 1000);
+  assert.equal(adjustTimer(key, 60, 1200, 1000), 120);
+  assert.equal(remainingSeconds(key, 1000), 120);
+  assert.equal(adjustTimer(key, -600, 1200, 31000), 60);
+  assert.equal(remainingSeconds(key, 31000), 60);
+  stopTimer(key);
+  assert.equal(formatMinutes(1260), '21 min');
+  assert.equal(formatMinutes(7200), '2 h');
 });

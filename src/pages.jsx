@@ -7,7 +7,7 @@ import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
-import { formatRemaining, parseDuration, primeAudio, startTimer, stopTimer } from './timer.js';
+import { MIN_SECONDS, STEP_SECONDS, adjustTimer, formatMinutes, formatRemaining, parseDuration, primeAudio, startTimer, stopTimer } from './timer.js';
 import { useTimer } from './useTimer.js';
 import { nextTheme, useTheme } from './theme.js';
 import { themeText } from './theme-i18n.js';
@@ -439,39 +439,58 @@ function TicketProgress({ doneCount, totalSteps }) {
 
 // A step that names a time gets a countdown: tap to start, tap again to stop.
 // Timers keep running across page turns and ring when they hit zero.
+// −/+ move it a minute at a time, before or while it runs.
 function StepTimer({ timerKey, duration, t, measure }) {
-  const { state, remaining } = useTimer(measure ? null : timerKey);
+  const { state, remaining, seconds } = useTimer(measure ? null : timerKey, duration.seconds);
   const toggle = () => {
     if (measure) return;
     if (state === 'running') stopTimer(timerKey);
     else if (state === 'done') stopTimer(timerKey);
     else {
       primeAudio();
-      startTimer(timerKey, duration.seconds);
+      startTimer(timerKey, seconds);
     }
   };
-  const text =
-    state === 'running' ? formatRemaining(remaining) : state === 'done' ? t.timerDone : duration.label;
+  const nudge = (delta) => {
+    if (measure) return;
+    if (state === 'idle') primeAudio();
+    adjustTimer(timerKey, delta, duration.seconds);
+  };
+  const idleText = seconds === duration.seconds ? duration.label : formatMinutes(seconds);
+  const text = state === 'running' ? formatRemaining(remaining) : state === 'done' ? t.timerDone : idleText;
   const label =
     state === 'running'
       ? t.timerStop(formatRemaining(remaining))
       : state === 'done'
         ? t.timerReset
-        : t.timerStart(duration.label);
+        : t.timerStart(idleText);
+  const canLess = state === 'running' ? remaining > MIN_SECONDS : seconds > MIN_SECONDS;
   return (
-    <button
-      type="button"
-      className={`step-timer step-timer--${state}`}
-      aria-label={label}
-      aria-live={state === 'done' ? 'assertive' : 'off'}
-      onClick={toggle}
-    >
-      <svg className="step-timer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" />
-        <path d="M12 9v4.5l3 2M9 3h6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-      </svg>
-      <span className="step-timer-text">{text}</span>
-    </button>
+    <div className={`step-timer step-timer--${state}`} role="group" aria-label={t.timer}>
+      {state !== 'done' && (
+        <button type="button" className="step-timer-adj" aria-label={t.timerLess} disabled={!canLess} onClick={() => nudge(-STEP_SECONDS)}>
+          <span aria-hidden="true">−</span>
+        </button>
+      )}
+      <button
+        type="button"
+        className="step-timer-main"
+        aria-label={label}
+        aria-live={state === 'done' ? 'assertive' : 'off'}
+        onClick={toggle}
+      >
+        <svg className="step-timer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" />
+          <path d="M12 9v4.5l3 2M9 3h6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+        <span className="step-timer-text">{text}</span>
+      </button>
+      {state !== 'done' && (
+        <button type="button" className="step-timer-adj" aria-label={t.timerMore} onClick={() => nudge(STEP_SECONDS)}>
+          <span aria-hidden="true">+</span>
+        </button>
+      )}
+    </div>
   );
 }
 

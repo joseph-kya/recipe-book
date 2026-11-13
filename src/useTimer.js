@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getTimer, remainingSeconds, subscribe } from './timer.js';
+import { getDuration, getTimer, remainingSeconds, subscribe } from './timer.js';
 
 // Live view of one step timer: { state: 'idle' | 'running' | 'done', remaining }.
-export function useTimer(key) {
+export function useTimer(key, fallback = 0) {
   const read = () => {
+    const seconds = getDuration(key, fallback);
     const entry = getTimer(key);
-    if (!entry) return { state: 'idle', remaining: 0 };
-    return { state: entry.done ? 'done' : 'running', remaining: remainingSeconds(key) };
+    if (!entry) return { state: 'idle', remaining: 0, seconds };
+    return { state: entry.done ? 'done' : 'running', remaining: remainingSeconds(key), seconds };
   };
   const [view, setView] = useState(read);
 
@@ -15,7 +16,7 @@ export function useTimer(key) {
     const unsub = subscribe((k) => k === key && setView(read()));
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, fallback]);
 
   useEffect(() => {
     if (view.state !== 'running') return;

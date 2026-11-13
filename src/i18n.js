@@ -55,6 +55,10 @@ export const ui = {
     timerStop: (left) => `${left} left. Stop timer`,
     timerDone: 'Time!',
     timerReset: 'Time is up. Clear timer',
+    timer: 'Timer',
+    timerLess: 'One minute less',
+    timerMore: 'One minute more',
+    keepAwake: 'Keep the screen on while baking',
   },
   de: {
     bookTitle: ['Josephs', 'Rezeptbuch'],
@@ -109,6 +113,10 @@ export const ui = {
     timerStop: (left) => `Noch ${left}. Timer stoppen`,
     timerDone: 'Fertig!',
     timerReset: 'Zeit ist um. Timer löschen',
+    timer: 'Timer',
+    timerLess: 'Eine Minute weniger',
+    timerMore: 'Eine Minute mehr',
+    keepAwake: 'Bildschirm beim Backen anlassen',
   },
 };
 

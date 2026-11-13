@@ -19,7 +19,7 @@ export default function Macros({ recipe, lang }) {
       <div className="macros-head">
         <h2 className="macros-title">{t.macros}</h2>
         <p className="macros-basis">
-          {basis}
+          <span className="macros-serving">{basis}</span>
           {nutrition.servings > 1 && nutrition.total?.kcal != null && <> · {t.macroTotal} {number.format(nutrition.total.kcal)} kcal</>}
           {' · '}<span className="macros-note">{t.macroNote}</span>
         </p>

@@ -25,21 +25,26 @@
   color: var(--choc-soft);
 }
 
+.macros-serving {
+  font-weight: 800;
+  color: var(--choc);
+}
+
 .macros-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: var(--sp-1) 0 0;
+  margin: var(--sp-2) 0 0;
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-m);
-  background: var(--cream);
+  background: var(--paper);
   box-shadow: 5px 5px 0 var(--choc);
   overflow: hidden;
 }
 
 .macros-cell {
   min-width: 0;
-  padding: var(--sp-1) var(--sp-1) var(--sp-2);
-  border-top: 4px solid var(--mint);
+  padding: var(--sp-2) var(--sp-1);
+  border-top: 5px solid color-mix(in srgb, var(--mint) 78%, var(--choc));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -47,7 +52,7 @@
 }
 
 .macros-cell:first-child {
-  background: color-mix(in srgb, var(--mustard) 42%, var(--cream));
+  background: color-mix(in srgb, var(--mustard) 36%, var(--paper));
   border-top-color: var(--mustard);
 }
 
@@ -56,7 +61,7 @@
 }
 
 .macros-cell:nth-child(4) {
-  border-top-color: var(--pink);
+  border-top-color: color-mix(in srgb, var(--pink) 76%, var(--cherry));
 }
 
 .macros-cell + .macros-cell {

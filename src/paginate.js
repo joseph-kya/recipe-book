@@ -284,7 +284,9 @@ function balance(root, src, pageHeight) {
     for (let i = 1; i <= SAMPLES; i++) {
       const extra = (range * i) / SAMPLES;
       consider(paginateLegal(root, src, (p) => (p >= 2 && p < last ? extra : 0), byRows, cut));
-      consider(paginateLegal(root, src, (p) => (p > 0 && p === last - 1 ? extra : 0), byRows, cut));
+      for (let targetPage = 1; targetPage < last; targetPage++) {
+        consider(paginateLegal(root, src, (p) => (p === targetPage ? extra : 0), byRows, cut));
+      }
     }
   }
   // Measure the ornament with the exact closing-page styles; a percentage of
@@ -313,15 +315,17 @@ function balance(root, src, pageHeight) {
   return placePhoto(root, src, pages, best.used, pageHeight);
 }
 
-// The finished-bake photo is optional: it goes at the end of the last page
-// only when at least PHOTO_MIN px of picture fits there (up to 42% of the
-// page), else on the blank facing page a recipe ending on a left page already
-// has; otherwise it is left out. It never adds a page.
+// The finished-bake photo is optional: when a recipe ends on a left page, the
+// photo takes the facing right page (instead of leaving it blank). Otherwise it
+// goes at the end of the last page when at least PHOTO_MIN px fits there (up to
+// 42% of the page). It never adds a spread.
 const PHOTO_MIN = 110;
 function placePhoto(root, src, pages, used, pageHeight) {
   const figure = src.querySelector('[data-unit="photo"]');
   if (!figure) return pages;
   const max = Math.round(pageHeight * 0.42);
+  const last = pages.length - 1;
+  if (last > 0 && pages.length % 2 === 1) return [...pages, [{ kind: 'photo', h: max }]];
   // Everything around the picture (label, mat, credit, margin), measured once.
   const box = newPageBox(root, src, 1, 0);
   const probe = figure.cloneNode(true);
@@ -330,13 +334,11 @@ function placePhoto(root, src, pages, used, pageHeight) {
   const img = probe.querySelector('img');
   const chrome = probe.getBoundingClientRect().height - img.getBoundingClientRect().height + parseFloat(getComputedStyle(probe).marginTop);
   box.face.remove();
-  const last = pages.length - 1;
   const room = (1 - used[last]) * pageHeight - 12 - chrome;
   if (room >= PHOTO_MIN) {
     const h = Math.floor(Math.min(max, room));
     return [...pages.slice(0, last), [...pages[last].filter((seg) => seg.kind !== 'ornament'), { kind: 'photo', h }]];
   }
-  if (last > 0 && pages.length % 2 === 1) return [...pages, [{ kind: 'photo', h: max }]];
   return pages;
 }
 
@@ -375,15 +377,21 @@ function widows(plan, kinds = ['menu', 'ticket']) {
 }
 
 // Lower is better: every extra page costs, and so does every page left under
-// about 60% full (`used` includes ~10% of padding and checkers).
+// about 60% full (`used` includes ~10% of padding and checkers), splitting the
+// two-column tips pair, or a later spread starkly unbalanced left-to-right.
 function score(plan) {
-  let s = plan.pages.length * 4 + widows(plan) * 100;
+  const tipPieces = plan.pages.flatMap((segs) => segs.filter((seg) => seg.kind === 'tips')).length;
+  let s = plan.pages.length * 4 + widows(plan) * 100 + (tipPieces > 1 ? 5 : 0);
   plan.pages.forEach((segs, i) => {
     // Credits alone are centred with an ornament when it fits. Do not pull
     // tips off a method page just to decorate an already composed closing.
     if (isClosing(segs)) return;
-    const gap = Math.max(0, 0.62 - plan.used[i]);
+    const gap = Math.max(0, 0.65 - plan.used[i]);
     s += gap * gap * 10;
+    if (i >= 2 && i % 2 === 0 && i + 1 < plan.pages.length && !isClosing(plan.pages[i + 1])) {
+      const diff = Math.max(0, Math.abs(plan.used[i] - plan.used[i + 1]) - 0.14);
+      s += diff * diff * 2;
+    }
   });
   return s;
 }

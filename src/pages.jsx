@@ -489,7 +489,7 @@ function Credits({ recipe, lang, units }) {
         </a>
       )}
       <p className="source">
-        {t.source}: <span className="source-name">{s.author}</span>,{' '}
+        {t.source}: {s.author},{' '}
         <span className="source-name">
           <a href={s.url} target="_blank" rel="noopener noreferrer">
             {s.site}
@@ -503,7 +503,7 @@ function Credits({ recipe, lang, units }) {
         </p>
       ) : recipe.conversions ? (
         <p className="small-credit">
-          {t.conversions}: <span className="source-name" lang={r.conversions ? lang : 'en'}>{r.conversions || recipe.conversions}</span>
+          {t.conversions}: <span lang={r.conversions ? lang : 'en'}>{r.conversions || recipe.conversions}</span>
         </p>
       ) : null}
     </footer>

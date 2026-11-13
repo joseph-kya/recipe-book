@@ -9,7 +9,13 @@
   justify-content: space-between;
   column-gap: var(--sp-3);
   row-gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+@media (max-height: 820px) {
+  .book--wide .menu-head {
+    margin-bottom: var(--sp-2);
+  }
 }
 
 .book .menu-head .menu-title {
@@ -181,7 +187,7 @@
   height: 2.75rem;
   padding: 0;
   border: 0;
-  border-radius: var(--r-s);
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--choc);
   font-family: var(--badge);
@@ -195,11 +201,9 @@
   color: var(--choc);
 }
 
-.scaler-field:focus-visible,
-.scaler-field:focus {
+.scaler-field:focus-visible {
   outline: 3px solid var(--choc);
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--mustard);
 }
 
 .scaler-x {

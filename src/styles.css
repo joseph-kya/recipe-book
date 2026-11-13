@@ -298,10 +298,9 @@ button {
 }
 
 /* Small laptops: the side arrows move under the book (see controls), so the
-   pages can take the full width and a little more height. */
+   pages can take the full width without encroaching on the bottom bar. */
 @media (max-width: 1279px) {
   .stage--wide {
-    --ph: min(calc(100dvh - 6.5rem), 60rem);
     --pw: min(calc(var(--ph) * 0.74), calc(50vw - 1.75rem));
   }
 }
@@ -310,7 +309,7 @@ button {
   width: calc(var(--pw) * 2);
   height: var(--ph);
   left: calc(50% - var(--pw));
-  top: calc(50% - var(--ph) / 2 - 1.75rem);
+  top: calc((100dvh - 4.75rem - var(--ph)) / 2);
   perspective: 2600px;
 }
 
@@ -379,7 +378,7 @@ button {
 
 .running-title {
   font-family: var(--display);
-  font-size: var(--fs-l);
+  font-size: clamp(0.95rem, calc(var(--pw) * 0.035), var(--fs-l));
   line-height: 1.1;
   color: var(--cherry);
   min-width: 0;
@@ -777,6 +776,7 @@ button {
   font-family: var(--badge);
   font-size: var(--fs-l);
   line-height: 1.15;
+  text-wrap: balance;
 }
 
 .toc-tagline {
@@ -988,7 +988,7 @@ button {
   max-width: 100%;
   margin-left: auto;
   text-align: right;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
 }
 
 /* Cups and spoons are the number you read. Metric is the footnote. */
@@ -1161,7 +1161,10 @@ button {
 @media (max-height: 820px) {
   .book--wide .page-pad {
     padding-top: var(--sp-4);
-    padding-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+  }
+  .book--wide .running-head {
+    margin-bottom: var(--sp-2);
   }
   .book--wide .recipe-title {
     font-size: min(calc(var(--pw) * 0.06), 2.125rem);
@@ -1186,6 +1189,22 @@ button {
   .book--wide .ing {
     padding: 3px 0;
   }
+  .book--wide .ticket {
+    margin-top: var(--sp-4);
+    padding: var(--sp-2) var(--sp-4) var(--sp-1);
+  }
+  .book--wide .menu + .ticket {
+    margin-top: var(--sp-3);
+  }
+  .book--wide .ticket-title {
+    font-size: var(--fs-xl);
+  }
+  .book--wide .equipment {
+    margin: var(--sp-1) 0 var(--sp-2);
+  }
+  .book--wide .step {
+    padding-bottom: var(--sp-2);
+  }
 }
 
 /* Small laptop: a narrower book page gets narrower margins, not smaller type. */
@@ -1201,9 +1220,6 @@ button {
   .book--wide .ing {
     column-gap: var(--sp-2);
   }
-  .book--wide .ing-how {
-    max-width: 11rem;
-  }
 }
 
 
@@ -1214,6 +1230,7 @@ button {
   line-height: 1.3;
   color: var(--choc-soft);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* ---------- recipe: the method ticket ---------- */
@@ -1412,6 +1429,7 @@ button {
   font-size: var(--fs-l);
   line-height: 1.15;
   margin-bottom: var(--sp-1);
+  text-wrap: balance;
 }
 
 /* ---------- recipe: credits + the PDF ---------- */
@@ -1425,6 +1443,7 @@ button {
   margin-top: var(--sp-2);
   font-size: var(--fs-s);
   line-height: 1.4;
+  text-wrap: balance;
 }
 
 .source-name {
@@ -1443,6 +1462,8 @@ button {
 .source a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
   min-height: 44px;
   padding: 0.5rem 0.15rem;
   margin: -0.5rem -0.15rem;
@@ -1458,6 +1479,7 @@ button {
   font-size: var(--fs-xs);
   line-height: 1.4;
   color: var(--choc-soft);
+  text-wrap: balance;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1736,7 +1758,7 @@ button {
 .controls--wide .ctl--turn {
   position: fixed;
   z-index: 20;
-  top: calc(50% - 1.75rem - 1.5rem);
+  top: calc((100dvh - 4.75rem) / 2 - 1.75rem);
   width: 3.5rem;
   height: 3.5rem;
 }
@@ -1753,7 +1775,7 @@ button {
   position: fixed;
   z-index: 20;
   left: 50%;
-  bottom: 1.5rem;
+  bottom: 1rem;
   transform: translateX(-50%);
   gap: 0.75rem;
 }
@@ -1761,7 +1783,7 @@ button {
 @media (max-width: 1279px) {
   .controls--wide .ctl--turn {
     top: auto;
-    bottom: 1.25rem;
+    bottom: 1rem;
   }
   .controls--wide .ctl--prev {
     left: 1.5rem;
@@ -1770,7 +1792,7 @@ button {
     right: 1.5rem;
   }
   .controls--wide .ctl-middle {
-    bottom: 1.5rem;
+    bottom: 1rem;
   }
 }
 

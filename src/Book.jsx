@@ -4,9 +4,10 @@ import { ui } from './i18n.js';
 import { buildSpreads, firstIndexFor, routeOfHash } from './layout.js';
 import { paginate } from './paginate.js';
 import { useScales } from './useScale.js';
-import { RecipeMeasure, renderFace } from './pages.jsx';
+import { getDoneSteps, RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband, unRubberband, rubberbandVelocity } from './spring.js';
 import Controls from './Controls.jsx';
+import CookMode from './CookMode.jsx';
 import { enterPage, swapContent, transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
@@ -62,6 +63,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const [fade, setFade] = useState(null); // { from } during a reduced-motion crossfade
   const [announce, setAnnounce] = useState('');
   const [barAway, setBarAway] = useState(false); // phone: control bar tucked away while reading
+  const [cookState, setCookState] = useState(null); // { recipe, initialStep } | null
   const bookRef = useRef(null);
   const measureRef = useRef(null);
   const faceEls = useRef(new Map());
@@ -70,6 +72,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const prevLocaleRef = useRef({ lang, units });
   const pendingSwapRef = useRef(null);
   const scrollAnchorRef = useRef(null);
+  const cookTriggerRef = useRef(null);
+  const wasCookOpenRef = useRef(false);
 
   // The engine's live state. React state above only decides which faces exist.
   const s = useRef({
@@ -89,11 +93,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
     planVersion: 0,
     repaginating: false,
     planCache: new Map(),
+    cookOpen: false,
   }).current;
   s.wide = wide;
   s.reduce = reduce;
   s.lang = lang;
   s.scales = scales;
+  s.cookOpen = Boolean(cookState);
   const last = () => s.spreads.length - 1;
 
   /* ---------- painting: transform + opacity only, straight onto the faces ---------- */
@@ -422,6 +428,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const st = history.state;
       const k =
         st && st.key === s.key && s.spreads[st.k]?.route === route ? st.k : firstIndexFor(s.spreads, route);
+      setCookState((cur) => (cur && s.spreads[k]?.recipe?.slug === cur.recipe.slug ? cur : null));
       navigate(k, { instant: s.keyboardNavigation });
       s.keyboardNavigation = false;
     };
@@ -433,9 +440,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
     };
   }, [navigate, s]);
 
-  // ← / → turn pages, unless someone is typing.
+  // ← / → turn pages, unless someone is typing or Cook mode is open.
   useEffect(() => {
     const onKey = (e) => {
+      if (s.cookOpen) return;
       if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
       if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
       if (e.key === 'ArrowRight') {
@@ -505,6 +513,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   };
 
   const onPointerDown = (e) => {
+    if (s.cookOpen) return;
     // A tap near the bottom edge asks for the bar.
     if (!s.wide && e.clientY > innerHeight - 96) setBarAway(false);
     if (!e.isPrimary || e.button !== 0 || s.drag) return;
@@ -735,12 +744,41 @@ export default function Book({ lang, setLang, units, setUnits }) {
     [s, setUnits],
   );
 
+  const openCookMode = useCallback(
+    (recipe, triggerEl) => {
+      if (!recipe) return;
+      cookTriggerRef.current = triggerEl || document.activeElement;
+      const done = getDoneSteps(recipe.slug);
+      const { text } = textFor(recipe, lang);
+      const firstUndone = text.steps.findIndex((_, i) => !done.has(i));
+      setCookState({ recipe, initialStep: firstUndone === -1 ? 0 : firstUndone });
+    },
+    [lang],
+  );
+
+  const closeCookMode = useCallback(() => {
+    setCookState(null);
+  }, []);
+
+  const cookOpen = Boolean(cookState);
+
+  useEffect(() => {
+    if (wasCookOpenRef.current && !cookOpen) {
+      const target = cookTriggerRef.current?.isConnected
+        ? cookTriggerRef.current
+        : bookRef.current?.querySelector('.face--rest .cook-start-btn');
+      cookTriggerRef.current = null;
+      target?.focus();
+    }
+    wasCookOpenRef.current = cookOpen;
+  }, [cookOpen]);
+
   /* ---------- which faces exist right now ---------- */
 
   const faces = [];
   const add = (idx, side, role) => {
     const sp = spreads[idx];
-    const content = sp && renderFace(sp[side], lang, units);
+    const content = sp && renderFace(sp[side], lang, units, openCookMode);
     // Key recipe faces by recipe + spread offset + side (not layoutKey or idx) so
     // EN<->DE or cups<->g repagination updates content in-place without remounting.
     const baseKey = sp?.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp?.kind}-${side}`;
@@ -768,75 +806,87 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const activeIndex = turn ? (turn.target === 1 ? turn.hi : turn.lo) : index;
 
   return (
-    <div
-      className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}
-      onClickCapture={(e) => {
-        if (e.target.closest?.('a[href^="#/"]')) s.keyboardNavigation = e.detail === 0;
-      }}
-    >
+    <>
       <div
-        className={`book ${wide ? 'book--wide' : 'book--narrow'}`}
-        ref={bookRef}
-        aria-label={t.bookLabel}
-        role="region"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        onClickCapture={onClickCapture}
+        className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}
+        inert={cookOpen}
+        aria-hidden={cookOpen || undefined}
+        onClickCapture={(e) => {
+          if (e.target.closest?.('a[href^="#/"]')) s.keyboardNavigation = e.detail === 0;
+        }}
       >
-        {faces.map((f) => {
-          const live = f.role === 'rest' && atRest;
-          return (
-            <div
-              key={f.key}
-              ref={(el) => {
-                if (el) faceEls.current.set(f.key, el);
-                else faceEls.current.delete(f.key);
-              }}
-              data-role={f.role}
-              className={`face face--${f.side} face--${f.role}`}
-              inert={!live}
-              aria-hidden={!live}
-              onAnimationEnd={f.role === 'fading' ? () => setFade(null) : undefined}
-            >
+        <div
+          className={`book ${wide ? 'book--wide' : 'book--narrow'}`}
+          ref={bookRef}
+          aria-label={t.bookLabel}
+          role="region"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClickCapture={onClickCapture}
+        >
+          {faces.map((f) => {
+            const live = f.role === 'rest' && atRest;
+            return (
               <div
-                className="face-scroll"
-                onScroll={live && !wide && spreads[f.idx]?.kind === 'recipe' ? onFaceScroll : undefined}
+                key={f.key}
+                ref={(el) => {
+                  if (el) faceEls.current.set(f.key, el);
+                  else faceEls.current.delete(f.key);
+                }}
+                data-role={f.role}
+                className={`face face--${f.side} face--${f.role}`}
+                inert={!live}
+                aria-hidden={!live}
+                onAnimationEnd={f.role === 'fading' ? () => setFade(null) : undefined}
               >
-                {f.content}
+                <div
+                  className="face-scroll"
+                  onScroll={live && !wide && spreads[f.idx]?.kind === 'recipe' ? onFaceScroll : undefined}
+                >
+                  {f.content}
+                </div>
+                <div className="shade" aria-hidden="true" />
               </div>
-              <div className="shade" aria-hidden="true" />
-            </div>
-          );
-        })}
-      </div>
-      {wide && (
-        // Off-screen copy of every recipe for the paginator to measure against.
-        <div className="book book--wide measure" ref={measureRef} aria-hidden="true" inert>
-          <div className="measure-src" hidden>
-            {recipes.map((r) => (
-              <RecipeMeasure key={r.slug} recipe={r} lang={lang} units={units} />
-            ))}
-          </div>
+            );
+          })}
         </div>
+        {wide && (
+          // Off-screen copy of every recipe for the paginator to measure against.
+          <div className="book book--wide measure" ref={measureRef} aria-hidden="true" inert>
+            <div className="measure-src" hidden>
+              {recipes.map((r) => (
+                <RecipeMeasure key={r.slug} recipe={r} lang={lang} units={units} />
+              ))}
+            </div>
+          </div>
+        )}
+        <Controls
+          lang={lang}
+          setLang={handleSetLang}
+          units={units}
+          setUnits={handleSetUnits}
+          index={activeIndex}
+          last={spreads.length - 1}
+          wide={wide}
+          away={!wide && barAway}
+          onShow={() => setBarAway(false)}
+          onPrev={(instant = false) => navigate(destination() - 1, { instant })}
+          onNext={(instant = false) => navigate(destination() + 1, { instant })}
+        />
+        <p className="sr-only" aria-live="polite">
+          {announce}
+        </p>
+      </div>
+      {cookState && (
+        <CookMode
+          recipe={cookState.recipe}
+          lang={lang}
+          initialStep={cookState.initialStep}
+          onClose={closeCookMode}
+        />
       )}
-      <Controls
-        lang={lang}
-        setLang={handleSetLang}
-        units={units}
-        setUnits={handleSetUnits}
-        index={activeIndex}
-        last={spreads.length - 1}
-        wide={wide}
-        away={!wide && barAway}
-        onShow={() => setBarAway(false)}
-        onPrev={(instant = false) => navigate(destination() - 1, { instant })}
-        onNext={(instant = false) => navigate(destination() + 1, { instant })}
-      />
-      <p className="sr-only" aria-live="polite">
-        {announce}
-      </p>
-    </div>
+    </>
   );
 }

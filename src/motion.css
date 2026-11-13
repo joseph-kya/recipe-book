@@ -22,20 +22,20 @@
   width: 100%;
   height: 100%;
   mix-blend-mode: normal;
-  animation: content-out 200ms var(--ease-out) both;
+  animation: content-out 180ms var(--ease-out) both;
 }
 
 ::view-transition-new(recipe-content) {
   animation-name: content-in;
-  animation-duration: 220ms;
+  animation-duration: 200ms;
 }
 
 @keyframes content-out {
-  to { opacity: 0; transform: scale(0.985); }
+  to { opacity: 0; transform: scale(0.996); }
 }
 
 @keyframes content-in {
-  from { opacity: 0; transform: scale(0.985); }
+  from { opacity: 0; transform: scale(0.996); }
 }
 
 /* The measured face slides and resizes; labels stay sharp in their buttons.
@@ -105,6 +105,10 @@
   transition: transform 200ms var(--ease-spring);
 }
 
+.controls .ctl--turn {
+  transition: transform 200ms var(--ease-spring), opacity 200ms var(--ease-out);
+}
+
 .controls button:not(:disabled):active,
 .controls .ctl--contents:active,
 .book [role='group'] > button[aria-pressed]:active {
@@ -125,10 +129,15 @@
     opacity 180ms var(--ease-out);
 }
 
-/* A static gradient paints once; only its opacity follows the moving leaf. */
-.book--wide .face--front > .shade,
-.book--wide .face--back > .shade {
+/* A static gradient paints once; only its opacity follows the moving leaf.
+   Front (right page) has its spine on the left (90deg); back (left page) has its spine on the right (270deg). */
+.book--wide .face--front > .shade {
   background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
+    color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
+}
+
+.book--wide .face--back > .shade {
+  background: linear-gradient(270deg, color-mix(in srgb, var(--ink) 50%, transparent), transparent 24%,
     color-mix(in srgb, var(--ground) 18%, transparent) 78%, color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
@@ -152,7 +161,8 @@
   .book [role='group'] > button[aria-pressed],
   .scaler-chip,
   .scaler-step,
-  .scaler-custom { transition: none; animation: none; }
+  .scaler-custom,
+  .scale-note { transition: none; animation: none; }
 
   .book .btn:is(:active, :hover),
   .book .btn:hover .btn-icon,
@@ -188,7 +198,7 @@
   ::view-transition-group(book-controls) {
     border-radius: var(--r-pill);
     overflow: hidden;
-    box-shadow: 4px 4px 0 var(--choc);
+    box-shadow: 4px 5px 0 var(--choc);
   }
   ::view-transition-new(book-controls) {
     mix-blend-mode: normal;

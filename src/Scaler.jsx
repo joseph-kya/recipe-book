@@ -116,24 +116,7 @@ export default function Scaler({ recipe, text, textLang, t }) {
         })}
         <span className="scaler-indicator" aria-hidden="true" />
       </div>
-      <button
-        type="button"
-        className="scaler-chip scaler-chip--custom"
-        aria-pressed={custom}
-        onClick={() => {
-          if (custom) return field.current?.focus();
-          opening.current = true;
-          setCustom(factor);
-        }}
-      >
-        {t.custom}
-      </button>
-      {y && (
-        <span className="scaler-unit" lang={textLang} aria-hidden="true">
-          {y.label}
-        </span>
-      )}
-      {custom && (
+      {custom ? (
         <div className="scaler-custom" role="group" aria-label={t.customAmount}>
           <button type="button" className="scaler-step" aria-label={t.less} onClick={() => step(-1)} disabled={shown <= min}>
             −
@@ -156,6 +139,8 @@ export default function Scaler({ recipe, text, textLang, t }) {
               if (e.key === 'Enter') {
                 clearTimeout(timer.current);
                 commit(draft);
+              } else if (e.key === 'Escape') {
+                e.currentTarget.blur();
               } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
                 // inside the field, arrows step the amount (never turn the page)
                 e.preventDefault();
@@ -175,6 +160,23 @@ export default function Scaler({ recipe, text, textLang, t }) {
             </span>
           )}
         </div>
+      ) : (
+        <button
+          type="button"
+          className="scaler-chip scaler-chip--custom"
+          aria-pressed="false"
+          onClick={() => {
+            opening.current = true;
+            setCustom(factor, { animate: false });
+          }}
+        >
+          {t.custom}
+        </button>
+      )}
+      {y && (
+        <span className="scaler-unit" lang={textLang} aria-hidden="true">
+          {y.label}
+        </span>
       )}
     </div>
   );

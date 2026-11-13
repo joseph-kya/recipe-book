@@ -70,7 +70,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
       <button
         type="button"
         className="ctl ctl--turn ctl--prev"
-        onClick={onPrev}
+        onClick={(e) => onPrev(e.detail === 0)}
         disabled={index === 0}
         aria-label={t.prev}
       >
@@ -95,7 +95,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
           {index + 1}/{last + 1}
         </span>
         <Segments label={t.language} value={lang} onChange={setLang} options={[
-          { value: 'en', short: 'EN', long: t.languageEnglish, lang, className: 'lang-btn' },
+          { value: 'en', short: 'EN', long: t.languageEnglish, lang: 'en', className: 'lang-btn' },
           { value: 'de', short: 'DE', long: t.languageGerman, lang: 'de', className: 'lang-btn' },
         ]} />
         <Segments label={t.units} value={units} onChange={setUnits} options={[
@@ -107,7 +107,7 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
       <button
         type="button"
         className="ctl ctl--turn ctl--next"
-        onClick={onNext}
+        onClick={(e) => onNext(e.detail === 0)}
         disabled={index === last}
         aria-label={t.next}
       >

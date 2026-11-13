@@ -1610,8 +1610,9 @@ button {
   .ctl--contents:hover {
     background-color: color-mix(in srgb, var(--ink) 8%, transparent);
   }
-  .controls--wide .ctl--contents:hover {
-    background-color: color-mix(in srgb, var(--ground) 12%, transparent);
+  .controls--wide .ctl--contents:not([aria-current='page']):hover {
+    background-color: color-mix(in srgb, var(--ground) 18%, transparent);
+    transform: translateY(-1px);
   }
 }
 
@@ -1642,7 +1643,7 @@ button {
   border-radius: var(--r-pill);
   font-family: var(--badge);
   font-size: var(--fs-m);
-  transition: transform var(--press) var(--ease-out), background-color 160ms ease;
+  transition: transform var(--press) var(--ease-out);
 }
 
 .ctl--contents:active {
@@ -1651,7 +1652,21 @@ button {
 }
 
 .controls--wide .ctl--contents:active {
-  background-color: color-mix(in srgb, var(--ground) 14%, transparent);
+  background-color: color-mix(in srgb, var(--ground) 20%, transparent);
+}
+
+.controls--narrow .ctl--contents[aria-current='page'] {
+  background: var(--choc);
+  color: var(--cream);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, white 18%, transparent);
+}
+
+.controls--narrow .ctl--turn:disabled {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ink) 8%, var(--cream));
+  border-color: color-mix(in srgb, var(--choc) 28%, transparent);
+  color: color-mix(in srgb, var(--choc) 36%, transparent);
+  box-shadow: none;
 }
 
 .ctl-count {
@@ -1857,6 +1872,24 @@ button {
 .controls--wide .ctl-count {
   display: grid;
   place-items: center;
+  min-height: 2.25rem;
+  min-width: 3.25rem;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--ground) 12%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+.controls--wide .ctl--contents {
+  padding: 0 var(--sp-4);
+  border: 2px solid color-mix(in srgb, var(--cream) 60%, transparent);
+  background: color-mix(in srgb, var(--ground) 10%, transparent);
+}
+
+.controls--wide .ctl--contents[aria-current='page'] {
+  background: var(--cream);
+  color: var(--choc);
+  border-color: var(--cream);
 }
 
 .controls--wide .ctl--turn {
@@ -1913,14 +1946,6 @@ button {
 .controls--wide {
   --ring-in: var(--choc);
   --ring-out: var(--cream);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .controls--wide .ctl--contents:hover {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-  }
 }
 
 /* Reduced motion: no flips anywhere, only the 200 ms crossfade. */

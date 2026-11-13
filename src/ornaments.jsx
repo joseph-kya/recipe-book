@@ -38,6 +38,20 @@ export function Cupcake({ className = '', bites = 0 }) {
   );
 }
 
+// A diner service bell. Colours follow the colourway.
+export function Bell({ className = '' }) {
+  return (
+    <svg className={`bell ${className}`} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <g className="cupcake-line" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M18 70 q0-30 32-30 q32 0 32 30 z" className="cupcake-cream" />
+        <path d="M44 40 v-8 h12 v8" className="cupcake-cup" />
+        <circle cx="50" cy="26" r="6" className="cupcake-cherry" />
+        <rect x="10" y="70" width="80" height="12" rx="3" className="cupcake-cup" />
+      </g>
+    </svg>
+  );
+}
+
 export function Checkers({ tone = 'choc', edge = 'top' }) {
   return <div className={`checkers checkers--${tone} checkers--${edge}`} aria-hidden="true" />;
 }

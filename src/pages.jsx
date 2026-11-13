@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { amountsCreditFor, recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { spinCupcake } from './motion.js';
-import { CUPCAKE_BITES, Checkers, Cupcake } from './ornaments.jsx';
+import { Bell, CUPCAKE_BITES, Checkers, Cupcake } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { amountsFor } from './units.js';
 import { scaleAmount, scaleStat } from './scale.js';
@@ -110,6 +110,63 @@ export function Cover({ lang }) {
 
 /* ---------- Contents: numbers and titles ---------- */
 
+// A service bell by the contents heading: tap to ding, hold to keep ringing.
+function ServiceBell({ lang }) {
+  const copy = themeText[lang] || themeText.en;
+  const [ring, setRing] = useState(''); // '' | 'ding' | 'held'
+  const [announced, setAnnounced] = useState('');
+  const [tick, setTick] = useState(0);
+  const holdRef = useRef(0);
+  const heldRef = useRef(false);
+
+  useEffect(() => () => clearTimeout(holdRef.current), []);
+
+  const ding = () => {
+    if (heldRef.current) {
+      heldRef.current = false;
+      return;
+    }
+    setRing('ding');
+    setTick((n) => n + 1);
+    setAnnounced(copy.ding);
+  };
+  const holdStart = (e) => {
+    if (e.button !== 0) return;
+    heldRef.current = false;
+    clearTimeout(holdRef.current);
+    holdRef.current = setTimeout(() => {
+      heldRef.current = true;
+      setRing('held');
+      setAnnounced(copy.ringing);
+    }, 450);
+  };
+  const holdEnd = () => {
+    clearTimeout(holdRef.current);
+    if (heldRef.current) setRing('');
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="service-bell-btn"
+        aria-label={copy.ringBell}
+        onClick={ding}
+        onPointerDown={holdStart}
+        onPointerUp={holdEnd}
+        onPointerCancel={holdEnd}
+        onPointerLeave={holdEnd}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        <Bell key={ring === 'ding' ? tick : ring} className={`service-bell${ring ? ` service-bell--${ring}` : ''}`} />
+      </button>
+      <span className="sr-only" aria-live="polite">
+        {announced}
+      </span>
+    </>
+  );
+}
+
 // Wide: the left page of the contents spread carries its heading and an ornament.
 function ContentsLeft({ lang }) {
   const t = ui[lang];
@@ -121,6 +178,7 @@ function ContentsLeft({ lang }) {
           <Cupcake className="contents-cupcake" />
         </div>
         <h1 className="contents-title">{t.contents}</h1>
+        <ServiceBell lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -141,7 +199,12 @@ function ContentsList({ lang, withTitle = false }) {
     <div className="page-body contents">
       <Checkers tone="choc" edge="top" />
       <div className="page-pad">
-        {withTitle && <h1 className="contents-title">{t.contents}</h1>}
+        {withTitle && (
+          <div className="contents-head">
+            <h1 className="contents-title">{t.contents}</h1>
+            <ServiceBell lang={lang} />
+          </div>
+        )}
         <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
           {recipes.map((r) => {
             const { text, lang: textLang } = textFor(r, lang);

@@ -718,6 +718,64 @@ button {
   background: var(--choc);
 }
 
+/* Service bell: tap to ding, hold to keep ringing. Flat, transform only. */
+.contents-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.service-bell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: var(--sp-1);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 140ms var(--ease-out);
+}
+.service-bell-btn:active {
+  transform: scale(0.95);
+}
+.service-bell {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  transform-origin: 50% 85%;
+}
+.service-bell--ding {
+  animation: bell-ding 420ms var(--ease-out);
+}
+.service-bell--held {
+  animation: bell-ring 220ms ease-in-out infinite;
+}
+@keyframes bell-ding {
+  0% { transform: scale(1, 0.86); }
+  30% { transform: scale(1, 1.06) rotate(-6deg); }
+  60% { transform: rotate(5deg); }
+  100% { transform: none; }
+}
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-bell--ding,
+  .service-bell--held {
+    animation: none;
+  }
+  .service-bell--held {
+    transform: scale(1, 0.9);
+  }
+}
+
 .contents-medallion {
   display: grid;
   place-items: center;

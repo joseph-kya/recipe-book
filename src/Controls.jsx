@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { ui } from './i18n.js';
-import { flipLabel } from './motion.js';
+import { createTapHandlers, flipLabel } from './motion.js';
 import { Arrow } from './ornaments.jsx';
 import { AwakeToggle } from './Awake.jsx';
 
@@ -9,19 +9,33 @@ function TapToggle({ value, text, label, className, onToggle }) {
   const inRef = useRef(null);
   const outRef = useRef(null);
   const animRef = useRef(null);
+  const pressRef = useRef(null);
+  const downRef = useRef(false);
+  const releasedAtRef = useRef(-1);
   const prev = useRef({ value, text });
 
-  useEffect(() => () => animRef.current?.cancel(), []);
+  const tapHandlers = useMemo(
+    () => createTapHandlers({ btnRef, pressRef, releasedAtRef, downRef }),
+    [],
+  );
+
+  useEffect(() => () => {
+    animRef.current?.cancel();
+    pressRef.current?.cancel();
+  }, []);
 
   useLayoutEffect(() => {
     const old = prev.current;
     prev.current = { value, text };
     if (old.value === value) return;
+    const fromPointer = releasedAtRef.current >= 0 && performance.now() - releasedAtRef.current < 80;
+    releasedAtRef.current = -1;
     flipLabel(inRef.current, {
-      button: btnRef.current,
+      button: fromPointer ? null : btnRef.current,
       outgoing: outRef.current,
       outgoingText: old.text,
       animRef,
+      buttonAnimRef: pressRef,
     });
   }, [value, text]);
 
@@ -32,6 +46,7 @@ function TapToggle({ value, text, label, className, onToggle }) {
       className={`ctl ctl--toggle ${className}`}
       aria-label={label}
       title={label}
+      {...tapHandlers}
       onClick={onToggle}
     >
       <span className="ctl-flip-box">

@@ -33,15 +33,32 @@ test('CSS keeps flat retro look, 44px mobile targets, and reduced-motion fallbac
   assert.doesNotMatch(motionCss, /\.seg-indicator|\.seg-label-active|\.seg-btn/);
   assert.match(stylesCss, /min-width:\s*44px;\s*min-height:\s*44px;/);
   assert.match(stylesCss, /\.ctl--toggle\b[\s\S]*overflow:\s*hidden;/);
+  assert.match(stylesCss, /\.ctl--awake\b[\s\S]*overflow:\s*hidden;/);
   assert.match(stylesCss, /\.ctl-flip-box\b/);
   assert.match(stylesCss, /\.ctl-flip--out\[hidden\]\s*\{\s*display:\s*none;\s*\}/);
   assert.match(controlsSrc, /className="ctl-flip-box"/);
   assert.match(controlsSrc, /className="ctl-flip ctl-flip--out"\s+aria-hidden="true"\s+hidden/);
   assert.match(controlsSrc, /className="ctl-flip ctl-flip--in"/);
+  assert.match(awakeSrc, /className="ctl-flip-box"/);
+  assert.match(awakeSrc, /className="ctl-flip ctl-flip--out"\s+aria-hidden="true"\s+hidden/);
+  assert.match(awakeSrc, /className="ctl-flip ctl-flip--in"/);
   assert.match(stylesCss, /\.ctl--awake\[aria-pressed='true'\]/);
+  assert.match(motionCss, /\.controls button:not\(:disabled\):not\(\.ctl--toggle\):not\(\.ctl--awake\):active/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl-flip/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--toggle/);
   assert.match(motionCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.ctl--awake/);
+});
+
+test('EN/DE, cups/g, and sun toggles share pointerdown squash, bouncy release, and label flip without delaying clicks', () => {
+  assert.match(controlsSrc, /createTapHandlers/);
+  assert.match(controlsSrc, /flipLabel\(/);
+  assert.match(controlsSrc, /\{\.\.\.tapHandlers\}/);
+  assert.match(awakeSrc, /createTapHandlers/);
+  assert.match(awakeSrc, /flipLabel\(/);
+  assert.match(awakeSrc, /preserveOutgoing:\s*true/);
+  assert.match(awakeSrc, /\{\.\.\.tapHandlers\}/);
+  assert.match(stylesCss, /\.ctl--awake\b[\s\S]*touch-action:\s*manipulation;/);
+  assert.match(stylesCss, /\.ctl--toggle\b[\s\S]*touch-action:\s*manipulation;/);
 });
 
 test('language and unit toggles commit immediately without blocking ViewTransition or layout jumps', () => {

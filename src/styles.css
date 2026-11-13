@@ -275,6 +275,12 @@ button {
   transform-origin: left center;
 }
 
+/* Give the turning sheet a crisp paper edge and cast shadow over the page below. */
+.book--narrow .face--front {
+  border-right: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: 10px 0 26px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
 /* Wide: an open book on a diner-tile table. */
 .stage--wide {
   background-color: var(--table);
@@ -320,6 +326,18 @@ button {
   transform-origin: left center;
   border-radius: 0 var(--r-m) var(--r-m) 0;
   box-shadow: inset 22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.book--wide .face--L:is(.face--rest, .face--under-l) {
+  box-shadow:
+    inset -22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent),
+    0 18px 36px -8px color-mix(in srgb, black 46%, transparent);
+}
+
+.book--wide .face--R:is(.face--rest, .face--under-r) {
+  box-shadow:
+    inset 22px 0 26px -18px color-mix(in srgb, var(--ink) 35%, transparent),
+    0 18px 36px -8px color-mix(in srgb, black 46%, transparent);
 }
 
 /* ---------- shared bits ---------- */
@@ -471,7 +489,7 @@ button {
 }
 
 .btn:focus-visible {
-  box-shadow: 0 0 0 3px var(--ring-in, var(--cream)), var(--btn-shadow);
+  box-shadow: var(--btn-highlight), 0 0 0 3px var(--ring-in, var(--cream)), var(--btn-shadow);
 }
 
 .btn--cherry {
@@ -1876,6 +1894,14 @@ button {
   transition-timing-function: var(--ease-out);
 }
 
+.ctl--prev:active:not(:disabled) .arrow-icon {
+  transform: translateX(-2px);
+}
+
+.ctl--next:active:not(:disabled) .arrow-icon {
+  transform: translateX(2px);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .ctl--turn:not(:disabled):hover {
     --turn-shadow: 3px 4px 0 var(--choc);
@@ -1893,8 +1919,14 @@ button {
     transition-duration: 85ms;
     transition-timing-function: var(--ease-out);
   }
-  .ctl--contents:hover {
-    background-color: color-mix(in srgb, var(--ink) 8%, transparent);
+  .ctl--prev:not(:disabled):active .arrow-icon {
+    transform: translateX(-2px);
+  }
+  .ctl--next:not(:disabled):active .arrow-icon {
+    transform: translateX(2px);
+  }
+  .controls--narrow .ctl--contents:not([aria-current='page']):hover {
+    background-color: color-mix(in srgb, var(--ink) 10%, transparent);
   }
   .controls--wide .ctl--contents:not([aria-current='page']):hover {
     background-color: color-mix(in srgb, var(--ground) 18%, transparent);
@@ -2058,6 +2090,15 @@ button {
 .controls--narrow .ctl--contents {
   width: 3rem;
   padding: 0;
+  border: 2px solid color-mix(in srgb, var(--choc) 28%, transparent);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.controls--narrow .ctl--contents[aria-current='page'] {
+  background: var(--choc);
+  border-color: var(--choc);
+  color: var(--cream);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, white 18%, transparent);
 }
 
 .controls--narrow .ctl--turn {
@@ -2152,14 +2193,14 @@ button {
   font-size: var(--fs-s);
   font-weight: 400;
   line-height: 1;
-  min-height: 3rem;
+  min-height: 2.75rem;
 }
 
 .controls--wide .ctl-count {
   display: grid;
   place-items: center;
   min-height: 2.25rem;
-  min-width: 3.25rem;
+  min-width: 3.5rem;
   padding: 0 var(--sp-3);
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--ground) 12%, transparent);
@@ -2194,6 +2235,32 @@ button {
   right: calc(50% - var(--pw) - 5.25rem);
 }
 
+.controls--wide .ctl-middle {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  gap: 0.55rem;
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--table) 90%, black);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid color-mix(in srgb, var(--cream) 40%, transparent);
+  border-radius: var(--r-pill);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--cream) 18%, transparent),
+    0 8px 22px color-mix(in srgb, black 38%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .controls--wide .ctl-middle {
+    background: var(--table);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 @media (max-width: 1279px) {
   .controls--wide .ctl--turn {
     top: auto;
@@ -2206,17 +2273,8 @@ button {
     right: 1.5rem;
   }
   .controls--wide .ctl-middle {
-    bottom: 1.5rem;
+    bottom: 1rem;
   }
-}
-
-.controls--wide .ctl-middle {
-  position: fixed;
-  z-index: 20;
-  left: 50%;
-  bottom: 1.5rem;
-  transform: translateX(-50%);
-  gap: 0.75rem;
 }
 
 .controls--wide .seg {

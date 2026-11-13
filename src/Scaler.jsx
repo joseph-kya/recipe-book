@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { slidePill } from './motion.js';
 import { clampFactor, CUSTOM_MAX, CUSTOM_MIN, factorLabel, scaleStat, yieldStat } from './scale.js';
 import { useScale } from './useScale.js';
 
@@ -21,7 +22,11 @@ export default function Scaler({ recipe, text, textLang, t }) {
   const field = useRef(null);
   const opening = useRef(false);
   const groupRef = useRef(null);
+  const animRef = useRef(null);
+  const prevSelection = useRef({ factor, custom });
   const labels = offered.map((f) => (y ? scaleStat(y.value, f) : factorLabel(f))).join('|');
+
+  useEffect(() => () => animRef.current?.cancel(), []);
 
   useLayoutEffect(() => {
     const group = groupRef.current;
@@ -29,28 +34,26 @@ export default function Scaler({ recipe, text, textLang, t }) {
     const indicator = group.querySelector('.scaler-indicator');
     const buttons = [...group.querySelectorAll('.scaler-chip')];
     let disposed = false;
-    const measure = () => {
+    const prev = prevSelection.current;
+    prevSelection.current = { factor, custom };
+    const animate = !custom && !prev.custom && prev.factor !== factor;
+
+    const measure = (shouldAnimate = false) => {
       if (disposed || !indicator) return;
       const active = group.querySelector('[aria-pressed="true"]');
-      if (!active) {
-        indicator.dataset.hidden = 'true';
-        return;
-      }
-      delete indicator.dataset.hidden;
-      indicator.style.width = `${active.offsetWidth}px`;
-      indicator.style.transform = `translateX(${active.offsetLeft}px)`;
-      group.dataset.ready = 'true';
+      slidePill(group, indicator, active, { animate: shouldAnimate, animRef });
     };
-    measure();
-    const observer = new ResizeObserver(measure);
+    measure(animate);
+    const observer = new ResizeObserver(() => measure(false));
     observer.observe(group);
     buttons.forEach((b) => observer.observe(b));
-    document.fonts?.ready.then(measure);
-    document.fonts?.addEventListener('loadingdone', measure);
+    const onFonts = () => measure(false);
+    document.fonts?.ready.then(onFonts);
+    document.fonts?.addEventListener('loadingdone', onFonts);
     return () => {
       disposed = true;
       observer.disconnect();
-      document.fonts?.removeEventListener('loadingdone', measure);
+      document.fonts?.removeEventListener('loadingdone', onFonts);
     };
   }, [factor, custom, labels]);
 

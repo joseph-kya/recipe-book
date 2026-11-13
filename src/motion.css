@@ -38,8 +38,8 @@
   from { opacity: 0; transform: scale(0.996); }
 }
 
-/* The measured face slides and resizes; labels stay sharp in their buttons.
-   CSS transitions retarget from the current position on rapid reversals. */
+/* The measured face slides and resizes via WAAPI transform (never animating layout
+   width), starting from the live visual rect on rapid reversals. */
 .seg-indicator {
   position: absolute;
   top: var(--seg-inset);
@@ -49,9 +49,7 @@
   border-radius: var(--r-pill);
   pointer-events: none;
   background: var(--choc);
-  transition:
-    transform 240ms var(--ease-spring),
-    width 220ms var(--ease-out);
+  transform-origin: left center;
   visibility: hidden;
 }
 
@@ -167,13 +165,14 @@
   .book .btn:is(:active, :hover),
   .book .btn:hover .btn-icon,
   .controls button:not(:disabled):is(:active, :hover),
-  .controls .ctl--turn:not(:disabled):hover .arrow-icon,
+  .controls .ctl--turn:not(:disabled):is(:hover, :active) .arrow-icon,
   .controls .ctl--contents:active,
   .seg:has(> .seg-btn:active) .seg-label-active,
   .book .toc-link:is(:active, :hover),
   .book .toc-link:is(:active, :hover) :is(.toc-no, .toc-text),
   .book [role='group'] > button[aria-pressed]:active,
   .scaler-chip:active,
+  .scaler-chip--custom:is(:hover, :active),
   .scaler-step:active:not(:disabled) { transform: none; }
 
   .controls--narrow { transition: opacity 150ms var(--ease-out); }
@@ -188,6 +187,13 @@
 ::view-transition-new(book-controls) {
   animation: none;
 }
+::view-transition-group(book-controls) {
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+::view-transition-new(book-controls) {
+  mix-blend-mode: normal;
+}
 ::view-transition-old(book-controls) {
   display: none;
 }
@@ -196,12 +202,7 @@
    the live nav: its keyboard focus rings must remain free to paint outside. */
 @media (max-width: 959px), (max-height: 559px) {
   ::view-transition-group(book-controls) {
-    border-radius: var(--r-pill);
-    overflow: hidden;
     box-shadow: 4px 5px 0 var(--choc);
-  }
-  ::view-transition-new(book-controls) {
-    mix-blend-mode: normal;
   }
 }
 @media (max-width: 359px) {

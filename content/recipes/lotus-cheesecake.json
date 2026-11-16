@@ -1,0 +1,405 @@
+{
+  "slug": "lotus-cheesecake",
+  "route": "lotus-cheesecake",
+  "number": 6,
+  "source": {
+    "site": "Einfach Backen",
+    "author": "Anna-Lena Zwar",
+    "url": "https://www.einfachbacken.de/rezepte/lotus-cheesecake-das-beste-rezept-ohne-backen"
+  },
+  "conversions": "approx. cups; crumbs ~100 g/cup, cream cheese ~232 g/cup, Lotus spread ~16–17 g/tbsp, icing sugar 113 g/cup",
+  "amounts_credit": {
+    "en": {
+      "label": "Cup conversions",
+      "src": "approx. (King Arthur + crumbs ~100 g/cup, cream cheese ~232 g/cup)"
+    },
+    "de": {
+      "label": "Tassenumrechnung",
+      "src": "ungefähr (King Arthur + Kekskrümel ~100 g/Tasse, Frischkäse ~232 g/Tasse)"
+    },
+    "fr": {
+      "label": "Conversions en tasses",
+      "src": "approx. (King Arthur + miettes ~100 g/tasse, fromage frais ~232 g/tasse)"
+    }
+  },
+  "en": {
+    "title": "Lotus Cheesecake",
+    "title_lines": [
+      "Lotus",
+      "Cheesecake"
+    ],
+    "tagline": "Crunchy base, creamy middle, Lotus all the way.",
+    "sticker": [
+      "No bake.",
+      "Just chill."
+    ],
+    "intro": "A crunchy Lotus base, a creamy cream-cheese middle, and a melted Biscoff topping. No oven, no gelatin — just two long chills.",
+    "stats": [
+      {
+        "value": "30 min",
+        "label": "prep"
+      },
+      {
+        "value": "2 hrs",
+        "label": "chill (1 + 1)"
+      },
+      {
+        "value": "~12",
+        "label": "slices, 20 cm tin"
+      }
+    ],
+    "equipment": "20 cm (8-in) springform, baking paper, mini chopper or bag + rolling pin, small pan, cake ring, cake plate.",
+    "ingredients_headline": "The good stuff",
+    "groups": [
+      {
+        "title": "The base",
+        "items": [
+          {
+            "amount": "2 cups crumbs",
+            "metric": "200 g",
+            "name": "Lotus Biscoff biscuits",
+            "note": "about 32 biscuits"
+          },
+          {
+            "amount": "4 tbsp + ¾ tsp",
+            "metric": "60 g",
+            "name": "butter",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "The filling",
+        "items": [
+          {
+            "amount": "3 cups",
+            "metric": "700 g",
+            "name": "full-fat cream cheese",
+            "note": "Doppelrahmstufe"
+          },
+          {
+            "amount": "¾ cup (12 tbsp)",
+            "metric": "200 g",
+            "name": "Lotus Biscoff spread",
+            "note": "bought or homemade"
+          },
+          {
+            "amount": "scant ½ cup (7 tbsp)",
+            "metric": "50 g",
+            "name": "icing sugar",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "The topping & décor",
+        "items": [
+          {
+            "amount": "¾ cup (12 tbsp)",
+            "metric": "200 g",
+            "name": "Lotus Biscoff spread",
+            "note": "bought or homemade"
+          },
+          {
+            "amount": "6",
+            "metric": "6",
+            "name": "Lotus Biscoff biscuits",
+            "note": "crush 5; leave 1 whole"
+          }
+        ]
+      }
+    ],
+    "method_headline": "Let's make a mess.",
+    "steps": [
+      {
+        "title": "Crush + melt.",
+        "text": "Grind the 200 g biscuits to fine crumbs in a mini chopper (or crush them in a freezer bag with a rolling pin). Melt the butter in a small pan on low heat. Stir in the crumbs.",
+        "cue": "Fine crumbs, evenly moist with butter."
+      },
+      {
+        "title": "Press the base.",
+        "text": "Line a 20 cm springform with baking paper. Tip in the crumb mix and press it smooth with a spoon or the back of a glass.",
+        "cue": "Even, compact base, no gaps."
+      },
+      {
+        "title": "Fill + first chill.",
+        "text": "Stir the cream cheese with the 200 g spread and the icing sugar. Spread it on the base and smooth the top. Chill at least 1 hour. Loosen with a hot knife, move to a cake plate, and clamp a cake ring around it.",
+        "cue": "Smooth filling, fully chilled before unmoulding."
+      },
+      {
+        "title": "Melt the topping.",
+        "text": "Melt the remaining 200 g spread in a pan on low heat, stirring. Too hot and it scorches. Pour over the chilled cheesecake and smooth. Chill at least 1 hour more.",
+        "cue": "Pourable, not bubbling or browned."
+      },
+      {
+        "title": "Décor, then slice.",
+        "text": "Just before serving, crush 5 of the 6 biscuits and sprinkle the crumbs around the edge of the topping. Set the last biscuit in the centre. Ease off the ring (hot knife around the edge first). About 12 slices. Keeps 3–4 days chilled.",
+        "cue": "Ring off cleanly; crumbs only on the rim."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Cups are approximate.",
+        "text": "Crumbs ~100 g/cup (~32 biscuits for the base; 1 Lotus ≈ 6.25 g). Cream cheese ~232 g/cup, so 700 g is almost exactly 3 cups. Lotus spread ~16–17 g/tbsp, so ¾ cup is close. Icing sugar at 113 g/cup (King Arthur)."
+      },
+      {
+        "title": "No oven, no gelatin.",
+        "text": "It sets in the fridge. A cake ring holds the sides after you unmould. Einfach Backen also suggests fresh berries on top, or lemon zest in the filling. 4354 kcal for the whole cake (their figure)."
+      }
+    ]
+  },
+  "de": {
+    "title": "Lotus Cheesecake",
+    "title_lines": [
+      "Lotus",
+      "Cheesecake"
+    ],
+    "tagline": "Knuspriger Boden, cremige Mitte, durch und durch Lotus.",
+    "sticker": [
+      "Ohne Backen.",
+      "Einfach kühlen."
+    ],
+    "intro": "Ein knuspriger Lotus-Boden, eine cremige Frischkäse-Schicht und geschmolzene Biscoff-Creme obendrauf. Kein Ofen, keine Gelatine — nur zweimal geduldig kühlen.",
+    "stats": [
+      {
+        "value": "30 min",
+        "label": "Zubereitung"
+      },
+      {
+        "value": "2 h",
+        "label": "Kühlzeit (1 + 1)"
+      },
+      {
+        "value": "~12",
+        "label": "Stücke, 20-cm-Form"
+      }
+    ],
+    "equipment": "Springform 20 cm (8 Zoll), Backpapier, kleiner Zerkleinerer oder Gefrierbeutel + Nudelholz, kleiner Topf, Tortenring, Tortenplatte.",
+    "ingredients_headline": "Das gute Zeug",
+    "groups": [
+      {
+        "title": "Der Boden",
+        "items": [
+          {
+            "amount": "2 Tassen Krümel",
+            "metric": "200 g",
+            "name": "Lotus Biscoff Kekse",
+            "note": "etwa 32 Kekse"
+          },
+          {
+            "amount": "4 EL + ¾ TL",
+            "metric": "60 g",
+            "name": "Butter",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "Die Füllung",
+        "items": [
+          {
+            "amount": "3 Tassen",
+            "metric": "700 g",
+            "name": "Frischkäse",
+            "note": "Doppelrahmstufe"
+          },
+          {
+            "amount": "¾ Tasse (12 EL)",
+            "metric": "200 g",
+            "name": "Lotus Biscoff Creme",
+            "note": "gekauft oder selbstgemacht"
+          },
+          {
+            "amount": "knapp ½ Tasse (7 EL)",
+            "metric": "50 g",
+            "name": "Puderzucker",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "Topping & Deko",
+        "items": [
+          {
+            "amount": "¾ Tasse (12 EL)",
+            "metric": "200 g",
+            "name": "Lotus Biscoff Creme",
+            "note": "gekauft oder selbstgemacht"
+          },
+          {
+            "amount": "6",
+            "metric": "6",
+            "name": "Lotus Biscoff Kekse",
+            "note": "5 zerbröseln; 1 ganz lassen"
+          }
+        ]
+      }
+    ],
+    "method_headline": "Jetzt wird's chaotisch.",
+    "steps": [
+      {
+        "title": "Zerbröseln + schmelzen.",
+        "text": "Die 200 g Kekse im kleinen Zerkleinerer fein mahlen (oder im Gefrierbeutel mit dem Nudelholz zerdrücken). Die Butter in einem kleinen Topf bei schwacher Hitze schmelzen. Die Krümel unterrühren.",
+        "cue": "Feine Krümel, gleichmäßig von Butter durchfeuchtet."
+      },
+      {
+        "title": "Boden andrücken.",
+        "text": "Eine 20-cm-Springform mit Backpapier auslegen. Die Krümelmasse hineingeben und mit einem Löffel oder dem Boden eines Glases glatt drücken.",
+        "cue": "Gleichmäßiger, kompakter Boden ohne Lücken."
+      },
+      {
+        "title": "Füllen + erstes Kühlen.",
+        "text": "Frischkäse mit den 200 g Creme und dem Puderzucker verrühren. Auf den Boden streichen und glattziehen. Mindestens 1 Stunde kaltstellen. Mit einem heißen Messer vom Rand lösen, auf eine Tortenplatte setzen und einen Tortenring darum spannen.",
+        "cue": "Glatte Füllung, vor dem Ausformen gut durchgekühlt."
+      },
+      {
+        "title": "Topping schmelzen.",
+        "text": "Die restlichen 200 g Creme in einem Topf unter Rühren bei schwacher Hitze schmelzen. Zu heiß und sie brennt an. Über den gekühlten Cheesecake gießen und glattstreichen. Noch mindestens 1 Stunde kaltstellen.",
+        "cue": "Gießfähig, nicht blubbernd oder gebräunt."
+      },
+      {
+        "title": "Deko, dann anschneiden.",
+        "text": "Kurz vor dem Servieren 5 der 6 Kekse zerbröseln und die Krümel am Rand des Toppings verteilen. Den letzten Keks in die Mitte setzen. Den Tortenring vorsichtig abnehmen (vorher mit einem heißen Messer am Rand entlangfahren). Ergibt ca. 12 Stücke. Hält gekühlt 3–4 Tage.",
+        "cue": "Ring löst sich sauber; Krümel nur am Rand."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Tassen sind Schätzwerte.",
+        "text": "Krümel ~100 g/Tasse (~32 Kekse für den Boden; 1 Lotus ≈ 6,25 g). Frischkäse ~232 g/Tasse, damit sind 700 g fast genau 3 Tassen. Lotus-Creme ~16–17 g/EL, ¾ Tasse kommt also gut hin. Puderzucker nach King Arthur 113 g/Tasse."
+      },
+      {
+        "title": "Kein Ofen, keine Gelatine.",
+        "text": "Er wird im Kühlschrank fest. Ein Tortenring hält die Seiten nach dem Ausformen in Form. Einfach Backen schlägt außerdem frische Beeren obendrauf vor oder Zitronenabrieb in der Füllung. 4354 kcal für den ganzen Kuchen (deren Angabe)."
+      }
+    ],
+    "conversions": "Ungefähre Tassenangaben; Krümel ~100 g/Tasse, Frischkäse ~232 g/Tasse, Lotus-Creme ~16–17 g/EL, Puderzucker 113 g/Tasse"
+  },
+  "fr": {
+    "title": "Cheesecake au Lotus",
+    "title_lines": [
+      "Cheesecake",
+      "au Lotus"
+    ],
+    "tagline": "Base croquante, cœur crémeux, Lotus de bout en bout.",
+    "sticker": [
+      "Sans cuisson.",
+      "Juste au frais."
+    ],
+    "intro": "Une base croquante aux Lotus, une couche crémeuse au fromage frais et un nappage de pâte à tartiner Biscoff fondue. Sans four, sans gélatine — juste deux longs passages au frais.",
+    "stats": [
+      {
+        "value": "30 min",
+        "label": "préparation"
+      },
+      {
+        "value": "2 h",
+        "label": "au frais (1 + 1)"
+      },
+      {
+        "value": "~12",
+        "label": "parts, moule 20 cm"
+      }
+    ],
+    "equipment": "Moule à charnière de 20 cm (8 po), papier cuisson, mini-hachoir ou sachet + rouleau à pâtisserie, petite casserole, cercle à pâtisserie, plat à gâteau.",
+    "ingredients_headline": "Les bonnes choses",
+    "groups": [
+      {
+        "title": "La base",
+        "items": [
+          {
+            "amount": "2 tasses de miettes",
+            "metric": "200 g",
+            "name": "biscuits Lotus Biscoff",
+            "note": "environ 32 biscuits"
+          },
+          {
+            "amount": "4 c. à soupe + ¾ c. à café",
+            "metric": "60 g",
+            "name": "beurre",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "La garniture",
+        "items": [
+          {
+            "amount": "3 tasses",
+            "metric": "700 g",
+            "name": "fromage frais nature",
+            "note": "entier (Doppelrahmstufe)"
+          },
+          {
+            "amount": "¾ tasse (12 c. à soupe)",
+            "metric": "200 g",
+            "name": "pâte à tartiner Lotus Biscoff",
+            "note": "du commerce ou maison"
+          },
+          {
+            "amount": "à peine ½ tasse (7 c. à soupe)",
+            "metric": "50 g",
+            "name": "sucre glace",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "Le nappage et décor",
+        "items": [
+          {
+            "amount": "¾ tasse (12 c. à soupe)",
+            "metric": "200 g",
+            "name": "pâte à tartiner Lotus Biscoff",
+            "note": "du commerce ou maison"
+          },
+          {
+            "amount": "6",
+            "metric": "6",
+            "name": "biscuits Lotus Biscoff",
+            "note": "5 émiettés ; 1 entier"
+          }
+        ]
+      }
+    ],
+    "method_headline": "On met la main à la pâte.",
+    "steps": [
+      {
+        "title": "Émietter + fondre.",
+        "text": "Mixez finement les 200 g de biscuits au mini-hachoir (ou écrasez-les dans un sac congélation au rouleau à pâtisserie). Faites fondre le beurre dans une petite casserole à feu doux. Incorporez les miettes.",
+        "cue": "Miettes fines, uniformément imbibées de beurre."
+      },
+      {
+        "title": "Tasser la base.",
+        "text": "Chemisez un moule à charnière de 20 cm de papier cuisson. Versez les miettes et tassez bien lisse avec une cuillère ou le fond d’un verre.",
+        "cue": "Base régulière et compacte, sans trous."
+      },
+      {
+        "title": "Garnir + premier froid.",
+        "text": "Mélangez le fromage frais avec les 200 g de pâte à tartiner et le sucre glace. Étalez sur la base et lissez le dessus. Réfrigérez au moins 1 heure. Détachez avec un couteau chaud, posez sur un plat à gâteau et serrez un cercle à pâtisserie autour.",
+        "cue": "Garniture lisse, bien prise avant de démouler."
+      },
+      {
+        "title": "Fondre le nappage.",
+        "text": "Faites fondre les 200 g de pâte à tartiner restants dans une casserole à feu doux en remuant. Trop chaud et ça brûle. Versez sur le cheesecake refroidi et lissez. Réfrigérez encore au moins 1 heure.",
+        "cue": "Fluide à verser, sans bouillir ni brunir."
+      },
+      {
+        "title": "Décor, puis trancher.",
+        "text": "Juste avant de servir, émiettez 5 des 6 biscuits et parsemez les miettes sur le bord du nappage. Posez le dernier biscuit au centre. Retirez délicatement le cercle (passez d’abord un couteau chaud tout autour). Environ 12 parts. Se garde 3–4 jours au frais.",
+        "cue": "Le cercle se retire net ; miettes uniquement sur le bord."
+      }
+    ],
+    "tips": [
+      {
+        "title": "Mesures approximatives.",
+        "text": "Miettes ~100 g/tasse (~32 biscuits pour la base ; 1 Lotus ≈ 6,25 g). Fromage frais ~232 g/tasse, donc 700 g font presque 3 tasses. Pâte à tartiner Lotus ~16–17 g/c. à soupe, donc ¾ tasse s’en approche. Sucre glace à 113 g/tasse (King Arthur)."
+      },
+      {
+        "title": "Sans four, sans gélatine.",
+        "text": "Il prend simplement au réfrigérateur. Un cercle à pâtisserie maintient les bords après démoulage. Einfach Backen propose aussi des fruits rouges frais dessus ou un zeste de citron dans la garniture. 4354 kcal pour le gâteau entier (leur chiffre)."
+      }
+    ],
+    "conversions": "Tasses approximatives ; miettes ~100 g/tasse, fromage frais ~232 g/tasse, pâte à tartiner Lotus ~16–17 g/c. à soupe, sucre glace 113 g/tasse"
+  }
+}

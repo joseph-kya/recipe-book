@@ -18,7 +18,7 @@ import {
 const directory = new URL('../content/recipes/', import.meta.url);
 const recipes = readdirSync(directory).filter((file) => file.endsWith('.json'))
   .map((file) => JSON.parse(readFileSync(new URL(file, directory), 'utf8')));
-const sharedText = new Set(['Fudge Brownies', 'Fudge', 'Brownies', 'Topfenschmarren', 'Topfen-', 'schmarren', 'Type 405']);
+const sharedText = new Set(['Fudge Brownies', 'Fudge', 'Brownies', 'Lotus Cheesecake', 'Lotus', 'Cheesecake', 'Topfenschmarren', 'Topfen-', 'schmarren', 'Type 405', 'Doppelrahmstufe']);
 const measurement = /^[\d\s.,~+–×¼½¾⅓⅔()%°/-]*(?:g|ml|oz|EL|TL|h|min)?(?:[\d\s.,~+–×¼½¾⅓⅔()%°/-]+(?:g|ml|oz|EL|TL|h|min)?)*$/;
 const leaks = /Unsalted swap\.|Metal pan, no cream bath\.|as published, cups \+ grams are the author's own|ingredient weight chart|\b(cups?|tbsp|tsp|pinch|size M|to taste|as needed|to dust|to serve)\b/i;
 const deLeaksInFr = /\b(Tassen?|EL|TL|Prisen?|Größe M|nach Geschmack|nach Bedarf|zum Bestäuben|zum Servieren)\b/;

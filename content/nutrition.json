@@ -671,6 +671,111 @@
         "butter or coconut oil for the pan (\"a little\")",
         "fruit or compote (to serve)"
       ]
+    },
+    "lotus-cheesecake": {
+      "servings": 12,
+      "serving_basis": "12 slices (recipe yield)",
+      "per_serving": {
+        "kcal": 541,
+        "protein": 6.0,
+        "carbs": 41.0,
+        "fat": 40.2,
+        "sugar": 26.2
+      },
+      "total": {
+        "kcal": 6492,
+        "protein": 72.2,
+        "carbs": 491.6,
+        "fat": 482.6,
+        "sugar": 314.0
+      },
+      "ingredients": [
+        {
+          "ingredient": "Lotus Biscoff biscuits (base)",
+          "grams": 200,
+          "fdc_ids": [
+            2594825
+          ],
+          "fdc_names": [
+            "LOTUS BISCOFF COOKIE PARTY SIZE, 4.4 OZ, 6 COUNT"
+          ],
+          "basis": "200 g",
+          "kcal": 968.0
+        },
+        {
+          "ingredient": "butter",
+          "grams": 60,
+          "fdc_ids": [
+            173430
+          ],
+          "fdc_names": [
+            "Butter, without salt"
+          ],
+          "basis": "60 g",
+          "kcal": 430.2
+        },
+        {
+          "ingredient": "full-fat cream cheese",
+          "grams": 700,
+          "fdc_ids": [
+            173418
+          ],
+          "fdc_names": [
+            "Cheese, cream"
+          ],
+          "basis": "700 g",
+          "kcal": 2450.0
+        },
+        {
+          "ingredient": "Lotus Biscoff spread (filling)",
+          "grams": 200,
+          "fdc_ids": [
+            2675218
+          ],
+          "fdc_names": [
+            "COOKIE BUTTER"
+          ],
+          "basis": "200 g (Corona - Lotus N.V.)",
+          "kcal": 1134.0
+        },
+        {
+          "ingredient": "icing sugar",
+          "grams": 50,
+          "fdc_ids": [
+            169656
+          ],
+          "fdc_names": [
+            "Sugars, powdered"
+          ],
+          "basis": "50 g",
+          "kcal": 194.5
+        },
+        {
+          "ingredient": "Lotus Biscoff spread (topping)",
+          "grams": 200,
+          "fdc_ids": [
+            2675218
+          ],
+          "fdc_names": [
+            "COOKIE BUTTER"
+          ],
+          "basis": "200 g (Corona - Lotus N.V.)",
+          "kcal": 1134.0
+        },
+        {
+          "ingredient": "Lotus Biscoff biscuits (décor)",
+          "grams": 37.5,
+          "fdc_ids": [
+            2594825
+          ],
+          "fdc_names": [
+            "LOTUS BISCOFF COOKIE PARTY SIZE, 4.4 OZ, 6 COUNT"
+          ],
+          "basis": "6 biscuits × 6.25 g (recipe tips)",
+          "kcal": 181.5
+        }
+      ],
+      "left_out": []
     }
   }
 }

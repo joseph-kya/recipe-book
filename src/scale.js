@@ -205,13 +205,13 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
     return `${n} ${word(lang2, 'pinch', n)}`;
   }
 
-  // qualified cups: "1 heaped cup", "scant ½ cup", "~1½ cups", "1 tasse bombée"
-  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?$`));
-  if (qual && (qual[1] || qual[3] || qual[5])) {
+  // qualified cups: "1 heaped cup", "scant ½ cup", "~1½ cups", "1 tasse bombée", "2 cups crumbs"
+  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?( crumbs| Krümel| de miettes)?$`));
+  if (qual && (qual[1] || qual[3] || qual[5] || qual[6])) {
     const n = parseNumber(qual[2]) * factor;
     const [l] = UNIT_OF[qual[4]];
     const post = qual[5] ? (n >= 2 ? qual[5].replace(/s?$/, 's') : qual[5].replace(/s$/, '')) : '';
-    return `${qual[1] || ''}${formatNumber(n, QUARTERS)}${qual[3] || ''} ${word(l, 'cup', n)}${post}`;
+    return `${qual[1] || ''}${formatNumber(n, QUARTERS)}${qual[3] || ''} ${word(l, 'cup', n)}${post}${qual[6] || ''}`;
   }
 
   // grams, millilitres and ranges of them: "175 g", "10–20 ml", "1.5 g"
@@ -293,8 +293,8 @@ export function feasible(text, factor) {
 
   if (/^\d+ (pinch(?:es)?|Prisen?|pincées?)$/.test(s)) return true;
 
-  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?$`));
-  if (qual && (qual[1] || qual[3] || qual[5])) return quarterStep(parseNumber(qual[2]) * factor);
+  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?( crumbs| Krümel| de miettes)?$`));
+  if (qual && (qual[1] || qual[3] || qual[5] || qual[6])) return quarterStep(parseNumber(qual[2]) * factor);
 
   const metric = s.match(/^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/);
   if (metric) {

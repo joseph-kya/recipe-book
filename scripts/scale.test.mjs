@@ -109,6 +109,8 @@ test('German amounts scale in German units', () => {
     ['1½ EL', 0.5, '2¼ TL'],
     ['3 EL', 2, '6 EL'],
     ['½ TL', 0.5, '¼ TL'],
+    ['2 Tassen Krümel', 0.5, '1 Tasse Krümel'],
+    ['2 Tassen Krümel', 2, '4 Tassen Krümel'],
   ];
   for (const [text, f, want] of cases) assert.equal(scaleAmount(text, f, 'de'), want, `${text} × ${f}`);
   assert.equal(scaleAmount('1.5 g', 3, 'de'), '5 g');
@@ -120,6 +122,8 @@ test('French amounts scale in French units', () => {
     ['1 tasse + 1½ c. à café', 0.5, '½ tasse + ¾ c. à café'],
     ['¼ tasse + 1 c. à soupe + 2 c. à café', 0.5, '2 c. à soupe + 2½ c. à café'],
     ['2 tasses', 0.5, '1 tasse'],
+    ['2 tasses de miettes', 0.5, '1 tasse de miettes'],
+    ['2 tasses de miettes', 2, '4 tasses de miettes'],
     ['½ tasse (8 c. à soupe)', 2, '1 tasse (16 c. à soupe)'],
     ['1½ c. à soupe', 0.5, '2¼ c. à café'],
     ['3 c. à soupe', 2, '6 c. à soupe'],
@@ -141,6 +145,8 @@ test('qualifiers, parentheticals, ranges, pinches and countables', () => {
   const cases = [
     ['1 heaped cup', 2, '2 heaped cups'],
     ['1 heaped cup', 0.5, '½ heaped cup'],
+    ['2 cups crumbs', 0.5, '1 cup crumbs'],
+    ['2 cups crumbs', 2, '4 cups crumbs'],
     ['scant ½ cup', 2, 'scant 1 cup'],
     ['~1½ cups', 0.5, '~¾ cup'],
     ['½ cup (8 tbsp)', 2, '1 cup (16 tbsp)'],

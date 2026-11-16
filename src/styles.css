@@ -901,12 +901,23 @@ button {
   flex-direction: column;
 }
 
+.book--wide .contents .checkers {
+  flex: none;
+}
+
+.book--wide .contents .checkers--bottom {
+  position: static;
+}
+
 .book--wide .contents .page-pad {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding-block: var(--sp-6);
+  justify-content: safe center;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding-block: clamp(0.75rem, calc(var(--ph) * 0.025), var(--sp-6));
 }
 
 .toc li + li {

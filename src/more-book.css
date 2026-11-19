@@ -1,5 +1,4 @@
-/* Book chrome (more-book): cloth ribbon bookmark, printed cookbook page folios,
-   and flat retro hardcover/paper-edge craft. Strictly flat: zero blur/glows, zero chevrons. */
+/* Quiet page numbers and a flat bookmark, without decorative book edges. */
 
 /* ---------- page wrapper inside .face-scroll ---------- */
 
@@ -19,210 +18,11 @@
   height: 100%;
 }
 
-/* ---------- flat paper edges & center gutter (wide) ---------- */
-
-/* Replace the soft blurred gutter shadow with crisp, flat retro stepped folds (0px blur). */
-.book--wide .face--L {
-  box-shadow:
-    inset -1px 0 0 color-mix(in srgb, var(--ink) 28%, transparent),
-    inset -5px 0 0 color-mix(in srgb, var(--ink) 6%, transparent),
-    inset -11px 0 0 color-mix(in srgb, var(--ink) 2.5%, transparent),
-    inset 2px 2px 0 var(--page-edge, var(--choc)),
-    inset 0 -2px 0 var(--page-edge, var(--choc));
-}
-
-.book--wide .face--R {
-  box-shadow:
-    inset 1px 0 0 color-mix(in srgb, var(--ink) 28%, transparent),
-    inset 5px 0 0 color-mix(in srgb, var(--ink) 6%, transparent),
-    inset 11px 0 0 color-mix(in srgb, var(--ink) 2.5%, transparent),
-    inset -2px 2px 0 var(--page-edge, var(--choc)),
-    inset 0 -2px 0 var(--page-edge, var(--choc));
-}
-
-/* Closed front cover: solid hardcover board frame with no open-book gutter lines. */
-.book--wide .face--cover {
-  border-radius: 4px var(--r-m) var(--r-m) 4px;
-  box-shadow: inset 0 0 0 2px var(--page-edge, var(--choc));
-}
-
-.book--wide .face--cover .cover {
-  box-shadow: none;
-}
-
-/* Wrapper intentionally creates no stacking context so boards sit at z:0 and seam at z:2. */
-.book-edges {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* Closed cookbook resting on the diner table: stacked paper block peeking out right & bottom. */
-.book-closed-edge {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 50%;
-  z-index: 0;
-}
-
-.book-closed-pages {
-  position: absolute;
-  top: 3px;
-  right: -9px;
-  bottom: -6px;
-  left: 6px;
-  border-radius: 4px var(--r-m) var(--r-m) 4px;
-  border: 2px solid var(--page-edge, var(--choc));
-  background:
-    repeating-linear-gradient(
-      90deg,
-      var(--paper) 0 2px,
-      color-mix(in srgb, var(--ink) 26%, var(--paper)) 2px 3px
-    );
-  box-shadow: 5px 5px 0 var(--shadow);
-}
-
-/* Open cookbook cloth hardcover board framing both pages. */
-.book-board {
-  position: absolute;
-  inset: -4px -10px -6px -10px;
-  z-index: 0;
-  border-radius: calc(var(--r-m) + 3px);
-  border: 2px solid var(--page-edge, var(--choc));
-  background: var(--cover);
-  box-shadow: 6px 6px 0 var(--shadow);
-}
-
-/* Stepped flat paper-stack fore-edges on left & right of the open spread. */
-.book-stack {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  width: 6px;
-  z-index: 0;
-  border-top: 2px solid var(--page-edge, var(--choc));
-  border-bottom: 2px solid var(--page-edge, var(--choc));
-  background:
-    repeating-linear-gradient(
-      90deg,
-      var(--paper) 0 2px,
-      color-mix(in srgb, var(--ink) 28%, var(--paper)) 2px 3px
-    );
-  transition: width 220ms var(--ease-out);
-}
-
-.book-stack--L {
-  right: 100%;
-  border-left: 2px solid var(--page-edge, var(--choc));
-  border-radius: var(--r-s) 0 0 var(--r-s);
-}
-
-.book-stack--R {
-  left: 100%;
-  border-right: 2px solid var(--page-edge, var(--choc));
-  border-radius: 0 var(--r-s) var(--r-s) 0;
-}
-
-.book-stack[data-depth='1'] {
-  width: 4px;
-}
-
-.book-stack[data-depth='2'] {
-  width: 6px;
-}
-
-.book-stack[data-depth='3'] {
-  width: 8px;
-}
-
-/* Razor-crisp flat center binding seam over resting pages (below turning z:3 leaf). */
-.book-spine-seam {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  z-index: 2;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--ink) 28%, transparent);
-}
-
-/* Cloth ribbon tail tucked out the bottom of the open spine onto the diner table. */
-.book-ribbon-tail {
-  position: absolute;
-  left: 50%;
-  top: calc(100% - 1px);
-  z-index: 0;
-  transform: translateX(-50%);
-  color: var(--ink);
-}
-
-.book-ribbon-tail-svg {
-  display: block;
-  width: 1.125rem;
-  height: 1.45rem;
-}
-
-.book-ribbon-fill {
-  fill: var(--cupcake-cherry);
-}
-
-/* ---------- per-face paper edges (cover hinge + narrow phone spine/fore-edge) ---------- */
-
-/* Pressed cloth spine hinge groove near the left edge of the front cover. */
-.book-cover-hinge {
-  position: absolute;
-  top: 14px;
-  bottom: 14px;
-  left: 11px;
-  width: 4px;
-  z-index: 2;
-  pointer-events: none;
-  border-left: 1.5px solid color-mix(in srgb, var(--cover-ink) 22%, transparent);
-  border-right: 1.5px solid color-mix(in srgb, var(--shadow) 38%, transparent);
-}
-
-.book--narrow .book-cover-hinge {
-  left: 8px;
-}
-
-/* Phone interior spine binding strip on the left edge (stays well inside the 18px pad). */
-.book-spine-strip {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 4px;
-  z-index: 2;
-  pointer-events: none;
-  background: color-mix(in srgb, var(--ink) 7%, var(--ground));
-  border-right: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
-}
-
-/* Phone fore-edge paper stack cue along the right edge when more pages lie ahead. */
-.book-fore-edge {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 4px;
-  z-index: 2;
-  pointer-events: none;
-  border-left: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  background:
-    repeating-linear-gradient(
-      90deg,
-      var(--paper) 0 1.5px,
-      color-mix(in srgb, var(--ink) 24%, var(--paper)) 1.5px 2.5px
-    );
-}
-
-.book-fore-edge--cover {
-  width: 5px;
-  border-left: 2px solid var(--page-edge, var(--choc));
-}
+/* Decorative paper stacks and binding layers stay out of the flat book surface. */
+.book-edges,
+.book-cover-hinge,
+.book-spine-strip,
+.book-fore-edge { display: none; }
 
 /* ---------- printed cookbook page numbers (folios) ---------- */
 
@@ -251,27 +51,13 @@
   left: 2.25rem;
 }
 
-.book--wide .page-folio--L::after {
-  content: '';
-  display: block;
-  width: 0.75rem;
-  height: 2px;
-  background: currentColor;
-  opacity: 0.45;
-}
+
 
 .book--wide .page-folio--R {
   right: 2.25rem;
 }
 
-.book--wide .page-folio--R::before {
-  content: '';
-  display: block;
-  width: 0.75rem;
-  height: 2px;
-  background: currentColor;
-  opacity: 0.45;
-}
+
 
 /* Reserve crisp bottom room on short wide viewports so paginate.js never collides with folios. */
 @media (max-height: 820px) {
@@ -299,15 +85,7 @@
   transform: translateX(-50%);
 }
 
-.book--narrow .page-folio::before,
-.book--narrow .page-folio::after {
-  content: '';
-  display: block;
-  width: 0.85rem;
-  height: 2px;
-  background: currentColor;
-  opacity: 0.4;
-}
+
 
 /* ---------- interactive cloth ribbon bookmark ("Continue where you left off") ---------- */
 
@@ -337,12 +115,12 @@
   min-height: 44px;
   max-width: 100%;
   padding: 0.45rem 0.9rem 0.5rem 0.72rem;
-  border: 2.5px solid var(--choc);
+  border: 0;
   border-top: 0;
   border-radius: 0 0 var(--r-m) var(--r-m);
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 3px 3px 0 var(--shadow);
+  box-shadow: none;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -350,14 +128,13 @@
   -webkit-tap-highlight-color: transparent;
   transition:
     transform 140ms var(--ease-out),
-    box-shadow 140ms var(--ease-out),
     background-color 140ms var(--ease-out);
 }
 
 .book-ribbon-btn:focus-visible {
   outline: 3px solid var(--ring-out, var(--choc));
   outline-offset: 2px;
-  box-shadow: 3px 3px 0 var(--shadow);
+  box-shadow: none;
 }
 
 .book-ribbon--cover .book-ribbon-btn {
@@ -366,7 +143,7 @@
 
 .book-ribbon-btn:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--shadow);
+  box-shadow: none;
   background: var(--card);
   transition-duration: 55ms;
 }
@@ -374,11 +151,11 @@
 @media (hover: hover) and (pointer: fine) {
   .book-ribbon-btn:hover {
     transform: translateY(2px);
-    box-shadow: 3px 4px 0 var(--shadow);
+    box-shadow: none;
   }
   .book-ribbon-btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--shadow);
+    box-shadow: none;
     background: var(--card);
     transition-duration: 55ms;
   }

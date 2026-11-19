@@ -2,26 +2,47 @@
 // Kept pure and self-contained so it can be unit-tested directly under Node.
 
 export const LAST_RANDOM_KEY = 'recipe-book:last-random';
+export const SHUFFLE_STEP_MS = 85;
+export const LAND_HOLD_MS = 900;
+export const REDUCED_HOLD_MS = 600;
 
 export const randomText = {
   en: {
     label: 'Surprise me',
     ariaLabel: 'Surprise me — open a random recipe',
+    rerollAriaLabel: 'Surprise me — roll another recipe',
+    recipeNo: 'No.',
+    openNow: 'open now',
     opening: (title) => `Opening ${title}`,
   },
   de: {
     label: 'Überrasch mich',
     ariaLabel: 'Überrasch mich — zufälliges Rezept öffnen',
+    rerollAriaLabel: 'Überrasch mich — noch einmal würfeln',
+    recipeNo: 'Nr.',
+    openNow: 'jetzt öffnen',
     opening: (title) => `Öffne ${title}`,
   },
   fr: {
     label: 'Surprenez-moi',
     ariaLabel: 'Surprenez-moi — ouvrir une recette au hasard',
+    rerollAriaLabel: 'Surprenez-moi — tirer une autre recette',
+    recipeNo: 'N°',
+    openNow: 'ouvrir maintenant',
     opening: (title) => `Ouverture : ${title}`,
   },
 };
 
 export const randomCopyFor = (lang) => randomText[lang] || randomText.en;
+
+export const holdDurationMs = (reduced = false) => (reduced ? REDUCED_HOLD_MS : LAND_HOLD_MS);
+
+// Format a recipe's printed book number in the active language (e.g. "No. 3", "Nr. 3", "N° 3").
+export function formatRecipeNumber(recipe, lang = 'en') {
+  const n = Number(recipe?.no);
+  if (!Number.isInteger(n) || n < 1) return '';
+  return `${randomCopyFor(lang).recipeNo} ${n}`;
+}
 
 let memoryLastSlug = null;
 

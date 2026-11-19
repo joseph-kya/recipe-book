@@ -1,11 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
+import { ui } from '../src/i18n.js';
 import {
+  LAND_HOLD_MS,
   LAST_RANDOM_KEY,
+  REDUCED_HOLD_MS,
+  SHUFFLE_STEP_MS,
   buildShuffleFrames,
   dieFaceForRecipe,
+  formatRecipeNumber,
   getLastRandomSlug,
+  holdDurationMs,
   pickRandomRecipe,
   randomCopyFor,
   randomText,
@@ -73,12 +79,24 @@ test('last random slug persists in storage and falls back cleanly when storage i
   resetLastRandomSlug(mockStorage);
 });
 
-test('dieFaceForRecipe and buildShuffleFrames vary faces cleanly before landing on the winner', () => {
+test('dieFaceForRecipe, formatRecipeNumber, timing constants, and buildShuffleFrames work cleanly', () => {
   assert.equal(dieFaceForRecipe({ no: 1 }), 1);
   assert.equal(dieFaceForRecipe({ no: 6 }), 6);
   assert.equal(dieFaceForRecipe({ no: 7 }), 1);
   assert.equal(dieFaceForRecipe({ no: 0 }, 5), 5);
   assert.equal(dieFaceForRecipe(null, 5), 5);
+
+  assert.equal(formatRecipeNumber({ no: 3 }, 'en'), 'No. 3');
+  assert.equal(formatRecipeNumber({ no: 3 }, 'de'), 'Nr. 3');
+  assert.equal(formatRecipeNumber({ no: 3 }, 'fr'), 'N° 3');
+  assert.equal(formatRecipeNumber({ no: 0 }, 'en'), '');
+  assert.equal(formatRecipeNumber(null, 'en'), '');
+
+  assert.equal(SHUFFLE_STEP_MS, 85);
+  assert.equal(LAND_HOLD_MS, 900);
+  assert.equal(REDUCED_HOLD_MS, 600);
+  assert.equal(holdDurationMs(false), 900);
+  assert.equal(holdDurationMs(true), 600);
 
   const winner = realRecipes[2];
   const winnerFace = dieFaceForRecipe(winner);
@@ -99,18 +117,24 @@ test('randomText covers EN, DE, and FR with natural labels, accessible names, an
     assert.equal(copy, randomText[lang]);
     assert.ok(copy.label.trim().length > 0);
     assert.ok(copy.ariaLabel.startsWith(copy.label), `${lang} ariaLabel should start with visible label`);
+    assert.ok(copy.rerollAriaLabel.startsWith(copy.label), `${lang} rerollAriaLabel should start with visible label`);
+    assert.equal(copy.recipeNo, ui[lang].recipeNo, `${lang} recipeNo should match book UI`);
+    assert.ok(copy.openNow.trim().length > 0);
     assert.ok(copy.opening('Topfenschmarren').includes('Topfenschmarren'));
   }
   assert.equal(randomCopyFor('unknown'), randomText.en);
   assert.notEqual(randomText.en.label, randomText.de.label);
   assert.notEqual(randomText.en.label, randomText.fr.label);
   assert.notEqual(randomText.de.label, randomText.fr.label);
+  assert.notEqual(randomText.en.openNow, randomText.de.openNow);
+  assert.notEqual(randomText.en.openNow, randomText.fr.openNow);
+  assert.notEqual(randomText.de.openNow, randomText.fr.openNow);
   assert.match(randomText.fr.opening('Brownies'), /Ouverture : Brownies/);
-  assert.doesNotMatch(JSON.stringify(randomText.de), /\b(surprise|random|recipe)\b/i);
-  assert.doesNotMatch(JSON.stringify(randomText.fr), /\b(surprise|random|recipe)\b/i);
+  assert.doesNotMatch(JSON.stringify(randomText.de), /\b(surprise|random|recipe|open|roll|now)\b/i);
+  assert.doesNotMatch(JSON.stringify(randomText.fr), /\b(surprise|random|recipe|open|roll|now)\b/i);
 });
 
-test('CoverRandom and idea-random.css preserve flat-retro, 44px target, and reduced-motion contracts', () => {
+test('CoverRandom and idea-random.css preserve reveal, re-roll, flat-retro, 44px target, and reduced-motion contracts', () => {
   const pagesSrc = readFileSync(new URL('../src/pages.jsx', import.meta.url), 'utf8');
   const randomSrc = readFileSync(new URL('../src/CoverRandom.jsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/idea-random.css', import.meta.url), 'utf8');
@@ -119,6 +143,11 @@ test('CoverRandom and idea-random.css preserve flat-retro, 44px target, and redu
   assert.match(pagesSrc, /<CoverRandom lang=\{lang\} \/>/);
   assert.match(randomSrc, /import '\.\/idea-random\.css';/);
   assert.match(randomSrc, /reducedMotion\(\)/);
+  assert.match(randomSrc, /holdDurationMs\(true\)/);
+  assert.match(randomSrc, /holdDurationMs\(false\)/);
+  assert.match(randomSrc, /formatRecipeNumber\(/);
+  assert.match(randomSrc, /onClick=\{handleOpenPicked\}/);
+  assert.doesNotMatch(randomSrc, /if\s*\(\s*phase\s*!==\s*'idle'\s*\)\s*return;/, 'Surprise me should allow re-rolling');
   assert.match(randomSrc, /aria-live="polite"/);
   assert.doesNotMatch(randomSrc, /filter=|drop-shadow|linearGradient|radialGradient/);
 
@@ -126,8 +155,11 @@ test('CoverRandom and idea-random.css preserve flat-retro, 44px target, and redu
   assert.match(css, /\.cover-random-btn\s*\{[\s\S]*min-width:\s*2\.75rem;[\s\S]*min-height:\s*2\.75rem;/);
   assert.match(css, /\.cover-random-btn\s*\{[\s\S]*touch-action:\s*manipulation;/);
   assert.match(css, /\.cover-random-btn:active\s*\{[\s\S]*transition-duration:\s*55ms;/);
+  assert.match(css, /\.cover-random-pick\s*\{[\s\S]*min-width:\s*2\.75rem;[\s\S]*min-height:\s*2\.75rem;/);
+  assert.match(css, /\.cover-random-pick\s*\{[\s\S]*touch-action:\s*manipulation;/);
+  assert.match(css, /\.cover-random-pick:active\s*\{[\s\S]*transition-duration:\s*55ms;/);
   assert.doesNotMatch(css, /box-shadow:|text-shadow:|drop-shadow|backdrop-filter|radial-gradient|linear-gradient|glow/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cover-random-pick\s*\{[\s\S]*animation:\s*none;/);
 
   // Every @keyframes block animates only transform and opacity.
   for (const [, name, body] of css.matchAll(/@keyframes\s+([a-z-]+)\s*\{([\s\S]*?)\n\}/g)) {

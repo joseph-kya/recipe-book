@@ -4,9 +4,12 @@ import { routeOfHash } from './layout.js';
 import { recipeHash } from './share.js';
 import { reducedMotion } from './motion.js';
 import {
+  SHUFFLE_STEP_MS,
   buildShuffleFrames,
   dieFaceForRecipe,
+  formatRecipeNumber,
   getLastRandomSlug,
+  holdDurationMs,
   pickRandomRecipe,
   randomCopyFor,
   setLastRandomSlug,
@@ -22,9 +25,6 @@ const PIPS = {
   6: [[8, 7.5], [16, 7.5], [8, 12], [16, 12], [8, 16.5], [16, 16.5]],
 };
 
-const SHUFFLE_STEP_MS = 85;
-const LAND_HOLD_MS = 215;
-
 function DieIcon({ face = 5, className = '' }) {
   const pips = PIPS[face] || PIPS[5];
   return (
@@ -37,11 +37,26 @@ function DieIcon({ face = 5, className = '' }) {
   );
 }
 
+function OpenArrowIcon({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        d="M3.5 8h9m0 0-3.25-3.25M12.5 8l-3.25 3.25"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function CoverRandom({ lang }) {
   const copy = randomCopyFor(lang);
   const [phase, setPhase] = useState('idle'); // 'idle' | 'rolling' | 'landed'
   const [face, setFace] = useState(5);
-  const [peek, setPeek] = useState(null); // { title, textLang } | null
+  const [peekRecipe, setPeekRecipe] = useState(null);
   const [announced, setAnnounced] = useState('');
   const [rollId, setRollId] = useState(0);
   const timersRef = useRef([]);
@@ -56,7 +71,7 @@ export default function CoverRandom({ lang }) {
   const resetShuffle = useCallback(() => {
     clearTimers();
     setPhase('idle');
-    setPeek(null);
+    setPeekRecipe(null);
   }, [clearTimers]);
 
   useEffect(() => {
@@ -78,37 +93,63 @@ export default function CoverRandom({ lang }) {
     window.location.hash = recipeHash(recipe);
   };
 
+  const handleOpenPicked = () => {
+    if (phase !== 'landed' || !peekRecipe) return;
+    const target = peekRecipe;
+    clearTimers();
+    setPhase('idle');
+    setPeekRecipe(null);
+    openRecipe(target);
+  };
+
   const handleSurprise = () => {
-    if (phase !== 'idle') return;
     const winner = pickRandomRecipe(recipes, getLastRandomSlug());
     if (!winner) return;
     setLastRandomSlug(winner.slug);
 
-    const activeLang = langRef.current;
-    const winnerCopy = textFor(winner, activeLang);
     const winnerFace = dieFaceForRecipe(winner);
-    setAnnounced(copy.opening(winnerCopy.text.title));
+    const isReduced = reducedMotion();
+
     try {
       globalThis.navigator?.vibrate?.(12);
     } catch {
       /* optional haptics */
     }
 
-    if (reducedMotion()) {
+    clearTimers();
+    setRollId((n) => n + 1);
+
+    const revealWinner = (holdMs) => {
+      const activeLang = langRef.current;
+      const landed = textFor(winner, activeLang);
+      const noTag = formatRecipeNumber(winner, activeLang);
+      const spoken = noTag ? `${noTag} ${landed.text.title}` : landed.text.title;
       setFace(winnerFace);
-      openRecipe(winner);
+      setPeekRecipe(winner);
+      setPhase('landed');
+      setAnnounced(randomCopyFor(activeLang).opening(spoken));
+
+      timersRef.current.push(
+        setTimeout(() => {
+          clearTimers();
+          setPhase('idle');
+          setPeekRecipe(null);
+          openRecipe(winner);
+        }, holdMs),
+      );
+    };
+
+    if (isReduced) {
+      revealWinner(holdDurationMs(true));
       return;
     }
 
     const frames = buildShuffleFrames(recipes, winner, 3);
-    clearTimers();
     setPhase('rolling');
-    setRollId((n) => n + 1);
 
     const showFrame = (frame) => {
-      const shown = textFor(frame.recipe, langRef.current);
       setFace(frame.face);
-      setPeek({ title: shown.text.title, textLang: shown.lang });
+      setPeekRecipe(frame.recipe);
     };
 
     if (frames.length > 0) {
@@ -119,23 +160,7 @@ export default function CoverRandom({ lang }) {
     }
 
     const landAt = frames.length * SHUFFLE_STEP_MS;
-    timersRef.current.push(
-      setTimeout(() => {
-        const landed = textFor(winner, langRef.current);
-        setFace(winnerFace);
-        setPeek({ title: landed.text.title, textLang: landed.lang });
-        setPhase('landed');
-      }, landAt),
-    );
-
-    timersRef.current.push(
-      setTimeout(() => {
-        clearTimers();
-        setPhase('idle');
-        setPeek(null);
-        openRecipe(winner);
-      }, landAt + LAND_HOLD_MS),
-    );
+    timersRef.current.push(setTimeout(() => revealWinner(holdDurationMs(false)), landAt));
   };
 
   const dieClass =
@@ -148,13 +173,16 @@ export default function CoverRandom({ lang }) {
   const btnClass =
     phase === 'idle' ? 'cover-random-btn' : `cover-random-btn cover-random-btn--${phase}`;
 
+  const shown = peekRecipe ? textFor(peekRecipe, lang) : null;
+  const noTag = peekRecipe ? formatRecipeNumber(peekRecipe, lang) : '';
+
   return (
     <div className="cover-random">
       <button
         type="button"
         className={btnClass}
-        aria-label={copy.ariaLabel}
-        aria-busy={phase !== 'idle' || undefined}
+        aria-label={phase === 'landed' ? copy.rerollAriaLabel : copy.ariaLabel}
+        aria-busy={phase === 'rolling' || undefined}
         onClick={handleSurprise}
       >
         <span key={rollId} className={dieClass}>
@@ -162,14 +190,32 @@ export default function CoverRandom({ lang }) {
         </span>
         <span className="cover-random-label">{copy.label}</span>
       </button>
-      {peek && (
-        <span
-          className={phase === 'landed' ? 'cover-random-peek cover-random-peek--landed' : 'cover-random-peek'}
-          lang={peek.textLang}
-          aria-hidden="true"
-        >
-          {peek.title}
-        </span>
+      {phase === 'rolling' && shown && (
+        <div className="cover-random-slot" aria-hidden="true">
+          <span className="cover-random-peek">
+            {noTag && <span className="cover-random-peek-no">{noTag}</span>}
+            <span className="cover-random-peek-title" lang={shown.lang}>
+              {shown.text.title}
+            </span>
+          </span>
+        </div>
+      )}
+      {phase === 'landed' && shown && (
+        <div className="cover-random-slot">
+          <button
+            key={rollId}
+            type="button"
+            className="cover-random-pick"
+            onClick={handleOpenPicked}
+          >
+            {noTag && <span className="cover-random-pick-no">{noTag}</span>}
+            <span className="cover-random-pick-title" lang={shown.lang}>
+              {shown.text.title}
+            </span>
+            <span className="sr-only"> — {copy.openNow}</span>
+            <OpenArrowIcon className="cover-random-pick-arrow" />
+          </button>
+        </div>
       )}
       <span className="sr-only" aria-live="polite">
         {announced}

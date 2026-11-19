@@ -137,8 +137,9 @@ function recipeContent() {
   };
 }
 
-// Inject the built app-shell URLs and content hash into dist/sw.js so hashed
-// assets, fonts and photos are precached while recipe PDFs stay on-demand.
+// Inject the built app-shell, recipe chunks, fonts, icons, photos and PDFs
+// plus a content hash into dist/sw.js so the whole book works offline in the
+// kitchen and auto-updates without prompts whenever any file changes.
 function serviceWorkerPrecache() {
   let outDir = 'dist';
   return {
@@ -153,7 +154,7 @@ function serviceWorkerPrecache() {
       const swSource = readFileSync(swPath, 'utf8');
       const files = walkFiles(outDir)
         .map((f) => relative(outDir, f).replace(/\\/g, '/'))
-        .filter((f) => f !== 'sw.js' && !f.endsWith('.pdf') && !f.startsWith('.'))
+        .filter((f) => f !== 'sw.js' && !f.startsWith('.') && !f.includes('/.'))
         .sort();
       const precacheUrls = ['./', ...files.map((f) => `./${f}`)];
 
@@ -179,10 +180,63 @@ function serviceWorkerPrecache() {
   };
 }
 
-// base './' so dist/ works from any static host or subfolder.
+// Start fetching the active language's recipe chunk alongside the app bundle
+// (avoiding a waterfall on src/content.js's top-level await), preload Nunito
+// on deep links straight to contents/recipes, and silently check for SW updates
+// when returning to an installed PWA in the background.
+function preloadHints() {
+  return {
+    name: 'preload-hints',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, ctx) {
+        if (!ctx?.bundle) return html;
+        const langChunks = {};
+        let bodyFont = null;
+        for (const [fileName, item] of Object.entries(ctx.bundle)) {
+          if (item.type === 'chunk' && RECIPE_LANGS.includes(item.name)) {
+            langChunks[item.name] = `./${fileName}`;
+          } else if (
+            item.type === 'asset' &&
+            /^assets\/Nunito-VariableFont_wght-.*\.woff2$/.test(fileName)
+          ) {
+            bodyFont = `./${fileName}`;
+          }
+        }
+        const script = [
+          '(function(){try{',
+          `var langs=${JSON.stringify(langChunks)};`,
+          'var saved=localStorage.getItem("recipe-book:lang");',
+          'var nav=(navigator.language||"").toLowerCase();',
+          'var l=langs[saved]?saved:nav.indexOf("de")===0?"de":nav.indexOf("fr")===0?"fr":"en";',
+          'function hint(rel,href,as,type){if(!href)return;var el=document.createElement("link");el.rel=rel;el.href=href;el.crossOrigin="";if(as)el.as=as;if(type)el.type=type;document.head.appendChild(el);}',
+          'hint("modulepreload",langs[l]);',
+          bodyFont
+            ? `if(location.hash&&location.hash!=="#"&&location.hash!=="#/"){hint("preload",${JSON.stringify(bodyFont)},"font","font/woff2");}`
+            : '',
+          'if("serviceWorker"in navigator){',
+          'var last=Date.now();',
+          'document.addEventListener("visibilitychange",function(){if(document.visibilityState!=="visible"||Date.now()-last<300000)return;last=Date.now();navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});}).catch(function(){});});',
+          '}',
+          '}catch(e){}})();',
+        ].join('');
+        return [
+          {
+            tag: 'script',
+            children: script,
+            injectTo: 'head',
+          },
+        ];
+      },
+    },
+  };
+}
+
+// base './' so dist/ works under GitHub Pages (/recipe-book/) and any static host.
 export default defineConfig({
   base: './',
-  plugins: [react(), recipeContent(), serviceWorkerPrecache()],
+  plugins: [react(), recipeContent(), preloadHints(), serviceWorkerPrecache()],
   build: {
     // PDFs must stay files (never inlined as data URLs).
     assetsInlineLimit: 0,

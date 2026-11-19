@@ -680,7 +680,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
     const link = e.target.closest?.('.toc-link[href^="#/"]');
     if (!link || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    navigate(firstIndexFor(s.spreads, routeOfHash(link.hash)), { connected: true, instant: e.detail === 0 });
+    navigate(firstIndexFor(s.spreads, routeOfHash(link.hash)), { instant: true });
   };
 
   // Preference changes and unmounts must not leave a hidden moving leaf behind.

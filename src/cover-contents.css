@@ -1,0 +1,327 @@
+/* Cover & Contents: simplified flat retro diner layout, instant tap feel, clean recipe finder. */
+
+/* ---------- Cover refinements ---------- */
+
+.book .cover .cover-inner {
+  gap: var(--sp-5);
+}
+
+.book.book--wide .cover .cover-inner {
+  gap: calc(var(--ph) * 0.045);
+}
+
+.book .cover .cover-open .btn {
+  min-width: 10.5rem;
+  min-height: 3.125rem;
+  padding: 0 2rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+}
+
+.book .cover .cover-open .btn:active {
+  --btn-shadow: 1px 1px 0 var(--shadow);
+  transform: translate(3px, 3px);
+  transition-duration: 55ms;
+}
+
+.book .cover .cover-cupcake-btn:active {
+  transform: scale(0.94);
+  transition-duration: 55ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .book .cover .cover-open .btn:hover {
+    --btn-shadow: 5px 5px 0 var(--shadow);
+    transform: translate(-1px, -1px);
+  }
+  .book .cover .cover-open .btn:active {
+    --btn-shadow: 1px 1px 0 var(--shadow);
+    transform: translate(3px, 3px);
+    transition-duration: 55ms;
+  }
+}
+
+/* ---------- Contents left title page (wide) ---------- */
+
+.book .contents-left .contents-left-inner {
+  gap: var(--sp-4);
+}
+
+.contents-count {
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Contents header & layout ---------- */
+
+.book .contents .contents-head {
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.book .contents .contents-head .contents-title {
+  margin-bottom: 0;
+}
+
+.book .service-bell-btn:active {
+  transform: scale(0.94);
+  transition-duration: 55ms;
+}
+
+.book.book--wide .contents .page-pad {
+  justify-content: flex-start;
+  padding-top: clamp(1.25rem, calc(var(--ph) * 0.055), 2.5rem);
+}
+
+/* ---------- Quick recipe finder ---------- */
+
+.toc-find {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.toc-find-icon {
+  position: absolute;
+  left: 0.875rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--cue);
+  pointer-events: none;
+}
+
+.toc-find-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 2.75rem 0.5rem 2.5rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toc-find-input::placeholder {
+  color: var(--cue);
+  opacity: 1;
+  font-weight: 500;
+}
+
+.toc-find-input::-webkit-search-decoration,
+.toc-find-input::-webkit-search-cancel-button,
+.toc-find-input::-webkit-search-results-button,
+.toc-find-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.toc-find-input:focus-visible {
+  outline: 3px solid var(--choc);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.toc-find-clear {
+  position: absolute;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-m);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms var(--ease-out);
+}
+
+.toc-find-clear:active {
+  transform: scale(0.92);
+  transition-duration: 55ms;
+}
+
+.toc-find-clear-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ---------- Simplified recipe index rows ---------- */
+
+.book .contents .toc > li + li {
+  border-top: 2px dotted color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+.book .contents .toc-link {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr auto;
+  gap: var(--sp-3);
+  align-items: center;
+  min-height: 3.375rem;
+  padding: 0.65rem var(--sp-2);
+  margin: 0 calc(var(--sp-2) * -1);
+  border-radius: var(--r-m);
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms var(--ease-out);
+}
+
+.book.book--wide .contents .toc-link {
+  min-height: 3.25rem;
+  padding: 0.6rem var(--sp-2);
+}
+
+.book .contents .toc-link:active {
+  background-color: color-mix(in srgb, var(--accent) 26%, transparent);
+  transform: scale(0.985);
+  transition-duration: 55ms;
+}
+
+.book .contents .toc-no {
+  display: block;
+  width: 1.75rem;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--primary);
+  font-family: var(--badge);
+  font-size: var(--fs-l);
+  line-height: 1;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  transition: none;
+}
+
+.book.book--wide .contents .toc-no {
+  width: 1.75rem;
+  height: auto;
+  font-size: var(--fs-l);
+}
+
+.book .contents .toc-title {
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+.toc-match {
+  display: block;
+  font-family: var(--body);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .book .contents .toc-link:hover {
+    background-color: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+  .book .contents .toc-link:hover .toc-title {
+    color: var(--cherry-ink);
+  }
+  .book .contents .toc-link:hover .toc-no {
+    transform: none;
+  }
+  .book .contents .toc-link:active {
+    background-color: color-mix(in srgb, var(--accent) 26%, transparent);
+    transform: scale(0.985);
+    transition-duration: 55ms;
+  }
+  .toc-find-clear:hover {
+    color: var(--cherry-ink);
+  }
+}
+
+/* ---------- Empty search state ---------- */
+
+.toc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-5) 0;
+}
+
+.toc-empty-text {
+  font-family: var(--body);
+  font-size: var(--fs-m);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.toc-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-4);
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms var(--ease-out);
+}
+
+.toc-empty-btn:active {
+  transform: scale(0.96);
+  transition-duration: 55ms;
+}
+
+/* ---------- Compact screens ---------- */
+
+@media (max-height: 700px) {
+  .book.book--wide .contents .toc-link {
+    min-height: 2.85rem;
+    padding-block: 0.45rem;
+  }
+  .book.book--wide .contents .toc-no,
+  .book.book--wide .contents .toc-title {
+    font-size: var(--fs-m);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .book .cover .cover-open .btn,
+  .book .cover .cover-cupcake-btn,
+  .book .service-bell-btn,
+  .book .contents .toc-link,
+  .toc-find-clear,
+  .toc-empty-btn {
+    transition: none;
+  }
+  .book .cover .cover-open .btn:is(:hover, :active),
+  .book .cover .cover-cupcake-btn:is(:hover, :active),
+  .book .service-bell-btn:active,
+  .book .contents .toc-link:is(:hover, :active),
+  .toc-find-clear:active,
+  .toc-empty-btn:active {
+    transform: none;
+  }
+}

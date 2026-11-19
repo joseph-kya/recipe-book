@@ -292,15 +292,15 @@
   "fr": {
     "title": "Gratin au fromage blanc, citron et fruits rouges",
     "title_lines": [
-      "Gratin Citron",
-      "& Fruits Rouges"
+      "Gratin citron",
+      "& fruits rouges"
     ],
     "tagline": "Un flan façon Topfenauflauf pour le petit-déj, le dessert ou les deux.",
     "sticker": [
       "Demi-",
       "fournée !"
     ],
-    "intro": "Le gratin sucré au quark de REWE, divisé par deux et sans crumble : fromage blanc citronné, blancs en neige et fruits rouges juteux.",
+    "intro": "Le gratin sucré de REWE, divisé par deux et sans crumble : fromage blanc citronné, blanc en neige et fruits rouges juteux.",
     "stats": [
       {
         "value": "30–40 min",
@@ -324,7 +324,7 @@
           {
             "amount": "~1½ tasse",
             "metric": "200 g",
-            "name": "fruits rouges mélangés",
+            "name": "mélange de fruits rouges",
             "note": "surgelés, ça marche aussi"
           },
           {
@@ -382,23 +382,23 @@
     "steps": [
       {
         "title": "Fruits rouges et zeste.",
-        "text": "Préchauffez le four à 160 °C en chaleur traditionnelle. Triez, lavez et égouttez les fruits rouges (surgelés : faites-les décongeler, puis égouttez-les). Râpez le zeste du citron.",
-        "cue": "Les fruits sont bien égouttés, pas baignés dans le jus."
+        "text": "Préchauffez le four à 160 °C en chaleur traditionnelle. Triez, lavez et égouttez les fruits rouges (surgelés : faites-les décongeler, puis égouttez-les). Zestez le citron.",
+        "cue": "Les fruits sont bien égouttés, sans baigner dans leur jus."
       },
       {
         "title": "Montez le blanc.",
-        "text": "Séparez l’œuf. Montez le blanc en neige ferme avec une pincée de sel et 1 c. à soupe de sucre.",
-        "cue": "Becs fermes."
+        "text": "Séparez le blanc du jaune. Montez le blanc en neige ferme avec une pincée de sel et 1 c. à soupe de sucre.",
+        "cue": "Neige bien ferme."
       },
       {
         "title": "La base au fromage blanc.",
-        "text": "Mélangez bien le fromage blanc, le jaune, le zeste, la semoule, la levure chimique et l’autre cuillère à soupe de sucre. Incorporez délicatement le blanc en neige.",
+        "text": "Mélangez bien le fromage blanc, le jaune, le zeste, la semoule, la levure chimique et la seconde c. à soupe de sucre. Incorporez délicatement le blanc en neige.",
         "cue": "Lisse et aérien, sans traces blanches."
       },
       {
         "title": "Place aux fruits.",
-        "text": "Versez dans le plat et incorporez les fruits rouges délicatement.",
-        "cue": "Les fruits sont répartis, pas écrasés."
+        "text": "Versez dans le plat et incorporez délicatement les fruits rouges.",
+        "cue": "Les fruits sont bien répartis, sans être écrasés."
       },
       {
         "title": "Cuisson.",

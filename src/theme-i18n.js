@@ -188,40 +188,40 @@ export const themeText = {
     names: { cherry: 'Kirsche', blueplate: 'Blauer Teller', soda: 'Soda', butterscotch: 'Karamell', paper: 'Papier', ink: 'Tinte' },
     ringBell: 'Tischglocke läuten',
     ding: 'Ding! Bestellung fertig.',
-    ringing: 'Kling kling kling! Geduld, der Kuchen kommt.',
-    bites: ['Mmm. Ein großer Bissen.', 'Mmm mmm. Zwei große Bissen.', 'Alles weg!', 'Ein frischer Cupcake!'],
+    ringing: 'Ding, ding, ding! Geduld, der Kuchen kommt gleich.',
+    bites: ['Mmm. Ein großer Bissen.', 'Mmm, mmm. Zwei große Bissen.', 'Alles weg!', 'Ein frischer Cupcake!'],
     tiers: [
       // Tier 1 (finishes 1-4): cheeky diner base
       {
         allGone: [
-          'Kein Krümel übrig. Verdächtig.',
+          'Kein Krümel übrig. Verdächtig sauber.',
           'Hey, das war das Dekostück!',
-          'Eingeatmet, nicht gekaut.',
-          'Cover-Kalorien zählen nicht.',
-          'Zack, einfach weggesnackt.',
+          'Eingeatmet. Nicht mal gekaut.',
+          'Titelbild-Kalorien zählen nicht.',
+          'Zack, einfach weggeputzt.',
         ],
         muffinReply: [
           'Schon vermisst?',
-          'Wieder aufm Blech.',
-          'Netter Versuch, Dieb.',
+          'Zurück auf dem Blech.',
+          'Netter Versuch, Naschdieb.',
           'Ich hab neun Leben.',
-          'Noch ’ne Runde?',
+          'Runde zwei, Schätzchen?',
         ],
       },
       // Tier 2 (finishes 5-9): flirty warmup
       {
         allGone: [
-          'Schon wieder? Du hast ’n Schema.',
-          'Hast du grad das Papier abgeleckt?',
+          'Schon wieder? Du hast wohl ein Beuteschema.',
+          'Hast du grad das Förmchen abgeleckt?',
           'Da steht wer auf Glasur.',
-          'Zärtlich? Kennste nicht.',
+          'Zärtlich? Kennst du wohl nicht.',
           'Immer langsam, Naschkatze.',
         ],
         muffinReply: [
-          'Beiß mich. Nochmal.',
-          'Augen nach oben!',
-          'Vorsicht mit dem Guss.',
-          'Oha, ganz schön gierig.',
+          'Beiß mich. Noch mal.',
+          'Augen nach oben, bitte.',
+          'Sachte mit der Glasur.',
+          'Oha, ganz schön stürmisch.',
           'Achtung, bin noch warm.',
         ],
       },
@@ -231,45 +231,45 @@ export const themeText = {
           'Zweistellig. Null Zurückhaltung.',
           'Direkt oben abgebissen. Mutig.',
           'Sofort auf die Kirsche gestürzt.',
-          'Ganz schön tief im Blech jetzt.',
-          'Schon wieder so grabbelig?',
+          'Jetzt steckst du tief im Blech.',
+          'Wieder auf Tuchfühlung mit Gebäck?',
         ],
         muffinReply: [
-          'Frisch ausm Ofen!',
+          'Frisch aus dem Ofen!',
           'Finger weg von der Kirsche!',
           'Magst es schön weich?',
-          'Wieder Bock auf Sahne?',
-          'Erst mal ’n Kaffee!',
+          'Wieder Lust auf die Creme?',
+          'Erst mal einen Kaffee ausgeben!',
         ],
       },
       // Tier 4 (finishes 15-19): bold flirting & roasts
       {
         allGone: [
-          'Ganz schön fix an den Backen.',
+          'Ganz schön fleißig an den Backen.',
           'Ohne Serviette. Komplett wild.',
           'So oft – und noch nix gebacken?!',
           'Erst die Creme, dann der Teig.',
           'Flirten wir oder backen wir?',
         ],
         muffinReply: [
-          'Mag’s, wie du mich hältst.',
-          'Hör bloß nicht auf.',
+          'Ich mag, wie du mich hältst.',
+          'Hör bloß nicht auf, Bäcker.',
           'Zu heiß für dich?',
-          'Mein Guss, dein Chaos.',
-          'Wird ganz dampfig hier.',
+          'Meine Glasur, dein Chaos.',
+          'Es wird ganz schön heiß hier.',
         ],
       },
       // Tier 5 (finishes 20-24): spicy & judgy
       {
         allGone: [
-          'Dein Daumen braucht ’ne Kippe.',
+          'Dein Daumen braucht jetzt eine Zigarette.',
           'Bis zum Ellbogen im Teig, na klar.',
-          'Nicht mal erst zum Essen einladen?',
+          'Kein Abendessen vorher? Oha.',
           'Die Glasur hatte null Chance.',
           'Pixel futtern als Leistungssport?',
         ],
         muffinReply: [
-          'Fester. Nee – sanfter.',
+          'Fester. Warte – sanfter.',
           'Noch warm. Komm näher.',
           'Fix und aufgeschlagen.',
           'Creme am Mundwinkel.',
@@ -279,52 +279,52 @@ export const themeText = {
       // Tier 6 (finishes 25-29): unapologetically suggestive
       {
         allGone: [
-          'Immer noch null Rezepte gekocht.',
-          'So viel Einsatz für ’n Pixel-Teil?',
-          'Sag doch, du willst meine Brötchen.',
+          'Immer noch kein Rezept gebacken.',
+          'So viel Einsatz für ein paar Pixel?',
+          'Gib’s zu, du liebst meine süßen Backen.',
           'Saftiger Teig, null Beherrschung.',
-          'Knet lieber echten Teig, Mensch.',
+          'Knet lieber mal echten Teig.',
         ],
         muffinReply: [
-          'Sag, ich bin der Beste.',
+          'Sag, ich bin dein Liebling.',
           'Ooh, mitten ins Herz.',
-          'Mein Teig geht auf.',
-          'Ganz schön frech heute.',
+          'Du lässt meinen Teig aufgehen.',
+          'Ganz schön freche Finger.',
           'Vorsicht, ich tropfe.',
         ],
       },
       // Tier 7 (finishes 30-34): unhinged baker energy
       {
         allGone: [
-          'Hol dir sofort echte Carbs.',
-          'Du knutscht grad ’ne Vektorgrafik.',
+          'Iss bitte echte Kohlenhydrate.',
+          'Du knutscht grad eine Vektorgrafik.',
           'Die Rezepte sind IM Buch, Genie.',
           'Roh angebissen. Ohne Vorheizen.',
           'Immer noch hungrig?! Unglaublich.',
         ],
         muffinReply: [
-          'Nimm beide Hände!',
+          'Nächstes Mal beide Hände!',
           'Glasiert und verwirrt.',
-          'Weg vom Förmchen!',
-          'Machst mich fertig. Mehr.',
-          'Drück nochmal langsam.',
+          'Augen weg vom Förmchen!',
+          'Du machst mich fertig. Noch mal.',
+          'Halt mich noch mal ganz lang.',
         ],
       },
       // Tier 8 (finishes 35-39): mild swearing + ferally flirty
       {
         allGone: [
           'Verdammt, du hasst den Öffnen-Knopf.',
-          'Wer hat dich so ausgehungert?',
-          'Glasur komplett zerlegt, alter Schwede.',
-          'Ganz ehrlich? Heirate mich doch.',
+          'Wer hat dich bloß so ausgehungert?',
+          'Glasur komplett zerlegt, oh ja!',
+          'Ganz ehrlich? Heirate den Muffin doch.',
           'Null Gnade. Bäckerei-Schreck.',
         ],
         muffinReply: [
           'Verdammt hartnäckig.',
-          'Friss Krümel, Feigling.',
+          'Friss meine Krümel, Feigling.',
           'Viel zu heiß dafür.',
-          'Nicht necken, beißen!',
-          'Oh ja, gib alles.',
+          'Nicht necken, beiß zu!',
+          'Oh ja, mach weiter.',
         ],
       },
       // Tier 9 (finishes 40-44): meltdown & peak innuendo
@@ -332,32 +332,32 @@ export const themeText = {
         allGone: [
           'Fass mal echtes Mehl an, verdammt!',
           'Ab jetzt schuldest du mir Miete.',
-          'Beide komplett durchgedreht hier.',
-          'Du hast den verdammten Verstand weg.',
-          'Reine, hemmungslose Backwaren-Gier.',
+          'Beide komplett heiß und hinüber.',
+          'Du hast komplett den Verstand verloren.',
+          'Pure, hemmungslose Gebäck-Lust.',
         ],
         muffinReply: [
-          'Buttercreme schwitzt.',
-          'Nenn mich freches Teil.',
+          'Meine Buttercreme schwitzt.',
+          'Nenn mich freches Küchlein.',
           'Sind wir jetzt verlobt?!',
           'Verdammt, du gibst nie auf.',
-          'Bin voll. Weiter!',
+          'Ich platze. Mehr!',
         ],
       },
       // Tier 10 (finishes 45-50+): wildest final boss chaos
       {
         allGone: [
-          '45+?! Backstube komplett zerlegt.',
+          '45+?! Du hast die ganze Backstube gesprengt.',
           'Null gebacken. Nur noch Fiebertraum.',
-          'Komplett wild auf ’n Comic-Küchlein.',
-          'Fifty Shades of Buttercreme, Hilfe.',
+          'Völlig verrückt nach einem Comic-Küchlein.',
+          'Fünfzig Schattierungen Buttercreme, Herrje.',
           'Back endlich echte Brownies, Monster!',
         ],
         muffinReply: [
           'Deine Sucht für immer.',
-          'Na gut. Nimm alle Sahne.',
+          'Na gut. Nimm die ganze Creme.',
           'Verdammt, schon wieder?!',
-          'Jetzt steck ’n Ring drauf.',
+          'Steck mir schon einen Ring an.',
           'Du gewinnst. Für immer dein.',
         ],
       },
@@ -368,7 +368,7 @@ export const themeText = {
     names: { cherry: 'Cerise', blueplate: 'Assiette bleue', soda: 'Soda', butterscotch: 'Caramel au beurre', paper: 'Papier', ink: 'Encre' },
     ringBell: 'Sonner la clochette de service',
     ding: 'Ding ! Commande prête.',
-    ringing: 'Dring dring dring ! Patience, la tarte arrive.',
+    ringing: 'Dring, dring, dring ! Patience, la tarte arrive.',
     bites: ['Miam. Une grosse bouchée.', 'Miam miam. Deux grosses bouchées.', 'Tout mangé !', 'Un cupcake tout frais !'],
     tiers: [
       // Tier 1 (finishes 1-4): cheeky diner base
@@ -391,11 +391,11 @@ export const themeText = {
       // Tier 2 (finishes 5-9): flirty warmup
       {
         allGone: [
-          'Déjà de retour ? Tu as un faible.',
+          'Déjà de retour ? T’as un genre bien précis.',
           'T’as léché la caissette, avoue.',
           'Quelqu’un aime bien le glaçage.',
           'La douceur ? Tu connais pas.',
-          'Doucement là-dessus, bec sucré.',
+          'Tout doux, bec sucré.',
         ],
         muffinReply: [
           'Croque-moi. Encore.',
@@ -409,7 +409,7 @@ export const themeText = {
       {
         allGone: [
           'Deux chiffres. Zéro retenue.',
-          'Droit par le sommet. Audacieux.',
+          'Direct par le sommet. Osé.',
           'Foncé direct sur la cerise.',
           'À fond dans le moule maintenant.',
           'Encore les mains baladeuses sur la pâte ?',
@@ -445,11 +445,11 @@ export const themeText = {
           'Ton pouce mérite une cigarette.',
           'Jusqu’aux coudes dans la pâte, hein ?',
           'Même pas un dîner avant, sérieux ?',
-          'Ce glaçage avait zéro chance.',
-          'Tu dévores des pixels par sport maintenant ?',
+          'Ce glaçage n’avait aucune chance.',
+          'Dévorer des pixels, ton nouveau sport ?',
         ],
         muffinReply: [
-          'Plus fort. Non, plus doux.',
+          'Plus fort. Attends — plus doux.',
           'Encore tiède. Approche.',
           'Je suis fouetté. Littéralement.',
           'De la crème sur la lèvre.',
@@ -459,7 +459,7 @@ export const themeText = {
       // Tier 6 (finishes 25-29): unapologetically suggestive
       {
         allGone: [
-          'Toujours zéro recette cuisinée.',
+          'Toujours zéro recette préparée.',
           'Tout ce boulot pour un pauvre PNG ?',
           'Avoue que tu craques pour mes miches.',
           'Mie fondante, zéro maîtrise.',
@@ -483,19 +483,19 @@ export const themeText = {
           'Encore faim ?! Incroyable.',
         ],
         muffinReply: [
-          'Prends les deux mains la prochaine fois.',
+          'À deux mains la prochaine fois.',
           'Glacé et tout retourné.',
-          'Bas les yeux de ma caissette.',
-          'Tu me ruines. Recommence.',
-          'Serre-moi lentement encore.',
+          'Lâche ma caissette des yeux !',
+          'Tu m’achèves. Recommence.',
+          'Serre-moi encore tout doucement.',
         ],
       },
       // Tier 8 (finishes 35-39): mild swearing + ferally flirty
       {
         allGone: [
           'Putain, tu détestes le bouton Ouvrir.',
-          'Qui t’a affamé comme ça, merde.',
-          'Glaçage pulvérisé, putain oui.',
+          'Qui t’a affamé comme ça, bordel ?',
+          'Glaçage pulvérisé, oh que oui !',
           'Franchement ? Épouse le muffin.',
           'Zéro pitié. Terreur de la boulangerie.',
         ],
@@ -503,8 +503,8 @@ export const themeText = {
           'Putain, tu lâches rien.',
           'Mange mes miettes, lâche.',
           'Bien trop chaud pour ça.',
-          'Arrête de narguer, mords.',
-          'Putain oui, continue.',
+          'Arrête de me narguer, croque !',
+          'Bordel, continue !',
         ],
       },
       // Tier 9 (finishes 40-44): meltdown & peak innuendo
@@ -521,21 +521,21 @@ export const themeText = {
           'Traite-moi de vilaine brioche.',
           'On est fiancés maintenant ?!',
           'Merde, t’abandonnes jamais.',
-          'Je suis plein. Encore.',
+          'Je déborde. Encore.',
         ],
       },
       // Tier 10 (finishes 45-50+): wildest final boss chaos
       {
         allGone: [
-          '45+ ?! T’as cassé la putain de boulangerie.',
-          'Zéro gâteau cuit. Pur délire fébrile.',
-          'Enragé sur un cupcake de dessin animé.',
+          '45+ ?! T’as explosé toute la boulangerie.',
+          'Zéro gâteau cuit. Pur rêve fiévreux.',
+          'Déchaîné pour un cupcake de dessin animé.',
           'Cinquante nuances de crème au beurre, pitié.',
-          'Va cuire de vrais brownies, espèce de monstre !',
+          'Va faire de vrais brownies, espèce de monstre !',
         ],
         muffinReply: [
           'Ton vice officiel désormais.',
-          'OK. Prends toute ma crème.',
+          'Bon. Prends toute ma crème.',
           'Bordel, encore ?!',
           'Passe-moi la bague au doigt.',
           'T’as gagné. À toi pour toujours.',

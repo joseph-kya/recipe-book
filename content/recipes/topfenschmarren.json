@@ -333,7 +333,7 @@
         "label": "belle portion"
       },
       {
-        "value": "470 kcal · 48 g protéines",
+        "value": "470 kcal · 48 g de protéines",
         "label": "(estimation du site d’origine)"
       }
     ],
@@ -405,7 +405,7 @@
           {
             "amount": "pour servir",
             "metric": "",
-            "name": "fruits frais ou compote",
+            "name": "fruits ou compote",
             "note": null
           }
         ]
@@ -415,13 +415,13 @@
     "steps": [
       {
         "title": "Jaunes et fromage blanc.",
-        "text": "Séparez les œufs. Mélangez bien le fromage blanc avec les 2 jaunes (et la crème fraîche, si vous en mettez).",
+        "text": "Séparez les blancs des jaunes. Mélangez bien le fromage blanc avec les 2 jaunes (et la crème fraîche, si vous en mettez).",
         "cue": "Bien lisse et crémeux."
       },
       {
         "title": "On parfume.",
-        "text": "Ajoutez la farine, l’édulcorant, le zeste de citron et le sel. Trop épais ? Un filet d’eau suffit.",
-        "cue": "Épais, mais toujours onctueux."
+        "text": "Ajoutez la farine, l’édulcorant, le zeste de citron et le sel. Pâte trop épaisse ? Un filet d’eau suffit.",
+        "cue": "Épaisse, mais toujours onctueuse."
       },
       {
         "title": "Monter et incorporer.",
@@ -430,7 +430,7 @@
       },
       {
         "title": "Cuisson douce.",
-        "text": "Faites fondre le beurre à feu MOYEN. Étalez la pâte sur 0.5–1 cm d’épaisseur. Faites dorer ~5 min jusqu’à ce qu’elle commence à prendre, retournez et poursuivez ~5 min.",
+        "text": "Faites fondre la matière grasse à feu MOYEN. Étalez la pâte sur 0,5–1 cm d’épaisseur. Faites dorer ~5 min jusqu’à ce qu’elle commence à prendre, retournez et poursuivez ~5 min.",
         "cue": "Tout au plus doré, jamais foncé."
       },
       {
@@ -447,7 +447,7 @@
     "tips": [
       {
         "title": "Nos ajustements.",
-        "text": "Aucun sur la recette : quantités et étapes sont celles de Susanna. Les tasses sont nos conversions approximatives. Elle laisse l’édulcorant, la matière grasse et le zeste au goût."
+        "text": "Aucun sur la recette : quantités et étapes sont celles de Susanna. Les tasses sont nos conversions approximatives. Elle laisse l’édulcorant, la matière grasse et le zeste à doser selon votre goût."
       },
       {
         "title": "Attention au feu.",

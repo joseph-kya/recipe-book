@@ -1,0 +1,186 @@
+/* Cover "Surprise me" control: flat retro diner pill, 44px touch target, crisp dice shuffle. */
+
+.book .cover .cover-open {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cover-random {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.cover-random-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border: 2px solid color-mix(in srgb, var(--cover-ink) 46%, transparent);
+  border-radius: var(--r-pill);
+  background-color: transparent;
+  color: var(--cover-ink);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 140ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    border-color 140ms var(--ease-out);
+}
+
+.cover-random-btn:active {
+  background-color: color-mix(in srgb, var(--cover-ink) 16%, transparent);
+  border-color: var(--cover-ink);
+  transform: scale(0.96);
+  transition-duration: 55ms;
+}
+
+.cover-random-btn--rolling,
+.cover-random-btn--landed {
+  background-color: color-mix(in srgb, var(--cover-ink) 14%, transparent);
+  border-color: var(--cover-ink);
+}
+
+.cover-random-die {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  transform-origin: 50% 50%;
+  transition: transform 140ms var(--ease-out);
+}
+
+.cover-random-die-svg {
+  display: block;
+  width: 1.1875rem;
+  height: 1.1875rem;
+}
+
+.cover-random-die--rolling {
+  animation: cover-random-tumble 260ms var(--ease-out) both;
+}
+
+.cover-random-die--landed {
+  animation: cover-random-land 180ms var(--ease-out) both;
+}
+
+.cover-random-label {
+  white-space: nowrap;
+}
+
+.cover-random-peek {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.35rem);
+  width: max-content;
+  max-width: min(17rem, 80vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: var(--fs-s);
+  line-height: 1.15;
+  color: var(--cover-ink);
+  opacity: 0.86;
+  pointer-events: none;
+  transform: translate(-50%, 0);
+  animation: cover-random-peek-in 120ms var(--ease-out) both;
+}
+
+.cover-random-peek--landed {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-random-btn:hover {
+    background-color: color-mix(in srgb, var(--cover-ink) 11%, transparent);
+    border-color: var(--cover-ink);
+  }
+  .cover-random-btn:hover .cover-random-die {
+    transform: rotate(-8deg);
+  }
+  .cover-random-btn:active {
+    background-color: color-mix(in srgb, var(--cover-ink) 16%, transparent);
+    border-color: var(--cover-ink);
+    transform: scale(0.96);
+    transition-duration: 55ms;
+  }
+}
+
+@keyframes cover-random-tumble {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  24% {
+    transform: translateY(-4px) rotate(-24deg) scale(1.12, 0.92);
+  }
+  56% {
+    transform: translateY(-2px) rotate(185deg) scale(0.94, 1.08);
+  }
+  84% {
+    transform: translateY(1px) rotate(370deg) scale(1.06, 0.95);
+  }
+  100% {
+    transform: translateY(0) rotate(360deg) scale(1);
+  }
+}
+
+@keyframes cover-random-land {
+  0% {
+    transform: scale(1.14) rotate(-6deg);
+  }
+  60% {
+    transform: scale(0.96) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes cover-random-peek-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 359px), (max-height: 660px) {
+  .book--narrow .cover .cover-open {
+    gap: 0.5rem;
+  }
+  .book--narrow .cover .cover-random-peek {
+    top: calc(100% + 0.2rem);
+    font-size: var(--fs-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-random-btn,
+  .cover-random-die {
+    transition: none;
+  }
+  .cover-random-btn:is(:hover, :active),
+  .cover-random-btn:hover .cover-random-die {
+    transform: none;
+  }
+  .cover-random-die--rolling,
+  .cover-random-die--landed,
+  .cover-random-peek {
+    animation: none;
+  }
+}

@@ -16,6 +16,7 @@ import Ingredients from './Ingredients.jsx';
 import Method from './Method.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
+import CoverRandom from './CoverRandom.jsx';
 
 export { useRecipeText } from './recipeUI.jsx';
 export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
@@ -172,6 +173,7 @@ export function Cover({ lang }) {
           <a className="btn btn--cream" href="#/contents">
             {t.open}
           </a>
+          <CoverRandom lang={lang} />
         </div>
         <span className="sr-only" aria-live="polite">
           {announced || ''}

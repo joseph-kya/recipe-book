@@ -1,30 +1,82 @@
-// Offline support for the recipe book. During `vite build`, vite.config.js
-// replaces CACHE_VERSION and PRECACHE_URLS with the hashed app-shell assets
-// (excluding PDFs, which are cached here on first open instead).
+// Offline-first service worker for Joseph's Recipe Book.
+// During `vite build`, vite.config.js injects CACHE_VERSION (content hash) and
+// PRECACHE_URLS (app shell, EN/DE/FR recipe bundles, fonts, icons, photos, PDFs).
+const CACHE_PREFIX = 'recipe-book-';
 const CACHE_VERSION = 'dev';
-const CACHE_NAME = `recipe-book-${CACHE_VERSION}`;
+const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
+const HTML_NETWORK_TIMEOUT_MS = 3000;
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './favicon.svg',
   './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-192-maskable.png',
+  './icon-512-maskable.png',
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting()),
+function scopeUrl(rel) {
+  return new URL(rel, self.registration.scope).href;
+}
+
+function isImmutableAsset(rel) {
+  return rel.startsWith('./assets/');
+}
+
+async function precacheAll() {
+  const cache = await caches.open(CACHE_NAME);
+  const oldKeys = (await caches.keys()).filter(
+    (k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME,
   );
+  const oldCaches = await Promise.all(oldKeys.map((k) => caches.open(k)));
+
+  async function findInOldCaches(url) {
+    for (const old of oldCaches) {
+      const hit = await old.match(url);
+      if (hit && hit.status === 200) return hit;
+    }
+    return null;
+  }
+
+  await Promise.all(
+    PRECACHE_URLS.map(async (rel) => {
+      const url = scopeUrl(rel);
+      if (isImmutableAsset(rel)) {
+        const reused = await findInOldCaches(url);
+        if (reused) {
+          await cache.put(url, reused.clone());
+          return;
+        }
+      }
+      const req = isImmutableAsset(rel)
+        ? new Request(url)
+        : new Request(url, { cache: 'reload' });
+      const res = await fetch(req);
+      if (!res || !res.ok || res.status !== 200) {
+        throw new Error(`Precache failed (${res?.status ?? 'network'}) for ${rel}`);
+      }
+      await cache.put(url, res);
+    }),
+  );
+}
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(precacheAll().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME)
+            .map((k) => caches.delete(k)),
+        ),
+      )
       .then(() => self.clients.claim()),
   );
 });
@@ -35,33 +87,96 @@ function isHtmlRequest(request, url) {
   return request.headers.get('accept')?.includes('text/html') ?? false;
 }
 
-async function networkFirstHtml(request) {
+async function fetchWithTimeout(request, ms) {
+  if (typeof AbortController === 'undefined') return fetch(request);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const response = await fetch(request);
-    if (response && response.status === 200) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return (
-      (await caches.match(request, { ignoreSearch: true })) ||
-      (await caches.match('./index.html')) ||
-      (await caches.match('./')) ||
-      Response.error()
-    );
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
   }
 }
 
-async function cacheFirstAsset(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  const response = await fetch(request);
-  if (response && response.status === 200) {
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, response.clone());
+async function matchCachedHtml(request) {
+  const cache = await caches.open(CACHE_NAME);
+  return (
+    (await cache.match(request, { ignoreSearch: true })) ||
+    (await cache.match(scopeUrl('./index.html'))) ||
+    (await cache.match(scopeUrl('./'))) ||
+    (await caches.match(request, { ignoreSearch: true })) ||
+    (await caches.match(scopeUrl('./index.html'))) ||
+    (await caches.match(scopeUrl('./'))) ||
+    Response.error()
+  );
+}
+
+async function networkFirstHtml(request) {
+  try {
+    const response = await fetchWithTimeout(request, HTML_NETWORK_TIMEOUT_MS);
+    if (response && response.ok && response.status === 200) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone()).catch(() => {});
+      return response;
+    }
+  } catch {
+    /* offline or timed out: serve cached shell below */
   }
-  return response;
+  return matchCachedHtml(request);
+}
+
+async function sliceRangeResponse(cached, rangeHeader) {
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
+  if (!match || (!match[1] && !match[2])) return cached;
+  const buf = await cached.arrayBuffer();
+  const total = buf.byteLength;
+
+  let start = match[1] === '' ? null : Number(match[1]);
+  let end = match[2] === '' ? null : Number(match[2]);
+  if (start === null && end !== null) {
+    start = Math.max(0, total - end);
+    end = total - 1;
+  } else {
+    if (start === null) start = 0;
+    if (end === null || end >= total) end = total - 1;
+  }
+  if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= total) {
+    return new Response(null, {
+      status: 416,
+      headers: { 'Content-Range': `bytes */${total}` },
+    });
+  }
+
+  const chunk = buf.slice(start, end + 1);
+  const headers = new Headers(cached.headers);
+  headers.set('Accept-Ranges', 'bytes');
+  headers.set('Content-Range', `bytes ${start}-${end}/${total}`);
+  headers.set('Content-Length', String(chunk.byteLength));
+  return new Response(chunk, {
+    status: 206,
+    statusText: 'Partial Content',
+    headers,
+  });
+}
+
+async function cacheFirstAsset(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const url = request.url;
+  const cached = (await cache.match(url)) || (await caches.match(url));
+  if (cached) {
+    const range = request.headers.get('range');
+    return range ? sliceRangeResponse(cached, range) : cached;
+  }
+
+  try {
+    const response = await fetch(request);
+    if (response && response.ok && response.status === 200) {
+      cache.put(url, response.clone()).catch(() => {});
+    }
+    return response;
+  } catch {
+    return Response.error();
+  }
 }
 
 self.addEventListener('fetch', (event) => {
@@ -70,6 +185,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (!url.href.startsWith(self.registration.scope)) return;
 
   if (isHtmlRequest(request, url)) {
     event.respondWith(networkFirstHtml(request));

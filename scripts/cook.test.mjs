@@ -9,6 +9,7 @@ const methodSrc = readFileSync(new URL('../src/Method.jsx', import.meta.url), 'u
 const ornamentsSrc = readFileSync(new URL('../src/ornaments.jsx', import.meta.url), 'utf8');
 const bookSrc = readFileSync(new URL('../src/Book.jsx', import.meta.url), 'utf8');
 const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+const cookCss = readFileSync(new URL('../src/cook.css', import.meta.url), 'utf8');
 
 test('Cook mode UI strings exist in English, German, and French', () => {
   const keys = [
@@ -24,6 +25,10 @@ test('Cook mode UI strings exist in English, German, and French', () => {
     'cookDoneBody',
     'cookBackToRecipe',
     'cookToggleDone',
+    'cookUpNext',
+    'cookFinish',
+    'cookActiveTimers',
+    'cookTimerJump',
   ];
   for (const key of keys) {
     assert.ok(Object.hasOwn(ui.en, key), `missing EN key ${key}`);
@@ -45,6 +50,9 @@ test('Cook mode UI strings exist in English, German, and French', () => {
   assert.match(ui.de.cookDialogLabel('Brownies'), /Brownies/);
   assert.match(ui.en.cookToggleDone(2, false), /2/);
   assert.match(ui.de.cookToggleDone(2, true), /2/);
+  assert.match(ui.en.cookTimerJump(4, '12:00'), /4[\s\S]*12:00/);
+  assert.match(ui.de.cookTimerJump(4, '12:00'), /4[\s\S]*12:00/);
+  assert.match(ui.fr.cookTimerJump(4, '12:00'), /4[\s\S]*12:00/);
 });
 
 test('CookMode reuses WakeLock, StepBody/StepTimer, step tick-off state, and motion helpers', () => {
@@ -94,4 +102,36 @@ test('Cook mode and reset button styles use theme tokens, contrast-safe Done tit
   assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cook-reset-btn/);
   assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cook-close[\s\S]*\.cook-bar-fill/);
   assert.match(stylesCss, /@media \(max-height: 820px\)[\s\S]*\.book--wide \.page-pad > \.running-head \+ \*\s*\{\s*margin-top:\s*0;\s*\}/);
+});
+
+test('Active cooking simplifies CookMode, adds Up Next + background timer dock, persists steps, and ref-counts wake lock', () => {
+  assert.doesNotMatch(cookSrc, /<Arrow\b|cook-card-count/);
+  assert.match(cookSrc, /className="cook-upnext"/);
+  assert.match(cookSrc, /className="cook-dock"/);
+  assert.match(cookSrc, /useRecipeTimers\(recipe\.slug\)/);
+  assert.match(cookSrc, /isLastStep \? t\.cookFinish : t\.cookNext/);
+  assert.match(cookSrc, /goNext\(\{ instant: true \}\)/);
+  assert.match(cookSrc, /goPrev\(\{ instant: true \}\)/);
+  assert.match(cookSrc, /import '\.\/cook\.css';/);
+
+  assert.match(methodSrc, /export const STEPS_KEY = 'recipe-book:steps:v1';/);
+  assert.match(methodSrc, /localStorage\.setItem\(STEPS_KEY/);
+  assert.match(methodSrc, /step--next/);
+  assert.match(methodSrc, /aria-current=\{isNext \? 'step' : undefined\}/);
+  assert.match(methodSrc, /step-timer-bar/);
+  assert.match(methodSrc, /TimerStateGlyph/);
+  assert.match(methodSrc, /import '\.\/cook\.css';/);
+
+  assert.match(awakeSrc, /let holdCount = 0;/);
+  assert.match(awakeSrc, /pageshow/);
+  assert.match(awakeSrc, /pointerdown/);
+  assert.match(awakeSrc, /addEventListener\?\.\('release'/);
+
+  assert.match(cookCss, /\.step-timer--done\s*\{[\s\S]*background:\s*var\(--btn-primary,\s*var\(--cherry\)\);[\s\S]*color:\s*var\(--btn-primary-ink,\s*var\(--cover-ink\)\);/);
+  assert.match(cookCss, /\.step-timer > \* \+ \*\s*\{\s*border-left:\s*2\.5px solid var\(--choc\);\s*\}/);
+  assert.match(cookCss, /\.cook-upnext\s*\{[\s\S]*min-height:\s*44px;/);
+  assert.match(cookCss, /\.cook-dock-btn\s*\{[\s\S]*min-height:\s*44px;/);
+  assert.match(cookCss, /\.cook-close:focus-visible\s*\{[\s\S]*box-shadow:\s*none;/);
+  assert.match(cookCss, /touch-action:\s*manipulation;/);
+  assert.match(cookCss, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.cook-upnext[\s\S]*\.cook-dock-btn/);
 });

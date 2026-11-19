@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDuration, formatRemaining, formatMinutes, startTimer, stopTimer, finishTimer, getTimer, remainingSeconds, adjustTimer, getDuration, pauseTimer, resumeTimer, TIMERS_KEY } from '../src/timer.js';
+import { parseDuration, formatRemaining, formatMinutes, startTimer, stopTimer, finishTimer, getTimer, remainingSeconds, adjustTimer, getDuration, pauseTimer, resumeTimer, getRecipeTimers, reconcileTimer, TIMERS_KEY } from '../src/timer.js';
 
 test('parseDuration reads minutes, ranges (low end) and hours in all three languages', () => {
   assert.deepEqual(parseDuration('Bake for 20–25 min until set.'), { seconds: 1200, label: '20–25 min' });
@@ -153,5 +153,33 @@ test('bell, timer and bite audio wait for resume and reuse one WebKit context', 
     delete globalThis.webkitAudioContext;
     if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);
     else delete globalThis.navigator;
+  }
+});
+
+test('getRecipeTimers lists one recipe’s active timers in step order and reconcileTimer finishes expired ones', () => {
+  const keys = ['cinnamon:7', 'cinnamon:1', 'cinnamon:3', 'brownies:3'];
+  try {
+    startTimer('cinnamon:7', 1200, 1000);
+    startTimer('cinnamon:1', 600, 1000);
+    pauseTimer('cinnamon:1', 61000);
+    startTimer('cinnamon:3', 60, 1000);
+    startTimer('brownies:3', 900, 1000);
+
+    assert.equal(reconcileTimer('cinnamon:3', 50000), false);
+    assert.equal(reconcileTimer('cinnamon:3', 62000), true);
+    assert.equal(getTimer('cinnamon:3').done, true);
+
+    const list = getRecipeTimers('cinnamon', 62000);
+    assert.deepEqual(list.map((x) => [x.stepIndex, x.state]), [
+      [1, 'paused'],
+      [3, 'done'],
+      [7, 'running'],
+    ]);
+    assert.equal(list[0].remaining, 540);
+    assert.equal(list[1].remaining, 0);
+    assert.equal(list[2].total, 1200);
+    assert.deepEqual(getRecipeTimers(''), []);
+  } finally {
+    keys.forEach((k) => stopTimer(k));
   }
 });

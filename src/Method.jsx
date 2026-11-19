@@ -15,9 +15,38 @@ import {
   stopTimer,
 } from './timer.js';
 import { useTimer } from './useTimer.js';
+import './cook.css';
 
+export const STEPS_KEY = 'recipe-book:steps:v1';
 const doneStepsBySlug = new Map();
 const stepListeners = new Set();
+
+function persistDoneSteps() {
+  try {
+    const entries = [...doneStepsBySlug]
+      .filter(([, set]) => set.size > 0)
+      .map(([slug, set]) => [slug, [...set].sort((a, b) => a - b)]);
+    localStorage.setItem(STEPS_KEY, JSON.stringify(entries));
+  } catch {
+    /* Storage can be unavailable; step progress still works this visit. */
+  }
+}
+
+function restoreDoneSteps() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STEPS_KEY));
+    if (!Array.isArray(saved)) return;
+    for (const row of saved) {
+      if (!Array.isArray(row) || typeof row[0] !== 'string' || !Array.isArray(row[1])) continue;
+      const valid = row[1].filter((n) => Number.isInteger(n) && n >= 0);
+      if (valid.length) doneStepsBySlug.set(row[0], new Set(valid));
+    }
+  } catch {
+    /* Ignore malformed or inaccessible storage. */
+  }
+}
+
+restoreDoneSteps();
 
 export function subscribeSteps(fn) {
   stepListeners.add(fn);
@@ -36,7 +65,9 @@ export function setStepDone(slug, stepIndex, done = true) {
   const next = new Set(doneStepsBySlug.get(slug));
   if (done) next.add(stepIndex);
   else next.delete(stepIndex);
-  doneStepsBySlug.set(slug, next);
+  if (next.size) doneStepsBySlug.set(slug, next);
+  else doneStepsBySlug.delete(slug);
+  persistDoneSteps();
   for (const sync of stepListeners) sync(slug);
 }
 
@@ -47,6 +78,7 @@ export function toggleStepDone(slug, stepIndex) {
 export function clearDoneSteps(slug) {
   if (!doneStepsBySlug.get(slug)?.size) return;
   doneStepsBySlug.delete(slug);
+  persistDoneSteps();
   for (const sync of stepListeners) sync(slug);
 }
 
@@ -82,11 +114,26 @@ export function StepDot({ stepIndex, done, label, onToggle }) {
   );
 }
 
+function TimerStateGlyph({ paused }) {
+  return (
+    <svg className="step-timer-state-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      {paused ? (
+        <path d="M4.5 2.5v11l8.5-5.5-8.5-5.5Z" fill="currentColor" />
+      ) : (
+        <path d="M4 2.5h3v11H4zm5 0h3v11H9z" fill="currentColor" />
+      )}
+    </svg>
+  );
+}
+
 // A step that names a time gets a countdown: tap to start, pause or resume.
 // Timers keep running across page turns and ring when they hit zero.
 // −/+ move it a minute at a time, before or while it runs.
 export function StepTimer({ timerKey, duration, t, measure = false }) {
-  const { state, remaining, seconds } = useTimer(measure ? null : timerKey, duration.seconds);
+  const { state, remaining, seconds, total } = useTimer(measure ? null : timerKey, duration.seconds);
+  const prime = () => {
+    if (!measure) primeAudio();
+  };
   const toggle = () => {
     if (measure) return;
     if (state === 'running') pauseTimer(timerKey);
@@ -117,10 +164,18 @@ export function StepTimer({ timerKey, duration, t, measure = false }) {
           ? t.timerReset
           : t.timerStart(idleText);
   const canLess = (isActive ? remaining : seconds) > MIN_SECONDS;
+  const progress = isActive && total > 0 ? Math.min(1, Math.max(0, 1 - remaining / total)) : 0;
   return (
     <div className={`step-timer step-timer--${state}`} role="group" aria-label={t.timer}>
       {state !== 'done' && (
-        <button type="button" className="step-timer-adj" aria-label={t.timerLess} disabled={!canLess} onClick={() => nudge(-STEP_SECONDS)}>
+        <button
+          type="button"
+          className="step-timer-adj"
+          aria-label={t.timerLess}
+          disabled={!canLess}
+          onPointerDown={prime}
+          onClick={() => nudge(-STEP_SECONDS)}
+        >
           <span aria-hidden="true">−</span>
         </button>
       )}
@@ -129,19 +184,34 @@ export function StepTimer({ timerKey, duration, t, measure = false }) {
         className="step-timer-main"
         aria-label={label}
         aria-live={state === 'done' ? 'assertive' : 'off'}
+        onPointerDown={prime}
         onClick={toggle}
       >
         <TimerIcon className="step-timer-icon" />
         <span className="step-timer-text">{text}</span>
-        {isActive && <span aria-hidden="true">{state === 'paused' ? '▶' : 'Ⅱ'}</span>}
+        {isActive && <TimerStateGlyph paused={state === 'paused'} />}
+        {isActive && (
+          <span className="step-timer-bar" aria-hidden="true" style={{ transform: `scaleX(${progress})` }} />
+        )}
       </button>
       {state !== 'done' && (
-        <button type="button" className="step-timer-adj" aria-label={t.timerMore} onClick={() => nudge(STEP_SECONDS)}>
+        <button
+          type="button"
+          className="step-timer-adj"
+          aria-label={t.timerMore}
+          onPointerDown={prime}
+          onClick={() => nudge(STEP_SECONDS)}
+        >
           <span aria-hidden="true">+</span>
         </button>
       )}
       {state === 'paused' && (
-        <button type="button" className="step-timer-adj" aria-label={t.timerClear} onClick={() => stopTimer(timerKey)}>
+        <button
+          type="button"
+          className="step-timer-adj"
+          aria-label={t.timerClear}
+          onClick={() => stopTimer(timerKey)}
+        >
           <span aria-hidden="true">×</span>
         </button>
       )}
@@ -176,6 +246,10 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
   const shown = steps || r.steps.map((_, i) => i);
   const doneCount = doneSteps.size;
   const totalSteps = r.steps.length;
+  const nextStepIndex =
+    !measure && doneCount > 0 && doneCount < totalSteps
+      ? r.steps.findIndex((_, i) => !doneSteps.has(i))
+      : -1;
   const normalHead = (
     <>
       <div className="ticket-head" data-head="normal">
@@ -234,8 +308,14 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
         {shown.map((i) => {
           const s = r.steps[i];
           const isDone = doneSteps.has(i);
+          const isNext = i === nextStepIndex;
           return (
-            <li className={cx('step', isDone && 'step--done')} key={i} data-step={i}>
+            <li
+              className={cx('step', isDone && 'step--done', isNext && 'step--next')}
+              key={i}
+              data-step={i}
+              aria-current={isNext ? 'step' : undefined}
+            >
               <StepDot
                 stepIndex={i}
                 done={isDone}

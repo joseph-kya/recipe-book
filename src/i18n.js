@@ -80,6 +80,10 @@ export const ui = {
     cookDoneBody: 'All steps completed.',
     cookBackToRecipe: 'Back to recipe',
     cookToggleDone: (i, done) => (done ? `Step ${i} done. Mark undone` : `Mark step ${i} done`),
+    cookUpNext: 'Up next',
+    cookFinish: 'Finish',
+    cookActiveTimers: 'Running timers',
+    cookTimerJump: (step, status) => `Step ${step} timer: ${status}. Jump to step ${step}`,
   },
   de: {
     bookTitle: ['Josephs', 'Rezeptbuch'],
@@ -159,6 +163,10 @@ export const ui = {
     cookDoneBody: 'Alle Schritte erledigt.',
     cookBackToRecipe: 'Zurück zum Rezept',
     cookToggleDone: (i, done) => (done ? `Schritt ${i} erledigt. Zurücksetzen` : `Schritt ${i} als erledigt markieren`),
+    cookUpNext: 'Als Nächstes',
+    cookFinish: 'Fertig',
+    cookActiveTimers: 'Laufende Timer',
+    cookTimerJump: (step, status) => `Timer für Schritt ${step}: ${status}. Zu Schritt ${step}`,
   },
   fr: {
     bookTitle: ['Les recettes', 'de Joseph'],
@@ -238,6 +246,10 @@ export const ui = {
     cookDoneBody: 'Toutes les étapes sont terminées.',
     cookBackToRecipe: 'Retour à la recette',
     cookToggleDone: (i, done) => (done ? `Étape ${i} terminée. Marquer comme non terminée` : `Marquer l’étape ${i} comme terminée`),
+    cookUpNext: 'Ensuite',
+    cookFinish: 'Terminer',
+    cookActiveTimers: 'Minuteurs en cours',
+    cookTimerJump: (step, status) => `Minuteur étape ${step} : ${status}. Aller à l’étape ${step}`,
   },
 };
 

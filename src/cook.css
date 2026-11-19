@@ -1,0 +1,458 @@
+/* Active-cooking styles: step timers, recipe next-step focus, and Cook mode.
+   Flat retro diner tokens only — no glows, no focus-ring shadows, no chevrons. */
+
+/* ---------- Recipe page: instant tap feedback + zero-shift next-step focus ---------- */
+
+.cook-start-btn,
+.step-dot,
+.step-timer-main,
+.step-timer-adj,
+.cook-close,
+.cook-nav-btn,
+.cook-upnext,
+.cook-dock-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.step-dot {
+  transition:
+    transform 110ms var(--ease-out),
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.step-dot:active {
+  transform: scale(0.92);
+}
+
+.step-dot:focus-visible,
+.step-timer-main:focus-visible,
+.step-timer-adj:focus-visible,
+.cook-upnext:focus-visible,
+.cook-dock-btn:focus-visible,
+.cook-nav-btn:focus-visible {
+  outline: 3px solid var(--choc);
+  outline-offset: 2px;
+}
+
+/* First undone step once cooking has started: unmistakable focus with zero height shift
+   so wide-mode pagination measurements stay exact. */
+.step--next .step-dot {
+  background: var(--btn-primary, var(--cherry));
+  color: var(--btn-primary-ink, var(--cover-ink));
+}
+
+.step--next .step-title {
+  color: var(--cherry-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Step timers: crisp flat retro pill, AA contrast in all 6 themes ---------- */
+
+.step-timer {
+  max-width: 100%;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+/* Uniform crisp dividers regardless of 1, 3, or 4 buttons (fixes paused [+] border). */
+.step-timer-adj:first-child,
+.step-timer-adj:last-child {
+  border-left: 0;
+  border-right: 0;
+}
+
+.step-timer > * + * {
+  border-left: 2.5px solid var(--choc);
+}
+
+.step-timer-main,
+.step-timer-adj {
+  transition:
+    transform 100ms var(--ease-out),
+    background-color 110ms ease;
+}
+
+.step-timer-main {
+  position: relative;
+  min-width: 44px;
+  padding: 0 0.6rem;
+  overflow: hidden;
+}
+
+.step-timer-adj {
+  width: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.step-timer-state-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+.step-timer-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left center;
+  transition: transform 420ms linear;
+  pointer-events: none;
+}
+
+.step-timer--done {
+  background: var(--btn-primary, var(--cherry));
+  color: var(--btn-primary-ink, var(--cover-ink));
+  border-color: var(--choc);
+  animation: timer-nudge 900ms var(--ease-out) 3;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .step-timer-main:hover,
+  .step-timer-adj:not(:disabled):hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  .step-timer--done .step-timer-main:hover {
+    background: color-mix(in srgb, var(--shadow) 12%, transparent);
+  }
+}
+
+/* ---------- Cook mode: simplified full-screen active-cooking focus view ---------- */
+
+.cook-modal {
+  height: 100dvh;
+}
+
+.cook-header {
+  gap: var(--sp-2);
+  padding:
+    max(var(--sp-2), env(safe-area-inset-top))
+    max(var(--sp-4), env(safe-area-inset-right))
+    var(--sp-2)
+    max(var(--sp-4), env(safe-area-inset-left));
+}
+
+.cook-header-text {
+  flex: 1;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.cook-recipe-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(1.05rem, 4.2vw, 1.5rem);
+}
+
+.cook-progress {
+  white-space: nowrap;
+  padding: 3px 0.65rem;
+  font-size: var(--fs-xs);
+}
+
+/* Flat crisp close button: 44px+ target, no ring shadow on focus */
+.cook-close {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-width: 2.5px;
+  box-shadow: none;
+  transition:
+    transform 100ms var(--ease-out),
+    background-color 110ms ease;
+}
+
+.cook-close:focus-visible {
+  box-shadow: none;
+  outline: 3px solid var(--choc);
+  outline-offset: 2px;
+}
+
+.cook-close:active {
+  transform: scale(0.92);
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cook-close:hover {
+    transform: none;
+    box-shadow: none;
+    background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  }
+  .cook-close:active {
+    transform: scale(0.92);
+    box-shadow: none;
+  }
+}
+
+/* Background timer dock: only rendered when another step has an active/paused/done timer */
+.cook-dock {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 48rem;
+  margin: var(--sp-2) auto 0;
+  padding: 0 max(var(--sp-4), env(safe-area-inset-right)) 0 max(var(--sp-4), env(safe-area-inset-left));
+}
+
+.cook-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.85rem;
+  border: 2.5px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--mustard);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    transform 100ms var(--ease-out),
+    background-color 110ms ease;
+}
+
+.cook-dock-btn--paused {
+  background: var(--paper);
+}
+
+.cook-dock-btn--done {
+  background: var(--btn-primary, var(--cherry));
+  color: var(--btn-primary-ink, var(--cover-ink));
+}
+
+.cook-dock-btn:active {
+  transform: scale(0.95);
+}
+
+.cook-dock-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+}
+
+.cook-dock-step {
+  opacity: 0.8;
+}
+
+/* Focus stage: active step card + quiet Up Next strip stacked cleanly */
+.cook-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) max(var(--sp-4), env(safe-area-inset-right)) var(--sp-3) max(var(--sp-4), env(safe-area-inset-left));
+}
+
+.cook-card {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-width: 44rem;
+  box-shadow: 4px 4px 0 var(--card-shadow, var(--choc));
+  padding: clamp(1.1rem, 3.8vw, 2rem);
+}
+
+.cook-card-top {
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+
+.cook-card .step-dot {
+  width: 3rem;
+  height: 3rem;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: var(--fs-xl);
+}
+
+.cook-card .step-title {
+  margin-bottom: var(--sp-2);
+  font-size: clamp(1.45rem, 5.2vw, 2.25rem);
+}
+
+.cook-card .step-body p {
+  font-size: clamp(1.125rem, 3.8vw, 1.6rem);
+  line-height: 1.48;
+}
+
+.cook-card .step-body .cue {
+  margin-top: var(--sp-2);
+  font-size: clamp(1.0625rem, 3.2vw, 1.35rem);
+}
+
+.cook-card .step-timer {
+  margin-top: var(--sp-3);
+  min-height: 3.125rem;
+  font-size: clamp(1.125rem, 4vw, 1.375rem);
+}
+
+.cook-card .step-timer-main,
+.cook-card .step-timer-adj {
+  min-height: 3.125rem;
+  min-width: 2.85rem;
+}
+
+.cook-card .step-timer-main {
+  padding: 0 0.75rem;
+  gap: 0.45rem;
+}
+
+/* "Up next" preview strip: lets you glance ahead without losing your active step */
+.cook-upnext {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 44rem;
+  min-height: 44px;
+  padding: 0.55rem 0.9rem;
+  border: 2.5px solid var(--choc);
+  border-radius: var(--r-m, var(--r-s));
+  background: var(--paper);
+  color: var(--choc);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 100ms var(--ease-out),
+    background-color 110ms ease;
+}
+
+.cook-upnext:active {
+  transform: scale(0.98);
+}
+
+.cook-upnext-label {
+  flex: none;
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--cherry-ink);
+}
+
+.cook-upnext-title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: var(--fs-s);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cook-upnext-time {
+  flex: none;
+  padding: 2px 0.5rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cook-upnext:hover {
+    background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+  }
+  .cook-dock-btn:hover {
+    background: color-mix(in srgb, var(--ink) 8%, var(--mustard));
+  }
+  .cook-dock-btn--paused:hover {
+    background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  }
+  .cook-dock-btn--done:hover {
+    background: color-mix(in srgb, var(--shadow) 12%, var(--btn-primary, var(--cherry)));
+  }
+}
+
+/* Footer nav buttons: flat, chevron-free, instant press */
+.cook-footer {
+  padding:
+    var(--sp-2)
+    max(var(--sp-4), env(safe-area-inset-right))
+    calc(var(--sp-3) + env(safe-area-inset-bottom))
+    max(var(--sp-4), env(safe-area-inset-left));
+}
+
+.cook-nav-btn {
+  min-height: 3.5rem;
+  font-size: clamp(1.0625rem, 3.6vw, 1.3rem);
+  transition:
+    transform 100ms var(--ease-out),
+    background-color 110ms ease;
+}
+
+.cook-nav-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Compact phones (e.g. 390px wide, shorter heights) */
+@media (max-width: 480px) {
+  .step-timer-main {
+    padding: 0 0.5rem;
+    gap: 0.3rem;
+  }
+  .cook-stage {
+    padding: var(--sp-2) var(--sp-3);
+    gap: var(--sp-2);
+  }
+  .cook-card {
+    box-shadow: 3px 3px 0 var(--card-shadow, var(--choc));
+  }
+  .cook-footer {
+    gap: var(--sp-2);
+    padding-inline: var(--sp-3);
+  }
+}
+
+/* Reduced motion: keep instant state feedback, strip movement and transitions */
+@media (prefers-reduced-motion: reduce) {
+  .step-dot,
+  .step-timer,
+  .step-timer-main,
+  .step-timer-adj,
+  .step-timer-bar,
+  .cook-close,
+  .cook-upnext,
+  .cook-dock-btn,
+  .cook-nav-btn {
+    transition-duration: 0ms;
+  }
+  .step-dot:active,
+  .step-timer-main:active,
+  .step-timer-adj:active,
+  .cook-close:active,
+  .cook-upnext:active,
+  .cook-dock-btn:active,
+  .cook-nav-btn:active:not(:disabled) {
+    transform: none;
+  }
+  .step-timer--done {
+    animation: none;
+  }
+}

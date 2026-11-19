@@ -8,6 +8,9 @@ import { themeText } from './theme-i18n.js';
 import { cx, StepProgress } from './recipeUI.jsx';
 import { getDoneStepCount, subscribeSteps } from './Method.jsx';
 import { contentsText, filterRecipes } from './contents-find.js';
+import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
+import { favCopyFor } from './fav-i18n.js';
+import { FavMark } from './RecipeFav.jsx';
 import './cover-contents.css';
 
 function SearchIcon({ className }) {
@@ -98,14 +101,20 @@ export function ContentsLeft({ lang }) {
 export function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
   const copy = contentsText[lang] || contentsText.en;
+  const favCopy = favCopyFor(lang);
   const [query, setQuery] = useState('');
   const [, setStepTick] = useState(0);
+  const [favTick, setFavTick] = useState(0);
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
   useEffect(() => subscribeSteps(() => setStepTick((n) => n + 1)), []);
+  useEffect(() => subscribeFav(() => setFavTick((n) => n + 1)), []);
 
-  const matches = useMemo(() => filterRecipes(recipes, lang, query), [lang, query]);
+  const matches = useMemo(
+    () => sortFavoritesFirst(filterRecipes(recipes, lang, query)),
+    [lang, query, favTick],
+  );
   const trimmed = query.trim();
 
   const clearQuery = () => {
@@ -163,6 +172,7 @@ export function ContentsList({ lang, withTitle = false }) {
             {matches.map(({ recipe: r, text, textLang, matchCue }) => {
               const totalSteps = text.steps.length;
               const doneCount = getDoneStepCount(r.slug);
+              const fav = isFavorite(r.slug);
               return (
                 <li key={r.slug}>
                   <a href={`#/${r.route}`} className="toc-link">
@@ -176,13 +186,24 @@ export function ContentsList({ lang, withTitle = false }) {
                       <span className="toc-title" lang={textLang}>
                         {text.title}
                       </span>
+                      {fav && (
+                        <span className="sr-only">
+                          {', '}
+                          {favCopy.favoriteBadge}
+                        </span>
+                      )}
                       {matchCue && (
                         <span className="toc-match" lang={textLang}>
                           {matchCue}
                         </span>
                       )}
                     </span>
-                    <StepProgress className="toc-progress" doneCount={doneCount} totalSteps={totalSteps} />
+                    {(doneCount > 0 || fav) && (
+                      <span className="toc-trail">
+                        <StepProgress className="toc-progress" doneCount={doneCount} totalSteps={totalSteps} />
+                        {fav && <FavMark />}
+                      </span>
+                    )}
                   </a>
                 </li>
               );

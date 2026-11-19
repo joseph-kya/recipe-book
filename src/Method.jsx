@@ -1,20 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckIcon, PlayIcon, ResetIcon, TimerIcon } from './ornaments.jsx';
 import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
 import { readingCopyFor } from './recipe-reading-i18n.js';
-import { cookPrepCopyFor } from './more-cook-i18n.js';
-import { scaleAmount } from './scale.js';
-import { amountsFor } from './units.js';
-import { useScale } from './useScale.js';
-import {
-  matchRecipeSteps,
-  resetAutoStepLink,
-  resolveLinkedStep,
-  toggleStepLink,
-  useActiveStep,
-  usePrepItems,
-  useSyncedUnits,
-} from './more-cook.js';
 import {
   MIN_SECONDS,
   STEP_SECONDS,
@@ -31,7 +18,6 @@ import {
 import { useTimer } from './useTimer.js';
 import './recipe-reading.css';
 import './cook.css';
-import './more-cook.css';
 
 export const STEPS_KEY = 'recipe-book:steps:v1';
 const doneStepsBySlug = new Map();
@@ -88,16 +74,13 @@ export function setStepDone(slug, stepIndex, done = true) {
 }
 
 export function toggleStepDone(slug, stepIndex) {
-  const nextDone = !doneStepsBySlug.get(slug)?.has(stepIndex);
-  setStepDone(slug, stepIndex, nextDone);
-  if (nextDone) resetAutoStepLink(slug);
+  setStepDone(slug, stepIndex, !doneStepsBySlug.get(slug)?.has(stepIndex));
 }
 
 export function clearDoneSteps(slug) {
   if (!doneStepsBySlug.get(slug)?.size) return;
   doneStepsBySlug.delete(slug);
   persistDoneSteps();
-  resetAutoStepLink(slug);
   for (const sync of stepListeners) sync(slug);
 }
 
@@ -114,18 +97,6 @@ export function useDoneSteps(slug, disabled = false) {
   }, [slug, disabled]);
 
   return doneSteps;
-}
-
-// Small 3-row ingredient list icon (no chevrons).
-function StepLinkIcon({ className = '' }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-      <circle cx="3" cy="4" r="1.35" fill="currentColor" />
-      <circle cx="3" cy="8" r="1.35" fill="currentColor" />
-      <circle cx="3" cy="12" r="1.35" fill="currentColor" />
-      <path d="M6.5 4h7M6.5 8h7M6.5 12h5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 export function StepDot({ stepIndex, done, label, onToggle }) {
@@ -250,30 +221,11 @@ export function StepTimer({ timerKey, duration, t, measure = false }) {
   );
 }
 
-export function StepBody({
-  recipe,
-  step,
-  stepIndex,
-  t,
-  measure = false,
-  headingLevel = 3,
-  showTitle = true,
-  linkedIngredients = null,
-  linkedLabel = '',
-  textLang = undefined,
-  onBodyClick = undefined,
-}) {
+export function StepBody({ recipe, step, stepIndex, t, measure = false, headingLevel = 3, showTitle = true }) {
   const duration = parseDuration(step.text, step.cue);
   const Heading = headingLevel === 2 ? 'h2' : 'h3';
-  const handleClick = onBodyClick
-    ? (e) => {
-        if (e.target.closest?.('button, a, input, select, textarea')) return;
-        if (globalThis.getSelection?.()?.toString()) return;
-        onBodyClick();
-      }
-    : undefined;
   return (
-    <div className="step-body" onClick={handleClick}>
+    <div className="step-body">
       {showTitle && <Heading className="step-title">{step.title}</Heading>}
       <p>{step.text}</p>
       {step.cue && (
@@ -281,21 +233,6 @@ export function StepBody({
           {showTitle && <span aria-hidden="true">→ </span>}
           {step.cue}
         </p>
-      )}
-      {!measure && linkedIngredients && linkedIngredients.length > 0 && (
-        <div className="step-ings" role="region" aria-label={linkedLabel}>
-          <ul className="step-ings-list" lang={textLang}>
-            {linkedIngredients.map((item) => (
-              <li
-                key={item.id}
-                className={cx('step-ing-chip', item.prepped && 'step-ing-chip--prepped')}
-              >
-                {item.amount && <strong className="step-ing-amt">{item.amount}</strong>}
-                <span className="step-ing-name">{item.name}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
       )}
       {duration && (
         <StepTimer timerKey={`${recipe.slug}:${stepIndex}`} duration={duration} t={t} measure={measure} />
@@ -307,12 +244,7 @@ export function StepBody({
 export default function Method({ recipe, lang, steps, cont = false, measure = false, onStartCooking }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const rt = readingCopyFor(lang);
-  const mc = cookPrepCopyFor(lang);
   const doneSteps = useDoneSteps(recipe.slug, measure);
-  const activeStep = useActiveStep(recipe.slug, measure);
-  const prepItems = usePrepItems(recipe.slug, measure);
-  const { factor, custom } = useScale(recipe);
-  const units = useSyncedUnits(measure);
 
   const shown = steps || r.steps.map((_, i) => i);
   const doneCount = doneSteps.size;
@@ -321,32 +253,6 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
     !measure && doneCount > 0 && doneCount < totalSteps
       ? r.steps.findIndex((_, idx) => !doneSteps.has(idx))
       : -1;
-
-  const matchesByStep = useMemo(
-    () => matchRecipeSteps(r.groups, r.steps, textLang),
-    [r.groups, r.steps, textLang],
-  );
-  const linkedStepIndex = measure ? null : resolveLinkedStep(activeStep, currentStepIndex, matchesByStep);
-
-  const itemsById = useMemo(() => {
-    const map = new Map();
-    r.groups.forEach((g, gi) => {
-      g.items.forEach((raw, ii) => {
-        const scaled =
-          factor === 1
-            ? raw
-            : {
-                ...raw,
-                amount: scaleAmount(raw.amount, factor, textLang, custom),
-                metric: scaleAmount(raw.metric, factor, textLang, custom),
-              };
-        const { primary } = amountsFor(scaled, units);
-        map.set(`${gi}:${ii}`, { id: `${gi}:${ii}`, name: scaled.name, amount: primary });
-      });
-    });
-    return map;
-  }, [r.groups, factor, textLang, custom, units]);
-
   const normalHead = (
     <>
       <div className="ticket-head" data-head="normal">
@@ -406,80 +312,31 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
           const s = r.steps[i];
           const isDone = doneSteps.has(i);
           const isCurrent = i === currentStepIndex;
-          const matchedIds = matchesByStep[i] || [];
-          const hasIngs = matchedIds.length > 0;
-          const isLinked = !measure && hasIngs && linkedStepIndex === i;
-          const linkedList = isLinked
-            ? matchedIds
-                .map((id) => {
-                  const info = itemsById.get(id);
-                  return info ? { ...info, prepped: prepItems.has(id) } : null;
-                })
-                .filter(Boolean)
-            : null;
-          const onToggleLink =
-            !measure && hasIngs
-              ? () => toggleStepLink(recipe.slug, i, linkedStepIndex)
-              : undefined;
           return (
             <li
-              className={cx(
-                'step',
-                isDone && 'step--done',
-                isCurrent && 'step--current',
-                hasIngs && 'step--has-ings',
-                isLinked && 'step--linked',
-              )}
+              className={cx('step', isDone && 'step--done', isCurrent && 'step--current')}
               key={i}
               data-step={i}
               aria-current={isCurrent ? 'step' : undefined}
             >
-              <div className="step-head-row">
-                <h3 className="step-head">
-                  <button
-                    type="button"
-                    className="step-head-btn"
-                    aria-pressed={isDone}
-                    onClick={() => !measure && toggleStepDone(recipe.slug, i)}
-                  >
-                    <span className="step-dot" aria-hidden="true">
-                      <span className="step-num">{i + 1}</span>
-                      <CheckIcon className="step-check" />
-                    </span>
-                    <span className="sr-only">
-                      {i + 1}. {isCurrent ? `${rt.currentStep}: ` : ''}
-                    </span>
-                    <span className="step-title">{s.title}</span>
-                  </button>
-                </h3>
-                {hasIngs && (
-                  <button
-                    type="button"
-                    className="step-link-btn"
-                    aria-pressed={isLinked}
-                    aria-label={mc.stepLinkLabel(i + 1, matchedIds.length, isLinked)}
-                    title={mc.stepLinkLabel(i + 1, matchedIds.length, isLinked)}
-                    onClick={onToggleLink}
-                  >
-                    <span className="step-link-pill" aria-hidden="true">
-                      <StepLinkIcon className="step-link-icon" />
-                      <span>{matchedIds.length}</span>
-                    </span>
-                  </button>
-                )}
-              </div>
-              <StepBody
-                recipe={recipe}
-                step={s}
-                stepIndex={i}
-                t={t}
-                measure={measure}
-                showTitle={false}
-                linkedIngredients={linkedList}
-                linkedLabel={mc.stepIngredients(i + 1)}
-                textLang={textLang}
-                onBodyClick={onToggleLink}
-              />
+              <h3 className="step-head">
+                <button
+                  type="button"
+                  className="step-head-btn"
+                  aria-pressed={isDone}
+                  onClick={() => !measure && toggleStepDone(recipe.slug, i)}
+                >
+                  <span className="step-dot" aria-hidden="true">
+                    <span className="step-num">{i + 1}</span>
+                    <CheckIcon className="step-check" />
+                  </span>
+                  <span className="sr-only">
+                    {i + 1}. {isCurrent ? `${rt.currentStep}: ` : ''}
+                  </span>
+                  <span className="step-title">{s.title}</span>
+                </button>
+              </h3>
+              <StepBody recipe={recipe} step={s} stepIndex={i} t={t} measure={measure} showTitle={false} />
             </li>
           );
         })}

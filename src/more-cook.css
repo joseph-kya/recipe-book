@@ -1,5 +1,5 @@
 /* Step-to-ingredient linking and mise en place mode for Ingredients & Method.
-   Flat retro diner craft: soft fills without decorative edges,
+   Flat retro diner craft: crisp solid borders, zero glows/rings/chevrons,
    instant tap feedback, 44px mobile touch targets, reduced-motion safe. */
 
 /* ---------- Ingredients: Mise en place toggle & step-link indicator ---------- */
@@ -26,7 +26,7 @@
   gap: 0.45rem;
   min-height: 2.75rem;
   padding: 0 0.85rem;
-  border: 0;
+  border: 2px solid var(--choc);
   border-radius: var(--r-pill);
   background: var(--cream);
   color: var(--choc);
@@ -67,7 +67,7 @@
 .mise-progress {
   flex-shrink: 0;
   padding: 2px 0.55rem;
-  border: 0;
+  border: 2px solid var(--choc);
   border-radius: var(--r-pill);
   background: var(--cream);
   color: var(--choc);
@@ -94,7 +94,7 @@
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0;
-  border: 0;
+  border: 2px solid var(--choc);
   border-radius: var(--r-pill);
   background: var(--cream);
   color: var(--choc);
@@ -116,7 +116,7 @@
   gap: 0.35rem;
   min-height: 2.75rem;
   padding: 0 0.7rem;
-  border: 0;
+  border: 2px solid var(--choc);
   border-radius: var(--r-pill);
   background: var(--cream);
   color: var(--choc);
@@ -155,13 +155,13 @@
 /* ---------- Ingredients: Mise en place row ticks ---------- */
 
 .menu--mise .ing-tick {
-  border: 0;
+  border-color: var(--choc);
   background: var(--cream);
 }
 
 .menu--mise .ing--prepped .ing-tick {
   background: var(--primary);
-  border: 0;
+  border-color: var(--primary);
   color: var(--on-primary, var(--cream));
 }
 
@@ -185,12 +185,13 @@
 /* ---------- Ingredients: Highlighted rows for the active step ---------- */
 
 .menu .ing {
-  border: 0;
+  border-left: 3px solid transparent;
   margin-inline: -0.375rem;
   padding-inline: 0.375rem;
   border-radius: 0 var(--r-s) var(--r-s) 0;
   transition:
     background-color 150ms var(--ease-out),
+    border-left-color 150ms var(--ease-out),
     opacity 150ms var(--ease-out);
 }
 
@@ -210,13 +211,13 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
 }
 
 .menu--linked .ing--linked {
-  background: color-mix(in srgb, var(--primary) 10%, var(--paper));
-  border: 0;
+  background: var(--cream);
+  border-left-color: var(--primary);
 }
 
 .menu--linked .ing--linked + .ing,
 .menu--linked .ing + .ing--linked {
-  border: 0;
+  border-top-color: transparent;
 }
 
 .menu--linked .ing--linked .ing-name {
@@ -263,7 +264,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
   gap: 0.25rem;
   height: 1.75rem;
   padding: 0 0.5rem;
-  border: 0;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
   border-radius: var(--r-pill);
   background: transparent;
   color: var(--choc-soft);
@@ -274,6 +275,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
   transition:
     transform var(--press) var(--ease-out),
     background-color 140ms var(--ease-out),
+    border-color 140ms var(--ease-out),
     color 140ms var(--ease-out);
 }
 
@@ -282,7 +284,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
 }
 
 .ticket .step-link-btn[aria-pressed='true'] .step-link-pill {
-  border: 0;
+  border-color: var(--choc);
   background: var(--primary);
   color: var(--on-primary, var(--cream));
 }
@@ -298,7 +300,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
 }
 
 .ticket .step--linked {
-  border: 0;
+  border-left-color: var(--primary);
   background: color-mix(in srgb, var(--ground) 72%, var(--paper));
 }
 
@@ -307,8 +309,8 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
 .step-ings {
   margin-top: var(--sp-2);
   padding: var(--sp-2);
-  border: 0;
-  border: 0;
+  border: 2px solid var(--choc);
+  border-left: 3px solid var(--primary);
   border-radius: var(--r-s);
   background: var(--cream);
 }
@@ -328,7 +330,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
   gap: 0.3rem;
   max-width: 100%;
   padding: 0.2rem 0.5rem;
-  border: 0;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
   border-radius: var(--r-s);
   background: var(--paper);
   color: var(--choc);
@@ -337,7 +339,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
 }
 
 .step-ing-chip--prepped {
-  border: 0;
+  border-color: var(--primary);
   opacity: var(--got-opacity, 0.78);
 }
 
@@ -374,7 +376,7 @@ html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
     background: var(--paper);
   }
   .ticket .step-link-btn:not([aria-pressed='true']):hover .step-link-pill {
-    border: 0;
+    border-color: var(--choc);
     background: var(--cream);
     color: var(--choc);
   }

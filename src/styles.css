@@ -2802,16 +2802,3 @@ button {
     pointer-events: none;
   }
 }
-
-/* Flat diner surfaces: shape and colour carry controls, keyboard focus stays visible. */
-@media screen {
-  *, *::before, *::after {
-    border-width: 0 !important;
-    box-shadow: none !important;
-  }
-  :focus:not(:focus-visible) { outline: none !important; }
-  :focus-visible {
-    outline: 3px solid var(--ring-out, var(--choc));
-    outline-offset: 3px;
-  }
-}

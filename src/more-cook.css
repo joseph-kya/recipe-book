@@ -1,0 +1,469 @@
+/* Step-to-ingredient linking and mise en place mode for Ingredients & Method.
+   Flat retro diner craft: crisp solid borders, zero glows/rings/chevrons,
+   instant tap feedback, 44px mobile touch targets, reduced-motion safe. */
+
+/* ---------- Ingredients: Mise en place toggle & step-link indicator ---------- */
+
+.mise-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.mise-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.mise-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-s);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.mise-toggle:active {
+  transform: scale(0.96);
+}
+
+.mise-toggle[aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--on-primary, var(--cream));
+}
+
+.mise-toggle-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.mise-saved-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.mise-progress {
+  flex-shrink: 0;
+  padding: 2px 0.55rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.mise-progress--done {
+  background: var(--primary);
+  color: var(--on-primary, var(--cream));
+}
+
+.mise-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms var(--ease-out);
+}
+
+.mise-clear:active {
+  transform: scale(0.95);
+}
+
+.menu-step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0 0.7rem;
+  border: 2px solid var(--choc);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  color: var(--choc);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms var(--ease-out);
+}
+
+.menu-step-chip:active {
+  transform: scale(0.96);
+}
+
+.menu-step-chip-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.menu-step-chip-x {
+  font-family: var(--body);
+  font-size: var(--fs-m);
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.78;
+}
+
+/* ---------- Ingredients: Mise en place row ticks ---------- */
+
+.menu--mise .ing-tick {
+  border-color: var(--choc);
+  background: var(--cream);
+}
+
+.menu--mise .ing--prepped .ing-tick {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary, var(--cream));
+}
+
+.menu--mise .ing--prepped .ing-tick-svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.menu--mise .ing--prepped .ing-what,
+.menu--mise .ing--prepped .ing-how {
+  opacity: var(--got-opacity, 0.76);
+}
+
+.menu--mise .ing--prepped .ing-name {
+  color: var(--choc-soft);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: color-mix(in srgb, var(--primary) 65%, transparent);
+}
+
+/* ---------- Ingredients: Highlighted rows for the active step ---------- */
+
+.menu .ing {
+  border-left: 3px solid transparent;
+  margin-inline: -0.375rem;
+  padding-inline: 0.375rem;
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-left-color 150ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+}
+
+.menu .ing-btn {
+  width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+.menu--linked .ing:not(.ing--linked) {
+  opacity: 0.62;
+}
+
+html[data-theme='paper'] .menu--linked .ing:not(.ing--linked),
+html[data-theme='ink'] .menu--linked .ing:not(.ing--linked) {
+  opacity: 0.74;
+}
+
+.menu--linked .ing--linked {
+  background: var(--cream);
+  border-left-color: var(--primary);
+}
+
+.menu--linked .ing--linked + .ing,
+.menu--linked .ing + .ing--linked {
+  border-top-color: transparent;
+}
+
+.menu--linked .ing--linked .ing-name {
+  color: var(--choc);
+}
+
+.menu--linked .ing--linked .ing-amount {
+  color: var(--cherry-ink);
+}
+
+/* ---------- Method: Step header link trigger & active step highlight ---------- */
+
+.ticket .step-head-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.ticket .step-head-row .step-head {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticket .step-link-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--choc-soft);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ticket .step-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--choc-soft);
+  font-family: var(--badge);
+  font-size: var(--fs-xs);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition:
+    transform var(--press) var(--ease-out),
+    background-color 140ms var(--ease-out),
+    border-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.ticket .step-link-btn:active .step-link-pill {
+  transform: scale(0.93);
+}
+
+.ticket .step-link-btn[aria-pressed='true'] .step-link-pill {
+  border-color: var(--choc);
+  background: var(--primary);
+  color: var(--on-primary, var(--cream));
+}
+
+.ticket .step-link-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex-shrink: 0;
+}
+
+.ticket .step--has-ings .step-body {
+  cursor: pointer;
+}
+
+.ticket .step--linked {
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--ground) 72%, var(--paper));
+}
+
+/* ---------- Method: Compact inline ingredient strip on narrow screens ---------- */
+
+.step-ings {
+  margin-top: var(--sp-2);
+  padding: var(--sp-2);
+  border: 2px solid var(--choc);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--r-s);
+  background: var(--cream);
+}
+
+.step-ings-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-ing-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.2rem 0.5rem;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: var(--r-s);
+  background: var(--paper);
+  color: var(--choc);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+}
+
+.step-ing-chip--prepped {
+  border-color: var(--primary);
+  opacity: var(--got-opacity, 0.78);
+}
+
+.step-ing-chip--prepped .step-ing-name {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--primary) 65%, transparent);
+}
+
+.step-ing-amt {
+  font-family: var(--badge);
+  font-weight: 400;
+  color: var(--cherry-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.step-ing-name {
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+/* Wide desktop spreads show Ingredients right beside Method and use fixed-height
+   paginated faces, so never expand step height dynamically in wide mode. */
+.book--wide .step-ings {
+  display: none;
+}
+
+/* ---------- Hover states (pointer-fine only) ---------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .mise-toggle:not([aria-pressed='true']):hover,
+  .mise-clear:hover,
+  .menu-step-chip:hover {
+    background: var(--paper);
+  }
+  .ticket .step-link-btn:not([aria-pressed='true']):hover .step-link-pill {
+    border-color: var(--choc);
+    background: var(--cream);
+    color: var(--choc);
+  }
+}
+
+/* ---------- Wide desktop spreads (compact pagination density) ---------- */
+
+.book--wide .mise-bar {
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.book--wide .mise-toggle {
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  font-size: var(--fs-xs);
+}
+
+.book--wide .mise-clear {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.book--wide .menu-step-chip {
+  min-height: 2rem;
+  padding: 0 0.55rem;
+}
+
+.book--wide .menu .ing {
+  margin-inline: -0.25rem;
+  padding-inline: 0.25rem;
+}
+
+.book--wide .menu .ing-btn {
+  width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+.book--wide .ticket .step-link-btn {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+@media (max-height: 820px) {
+  .book--wide .mise-toggle,
+  .book--wide .menu-step-chip {
+    min-height: 1.75rem;
+  }
+  .book--wide .mise-clear {
+    width: 1.75rem;
+    height: 1.75rem;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+  }
+}
+
+/* ---------- Print: keep A4 sheet ink-friendly and distraction-free ---------- */
+
+@media print {
+  .mise-bar,
+  .step-link-btn,
+  .step-ings {
+    display: none !important;
+  }
+  .menu--linked .ing:not(.ing--linked) {
+    opacity: 1;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mise-toggle,
+  .mise-progress,
+  .mise-clear,
+  .menu-step-chip,
+  .menu .ing,
+  .ticket .step-link-pill {
+    transition: none;
+  }
+  .mise-toggle:active,
+  .mise-clear:active,
+  .menu-step-chip:active,
+  .ticket .step-link-btn:active .step-link-pill {
+    transform: none;
+  }
+}

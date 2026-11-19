@@ -1,14 +1,45 @@
-import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { CheckIcon, ResetIcon, ShoppingListIcon } from './ornaments.jsx';
 import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
 import { readingCopyFor } from './recipe-reading-i18n.js';
+import { cookPrepCopyFor } from './more-cook-i18n.js';
 import { recipeSummary } from './recipeMeta.js';
 import { scaleAmount } from './scale.js';
 import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
 import { amountsFor } from './units.js';
 import { useScale } from './useScale.js';
+import { useDoneSteps } from './Method.jsx';
+import {
+  clearPrepItems,
+  clearStepLink,
+  matchRecipeSteps,
+  resolveLinkedStep,
+  syncUnits,
+  toggleMiseMode,
+  togglePrepItem,
+  useActiveStep,
+  useMiseMode,
+  usePrepItems,
+} from './more-cook.js';
 import Scaler from './Scaler.jsx';
 import './recipe-reading.css';
+import './more-cook.css';
+
+// Small flat-retro prep bowl icon for Mise en place.
+function MiseIcon({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M3 9.5h14a7 7 0 0 1-14 0Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M6.5 16.5h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7.5 6.5 9.2 4.5M12.5 6.5 11.2 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 // Same text, but long amounts only break at their " + " joins.
 function Amount({ text }) {
@@ -96,10 +127,19 @@ function RecipeGlance({ recipe, lang }) {
 
 export default function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
+  const mc = cookPrepCopyFor(lang);
   const { factor, custom } = useScale(recipe);
   const gotItems = useGotItems(recipe.slug, measure);
+  const miseOn = useMiseMode(recipe.slug, measure);
+  const prepItems = usePrepItems(recipe.slug, measure);
+  const doneSteps = useDoneSteps(recipe.slug, measure);
+  const activeStep = useActiveStep(recipe.slug, measure);
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef(0);
+
+  useEffect(() => {
+    if (!measure) syncUnits(units);
+  }, [units, measure]);
 
   useEffect(() => {
     setCopied(false);
@@ -111,7 +151,22 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
   const itemsList = allItems(r);
   const totalItems = itemsList.length;
   const gotCount = itemsList.filter(([gi, ii]) => gotItems.has(`${gi}:${ii}`)).length;
+  const prepCount = itemsList.filter(([gi, ii]) => prepItems.has(`${gi}:${ii}`)).length;
   const remainingCount = totalItems - gotCount;
+
+  const matchesByStep = useMemo(
+    () => matchRecipeSteps(r.groups, r.steps, textLang),
+    [r.groups, r.steps, textLang],
+  );
+  const currentStepIndex =
+    !measure && doneSteps.size > 0 && doneSteps.size < r.steps.length
+      ? r.steps.findIndex((_, idx) => !doneSteps.has(idx))
+      : -1;
+  const linkedStepIndex = measure ? null : resolveLinkedStep(activeStep, currentStepIndex, matchesByStep);
+  const linkedIds = useMemo(
+    () => new Set(linkedStepIndex !== null ? matchesByStep[linkedStepIndex] || [] : []),
+    [linkedStepIndex, matchesByStep],
+  );
 
   const handleCopy = async () => {
     if (measure) return;
@@ -131,8 +186,9 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
     if (!byGroup.has(gi)) byGroup.set(gi, []);
     byGroup.get(gi).push(ii);
   }
+  const allPrepped = prepCount === totalItems && totalItems > 0;
   // The first piece of the card pairs title + shopping actions on one bar,
-  // followed by the at-a-glance stub and portion scaler.
+  // followed by the at-a-glance stub, portion scaler, and mise en place toggle.
   const normalHead = (
     <div className="menu-head" data-head="normal">
       <div className="menu-bar">
@@ -140,7 +196,7 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
           {r.ingredients_headline}
         </h2>
         <div className="menu-actions">
-          <StepProgress className="menu-progress" doneCount={gotCount} totalSteps={totalItems} />
+          {!miseOn && <StepProgress className="menu-progress" doneCount={gotCount} totalSteps={totalItems} />}
           <button
             type="button"
             className={cx('menu-action-btn menu-action-btn--copy', copied && 'is-copied')}
@@ -158,7 +214,7 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
               </span>
             </span>
           </button>
-          {gotCount > 0 && (
+          {!miseOn && gotCount > 0 && (
             <button
               type="button"
               className="menu-action-btn menu-action-btn--clear"
@@ -177,6 +233,63 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
       <RecipeGlance recipe={recipe} lang={lang} />
       <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
       {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
+      <div className="mise-bar" lang={lang}>
+        <div className="mise-controls">
+          <button
+            type="button"
+            className="mise-toggle"
+            aria-pressed={miseOn}
+            aria-label={mc.miseToggle(miseOn)}
+            title={mc.miseToggle(miseOn)}
+            onClick={() => !measure && toggleMiseMode(recipe.slug)}
+          >
+            <MiseIcon className="mise-toggle-icon" />
+            <span>{mc.miseLabel}</span>
+            {!miseOn && prepCount > 0 && (
+              <span className="mise-saved-count" aria-hidden="true">
+                · {prepCount}/{totalItems}
+              </span>
+            )}
+          </button>
+          {miseOn && prepCount > 0 && (
+            <>
+              <span
+                className={cx('mise-progress', allPrepped && 'mise-progress--done')}
+                aria-hidden="true"
+              >
+                {allPrepped ? mc.miseReady : `${prepCount}/${totalItems}`}
+              </span>
+              <button
+                type="button"
+                className="mise-clear"
+                aria-label={mc.miseClear}
+                title={mc.miseClear}
+                onClick={() => !measure && clearPrepItems(recipe.slug)}
+              >
+                <ResetIcon className="menu-action-icon" />
+              </button>
+            </>
+          )}
+        </div>
+        {linkedStepIndex !== null && linkedIds.size > 0 && (
+          <button
+            type="button"
+            className="menu-step-chip"
+            aria-label={mc.stepClear(linkedStepIndex + 1)}
+            title={mc.stepClear(linkedStepIndex + 1)}
+            onClick={() => !measure && clearStepLink(recipe.slug)}
+          >
+            <span className="menu-step-chip-dot" aria-hidden="true" />
+            <span>{mc.stepBadge(linkedStepIndex + 1)}</span>
+            <span className="menu-step-chip-x" aria-hidden="true">
+              ×
+            </span>
+          </button>
+        )}
+        <span className="sr-only" aria-live="polite">
+          {miseOn && prepCount > 0 ? mc.miseProgress(prepCount, totalItems) : ''}
+        </span>
+      </div>
     </div>
   );
   const contHead = (
@@ -185,11 +298,19 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
         {r.ingredients_headline}
         <ContMark t={t} lang={lang} />
       </h2>
-      <StepProgress className="menu-progress" doneCount={gotCount} totalSteps={totalItems} />
+      <StepProgress
+        className="menu-progress"
+        doneCount={miseOn ? prepCount : gotCount}
+        totalSteps={totalItems}
+      />
     </div>
   );
   return (
-    <section className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">
+    <section
+      className={cx('menu', miseOn && 'menu--mise', linkedIds.size > 0 && 'menu--linked')}
+      aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients}
+      data-card="menu"
+    >
       {measure ? (
         <>
           {normalHead}
@@ -216,14 +337,29 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
                 const current = amountsFor(it, units);
                 const alt = current.secondary ? amountsFor(it, units === 'cups' ? 'metric' : 'cups') : null;
                 const itemId = `${gi}:${ii}`;
-                const isGot = !measure && gotItems.has(itemId);
+                const isGot = !measure && !miseOn && gotItems.has(itemId);
+                const isPrepped = !measure && miseOn && prepItems.has(itemId);
+                const isLinked = !measure && linkedIds.has(itemId);
                 return (
-                  <li className={cx('ing', isGot && 'ing--got')} key={ii} data-item={itemId}>
+                  <li
+                    className={cx(
+                      'ing',
+                      isGot && 'ing--got',
+                      isPrepped && 'ing--prepped',
+                      isLinked && 'ing--linked',
+                    )}
+                    key={ii}
+                    data-item={itemId}
+                  >
                     <button
                       type="button"
                       className="ing-btn"
-                      aria-pressed={isGot}
-                      onClick={() => !measure && toggleGotItem(recipe.slug, itemId)}
+                      aria-pressed={miseOn ? isPrepped : isGot}
+                      onClick={() => {
+                        if (measure) return;
+                        if (miseOn) togglePrepItem(recipe.slug, itemId);
+                        else toggleGotItem(recipe.slug, itemId);
+                      }}
                     >
                       <span className="ing-tick" aria-hidden="true">
                         <CheckIcon className="ing-tick-svg" />

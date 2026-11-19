@@ -1,18 +1,19 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { amountsCreditFor, recipes, textFor } from './content.js';
+import { amountsCreditFor } from './content.js';
 import { ui } from './i18n.js';
 import { spinCupcake } from './motion.js';
-import { Bell, CUPCAKE_BITES, Checkers, Cupcake, CupcakeCrumbs, DownloadIcon } from './ornaments.jsx';
+import { CUPCAKE_BITES, Checkers, Cupcake, CupcakeCrumbs, DownloadIcon } from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
 import { primeAudio } from './timer.js';
-import { bite as biteSound, ring as ringDing } from './audio.js';
+import { bite as biteSound } from './audio.js';
 import { nextTheme, useTheme } from './theme.js';
 import { MUFFIN_TIER_COUNT, pickNextIndex, recordMuffinFinish, themeText, tierForFinishes } from './theme-i18n.js';
-import { cx, StepProgress, useRecipeText } from './recipeUI.jsx';
+import { cx, useRecipeText } from './recipeUI.jsx';
+import { ContentsLeft, ContentsList } from './Contents.jsx';
 import Ingredients from './Ingredients.jsx';
-import Method, { getDoneStepCount, subscribeSteps } from './Method.jsx';
+import Method from './Method.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 
@@ -175,136 +176,6 @@ export function Cover({ lang }) {
         <span className="sr-only" aria-live="polite">
           {announced || ''}
         </span>
-      </div>
-      <Checkers tone="cherry" edge="bottom" />
-    </div>
-  );
-}
-
-/* ---------- Contents: numbers and titles ---------- */
-
-// A service bell by the contents heading: tap to ding, hold to keep ringing.
-function ServiceBell({ lang }) {
-  const copy = themeText[lang] || themeText.en;
-  const [ring, setRing] = useState(''); // '' | 'ding' | 'held'
-  const [announced, setAnnounced] = useState('');
-  const [tick, setTick] = useState(0);
-  const holdRef = useRef(0);
-  const heldRef = useRef(false);
-
-  useEffect(() => () => clearTimeout(holdRef.current), []);
-
-  const ding = () => {
-    void ringDing();
-    if (heldRef.current) {
-      heldRef.current = false;
-      return;
-    }
-    setRing('ding');
-    setTick((n) => n + 1);
-    setAnnounced(copy.ding);
-  };
-  const holdStart = (e) => {
-    if (e.button !== 0) return;
-    heldRef.current = false;
-    clearTimeout(holdRef.current);
-    holdRef.current = setTimeout(() => {
-      heldRef.current = true;
-      setRing('held');
-      setAnnounced(copy.ringing);
-    }, 450);
-  };
-  const holdEnd = () => {
-    clearTimeout(holdRef.current);
-    if (heldRef.current) setRing('');
-  };
-
-  return (
-    <>
-      <button
-        type="button"
-        className="service-bell-btn"
-        aria-label={copy.ringBell}
-        onClick={ding}
-        onPointerDown={holdStart}
-        onPointerUp={holdEnd}
-        onPointerCancel={holdEnd}
-        onPointerLeave={holdEnd}
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        <Bell key={ring === 'ding' ? tick : ring} className={cx('service-bell', ring && `service-bell--${ring}`)} />
-      </button>
-      <span className="sr-only" aria-live="polite">
-        {announced}
-      </span>
-    </>
-  );
-}
-
-// Wide: the left page of the contents spread carries its heading and an ornament.
-function ContentsLeft({ lang }) {
-  const t = ui[lang];
-  return (
-    <div className="page-body contents-left">
-      <Checkers tone="choc" edge="top" />
-      <div className="contents-left-inner">
-        <div className="contents-medallion" aria-hidden="true">
-          <Cupcake className="contents-cupcake" />
-        </div>
-        <h1 className="contents-title">{t.contents}</h1>
-        <ServiceBell lang={lang} />
-      </div>
-      <Checkers tone="cherry" edge="bottom" />
-    </div>
-  );
-}
-
-function ContentsList({ lang, withTitle = false }) {
-  const t = ui[lang];
-  const [, setStepTick] = useState(0);
-
-  useEffect(() => subscribeSteps(() => setStepTick((n) => n + 1)), []);
-
-  return (
-    <div className="page-body contents">
-      <Checkers tone="choc" edge="top" />
-      <div className="page-pad">
-        {withTitle && (
-          <div className="contents-head">
-            <h1 className="contents-title">{t.contents}</h1>
-            <ServiceBell lang={lang} />
-          </div>
-        )}
-        <ol className="toc" aria-label={withTitle ? undefined : t.contents}>
-          {recipes.map((r) => {
-            const { text, lang: textLang } = textFor(r, lang);
-            const totalSteps = text.steps.length;
-            const doneCount = getDoneStepCount(r.slug);
-            return (
-              <li key={r.slug}>
-                <a href={`#/${r.route}`} className="toc-link">
-                  <span className="toc-no" aria-hidden="true">
-                    {r.no}
-                  </span>
-                  <span className="toc-text">
-                    <span className="sr-only">
-                      {t.recipeNo} {r.no}:{' '}
-                    </span>
-                    <span className="toc-title" lang={textLang}>
-                      {text.title}
-                    </span>
-                    {text.tagline && (
-                      <span className="toc-tagline" lang={textLang}>
-                        {text.tagline}
-                      </span>
-                    )}
-                  </span>
-                  <StepProgress className="toc-progress" doneCount={doneCount} totalSteps={totalSteps} />
-                </a>
-              </li>
-            );
-          })}
-        </ol>
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

@@ -1,11 +1,14 @@
 import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { CheckIcon, ResetIcon, ShoppingListIcon } from './ornaments.jsx';
-import { ContMark, cx, useRecipeText } from './recipeUI.jsx';
+import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
+import { readingCopyFor } from './recipe-reading-i18n.js';
+import { recipeSummary } from './recipeMeta.js';
 import { scaleAmount } from './scale.js';
 import { clearGotItems, formatShoppingList, getGotItems, shareOrCopyList, subscribeShopping, toggleGotItem } from './shopping.js';
 import { amountsFor } from './units.js';
 import { useScale } from './useScale.js';
 import Scaler from './Scaler.jsx';
+import './recipe-reading.css';
 
 // Same text, but long amounts only break at their " + " joins.
 function Amount({ text }) {
@@ -60,6 +63,37 @@ function useGotItems(slug, measure = false) {
   );
 }
 
+function RecipeGlance({ recipe, lang }) {
+  const rt = readingCopyFor(lang);
+  const { totalTimeLabel, difficulty } = recipeSummary(recipe);
+  const diffLabel = rt.difficulty[difficulty.key];
+  return (
+    <dl
+      className={cx('recipe-glance', !totalTimeLabel && 'recipe-glance--single')}
+      aria-label={rt.glanceLabel}
+      lang={lang}
+    >
+      {totalTimeLabel && (
+        <div className="recipe-glance-cell">
+          <dt className="recipe-glance-label">{rt.totalTime}</dt>
+          <dd className="recipe-glance-value">{totalTimeLabel}</dd>
+        </div>
+      )}
+      <div className="recipe-glance-cell">
+        <dt className="recipe-glance-label">{rt.effort}</dt>
+        <dd className="recipe-glance-value">
+          <span>{diffLabel}</span>
+          <span className="effort-dots" aria-hidden="true">
+            {[1, 2, 3].map((dot) => (
+              <span key={dot} className={cx('effort-dot', dot <= difficulty.level && 'effort-dot--on')} />
+            ))}
+          </span>
+        </dd>
+      </div>
+    </dl>
+  );
+}
+
 export default function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
@@ -75,8 +109,9 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
   useEffect(() => () => clearTimeout(copyTimerRef.current), []);
 
   const itemsList = allItems(r);
+  const totalItems = itemsList.length;
   const gotCount = itemsList.filter(([gi, ii]) => gotItems.has(`${gi}:${ii}`)).length;
-  const remainingCount = itemsList.length - gotCount;
+  const remainingCount = totalItems - gotCount;
 
   const handleCopy = async () => {
     if (measure) return;
@@ -96,54 +131,62 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
     if (!byGroup.has(gi)) byGroup.set(gi, []);
     byGroup.get(gi).push(ii);
   }
-  // The first piece of the card carries the portion scale (and its note when scaled).
+  // The first piece of the card pairs title + shopping actions on one bar,
+  // followed by the at-a-glance stub and portion scaler.
   const normalHead = (
     <div className="menu-head" data-head="normal">
-      <h2 className="menu-title" lang={textLang}>
-        {r.ingredients_headline}
-      </h2>
-      <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
-      {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
-      <div className="menu-actions">
-        <button
-          type="button"
-          className={cx('menu-action-btn menu-action-btn--copy', copied && 'is-copied')}
-          aria-label={t.copyList}
-          title={t.copyList}
-          disabled={remainingCount === 0}
-          onClick={handleCopy}
-        >
-          <span className="menu-action-box">
-            <span className="menu-action-label">
-              <ShoppingListIcon className="menu-action-icon" />
-            </span>
-            <span className="menu-action-done" aria-hidden="true">
-              <CheckIcon className="menu-action-icon" strokeWidth={3} />
-            </span>
-          </span>
-        </button>
-        {gotCount > 0 && (
+      <div className="menu-bar">
+        <h2 className="menu-title" lang={textLang}>
+          {r.ingredients_headline}
+        </h2>
+        <div className="menu-actions">
+          <StepProgress className="menu-progress" doneCount={gotCount} totalSteps={totalItems} />
           <button
             type="button"
-            className="menu-action-btn menu-action-btn--clear"
-            aria-label={t.clearTicksLabel}
-            title={t.clearTicksLabel}
-            onClick={() => !measure && clearGotItems(recipe.slug)}
+            className={cx('menu-action-btn menu-action-btn--copy', copied && 'is-copied')}
+            aria-label={t.copyList}
+            title={t.copyList}
+            disabled={remainingCount === 0}
+            onClick={handleCopy}
           >
-            <ResetIcon className="menu-action-icon" />
+            <span className="menu-action-box">
+              <span className="menu-action-label">
+                <ShoppingListIcon className="menu-action-icon" />
+              </span>
+              <span className="menu-action-done" aria-hidden="true">
+                <CheckIcon className="menu-action-icon" strokeWidth={3} />
+              </span>
+            </span>
           </button>
-        )}
-        <span className="sr-only" aria-live="polite">
-          {copied ? t.copied : ''}
-        </span>
+          {gotCount > 0 && (
+            <button
+              type="button"
+              className="menu-action-btn menu-action-btn--clear"
+              aria-label={t.clearTicksLabel}
+              title={t.clearTicksLabel}
+              onClick={() => !measure && clearGotItems(recipe.slug)}
+            >
+              <ResetIcon className="menu-action-icon" />
+            </button>
+          )}
+          <span className="sr-only" aria-live="polite">
+            {copied ? t.copied : ''}
+          </span>
+        </div>
       </div>
+      <RecipeGlance recipe={recipe} lang={lang} />
+      <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
+      {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
     </div>
   );
   const contHead = (
-    <h2 className="menu-title" lang={textLang} data-head="cont">
-      {r.ingredients_headline}
-      <ContMark t={t} lang={lang} />
-    </h2>
+    <div className="menu-head--cont" data-head="cont">
+      <h2 className="menu-title" lang={textLang}>
+        {r.ingredients_headline}
+        <ContMark t={t} lang={lang} />
+      </h2>
+      <StepProgress className="menu-progress" doneCount={gotCount} totalSteps={totalItems} />
+    </div>
   );
   return (
     <section className="menu" aria-label={cont ? `${t.ingredients} ${t.cont}` : t.ingredients} data-card="menu">

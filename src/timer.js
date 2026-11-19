@@ -90,7 +90,8 @@ export function getTimer(key) {
 }
 
 export function startTimer(key, seconds, now = Date.now()) {
-  stopTimer(key);
+  const prev = timers.get(key);
+  if (prev) clearTimeout(prev.handle);
   const entry = { endAt: now + seconds * 1000, total: seconds, done: false, handle: 0 };
   timers.set(key, entry);
   schedule(key, entry, now);
@@ -116,11 +117,42 @@ export function finishTimer(key) {
   notify(key);
 }
 
+export function reconcileTimer(key, now = Date.now()) {
+  const entry = timers.get(key);
+  if (entry && !entry.done && entry.remaining == null && entry.endAt <= now) {
+    finishTimer(key);
+    return true;
+  }
+  return false;
+}
+
 export function remainingSeconds(key, now = Date.now()) {
   const entry = timers.get(key);
   if (!entry || entry.done) return 0;
   if (entry.remaining != null) return entry.remaining;
   return Math.max(0, (entry.endAt - now) / 1000);
+}
+
+// Active (running, paused, or done) timers belonging to one recipe, ordered by step.
+export function getRecipeTimers(slug, now = Date.now()) {
+  if (!slug) return [];
+  const prefix = `${slug}:`;
+  const list = [];
+  for (const [key, entry] of timers) {
+    if (!key.startsWith(prefix)) continue;
+    const stepIndex = Number(key.slice(prefix.length));
+    if (!Number.isInteger(stepIndex) || stepIndex < 0) continue;
+    const state = entry.done ? 'done' : entry.remaining != null ? 'paused' : 'running';
+    list.push({
+      key,
+      stepIndex,
+      state,
+      remaining: remainingSeconds(key, now),
+      total: entry.total,
+    });
+  }
+  list.sort((a, b) => a.stepIndex - b.stepIndex);
+  return list;
 }
 
 // Persist data only: timeout handles belong to this document.

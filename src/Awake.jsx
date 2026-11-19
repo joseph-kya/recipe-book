@@ -6,29 +6,68 @@ import { SunIcon } from './ornaments.jsx';
 const AWAKE_KEY = 'recipe-book:awake';
 const canWake = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
-// Holds a screen wake lock while active, re-acquiring it when the tab comes back.
+// Shared ref-counted screen wake lock so the bottom-bar toggle and Cook mode
+// never conflict, leak sentinels, or drop the lock while either still needs it.
+let holdCount = 0;
+let sentinel = null;
+let requestInFlight = null;
+let listenersAttached = false;
+
+function requestScreenLock() {
+  if (holdCount <= 0 || typeof navigator === 'undefined' || typeof navigator.wakeLock?.request !== 'function') return;
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+  if (sentinel && !sentinel.released) return;
+  if (requestInFlight) return;
+
+  requestInFlight = navigator.wakeLock
+    .request('screen')
+    .then((acquired) => {
+      requestInFlight = null;
+      if (holdCount <= 0) {
+        return acquired.release().catch(() => {});
+      }
+      sentinel = acquired;
+      acquired.addEventListener?.('release', () => {
+        if (sentinel === acquired) sentinel = null;
+      });
+    })
+    .catch(() => {
+      /* low battery, hidden tab, or denied: retry on next interaction or visibility */
+      requestInFlight = null;
+    });
+}
+
+function attachWakeListeners() {
+  if (listenersAttached || typeof document === 'undefined') return;
+  listenersAttached = true;
+  document.addEventListener('visibilitychange', requestScreenLock);
+  window.addEventListener('pageshow', requestScreenLock);
+  document.addEventListener('pointerdown', requestScreenLock, { passive: true });
+}
+
+function detachWakeListeners() {
+  if (!listenersAttached || typeof document === 'undefined') return;
+  listenersAttached = false;
+  document.removeEventListener('visibilitychange', requestScreenLock);
+  window.removeEventListener('pageshow', requestScreenLock);
+  document.removeEventListener('pointerdown', requestScreenLock);
+}
+
+// Holds a screen wake lock while active, re-acquiring it on visibility, pageshow, or tap.
 export function useHoldWakeLock(active) {
   useEffect(() => {
     if (!active || !canWake) return;
-    let lock = null;
-    let disposed = false;
-    const acquire = async () => {
-      if (disposed || document.visibilityState !== 'visible') return;
-      try {
-        if (lock && !lock.released) return;
-        const acquired = await navigator.wakeLock.request('screen');
-        if (disposed) await acquired.release();
-        else lock = acquired;
-      } catch {
-        /* low battery or denied: nothing to hold */
-      }
-    };
-    acquire();
-    document.addEventListener('visibilitychange', acquire);
+    holdCount += 1;
+    if (holdCount === 1) attachWakeListeners();
+    requestScreenLock();
     return () => {
-      disposed = true;
-      document.removeEventListener('visibilitychange', acquire);
-      lock?.release().catch(() => {});
+      holdCount = Math.max(0, holdCount - 1);
+      if (holdCount === 0) {
+        detachWakeListeners();
+        const activeLock = sentinel;
+        sentinel = null;
+        activeLock?.release().catch(() => {});
+      }
     };
   }, [active]);
 }

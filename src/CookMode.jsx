@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useHoldWakeLock } from './Awake.jsx';
 import { reducedMotion } from './motion.js';
-import { Arrow, Checkers, CloseIcon, Cupcake } from './ornaments.jsx';
+import { Checkers, CloseIcon, Cupcake, TimerIcon } from './ornaments.jsx';
 import { StepBody, StepDot, setStepDone, toggleStepDone, useDoneSteps, useRecipeText } from './pages.jsx';
 import { animateSpring, makeSpring, rubberband } from './spring.js';
+import { formatRemaining, parseDuration } from './timer.js';
+import { useRecipeTimers } from './useTimer.js';
+import './cook.css';
 
 const REBOUND_SPRING = makeSpring({ response: 0.28, damping: 0.88 });
 const FOCUSABLE =
@@ -14,6 +17,7 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
   const totalSteps = r.steps.length;
   const [stepIndex, setStepIndex] = useState(() => Math.min(Math.max(0, initialStep), totalSteps));
   const doneSteps = useDoneSteps(recipe.slug);
+  const recipeTimers = useRecipeTimers(recipe.slug);
 
   const dialogRef = useRef(null);
   const stageRef = useRef(null);
@@ -29,8 +33,12 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
   useHoldWakeLock(true);
 
   const isDoneScreen = stepIndex >= totalSteps;
+  const isLastStep = stepIndex === totalSteps - 1;
   const currentStep = !isDoneScreen ? r.steps[stepIndex] : null;
+  const nextStep = !isDoneScreen && stepIndex + 1 < totalSteps ? r.steps[stepIndex + 1] : null;
+  const nextDuration = nextStep ? parseDuration(nextStep.text, nextStep.cue) : null;
   const isCurrentDone = !isDoneScreen && doneSteps.has(stepIndex);
+  const otherTimers = recipeTimers.filter((item) => item.stepIndex !== stepIndex);
 
   const stopMotion = useCallback(() => {
     springRef.current?.stop();
@@ -40,22 +48,37 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     if (cardRef.current) cardRef.current.style.transform = '';
   }, []);
 
-  const goNext = useCallback(() => {
-    setStepIndex((cur) => {
-      if (cur >= totalSteps) return cur;
-      setStepDone(recipe.slug, cur, true);
-      dirRef.current = 1;
-      return cur + 1;
-    });
-  }, [recipe.slug, totalSteps]);
+  const goNext = useCallback(
+    ({ instant = false } = {}) => {
+      setStepIndex((cur) => {
+        if (cur >= totalSteps) return cur;
+        setStepDone(recipe.slug, cur, true);
+        dirRef.current = instant ? 0 : 1;
+        return cur + 1;
+      });
+    },
+    [recipe.slug, totalSteps],
+  );
 
-  const goPrev = useCallback(() => {
+  const goPrev = useCallback(({ instant = false } = {}) => {
     setStepIndex((cur) => {
       if (cur <= 0) return cur;
-      dirRef.current = -1;
+      dirRef.current = instant ? 0 : -1;
       return cur - 1;
     });
   }, []);
+
+  const jumpToStep = useCallback(
+    (target) => {
+      setStepIndex((cur) => {
+        const clamped = Math.min(Math.max(0, target), totalSteps);
+        if (clamped === cur) return cur;
+        dirRef.current = clamped > cur ? 1 : -1;
+        return clamped;
+      });
+    },
+    [totalSteps],
+  );
 
   // Move focus into the dialog on open.
   useEffect(() => {
@@ -66,17 +89,17 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     };
   }, []);
 
-  // Animate step transitions (transform + opacity only) and keep focus valid on the Done screen.
+  // Animate step transitions (transform + opacity only), reset card scroll, and keep focus valid on Done.
   useLayoutEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
       if (!reducedMotion() && dialogRef.current?.animate) {
         const anim = dialogRef.current.animate(
           [
-            { opacity: 0, transform: 'translateY(10px)' },
+            { opacity: 0, transform: 'translateY(8px)' },
             { opacity: 1, transform: 'translateY(0)' },
           ],
-          { duration: 200, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+          { duration: 180, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
         );
         return () => anim.cancel();
       }
@@ -84,6 +107,7 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     }
 
     stopMotion();
+    if (cardRef.current) cardRef.current.scrollTop = 0;
     const dir = dirRef.current;
     dirRef.current = 0;
     if (isDoneScreen) {
@@ -92,10 +116,10 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     if (dir && !reducedMotion() && cardRef.current?.animate) {
       const anim = cardRef.current.animate(
         [
-          { opacity: 0.35, transform: `translateX(${dir * 26}px)` },
+          { opacity: 0.4, transform: `translateX(${dir * 24}px)` },
           { opacity: 1, transform: 'translateX(0)' },
         ],
-        { duration: 200, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+        { duration: 180, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
       );
       stepAnimRef.current = anim;
       anim.finished.catch(() => {}).finally(() => {
@@ -104,7 +128,7 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
     }
   }, [stepIndex, isDoneScreen, stopMotion]);
 
-  // Modal keyboard handling: trap Tab, Escape closes, ArrowLeft/ArrowRight turn steps.
+  // Modal keyboard handling: trap Tab, Escape closes, ArrowLeft/ArrowRight turn steps instantly.
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -146,11 +170,11 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
       if (e.key === 'ArrowRight') {
         e.preventDefault();
         e.stopPropagation();
-        goNext();
+        goNext({ instant: true });
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         e.stopPropagation();
-        goPrev();
+        goPrev({ instant: true });
       }
     };
 
@@ -318,6 +342,28 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
         <div className="cook-bar-fill" style={{ transform: `scaleX(${progressRatio})` }} />
       </div>
 
+      {otherTimers.length > 0 && (
+        <div className="cook-dock" role="region" aria-label={t.cookActiveTimers}>
+          {otherTimers.map((item) => {
+            const status = item.state === 'done' ? t.timerDone : formatRemaining(item.remaining);
+            const stepNum = item.stepIndex + 1;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                className={`cook-dock-btn cook-dock-btn--${item.state}`}
+                aria-label={t.cookTimerJump(stepNum, status)}
+                onClick={() => jumpToStep(item.stepIndex)}
+              >
+                <TimerIcon className="cook-dock-icon" />
+                <span className="cook-dock-step" aria-hidden="true">#{stepNum}</span>
+                <span>{status}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div
         ref={stageRef}
         className="cook-stage"
@@ -335,20 +381,33 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
             <p className="cook-done-body">{t.cookDoneBody}</p>
           </div>
         ) : (
-          <div ref={cardRef} className={`cook-card${isCurrentDone ? ' cook-card--step-done' : ''}`} lang={textLang}>
-            <div className="cook-card-top">
-              <StepDot
-                stepIndex={stepIndex}
-                done={isCurrentDone}
-                label={t.cookToggleDone(stepIndex + 1, isCurrentDone)}
-                onToggle={() => toggleStepDone(recipe.slug, stepIndex)}
-              />
-              <span className="cook-card-count" aria-hidden="true">
-                {stepLabel}
-              </span>
+          <>
+            <div ref={cardRef} className={`cook-card${isCurrentDone ? ' cook-card--step-done' : ''}`} lang={textLang}>
+              <div className="cook-card-top">
+                <StepDot
+                  stepIndex={stepIndex}
+                  done={isCurrentDone}
+                  label={t.cookToggleDone(stepIndex + 1, isCurrentDone)}
+                  onToggle={() => toggleStepDone(recipe.slug, stepIndex)}
+                />
+              </div>
+              <StepBody recipe={recipe} step={currentStep} stepIndex={stepIndex} t={t} headingLevel={2} />
             </div>
-            <StepBody recipe={recipe} step={currentStep} stepIndex={stepIndex} t={t} headingLevel={2} />
-          </div>
+
+            {nextStep && (
+              <button
+                type="button"
+                className="cook-upnext"
+                onClick={() => jumpToStep(stepIndex + 1)}
+              >
+                <span className="cook-upnext-label">{t.cookUpNext}</span>
+                <span className="cook-upnext-title" lang={textLang}>
+                  {stepIndex + 2}. {nextStep.title}
+                </span>
+                {nextDuration && <span className="cook-upnext-time">{nextDuration.label}</span>}
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -357,9 +416,8 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
           type="button"
           className="btn btn--cream cook-nav-btn"
           disabled={stepIndex === 0}
-          onClick={goPrev}
+          onClick={() => goPrev()}
         >
-          <Arrow dir="left" />
           <span>{t.cookPrev}</span>
         </button>
 
@@ -375,10 +433,9 @@ export default function CookMode({ recipe, lang, initialStep = 0, onClose }) {
           <button
             type="button"
             className="btn btn--cherry cook-nav-btn"
-            onClick={goNext}
+            onClick={() => goNext()}
           >
-            <span>{t.cookNext}</span>
-            <Arrow dir="right" />
+            <span>{isLastStep ? t.cookFinish : t.cookNext}</span>
           </button>
         )}
       </footer>

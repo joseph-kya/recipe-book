@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckIcon, PlayIcon, ResetIcon, TimerIcon } from './ornaments.jsx';
 import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
+import { readingCopyFor } from './recipe-reading-i18n.js';
 import {
   MIN_SECONDS,
   STEP_SECONDS,
@@ -15,6 +16,7 @@ import {
   stopTimer,
 } from './timer.js';
 import { useTimer } from './useTimer.js';
+import './recipe-reading.css';
 
 const doneStepsBySlug = new Map();
 const stepListeners = new Set();
@@ -149,16 +151,16 @@ export function StepTimer({ timerKey, duration, t, measure = false }) {
   );
 }
 
-export function StepBody({ recipe, step, stepIndex, t, measure = false, headingLevel = 3 }) {
+export function StepBody({ recipe, step, stepIndex, t, measure = false, headingLevel = 3, showTitle = true }) {
   const duration = parseDuration(step.text, step.cue);
   const Heading = headingLevel === 2 ? 'h2' : 'h3';
   return (
     <div className="step-body">
-      <Heading className="step-title">{step.title}</Heading>
+      {showTitle && <Heading className="step-title">{step.title}</Heading>}
       <p>{step.text}</p>
       {step.cue && (
         <p className="cue">
-          <span aria-hidden="true">→ </span>
+          {showTitle && <span aria-hidden="true">→ </span>}
           {step.cue}
         </p>
       )}
@@ -171,11 +173,16 @@ export function StepBody({ recipe, step, stepIndex, t, measure = false, headingL
 
 export default function Method({ recipe, lang, steps, cont = false, measure = false, onStartCooking }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
+  const rt = readingCopyFor(lang);
   const doneSteps = useDoneSteps(recipe.slug, measure);
 
   const shown = steps || r.steps.map((_, i) => i);
   const doneCount = doneSteps.size;
   const totalSteps = r.steps.length;
+  const currentStepIndex =
+    !measure && doneCount > 0 && doneCount < totalSteps
+      ? r.steps.findIndex((_, idx) => !doneSteps.has(idx))
+      : -1;
   const normalHead = (
     <>
       <div className="ticket-head" data-head="normal">
@@ -234,15 +241,27 @@ export default function Method({ recipe, lang, steps, cont = false, measure = fa
         {shown.map((i) => {
           const s = r.steps[i];
           const isDone = doneSteps.has(i);
+          const isCurrent = i === currentStepIndex;
           return (
-            <li className={cx('step', isDone && 'step--done')} key={i} data-step={i}>
-              <StepDot
-                stepIndex={i}
-                done={isDone}
-                label={`${i + 1}. ${s.title}`}
-                onToggle={() => !measure && toggleStepDone(recipe.slug, i)}
-              />
-              <StepBody recipe={recipe} step={s} stepIndex={i} t={t} measure={measure} />
+            <li className={cx('step', isDone && 'step--done', isCurrent && 'step--current')} key={i} data-step={i}>
+              <h3 className="step-head">
+                <button
+                  type="button"
+                  className="step-head-btn"
+                  aria-pressed={isDone}
+                  onClick={() => !measure && toggleStepDone(recipe.slug, i)}
+                >
+                  <span className="step-dot" aria-hidden="true">
+                    <span className="step-num">{i + 1}</span>
+                    <CheckIcon className="step-check" />
+                  </span>
+                  <span className="sr-only">
+                    {i + 1}. {isCurrent ? `${rt.currentStep}: ` : ''}
+                  </span>
+                  <span className="step-title">{s.title}</span>
+                </button>
+              </h3>
+              <StepBody recipe={recipe} step={s} stepIndex={i} t={t} measure={measure} showTitle={false} />
             </li>
           );
         })}

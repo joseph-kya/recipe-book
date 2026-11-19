@@ -38,7 +38,7 @@ export const readingText = {
       involved: 'Élaboré',
     },
     difficultyOf: (level, label) => `${label}, niveau ${level} sur 3`,
-    ingredientsProgress: (got, total) => `${got} sur ${total} ingrédients prêts`,
+    ingredientsProgress: (got, total) => `${got} ingrédient${got > 1 ? 's' : ''} sur ${total} prêt${got > 1 ? 's' : ''}`,
     currentStep: 'Étape suivante',
   },
 };

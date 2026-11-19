@@ -345,7 +345,7 @@
         ]
       },
       {
-        "title": "Le nappage et décor",
+        "title": "Le nappage et le décor",
         "items": [
           {
             "amount": "¾ tasse (12 c. à soupe)",
@@ -365,27 +365,27 @@
     "method_headline": "On met la main à la pâte.",
     "steps": [
       {
-        "title": "Émietter + fondre.",
+        "title": "Émietter et faire fondre.",
         "text": "Mixez finement les 200 g de biscuits au mini-hachoir (ou écrasez-les dans un sac congélation au rouleau à pâtisserie). Faites fondre le beurre dans une petite casserole à feu doux. Incorporez les miettes.",
         "cue": "Miettes fines, uniformément imbibées de beurre."
       },
       {
         "title": "Tasser la base.",
-        "text": "Chemisez un moule à charnière de 20 cm de papier cuisson. Versez les miettes et tassez bien lisse avec une cuillère ou le fond d’un verre.",
+        "text": "Chemisez un moule à charnière de 20 cm de papier cuisson. Versez les miettes et tassez uniformément avec une cuillère ou le fond d’un verre.",
         "cue": "Base régulière et compacte, sans trous."
       },
       {
-        "title": "Garnir + premier froid.",
-        "text": "Mélangez le fromage frais avec les 200 g de pâte à tartiner et le sucre glace. Étalez sur la base et lissez le dessus. Réfrigérez au moins 1 heure. Détachez avec un couteau chaud, posez sur un plat à gâteau et serrez un cercle à pâtisserie autour.",
+        "title": "Garnir et premier passage au frais.",
+        "text": "Mélangez le fromage frais avec les 200 g de pâte à tartiner et le sucre glace. Étalez sur la base et lissez le dessus. Réfrigérez au moins 1 heure. Décollez les bords avec un couteau chaud, posez sur un plat à gâteau et serrez un cercle à pâtisserie autour.",
         "cue": "Garniture lisse, bien prise avant de démouler."
       },
       {
-        "title": "Fondre le nappage.",
-        "text": "Faites fondre les 200 g de pâte à tartiner restants dans une casserole à feu doux en remuant. Trop chaud et ça brûle. Versez sur le cheesecake refroidi et lissez. Réfrigérez encore au moins 1 heure.",
-        "cue": "Fluide à verser, sans bouillir ni brunir."
+        "title": "Faire fondre le nappage.",
+        "text": "Faites fondre les 200 g de pâte à tartiner restants dans une casserole à feu doux en remuant. Trop chaud, elle brûle. Versez sur le cheesecake bien froid et lissez. Réfrigérez encore au moins 1 heure.",
+        "cue": "Assez fluide pour être versée, sans bouillir ni brunir."
       },
       {
-        "title": "Décor, puis trancher.",
+        "title": "Décorer, puis trancher.",
         "text": "Juste avant de servir, émiettez 5 des 6 biscuits et parsemez les miettes sur le bord du nappage. Posez le dernier biscuit au centre. Retirez délicatement le cercle (passez d’abord un couteau chaud tout autour). Environ 12 parts. Se garde 3–4 jours au frais.",
         "cue": "Le cercle se retire net ; miettes uniquement sur le bord."
       }

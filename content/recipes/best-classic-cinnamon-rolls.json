@@ -465,7 +465,7 @@
       "Roulés à la",
       "cannelle"
     ],
-    "tagline": "Deux scientifiques en alimentation. Douze roulés tout moelleux.",
+    "tagline": "Deux experts en sciences alimentaires. Douze roulés tout moelleux.",
     "sticker": [
       "12 roulés.",
       "Science !"
@@ -513,7 +513,7 @@
             "amount": "1¼ c. à café",
             "metric": "10 g",
             "name": "sel fin",
-            "note": "gros sel : pesez 10 g (environ 2 c. à café)"
+            "note": "sel kasher : pesez 10 g (environ 2 c. à café)"
           },
           {
             "amount": "1 gros",
@@ -524,8 +524,8 @@
           {
             "amount": "2 c. à soupe",
             "metric": "24 g",
-            "name": "huile neutre",
-            "note": "tournesol, colza, végétale ou olive"
+            "name": "huile liquide",
+            "note": "végétale, colza, tournesol ou olive"
           },
           {
             "amount": "1¼ tasse",
@@ -621,13 +621,13 @@
     "method_headline": "On met la main à la pâte.",
     "steps": [
       {
-        "title": "Les secs en petits tas.",
+        "title": "Les poudres en petits tas.",
         "text": "Mettez la farine dans le bol du robot. Ajoutez le sucre, la levure et le sel en petits tas séparés par-dessus.",
         "cue": "Le sel ne touche pas la levure."
       },
       {
-        "title": "Pétrissez sérieusement.",
-        "text": "Ajoutez l’œuf, l’huile, le lait et le beurre mou. Pétrissez au crochet à vitesse moyenne-basse pendant 10–15 min ; raclez les bords après 2 min, puis toutes les 3–5 min. Trop sec ou ferme ? Ajoutez l’eau, 10 ml à la fois.",
+        "title": "Pétrissez pour de bon.",
+        "text": "Ajoutez l’œuf, l’huile, le lait et le beurre mou. Pétrissez au crochet à vitesse lente à moyenne pendant 10–15 min ; raclez les bords après 2 min, puis toutes les 3–5 min. Pâte trop sèche ou ferme ? Ajoutez l’eau, 10 ml à la fois.",
         "cue": "La pâte grimpe au crochet puis se décolle du bol ; 24–26 °C (75–79 °F)."
       },
       {
@@ -637,13 +637,13 @@
       },
       {
         "title": "Grande pousse, petit coup de frais.",
-        "text": "Laissez lever dans un endroit tiède pendant 1–2 heures, puis mettez au frais 15 min (sautez le froid si la cuisine est fraîche).",
-        "cue": "Presque triplé de volume."
+        "text": "Laissez lever dans un endroit tiède pendant 1–2 heures, puis mettez au frais 15 min (passez cette étape si la cuisine est très fraîche).",
+        "cue": "Volume presque triplé."
       },
       {
         "title": "Moule et sable mouillé.",
         "text": "Beurrez le moule. Mélangez sucre, cannelle, farine et sel. Faites fondre le beurre à moitié seulement, remuez jusqu’à ce qu’il fonde complètement, puis incorporez-le avec l’eau.",
-        "cue": "Une pâte de sable mouillé : ni chaude (le gras se séparerait), ni froide (elle figerait)."
+        "cue": "Une texture de sable mouillé : ni chaude (le beurre se séparerait), ni froide (elle figerait)."
       },
       {
         "title": "Étalez, tartinez, coupez, roulez.",
@@ -652,8 +652,8 @@
       },
       {
         "title": "Pousse épaule contre épaule.",
-        "text": "Disposez côté spirale vers le haut, serrés sans se chevaucher. Couvrez sans serrer et laissez pousser 30–60 min. Préchauffez à 177 °C (350 °F).",
-        "cue": "Une pression du doigt remonte lentement en laissant une légère empreinte. Creux profond = trop poussé."
+        "text": "Disposez-les spirale vers le haut, bien rapprochés sans se chevaucher. Couvrez sans serrer et laissez pousser 30–60 min. Préchauffez le four à 177 °C (350 °F).",
+        "cue": "Sous une légère pression du doigt, la pâte remonte lentement en gardant une petite empreinte. Creux profond = trop poussée."
       },
       {
         "title": "Cuisson à cœur.",
@@ -662,7 +662,7 @@
       },
       {
         "title": "Le glaçage.",
-        "text": "Fouettez le cream cheese et le beurre bien lisses, puis ajoutez le sucre glace et la vanille. Étalez une fine couche sur chaque roulé.",
+        "text": "Fouettez le fromage frais et le beurre jusqu’à obtenir une texture bien lisse, puis ajoutez le sucre glace et la vanille. Étalez une fine couche sur chaque roulé.",
         "cue": "Lisse, épais et crémeux."
       }
     ],

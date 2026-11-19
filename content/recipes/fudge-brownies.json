@@ -388,17 +388,17 @@
     "steps": [
       {
         "title": "On chauffe tout ça.",
-        "text": "Préchauffez le four à 180 °C en chaleur traditionnelle (160 °C chaleur tournante). Chemisez une plaque de papier cuisson et posez dessus un cadre de 20 × 30 cm (un moule à charnière de 26 cm marche aussi).",
+        "text": "Préchauffez le four à 180 °C en chaleur traditionnelle (160 °C chaleur tournante). Tapissez une plaque de papier cuisson et posez dessus un cadre de 20 × 30 cm (un moule à charnière de 26 cm marche aussi).",
         "cue": "Le four est bien chaud avant d’enfourner."
       },
       {
         "title": "La magie du bain-marie.",
-        "text": "Faites fondre le chocolat haché et le beurre au bain-marie frémissant. Laissez tiédir. Mélangez cacao, farine et sel puis tamisez ensemble.",
+        "text": "Faites fondre le chocolat haché et le beurre au bain-marie frémissant. Laissez tiédir. Mélangez cacao, farine et sel puis tamisez le tout.",
         "cue": "Lisse et brillant, tiède mais pas brûlant."
       },
       {
         "title": "On rassemble.",
-        "text": "Fouettez les œufs, le sucre et la vanille jusqu’à ce que le mélange soit crémeux. Incorporez le mélange chocolat-beurre, puis les poudres en trois fois. Versez le lait ribot doucement à la fin.",
+        "text": "Fouettez les œufs, le sucre et la vanille jusqu’à obtenir une préparation crémeuse. Incorporez le mélange chocolat-beurre, puis les poudres en trois fois. Versez doucement le lait ribot à la fin.",
         "cue": "Pâte épaisse et brillante, sans paquets de farine."
       },
       {
@@ -415,7 +415,7 @@
     "tips": [
       {
         "title": "Dosage malin.",
-        "text": "1 tasse ≈ 240 ml · 1 c. à soupe = 15 ml · 1 c. à café = 5 ml. Utilisez des tasses doseuses, pas des mugs. Remplissez farine et cacao à la cuillère sans tasser, puis arasez. Tassez le beurre sans bulles d’air."
+        "text": "1 tasse ≈ 240 ml · 1 c. à soupe = 15 ml · 1 c. à café = 5 ml. Utilisez des tasses doseuses, pas des mugs. Prélevez la farine et le cacao à la cuillère sans tasser, puis arasez. Tassez le beurre sans laisser de bulles d’air."
       },
       {
         "title": "Astuce chocolat.",
@@ -434,7 +434,7 @@
       },
       {
         "title": "Astuce chocolat.",
-        "text": "175 g de couverture = 1¾ tablette de 100 g. Hachez-le finement pour qu’il fonde de façon uniforme avec le beurre."
+        "text": "175 g de chocolat de couverture = 1¾ tablette de 100 g. Hachez-le finement pour qu’il fonde de façon uniforme avec le beurre."
       }
     ],
     "conversions": "King Arthur Baking : tableau de poids des ingrédients"

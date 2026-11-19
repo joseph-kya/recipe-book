@@ -1,4 +1,7 @@
 import { recipes } from './content.js';
+import { hashForSpread, routeOfHash, spreadMatchesRoute } from './share.js';
+
+export { hashForSpread, routeOfHash, spreadMatchesRoute };
 
 // The book as a list of spreads. Phone: one page per spread (R only).
 // Wide: cover alone, contents, then each recipe over as many spreads as its
@@ -30,11 +33,7 @@ export function buildSpreads(wide, plans) {
   return spreads;
 }
 
-export function routeOfHash(hash) {
-  return decodeURIComponent((hash || '').replace(/^#\/?/, '')).replace(/\/$/, '');
-}
-
 export function firstIndexFor(spreads, route) {
-  const i = spreads.findIndex((s) => s.route === route);
+  const i = spreads.findIndex((s) => spreadMatchesRoute(s, route));
   return i === -1 ? 0 : i;
 }

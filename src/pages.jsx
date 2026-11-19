@@ -18,6 +18,7 @@ import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
 import CoverRandom from './CoverRandom.jsx';
 import { RecipeFav } from './RecipeFav.jsx';
+import { ShareButton } from './Share.jsx';
 
 export { useRecipeText } from './recipeUI.jsx';
 export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
@@ -219,7 +220,10 @@ function RecipeHero({ recipe, lang, measure = false }) {
         <p className="eyebrow">
           {t.recipeNo} {recipe.no}
         </p>
-        <RecipeFav recipe={recipe} lang={lang} title={r.title} measure={measure} />
+        <div className="hero-actions">
+          <RecipeFav recipe={recipe} lang={lang} title={r.title} measure={measure} />
+          <ShareButton recipe={recipe} lang={lang} measure={measure} />
+        </div>
       </div>
       {/* Phones break the title at its title_lines; wide pages run it on one line
           where it fits, so a "Topfen-" line break joins back to "Topfenschmarren". */}

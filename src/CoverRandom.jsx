@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { recipes, textFor } from './content.js';
 import { routeOfHash } from './layout.js';
+import { recipeHash } from './share.js';
 import { reducedMotion } from './motion.js';
 import {
   buildShuffleFrames,
@@ -72,9 +73,9 @@ export default function CoverRandom({ lang }) {
   if (!recipes.length) return null;
 
   const openRecipe = (recipe) => {
-    if (!recipe?.route) return;
+    if (!recipe?.slug) return;
     if (routeOfHash(window.location.hash) !== '') return;
-    window.location.hash = `#/${recipe.route}`;
+    window.location.hash = recipeHash(recipe);
   };
 
   const handleSurprise = () => {

@@ -11,6 +11,7 @@ import { contentsText, filterRecipes } from './contents-find.js';
 import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { FavMark } from './RecipeFav.jsx';
+import { recipeHash } from './share.js';
 import './cover-contents.css';
 
 function SearchIcon({ className }) {
@@ -175,7 +176,7 @@ export function ContentsList({ lang, withTitle = false }) {
               const fav = isFavorite(r.slug);
               return (
                 <li key={r.slug}>
-                  <a href={`#/${r.route}`} className="toc-link">
+                  <a href={recipeHash(r)} className="toc-link">
                     <span className="toc-no" aria-hidden="true">
                       {r.no}
                     </span>

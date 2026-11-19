@@ -5,23 +5,32 @@
 
 .hero-top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-2);
+  gap: var(--sp-1) var(--sp-2);
   min-height: 2rem;
 }
 
 .hero-top .eyebrow {
+  margin: 0;
   min-width: 0;
   flex-shrink: 0;
+}
+
+.hero-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .hero-fav {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   flex-shrink: 0;
-  margin-right: -0.5rem;
 }
 
 /* Both controls keep full 44x44px touch targets while their inner visual

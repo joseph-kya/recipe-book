@@ -54,7 +54,7 @@ export function filterRecipes(recipeList, lang, rawQuery) {
     const titleNorm = normalizeQuery(`${recipe.no} ${text.title}`);
     const ingredients = (text.groups || []).flatMap((g) => (g.items || []).map((item) => item.name)).filter(Boolean);
     const stats = (text.stats || []).map((s) => `${s.value} ${s.label}`.trim()).filter(Boolean);
-    const enTitle = recipe.en?.title || '';
+    const enTitle = recipe.en?.title || [recipe.slug, recipe.route].filter(Boolean).join(' ').replace(/-/g, ' ');
     const haystack = normalizeQuery([recipe.no, text.title, enTitle, text.tagline || '', ...ingredients, ...stats].join(' '));
 
     if (!tokens.every((tok) => haystack.includes(tok))) continue;

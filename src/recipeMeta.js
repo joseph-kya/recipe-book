@@ -3,7 +3,7 @@
 
 const TIME_UNIT = /\b(?:hrs?|hours?|h|mins?|minutes?)\b/i;
 const HOUR_UNIT = /^(?:hrs?|hours?|h)$/i;
-const TOTAL_LABEL = /\btotal\b/i;
+const TOTAL_LABEL = /\b(?:total|gesamt)\b/i;
 
 function parseNumber(raw) {
   return Number(String(raw).replace(',', '.'));

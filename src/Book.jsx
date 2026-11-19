@@ -189,6 +189,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const runSpring = useCallback(
     (target, velocity = 0) => {
       if (s.anim) s.anim.stop();
+      s.pendingTarget = null;
       s.target = target;
       setTurn((prev) => (prev && prev.target !== target ? { ...prev, target } : prev));
       s.anim = animateSpring({
@@ -268,7 +269,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const k = s.index;
       s.turn = { lo: Math.min(k, t), hi: Math.max(k, t) };
       s.p = t > k ? 0 : 1;
-      s.pendingTarget = t > k ? 1 : 0;
+      s.target = t > k ? 1 : 0;
+      s.pendingTarget = s.target;
       setFade(null);
       setIndex(k);
       setTurn({ ...s.turn, target: s.pendingTarget });

@@ -157,19 +157,19 @@
       "Fudge",
       "Brownies"
     ],
-    "tagline": "Große Schoko-Energie. Winziger Messbecher-Aufwand.",
+    "tagline": "Volle Ladung Schokolade. Kaum Aufwand mit dem Messbecher.",
     "sticker": [
       "Keine Waage.",
       "Kein Problem."
     ],
-    "intro": "Dichte, glänzende, richtig fudgige Stücke aus einer Schüssel und etwas Geduld. Buttermilch hält die Krume weich, das Kühlen am Ende sorgt für saubere Schnitte.",
+    "intro": "Dichte, glänzende, richtig saftig-schmelzende Stücke aus einer Schüssel und mit etwas Geduld. Buttermilch hält die Krume weich; durch das Kühlen am Schluss lassen sie sich sauber schneiden.",
     "stats": [
       {
-        "value": "30 Min",
+        "value": "30 min",
         "label": "Zubereitung"
       },
       {
-        "value": "35 Min",
+        "value": "35 min",
         "label": "Backen"
       },
       {
@@ -177,8 +177,8 @@
         "label": "Stücke, 5 × 5 cm"
       }
     ],
-    "equipment": "Backrahmen 20 × 30 cm (oder Springform 26 cm), Backpapier, hitzefeste Schüssel überm Wasserbad, Sieb.",
-    "ingredients_headline": "Das gute Zeug",
+    "equipment": "Backrahmen oder Backform (20 × 30 cm, oder eine 26-cm-Springform), Backpapier, hitzefeste Schüssel über dem Wasserbad, Sieb.",
+    "ingredients_headline": "Die guten Sachen",
     "groups": [
       {
         "title": null,
@@ -244,41 +244,41 @@
     "steps": [
       {
         "title": "Ofen an.",
-        "text": "Ofen auf 180 °C Ober-/Unterhitze (Umluft 160 °C) vorheizen. Ein Blech mit Backpapier auslegen und den Backrahmen 20 × 30 cm daraufstellen (eine 26-cm-Springform geht auch).",
-        "cue": "Ofen ist voll vorgeheizt, bevor der Teig reinkommt."
+        "text": "Heize den Ofen auf 180 °C Ober-/Unterhitze (160 °C Umluft) vor. Lege ein Backblech mit Backpapier aus und stelle den Backrahmen (20 × 30 cm) darauf (eine 26-cm-Springform funktioniert genauso).",
+        "cue": "Der Ofen ist vollständig vorgeheizt, bevor der Teig hineinkommt."
       },
       {
-        "title": "Schmelz-Magie.",
-        "text": "Gehackte Kuvertüre mit der Butter über dem Wasserbad schmelzen, leicht abkühlen lassen. Kakao, Mehl und Salz mischen und sieben.",
+        "title": "Zum Dahinschmelzen.",
+        "text": "Schmelze die gehackte Kuvertüre mit der Butter über einem sanft köchelnden Wasserbad und lass die Mischung leicht abkühlen. Mische Kakao, Mehl und Salz und siebe sie zusammen.",
         "cue": "Glänzend und glatt, warm, aber nicht heiß."
       },
       {
         "title": "Alles zusammen.",
-        "text": "Eier, Zucker und Vanille cremig aufschlagen. Schoko-Butter unterrühren, dann das Mehl in drei Portionen. Zum Schluss die Buttermilch langsam einfließen lassen.",
+        "text": "Schlage Eier, Zucker und Vanille cremig auf. Rühre erst die Schoko-Butter unter und dann die Mehlmischung in drei Portionen. Lass zum Schluss die Buttermilch langsam einfließen.",
         "cue": "Dicker, glänzender Teig ohne Mehlnester."
       },
       {
         "title": "Ab in den Ofen.",
-        "text": "Teig in den Rahmen streichen und ca. 35 Minuten backen.",
+        "text": "Streiche den Teig in den Backrahmen und backe ihn ca. 35 Minuten.",
         "cue": "Oberfläche fest und rissig; am Holzstäbchen kleben feuchte Krümel."
       },
       {
-        "title": "Der schwerste Teil: warten.",
-        "text": "Komplett auskühlen lassen. Wer's fester mag, noch 2 Stunden kühlen, dann in 5 × 5 cm große Stücke schneiden. Luftdicht bis zu 3 Tage haltbar.",
-        "cue": "Ganz kalt = saubere Schnitte."
+        "title": "Der schwerste Teil: Warten.",
+        "text": "Lass die Brownies vollständig auskühlen. Wenn du sie etwas fester magst, stelle sie noch 2 Stunden kalt und schneide sie dann in 5 × 5 cm große Stücke. Luftdicht verpackt halten sie sich bis zu 3 Tage.",
+        "cue": "Ganz kalt = saubere Stücke."
       }
     ],
     "tips": [
       {
-        "title": "Clever schöpfen.",
-        "text": "1 Tasse ≈ 240 ml · 1 EL = 15 ml · 1 TL = 5 ml. Echte Messbecher statt Kaffeetassen. Mehl und Kakao locker einlöffeln, dann glatt streichen. Butter ohne Luftlöcher eindrücken."
+        "title": "Richtig abmessen.",
+        "text": "1 Tasse ≈ 240 ml · 1 EL = 15 ml · 1 TL = 5 ml. Verwende richtige Messbecher statt Kaffeetassen. Löffle Mehl und Kakao locker hinein und streiche sie glatt ab. Drücke die Butter ohne Luftlöcher fest hinein."
       },
       {
         "title": "Der Schoko-Trick.",
-        "text": "Gehackte Schokolade fällt unterschiedlich aus. Genauer: 1¾ Tafeln à 100 g (175 g). Alle Tassen-Angaben sind Näherungswerte."
+        "text": "Je nachdem, wie fein die Schokolade gehackt ist, schwankt das Volumen. Genauer sind 1¾ Tafeln à 100 g (175 g). Alle Tassenangaben sind Näherungswerte."
       }
     ],
-    "tagline_grams": "Große Schoko-Energie. Aufs Gramm genau.",
+    "tagline_grams": "Volle Ladung Schokolade. Aufs Gramm genau.",
     "sticker_grams": [
       "Gramm für Gramm.",
       "Genau richtig."
@@ -286,11 +286,11 @@
     "tips_grams": [
       {
         "title": "Direkt aus dem Original.",
-        "text": "Alle Mengen sind die Gramm- und ml-Angaben des Originalrezepts. Löffel: 1 EL = 15 ml · 1 TL = 5 ml. Keine Waage? Nimm die Tassen-Version."
+        "text": "Alle Mengen entsprechen den Gramm- und ml-Angaben des Originalrezepts. Löffel: 1 EL = 15 ml · 1 TL = 5 ml. Keine Waage? Nimm die Tassenversion."
       },
       {
         "title": "Der Schoko-Trick.",
-        "text": "175 g Kuvertüre = 1¾ Tafeln à 100 g. Fein hacken, damit sie gleichmäßig mit der Butter schmilzt."
+        "text": "175 g Kuvertüre = 1¾ Tafeln à 100 g. Hacke sie fein, damit sie gleichmäßig mit der Butter schmilzt."
       }
     ],
     "conversions": "King Arthur Baking: Tabelle für Zutatengewichte"

@@ -15,7 +15,7 @@
     },
     "de": {
       "label": "Tassenumrechnung",
-      "src": "ungefähr (King Arthur + Quark ~240 g/Tasse)"
+      "src": "ca. (King Arthur + Topfen ~240 g/Tasse)"
     },
     "fr": {
       "label": "Conversions en tasses",
@@ -156,17 +156,17 @@
     ]
   },
   "de": {
-    "title": "Quarkauflauf mit Zitrone und Beeren",
+    "title": "Topfenauflauf mit Zitrone und Beeren",
     "title_lines": [
-      "Zitrone & Beeren",
-      "Quarkauflauf"
+      "Topfenauflauf",
+      "mit Zitrone & Beeren"
     ],
-    "tagline": "Ein Topfenauflauf zum Frühstück, als Dessert oder beides.",
+    "tagline": "Ein Topfenauflauf zum Frühstück, als Nachspeise oder beides.",
     "sticker": [
       "Halbe",
       "Menge!"
     ],
-    "intro": "REWEs süßer Quarkauflauf, halbiert und ohne Streusel: zitroniger Quark, Eischnee, saftige Beeren.",
+    "intro": "Der süße Topfenauflauf von REWE, halbiert und ohne Streusel: zitroniger Topfen, Eischnee und saftige Beeren.",
     "stats": [
       {
         "value": "30–40 min",
@@ -182,7 +182,7 @@
       }
     ],
     "equipment": "Handmixer, Reibe, zwei Schüsseln, kleine Auflaufform (~20 × 15 cm).",
-    "ingredients_headline": "Das gute Zeug",
+    "ingredients_headline": "Die guten Sachen",
     "groups": [
       {
         "title": "Der Auflauf",
@@ -191,7 +191,7 @@
             "amount": "~1½ Tassen",
             "metric": "200 g",
             "name": "gemischte Beeren",
-            "note": "tiefgekühlt geht auch"
+            "note": "tiefgekühlte gehen auch"
           },
           {
             "amount": "½",
@@ -215,12 +215,12 @@
             "amount": "2 EL",
             "metric": "25 g",
             "name": "Zucker",
-            "note": "in zwei Hälften aufteilen"
+            "note": "in zwei Hälften teilen"
           },
           {
             "amount": "1 gehäufte Tasse",
             "metric": "250 g",
-            "name": "Magerquark",
+            "name": "Magertopfen",
             "note": null
           },
           {
@@ -248,46 +248,46 @@
     "steps": [
       {
         "title": "Beeren und Zitronenabrieb.",
-        "text": "Ofen auf 160 °C Ober-/Unterhitze vorheizen. Beeren verlesen, waschen und abtropfen lassen (tiefgekühlte erst auftauen, dann abtropfen lassen). Zitronenschale abreiben.",
-        "cue": "Beeren sind abgetropft und liegen nicht im Saft."
+        "text": "Heize den Ofen auf 160 °C Ober-/Unterhitze vor. Sortiere die Beeren aus, wasche sie und lass sie gut abtropfen (tiefgekühlte vorher auftauen und abtropfen lassen). Reibe die Zitronenschale ab.",
+        "cue": "Die Beeren sind gut abgetropft und schwimmen nicht im Saft."
       },
       {
-        "title": "Eiweiß aufschlagen.",
-        "text": "Ei trennen. Eiweiß mit etwas Salz und 1 EL Zucker steif schlagen.",
-        "cue": "Feste Spitzen."
+        "title": "Eiweiß steif schlagen.",
+        "text": "Trenne das Ei. Schlage das Eiweiß mit etwas Salz und 1 EL Zucker steif.",
+        "cue": "Der Eischnee zieht feste Spitzen."
       },
       {
-        "title": "Die Quarkbasis.",
-        "text": "Quark, Eigelb, Zitronenabrieb, Grieß, Backpulver und den anderen 1 EL Zucker gut verrühren. Eischnee unterheben.",
+        "title": "Die Topfenmasse.",
+        "text": "Verrühre Topfen, Eigelb, Zitronenabrieb, Grieß, Backpulver und den restlichen Zucker (1 EL) gründlich. Hebe dann den Eischnee unter.",
         "cue": "Glatt und luftig, ohne Schlieren."
       },
       {
         "title": "Jetzt die Beeren.",
-        "text": "In die Form geben und die Beeren vorsichtig unterheben.",
-        "cue": "Beeren sind verteilt, nicht zerdrückt."
+        "text": "Fülle die Masse in die Auflaufform und hebe die Beeren vorsichtig unter.",
+        "cue": "Die Beeren sind locker verteilt, nicht zerdrückt."
       },
       {
         "title": "Backen.",
-        "text": "30–40 min backen.",
+        "text": "Backe den Auflauf 30–40 min.",
         "cue": "Fest und leicht gebräunt."
       },
       {
         "title": "Bestäuben und loslöffeln.",
-        "text": "Mit Puderzucker bestäuben und servieren.",
+        "text": "Bestäube den Auflauf mit Puderzucker und serviere ihn.",
         "cue": "Warm und in der Mitte gestockt."
       }
     ],
     "tips": [
       {
         "title": "Unsere Anpassungen.",
-        "text": "REWEs 4 Portionen halbiert (1 Ei statt 2), Streusel weggelassen; die kleinere Form ist unsere Wahl. Darin geht das Backen eventuell schneller: ab 25 min nachsehen."
+        "text": "Wir haben die 4 Portionen von REWE halbiert (1 Ei statt 2), die Streusel weggelassen und bewusst eine kleinere Form gewählt. Darin backt der Auflauf eventuell schneller – schau ab 25 min mal nach."
       },
       {
         "title": "Keine Zahlen.",
-        "text": "REWEs 464 kcal pro Portion enthalten die Streusel, deshalb stehen sie hier nicht. Tassenangaben sind Näherungswerte."
+        "text": "In den 464 kcal pro Portion von REWE sind die Streusel mitgerechnet, deshalb führen wir sie hier nicht auf. Die Tassenangaben sind Näherungswerte."
       }
     ],
-    "conversions": "Ungefähre Tassenangaben; Quark ~240 g/Tasse, Zucker 198 g/Tasse, Beeren ~140 g/Tasse"
+    "conversions": "Ungefähre Tassenangaben; Topfen ~240 g/Tasse, Zucker 198 g/Tasse, Beeren ~140 g/Tasse"
   },
   "fr": {
     "title": "Gratin au fromage blanc, citron et fruits rouges",

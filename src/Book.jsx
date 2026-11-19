@@ -10,9 +10,6 @@ import Controls from './Controls.jsx';
 import CookMode from './CookMode.jsx';
 import { PrintRecipe } from './Share.jsx';
 import { enterPage, swapContent, transition } from './motion.js';
-import { computePageFolios, resolveBookmarkSpread, setBookmark } from './bookmark.js';
-import { BookEdges, BookRibbon, FacePaperChrome, PageFolio, useBookmark } from './BookChrome.jsx';
-import './more-book.css';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
@@ -782,29 +779,6 @@ export default function Book({ lang, setLang, units, setUnits }) {
     wasCookOpenRef.current = cookOpen;
   }, [cookOpen]);
 
-  /* ---------- cookbook bookmark, folios, and physical chrome ---------- */
-
-  const bookmark = useBookmark();
-  const folios = useMemo(() => computePageFolios(spreads, wide), [spreads, wide]);
-  const bookmarkTarget = useMemo(() => resolveBookmarkSpread(spreads, bookmark), [spreads, bookmark]);
-  const bookmarkRecipe = bookmarkTarget >= 0 ? spreads[bookmarkTarget]?.recipe || null : null;
-
-  useEffect(() => {
-    if (turn) return;
-    const sp = spreads[index];
-    if (sp?.kind === 'recipe' && sp.recipe?.slug) {
-      setBookmark(sp.recipe.slug, sp.offset || 0);
-    }
-  }, [index, turn, spreads]);
-
-  const resumeBookmark = useCallback(
-    (instant = false) => {
-      const target = resolveBookmarkSpread(s.spreads, bookmark);
-      if (target >= 0) navigate(target, { instant });
-    },
-    [bookmark, navigate, s],
-  );
-
   /* ---------- which faces exist right now ---------- */
 
   const faces = [];
@@ -815,17 +789,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
     // EN/DE/FR or cups<->g repagination updates content in-place without remounting.
     const baseKey = sp?.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp?.kind}-${side}`;
     const key = role === 'fading' ? `fade-${baseKey}` : baseKey;
-    if (content) {
-      faces.push({
-        key,
-        idx,
-        side,
-        role,
-        content,
-        descType: sp?.[side]?.type || null,
-        folio: folios[idx]?.[side] || null,
-      });
-    }
+    if (content) faces.push({ key, idx, side, role, content });
   };
   if (turn) {
     if (wide) add(turn.lo, 'L', 'under-l');
@@ -870,22 +834,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
           onPointerCancel={onPointerUp}
           onClickCapture={onClickCapture}
         >
-          <BookEdges
-            wide={wide}
-            index={activeIndex}
-            last={spreads.length - 1}
-            turn={turn}
-            hasBookmark={Boolean(bookmarkRecipe)}
-          />
           {faces.map((f) => {
             const live = f.role === 'rest' && atRest;
-            const ribbonSurface = bookmarkRecipe
-              ? f.descType === 'cover'
-                ? 'cover'
-                : (wide ? f.descType === 'contentsLeft' : f.descType === 'contentsList')
-                  ? 'contents'
-                  : null
-              : null;
             return (
               <div
                 key={f.key}
@@ -894,7 +844,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
                   else faceEls.current.delete(f.key);
                 }}
                 data-role={f.role}
-                className={`face face--${f.side} face--${f.role}${f.descType === 'cover' ? ' face--cover' : ''}${ribbonSurface ? ' face--has-ribbon' : ''}`}
+                className={`face face--${f.side} face--${f.role}`}
                 inert={!live}
                 aria-hidden={!live}
                 onAnimationEnd={f.role === 'fading' ? () => setFade(null) : undefined}
@@ -903,15 +853,8 @@ export default function Book({ lang, setLang, units, setUnits }) {
                   className="face-scroll"
                   onScroll={live && !wide && spreads[f.idx]?.kind === 'recipe' ? onFaceScroll : undefined}
                 >
-                  <div className="face-page-wrap">
-                    {f.content}
-                    {ribbonSurface && (
-                      <BookRibbon recipe={bookmarkRecipe} lang={lang} surface={ribbonSurface} onResume={resumeBookmark} />
-                    )}
-                    <PageFolio folio={f.folio} side={f.side} />
-                  </div>
+                  {f.content}
                 </div>
-                <FacePaperChrome wide={wide} descType={f.descType} hasMorePages={f.idx < spreads.length - 1} />
                 <div className="shade" aria-hidden="true" />
               </div>
             );

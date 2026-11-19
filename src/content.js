@@ -1,48 +1,63 @@
 // Every recipe comes from content/recipes/*.json and its sheet from
 // content/pdfs/<slug>.pdf. Drop both in and rebuild: nothing here changes.
+// vite.config.js validates, slims, numbers, and splits translations by language
+// so initial load only downloads the active language.
 
-const recipeFiles = import.meta.glob('/content/recipes/*.json', {
-  eager: true,
-  import: 'default',
-});
+import baseRecipes from 'virtual:recipes-base';
 
-const pdfFiles = import.meta.glob('/content/pdfs/*.pdf', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
+const LANG_LOADERS = {
+  en: () => import('virtual:recipes-lang/en'),
+  de: () => import('virtual:recipes-lang/de'),
+  fr: () => import('virtual:recipes-lang/fr'),
+};
 
-// Photos of the finished bake, from each recipe's source page (content/photos.json).
-// Paths resolve against the site base, so they work under /recipe-book/ too.
-import photoIndex from '../content/photos.json';
-import nutritionIndex from '../content/nutrition.json';
-
-function photoFor(slug) {
-  const p = photoIndex[slug];
-  if (!p?.photo) return null;
-  const base = `${import.meta.env.BASE_URL}${p.photo}`;
-  return { small: `${base}-400.webp`, large: `${base}-800.webp`, credit: p.credit };
+function resolvePhoto(photo) {
+  if (!photo?.path) return null;
+  const base = `${import.meta.env.BASE_URL}${photo.path}`;
+  return { small: `${base}-400.webp`, large: `${base}-800.webp`, credit: photo.credit };
 }
 
-function pdfFor(slug) {
-  return pdfFiles[`/content/pdfs/${slug}.pdf`] ?? null;
+export const recipes = baseRecipes.map((r) => ({
+  ...r,
+  photo: resolvePhoto(r.photo),
+}));
+
+const loadedLangs = new Set();
+const pendingLangs = new Map();
+
+export const hasRecipeLang = (lang) => loadedLangs.has(lang);
+
+export function ensureRecipeLang(lang) {
+  const target = LANG_LOADERS[lang] ? lang : 'en';
+  if (loadedLangs.has(target)) return Promise.resolve();
+  if (!pendingLangs.has(target)) {
+    const p = LANG_LOADERS[target]()
+      .then(({ default: blocks }) => {
+        for (const r of recipes) {
+          if (blocks[r.slug]) r[target] = blocks[r.slug];
+        }
+        loadedLangs.add(target);
+      })
+      .finally(() => pendingLangs.delete(target));
+    pendingLangs.set(target, p);
+  }
+  return pendingLangs.get(target);
 }
 
-export const recipes = Object.values(recipeFiles)
-  .map((r) => ({
-    ...r,
-    // Short route from the optional "route" field, else the slug itself.
-    route: r.route || r.slug,
-    pdf: pdfFor(r.slug),
-    photo: photoFor(r.slug),
-    nutrition: nutritionIndex.recipes[r.slug] ?? null,
-    photoCredit: photoFor(r.slug)?.credit ?? null,
-    gramsPdf: pdfFor(`${r.slug}.grams`),
-  }))
-  .sort((a, b) => a.number - b.number)
-  // The number shown is the position in the book (1, 2, 3…), so a recipe removed
-  // at the source never leaves a gap. The JSON `number` only sets the order.
-  .map((r, i) => ({ ...r, no: i + 1 }));
+function detectInitialLang() {
+  try {
+    const saved = localStorage.getItem('recipe-book:lang');
+    if (saved && LANG_LOADERS[saved]) return saved;
+  } catch {
+    /* storage blocked: fall through */
+  }
+  const nav = (typeof navigator !== 'undefined' ? navigator.language || '' : '').toLowerCase();
+  if (nav.startsWith('de')) return 'de';
+  if (nav.startsWith('fr')) return 'fr';
+  return 'en';
+}
+
+await ensureRecipeLang(detectInitialLang());
 
 // Pure selectors are also exercised directly by the Node translation tests.
 export { textFor, amountsCreditFor } from './recipe-i18n.js';

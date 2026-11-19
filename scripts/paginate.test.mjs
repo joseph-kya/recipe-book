@@ -47,7 +47,19 @@ class Block {
   get clientHeight() { return this.parentElement?.clientHeight ?? 700; }
 }
 
-globalThis.getComputedStyle = () => ({ marginTop: '0' });
+globalThis.getComputedStyle = (el) => {
+  const isPad = el?.className?.split(' ').includes('page-pad');
+  return {
+    marginTop: '0',
+    marginBottom: '0',
+    paddingTop: isPad ? '20px' : '0',
+    paddingBottom: isPad ? '20px' : '0',
+    borderTopWidth: '0',
+    borderBottomWidth: '0',
+    gridTemplateColumns: '1fr',
+    rowGap: '0',
+  };
+};
 globalThis.document = { createElement: () => new Block() };
 
 function recipe({ hero = 240, groups = [9], row = 50, stepHeights = [90, 90, 90, 90], tipHeights = [], credits = 100, ornament, macros = 0, photo = false } = {}) {

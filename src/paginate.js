@@ -62,13 +62,22 @@ function measureRecipe(root, src, pageHeight) {
     if (node) pad.append(node);
   }
 
+  const px = (v) => parseFloat(v) || 0;
+  const headHeight = (els) => {
+    if (!els.length) return 0;
+    const last = els.at(-1);
+    const firstMT = px(getComputedStyle(els[0]).marginTop);
+    const lastMB = px(getComputedStyle(last).marginBottom);
+    return (last.offsetTop || 0) + last.offsetHeight - (els[0].offsetTop || 0) + firstMT + lastMB;
+  };
+
   const faceH = face.clientHeight || pageHeight;
   const topH = top.offsetHeight;
   const padCS = getComputedStyle(pad);
-  const padPadY = parseFloat(padCS.paddingTop) + parseFloat(padCS.paddingBottom);
+  const padPadY = px(padCS.paddingTop) + px(padCS.paddingBottom);
 
   const runningH = running
-    ? running.offsetHeight + parseFloat(getComputedStyle(running).marginBottom)
+    ? running.offsetHeight + px(getComputedStyle(running).marginBottom)
     : 0;
   const heroH = hero ? hero.offsetHeight : 0;
 
@@ -77,21 +86,14 @@ function measureRecipe(root, src, pageHeight) {
     const cs = getComputedStyle(menu);
     const normalHeads = [...menu.querySelectorAll(':scope > [data-head="normal"]')];
     const contHeads = [...menu.querySelectorAll(':scope > [data-head="cont"]')];
-    const headHeight = (els) => {
-      if (!els.length) return 0;
-      const last = els.at(-1);
-      const firstMT = parseFloat(getComputedStyle(els[0]).marginTop);
-      const lastMB = parseFloat(getComputedStyle(last).marginBottom);
-      return last.offsetTop + last.offsetHeight - els[0].offsetTop + firstMT + lastMB;
-    };
     const groupEls = [...menu.querySelectorAll('.ing-group')];
-    const groupGap = groupEls.length > 1 ? parseFloat(getComputedStyle(groupEls[1]).marginTop) : 0;
+    const groupGap = groupEls.length > 1 ? px(getComputedStyle(groupEls[1]).marginTop) : 0;
     const groups = groupEls.map((g) => {
       const titleEl = g.querySelector('.ing-group-title');
       const items = [...g.querySelectorAll('[data-item]')].map((li) => {
         const [gi, ii] = li.dataset.item.split(':').map(Number);
         const h = li.offsetHeight;
-        const borderTop = parseFloat(getComputedStyle(li).borderTopWidth);
+        const borderTop = px(getComputedStyle(li).borderTopWidth);
         return { id: [gi, ii], h, borderTop };
       });
       return {
@@ -105,12 +107,12 @@ function measureRecipe(root, src, pageHeight) {
       g.items.map((item) => ({ ...item, titleH: g.titleH, gIdx })),
     );
     menuMetrics = {
-      marginTop: parseFloat(cs.marginTop),
+      marginTop: px(cs.marginTop),
       chrome:
-        parseFloat(cs.borderTopWidth) +
-        parseFloat(cs.borderBottomWidth) +
-        parseFloat(cs.paddingTop) +
-        parseFloat(cs.paddingBottom),
+        px(cs.borderTopWidth) +
+        px(cs.borderBottomWidth) +
+        px(cs.paddingTop) +
+        px(cs.paddingBottom),
       normalHeadH: headHeight(normalHeads),
       contHeadH: headHeight(contHeads),
       groupGap,
@@ -124,24 +126,17 @@ function measureRecipe(root, src, pageHeight) {
     const cs = getComputedStyle(ticket);
     const normalHeads = [...ticket.querySelectorAll(':scope > [data-head="normal"]')];
     const contHeads = [...ticket.querySelectorAll(':scope > [data-head="cont"]')];
-    const headHeight = (els) => {
-      if (!els.length) return 0;
-      const last = els.at(-1);
-      const firstMT = parseFloat(getComputedStyle(els[0]).marginTop);
-      const lastMB = parseFloat(getComputedStyle(last).marginBottom);
-      return last.offsetTop + last.offsetHeight - els[0].offsetTop + firstMT + lastMB;
-    };
     const steps = [...ticket.querySelectorAll('[data-step]')].map((li) => ({
       id: Number(li.dataset.step),
       h: li.offsetHeight,
     }));
     ticketMetrics = {
-      marginTop: parseFloat(cs.marginTop),
+      marginTop: px(cs.marginTop),
       chrome:
-        parseFloat(cs.borderTopWidth) +
-        parseFloat(cs.borderBottomWidth) +
-        parseFloat(cs.paddingTop) +
-        parseFloat(cs.paddingBottom),
+        px(cs.borderTopWidth) +
+        px(cs.borderBottomWidth) +
+        px(cs.paddingTop) +
+        px(cs.paddingBottom),
       normalHeadH: headHeight(normalHeads),
       contHeadH: headHeight(contHeads),
       steps,
@@ -155,11 +150,11 @@ function measureRecipe(root, src, pageHeight) {
       id: Number(t.dataset.tip),
       h: t.offsetHeight,
     }));
-    const cols = Math.max(1, cs.gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length);
+    const cols = Math.max(1, (cs.gridTemplateColumns || '').trim().split(/\s+/).filter(Boolean).length);
     tipsMetrics = {
-      marginTop: parseFloat(cs.marginTop),
+      marginTop: px(cs.marginTop),
       cols,
-      rowGap: parseFloat(cs.rowGap) || 0,
+      rowGap: px(cs.rowGap),
       items,
     };
   }
@@ -167,7 +162,7 @@ function measureRecipe(root, src, pageHeight) {
   let macrosMetrics = null;
   if (macros) {
     macrosMetrics = {
-      marginTop: parseFloat(getComputedStyle(macros).marginTop),
+      marginTop: px(getComputedStyle(macros).marginTop),
       h: macros.offsetHeight,
     };
   }
@@ -175,9 +170,9 @@ function measureRecipe(root, src, pageHeight) {
   let creditsMetrics = null;
   if (credits) {
     const cs = getComputedStyle(credits);
-    const trim = parseFloat(cs.borderTopWidth) + parseFloat(cs.paddingTop);
+    const trim = px(cs.borderTopWidth) + px(cs.paddingTop);
     creditsMetrics = {
-      marginTop: parseFloat(cs.marginTop),
+      marginTop: px(cs.marginTop),
       h: credits.offsetHeight,
       afterRunningH: credits.offsetHeight - trim,
     };
@@ -303,7 +298,7 @@ function paginateOne(m, slack = 0, byRows = false, cut = null, menuBreaks = []) 
         (ctx, row, commit) => {
           let delta = 0;
           if (ctx.gi === row.id[0]) {
-            delta = row.borderTop ? row.h : row.h;
+            delta = row.h;
           } else {
             const firstRowH = row.h - row.borderTop;
             const titleH = row.id[1] === 0 ? row.titleH : 0;

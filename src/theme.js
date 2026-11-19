@@ -24,12 +24,25 @@ import { transition } from './motion.js';
 //   tableInk         wide-screen controls on the table (and active Contents pill ink)
 //   cupcakeCherry    the cupcake's cherry and service bell knob
 //   cupcakeCream     the cupcake's cream collar and service bell dome
+// Only the page ground colour is needed in the browser (for <meta name="theme-color">);
+// all other palette tokens live in src/theme.css. Keeping GROUNDS separate lets
+// the bundler tree-shake THEMES out of production JS while scripts/theme.test.mjs
+// still verifies every token against src/theme.css.
+const GROUNDS = {
+  cherry: '#fff4df',
+  blueplate: '#fbf4e4',
+  soda: '#fdf5e6',
+  butterscotch: '#fff2e0',
+  paper: '#ffffff',
+  ink: '#181818',
+};
+
 export const THEMES = {
   cherry: {
     primary: '#c8233a', primaryInk: '#a11b2e', primaryDeep: '#8e1626',
     card: '#a8dccb', accent: '#f2b134', accent2: '#f7c9cf',
     ink: '#3a2216', inkSoft: '#4a3022', cue: '#6b4a36',
-    ground: '#fff4df', paper: '#fffaf1', table: '#3a2216', tableTile: '#43291c', frosting: '#7a4a35',
+    ground: GROUNDS.cherry, paper: '#fffaf1', table: '#3a2216', tableTile: '#43291c', frosting: '#7a4a35',
     shadow: '#3a2216', highlight: '#fff4df',
     cover: '#c8233a', coverInk: '#fff4df', coverChecker: '#3a2216', coverCheckerAlt: '#fff4df',
     coverTitleShadow: '#3a2216', coverBtn: '#fff4df', coverBtnInk: '#3a2216',
@@ -40,7 +53,7 @@ export const THEMES = {
     primary: '#1d5fa8', primaryInk: '#174a85', primaryDeep: '#123b6b',
     card: '#bfe3ef', accent: '#f2b134', accent2: '#f7c9cf',
     ink: '#1b2340', inkSoft: '#2c3657', cue: '#4a5578',
-    ground: '#fbf4e4', paper: '#fffbf3', table: '#1b2340', tableTile: '#222c4f', frosting: '#7a4a35',
+    ground: GROUNDS.blueplate, paper: '#fffbf3', table: '#1b2340', tableTile: '#222c4f', frosting: '#7a4a35',
     shadow: '#1b2340', highlight: '#fbf4e4',
     cover: '#1d5fa8', coverInk: '#fbf4e4', coverChecker: '#1b2340', coverCheckerAlt: '#fbf4e4',
     coverTitleShadow: '#1b2340', coverBtn: '#fbf4e4', coverBtnInk: '#1b2340',
@@ -51,7 +64,7 @@ export const THEMES = {
     primary: '#1a7356', primaryInk: '#145a43', primaryDeep: '#0f4a37',
     card: '#f8e7b0', accent: '#f4c542', accent2: '#cdebdd',
     ink: '#1f2f27', inkSoft: '#2e4338', cue: '#4f5e52',
-    ground: '#fdf5e6', paper: '#fffbf2', table: '#1f2f27', tableTile: '#263a30', frosting: '#f7c9cf',
+    ground: GROUNDS.soda, paper: '#fffbf2', table: '#1f2f27', tableTile: '#263a30', frosting: '#f7c9cf',
     shadow: '#1f2f27', highlight: '#fdf5e6',
     cover: '#1a7356', coverInk: '#fdf5e6', coverChecker: '#1f2f27', coverCheckerAlt: '#fdf5e6',
     coverTitleShadow: '#1f2f27', coverBtn: '#fdf5e6', coverBtnInk: '#1f2f27',
@@ -62,7 +75,7 @@ export const THEMES = {
     primary: '#b04a12', primaryInk: '#8c3a0e', primaryDeep: '#6e2c08',
     card: '#bfe0dc', accent: '#f4c95d', accent2: '#f6d1c1',
     ink: '#3a2216', inkSoft: '#4a3022', cue: '#6b4a36',
-    ground: '#fff2e0', paper: '#fffaf2', table: '#1f3a3d', tableTile: '#24454a', frosting: '#7a4a35',
+    ground: GROUNDS.butterscotch, paper: '#fffaf2', table: '#1f3a3d', tableTile: '#24454a', frosting: '#7a4a35',
     shadow: '#3a2216', highlight: '#fff2e0',
     cover: '#b04a12', coverInk: '#fff2e0', coverChecker: '#3a2216', coverCheckerAlt: '#fff2e0',
     coverTitleShadow: '#3a2216', coverBtn: '#fff2e0', coverBtnInk: '#3a2216',
@@ -73,7 +86,7 @@ export const THEMES = {
     primary: '#222222', primaryInk: '#1f1f1f', primaryDeep: '#171717',
     card: '#ebebeb', accent: '#8fb9f2', accent2: '#e4e4e4',
     ink: '#171717', inkSoft: '#525252', cue: '#404040',
-    ground: '#ffffff', paper: '#f5f5f5', table: '#262626', tableTile: '#2f2f2f', frosting: '#737373',
+    ground: GROUNDS.paper, paper: '#f5f5f5', table: '#262626', tableTile: '#2f2f2f', frosting: '#737373',
     shadow: '#171717', highlight: '#ffffff',
     cover: '#f4f4f4', coverInk: '#171717', coverChecker: '#222222', coverCheckerAlt: '#ffffff',
     coverTitleShadow: '#cfcfcf', coverBtn: '#8fb9f2', coverBtnInk: '#171717',
@@ -84,7 +97,7 @@ export const THEMES = {
     primary: '#e6e6e6', primaryInk: '#e6e6e6', primaryDeep: '#f2f2f2',
     card: '#2b2b2b', accent: '#b3261e', accent2: '#262626',
     ink: '#f2f2f2', inkSoft: '#b8b8b8', cue: '#cccccc',
-    ground: '#181818', paper: '#222222', table: '#0d0d0d', tableTile: '#121212', frosting: '#666666',
+    ground: GROUNDS.ink, paper: '#222222', table: '#0d0d0d', tableTile: '#121212', frosting: '#666666',
     shadow: '#080808', highlight: '#f2f2f2',
     cover: '#181818', coverInk: '#f2f2f2', coverChecker: '#2e2e2e', coverCheckerAlt: '#181818',
     coverTitleShadow: '#080808', coverBtn: '#b3261e', coverBtnInk: '#f2f2f2',
@@ -93,8 +106,8 @@ export const THEMES = {
   },
 };
 
-export const THEME_IDS = Object.keys(THEMES);
-export const DEFAULT_THEME = 'cherry';
+export const THEME_IDS = Object.keys(GROUNDS);
+const DEFAULT_THEME = 'cherry';
 const KEY = 'recipe-book:theme';
 
 export const nextTheme = (id) => THEME_IDS[(THEME_IDS.indexOf(id) + 1) % THEME_IDS.length];
@@ -106,12 +119,12 @@ const current = () => {
 
 // Set the attribute the CSS reads and the browser bar colour. index.html does
 // the same before first paint, so a saved colourway never flashes the default.
-export function applyTheme(id) {
+function applyTheme(id) {
   const safe = THEME_IDS.includes(id) ? id : DEFAULT_THEME;
   const root = document.documentElement;
   if (safe === DEFAULT_THEME) delete root.dataset.theme;
   else root.dataset.theme = safe;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[safe].ground);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', GROUNDS[safe]);
 }
 
 export function useTheme() {

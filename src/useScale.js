@@ -1,5 +1,5 @@
 import { createContext, createElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { CANDIDATES, clampFactor, offeredFactors } from './scale.js';
+import { CANDIDATES, clampFactor } from './scale.js';
 import { transition } from './motion.js';
 
 // Portion scale, per recipe: you scale the one you are cooking, and opening
@@ -58,18 +58,13 @@ export function ScaleProvider({ children }) {
 
 export const useScales = () => useContext(ScaleContext);
 
-const offeredCache = new Map();
-const offeredFor = (recipe) => {
-  if (!offeredCache.has(recipe.slug)) offeredCache.set(recipe.slug, offeredFactors(recipe));
-  return offeredCache.get(recipe.slug);
-};
-
 // One recipe's scale: { factor, custom, offered, setFactor, setCustom }.
-// A saved preset this recipe does not offer quietly reads as 1×; a custom
-// factor is used exactly (clamped to 0.1–10×).
+// Offered factors are precomputed at build time (vite.config.js) across all
+// recipe languages. A saved preset this recipe does not offer quietly reads as
+// 1×; a custom factor is used exactly (clamped to 0.1–10×).
 export function useScale(recipe) {
   const { scales, setScale } = useContext(ScaleContext);
-  const offered = offeredFor(recipe);
+  const offered = recipe.offered || [1];
   const saved = scales[recipe.slug] ?? 1;
   const custom = isCustom(saved);
   const factor = custom ? saved.custom : offered.includes(saved) ? saved : 1;

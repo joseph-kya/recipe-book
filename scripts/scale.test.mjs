@@ -299,3 +299,15 @@ test('feasibility rules on single amounts', () => {
   assert.equal(feasible('1 pinch', 0.5), true);
   assert.equal(feasible('anything else', 3), true);
 });
+
+test('yieldStat and feasibleFactors handle minimal recipes without stats', () => {
+  assert.equal(yieldStat({}), null);
+  assert.equal(yieldStat(null), null);
+  const minimal = {
+    en: {
+      groups: [{ items: [{ amount: '2 cups', metric: '250 g' }] }],
+    },
+  };
+  assert.ok(feasibleFactors(minimal).includes(0.5));
+  assert.deepEqual(offeredFactors(minimal), [0.5, 1, 1.5, 2, 3]);
+});

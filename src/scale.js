@@ -26,35 +26,6 @@
 const VULGAR = { '¼': 0.25, '½': 0.5, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': 0.125 };
 const NUM = String.raw`(?:\d+(?:[.,]\d+)?)?[¼½¾⅓⅔⅛]?`;
 
-
-export function parseNumber(text) {
-  const m = String(text).trim().match(/^(\d+(?:[.,]\d+)?)?([¼½¾⅓⅔⅛])?$/);
-  if (!m || (!m[1] && !m[2])) return null;
-  return (m[1] ? parseFloat(m[1].replace(',', '.')) : 0) + (m[2] ? VULGAR[m[2]] : 0);
-}
-
-// Whole part plus the nearest fraction from `fractions` (null if none is close).
-function fraction(x, fractions) {
-  const whole = Math.floor(x + 1e-9);
-  const rest = x - whole;
-  let best = { sym: '', v: 0 };
-  for (const [sym, v] of [['', 0], ...fractions, ['', 1]]) {
-    if (Math.abs(rest - v) < Math.abs(rest - best.v)) best = { sym, v };
-  }
-  if (best.v === 1) return { whole: whole + 1, sym: '' };
-  return { whole, sym: best.sym };
-}
-
-const FRIENDLY = [['¼', 0.25], ['⅓', 1 / 3], ['½', 0.5], ['⅔', 2 / 3], ['¾', 0.75]];
-const QUARTERS = [['¼', 0.25], ['½', 0.5], ['¾', 0.75]];
-const HALVES = [['½', 0.5]];
-
-export function formatNumber(x, fractions = FRIENDLY) {
-  const { whole, sym } = fraction(x, fractions);
-  if (!whole && !sym) return '0';
-  return `${whole || ''}${sym}`;
-}
-
 const SPOONS = {
   en: { cup: ['cup', 'cups'], tbsp: ['tbsp', 'tbsp'], tsp: ['tsp', 'tsp'], pinch: ['pinch', 'pinches'] },
   de: { cup: ['Tasse', 'Tassen'], tbsp: ['EL', 'EL'], tsp: ['TL', 'TL'], pinch: ['Prise', 'Prisen'] },
@@ -70,14 +41,54 @@ const CUP_UNIT = String.raw`cups?|Tassen?|tasses?`;
 const COUNT_QUAL = String.raw` large| small| medium| groß| klein| gros| petit| moyen`;
 const TSP = { cup: 48, tbsp: 3, tsp: 1 };
 
+const NUM_RE = /^(\d+(?:[.,]\d+)?)?([¼½¾⅓⅔⅛])?$/;
+const SPOON_TERM_RE = new RegExp(`^(${NUM}) (${SPOON_UNIT})$`);
+const PAREN_RE = /^(.+?) \((.+)\)$/;
+const PINCH_PLUS_RE = /^(pinch|Prise|pincée) \+ (.+)$/;
+const PINCH_RE = /^(\d+) (pinch(?:es)?|Prisen?|pincées?)$/;
+const QUAL_CUP_RE = new RegExp(
+  `^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?( crumbs| Krümel| de miettes)?$`,
+);
+const METRIC_RE = /^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/;
+const OZ_RE = new RegExp(`^(${NUM}) oz$`);
+const COUNT_RE = new RegExp(`^(${NUM})(${COUNT_QUAL})?$`);
+const INT_RE = /^\d+$/;
+
+const FRIENDLY = [['¼', 0.25], ['⅓', 1 / 3], ['½', 0.5], ['⅔', 2 / 3], ['¾', 0.75]];
+const QUARTERS = [['¼', 0.25], ['½', 0.5], ['¾', 0.75]];
+const HALVES = [['½', 0.5]];
+
+function parseNumber(text) {
+  const m = String(text).trim().match(NUM_RE);
+  if (!m || (!m[1] && !m[2])) return null;
+  return (m[1] ? parseFloat(m[1].replace(',', '.')) : 0) + (m[2] ? VULGAR[m[2]] : 0);
+}
+
+// Whole part plus the nearest fraction from `fractions`.
+function fraction(x, fractions) {
+  const whole = Math.floor(x + 1e-9);
+  const rest = x - whole;
+  let best = { sym: '', v: 0 };
+  for (const [sym, v] of [['', 0], ...fractions, ['', 1]]) {
+    if (Math.abs(rest - v) < Math.abs(rest - best.v)) best = { sym, v };
+  }
+  return best.v === 1 ? { whole: whole + 1, sym: '' } : { whole, sym: best.sym };
+}
+
+function formatNumber(x, fractions = FRIENDLY) {
+  const { whole, sym } = fraction(x, fractions);
+  return !whole && !sym ? '0' : `${whole || ''}${sym}`;
+}
+
 const word = (lang, unit, n) => SPOONS[lang][unit][(lang === 'fr' ? n >= 2 : n > 1) ? 1 : 0];
+const hasQual = (m) => Boolean(m && (m[1] || m[3] || m[5] || m[6]));
 
 // "1 cup + 1½ tsp" → total teaspoons, or null if any term is not a plain spoon term.
 function parseSpoons(text) {
   let total = 0;
   let lang = null;
   for (const term of text.split(' + ')) {
-    const m = term.trim().match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
+    const m = term.trim().match(SPOON_TERM_RE);
     if (!m) return null;
     const n = parseNumber(m[1]);
     if (n === null) return null;
@@ -103,7 +114,7 @@ function spoonParts(tsp, cups, lang) {
 // Teaspoons → the most readable cups + tbsp + tsp: of every friendly cup size
 // that fits (and spoons only, up to ½ cup), the one with the fewest parts wins,
 // the larger cup on a tie. "6 tbsp" beats "⅓ cup + 2 tsp"; "2¼ cups + 3 tbsp"
-// beats "2⅓ cups + 1 tbsp + 2 tsp".
+// beats "2⅔ cups + 1 tbsp + 2 tsp".
 export function formatSpoons(tsp, lang) {
   // ⅛ tsp and less is a pinch
   if (tsp < 0.2) return `1 ${word(lang, 'pinch', 1)}`;
@@ -129,8 +140,7 @@ export function formatSpoons(tsp, lang) {
 
 // Grams and millilitres: whole units under 100 (at least 1), else nearest 5.
 export function roundMetric(x) {
-  if (x < 100) return Math.max(1, Math.round(x));
-  return Math.round(x / 5) * 5;
+  return x < 100 ? Math.max(1, Math.round(x)) : Math.round(x / 5) * 5;
 }
 
 const decimal = (x, lang) => (lang === 'de' || lang === 'fr' ? String(x).replace('.', ',') : String(x));
@@ -154,7 +164,7 @@ export const spoonTotal = (text) => parseSpoons(String(text).trim())?.total ?? n
 
 // "8 tbsp" → "16 tbsp": one spoon term kept in its own unit (used inside parentheses).
 function scaleSameUnit(text, factor) {
-  const m = String(text).match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
+  const m = String(text).match(SPOON_TERM_RE);
   if (!m) return null;
   const n = parseNumber(m[1]) * factor;
   const [l, unit] = UNIT_OF[m[2]];
@@ -167,7 +177,7 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   if (!s) return text;
 
   // ½ cup (8 tbsp): both halves, each in its own unit
-  const paren = s.match(/^(.+?) \((.+)\)$/);
+  const paren = s.match(PAREN_RE);
   if (paren) {
     const outer = scaleAmount(paren[1], factor, lang, custom);
     if (outer === paren[1]) return text;
@@ -185,20 +195,19 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   }
 
   // pinch + ¼ tsp: keep the pinch, scale the spoons
-  const pinchPlus = s.match(/^(pinch|Prise|pincée) \+ (.+)$/);
+  const pinchPlus = s.match(PINCH_PLUS_RE);
   if (pinchPlus) {
     const rest = parseSpoons(pinchPlus[2]);
     if (rest) {
       const scaled = rest.total * factor;
-      const lang2 = rest.lang;
       // the spoon part shrank to a pinch itself: two pinches
-      if (scaled < (custom ? 0.25 : 0.2)) return `2 ${word(lang2, 'pinch', 2)}`;
-      return `${pinchPlus[1]} + ${formatSpoons(scaled, lang2)}`;
+      if (scaled < (custom ? 0.25 : 0.2)) return `2 ${word(rest.lang, 'pinch', 2)}`;
+      return `${pinchPlus[1]} + ${formatSpoons(scaled, rest.lang)}`;
     }
   }
 
   // 1 pinch, 2 Prisen, 1 pincée
-  const pinch = s.match(/^(\d+) (pinch(?:es)?|Prisen?|pincées?)$/);
+  const pinch = s.match(PINCH_RE);
   if (pinch) {
     const n = Math.max(1, Math.round(parseNumber(pinch[1]) * factor));
     const lang2 = /^Pr/.test(pinch[2]) ? 'de' : /^pincée/.test(pinch[2]) ? 'fr' : 'en';
@@ -206,8 +215,8 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   }
 
   // qualified cups: "1 heaped cup", "scant ½ cup", "~1½ cups", "1 tasse bombée", "2 cups crumbs"
-  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?( crumbs| Krümel| de miettes)?$`));
-  if (qual && (qual[1] || qual[3] || qual[5] || qual[6])) {
+  const qual = s.match(QUAL_CUP_RE);
+  if (hasQual(qual)) {
     const n = parseNumber(qual[2]) * factor;
     const [l] = UNIT_OF[qual[4]];
     const post = qual[5] ? (n >= 2 ? qual[5].replace(/s?$/, 's') : qual[5].replace(/s$/, '')) : '';
@@ -215,7 +224,7 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   }
 
   // grams, millilitres and ranges of them: "175 g", "10–20 ml", "1.5 g"
-  const metric = s.match(/^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/);
+  const metric = s.match(METRIC_RE);
   if (metric) {
     const a = decimal(roundMetric(parseNumber(metric[1]) * factor), lang);
     if (!metric[2]) return `${a} ${metric[3]}`;
@@ -224,11 +233,11 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
   }
 
   // ounces
-  const oz = s.match(new RegExp(`^(${NUM}) oz$`));
-  if (oz) return `${formatNumber(Math.max(0.5, Math.round(parseNumber(oz[1]) * factor * 2) / 2), HALVES)} oz`;
+  const oz = s.match(OZ_RE);
+  if (oz) return `${formatNumber(countable(parseNumber(oz[1]) * factor), HALVES)} oz`;
 
   // countables: "4", "½", "1 large", "4 (size M)" (the parenthetical is caught above)
-  const count = s.match(new RegExp(`^(${NUM})(${COUNT_QUAL})?$`));
+  const count = s.match(COUNT_RE);
   if (count) {
     const n = parseNumber(count[1]);
     if (n !== null) {
@@ -242,7 +251,7 @@ export function scaleAmount(text, factor, lang = 'en', custom = false) {
 
 // A yield stat ("24" squares, "1" portion): only a plain number scales.
 export function scaleStat(value, factor, custom = false, lang = 'en') {
-  if (factor === 1 || !/^\d+$/.test(String(value).trim())) return value;
+  if (factor === 1 || !INT_RE.test(String(value).trim())) return value;
   return custom ? oneDecimal(Number(value) * factor, lang) : formatNumber(countable(Number(value) * factor), HALVES);
 }
 
@@ -275,9 +284,9 @@ export function feasible(text, factor) {
   const s = String(text).trim();
   if (!s) return true;
 
-  const paren = s.match(/^(.+?) \((.+)\)$/);
+  const paren = s.match(PAREN_RE);
   if (paren) {
-    const inner = paren[2].match(new RegExp(`^(${NUM}) (${SPOON_UNIT})$`));
+    const inner = paren[2].match(SPOON_TERM_RE);
     const innerOk = inner ? quarterStep(parseNumber(inner[1]) * factor) : feasible(paren[2], factor);
     return feasible(paren[1], factor) && innerOk;
   }
@@ -285,18 +294,18 @@ export function feasible(text, factor) {
   const spoons = parseSpoons(s);
   if (spoons) return spoonsFeasible(spoons.total * factor);
 
-  const pinchPlus = s.match(/^(pinch|Prise|pincée) \+ (.+)$/);
+  const pinchPlus = s.match(PINCH_PLUS_RE);
   if (pinchPlus) {
     const rest = parseSpoons(pinchPlus[2]);
     return rest ? spoonsFeasible(rest.total * factor) : true;
   }
 
-  if (/^\d+ (pinch(?:es)?|Prisen?|pincées?)$/.test(s)) return true;
+  if (PINCH_RE.test(s)) return true;
 
-  const qual = s.match(new RegExp(`^(~|scant |knapp |à peine |presque )?(${NUM})( heaped| gehäufte?)? (${CUP_UNIT})( bombées?| rases?)?( crumbs| Krümel| de miettes)?$`));
-  if (qual && (qual[1] || qual[3] || qual[5] || qual[6])) return quarterStep(parseNumber(qual[2]) * factor);
+  const qual = s.match(QUAL_CUP_RE);
+  if (hasQual(qual)) return quarterStep(parseNumber(qual[2]) * factor);
 
-  const metric = s.match(/^(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))? (g|ml|kg|l)$/);
+  const metric = s.match(METRIC_RE);
   if (metric) {
     return [metric[1], metric[2]].filter(Boolean).every((v) => {
       const exact = parseNumber(v) * factor;
@@ -304,10 +313,10 @@ export function feasible(text, factor) {
     });
   }
 
-  const oz = s.match(new RegExp(`^(${NUM}) oz$`));
+  const oz = s.match(OZ_RE);
   if (oz) return quarterStep(parseNumber(oz[1]) * factor);
 
-  const count = s.match(new RegExp(`^(${NUM})(${COUNT_QUAL})?$`));
+  const count = s.match(COUNT_RE);
   if (count && parseNumber(count[1]) !== null) return isWhole(parseNumber(count[1]) * factor);
 
   return true;
@@ -315,7 +324,7 @@ export function feasible(text, factor) {
 
 // The recipe's yield stat, when its value is a plain number ("24" squares).
 export function yieldStat(text) {
-  return text.stats.find((s) => /^\d+$/.test(String(s.value).trim())) || null;
+  return text?.stats?.find((s) => INT_RE.test(String(s.value).trim())) || null;
 }
 
 // Every factor at which every amount (cups and metric) in every language the
@@ -327,7 +336,7 @@ export function feasibleFactors(recipe) {
     return texts.every((t) => {
       const y = yieldStat(t);
       if (y && !isWhole(Number(y.value) * f)) return false;
-      return t.groups.every((g) => g.items.every((it) => feasible(it.amount, f) && feasible(it.metric, f)));
+      return (t.groups || []).every((g) => g.items.every((it) => feasible(it.amount, f) && feasible(it.metric, f)));
     });
   });
 }

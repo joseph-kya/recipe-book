@@ -15,7 +15,7 @@
     },
     "de": {
       "label": "Tassenumrechnung",
-      "src": "ungefähr (King Arthur + Kekskrümel ~100 g/Tasse, Frischkäse ~232 g/Tasse)"
+      "src": "ca. (King Arthur + Kekskrümel ~100 g/Tasse, Frischkäse ~232 g/Tasse)"
     },
     "fr": {
       "label": "Conversions en tasses",
@@ -159,7 +159,7 @@
       "Ohne Backen.",
       "Einfach kühlen."
     ],
-    "intro": "Ein knuspriger Lotus-Boden, eine cremige Frischkäse-Schicht und geschmolzene Biscoff-Creme obendrauf. Kein Ofen, keine Gelatine — nur zweimal geduldig kühlen.",
+    "intro": "Ein knuspriger Lotus-Boden, eine cremige Frischkäseschicht und geschmolzene Biscoff-Creme obendrauf. Kein Backrohr, keine Gelatine — nur zweimal geduldig kühlen.",
     "stats": [
       {
         "value": "30 min",
@@ -174,8 +174,8 @@
         "label": "Stücke, 20-cm-Form"
       }
     ],
-    "equipment": "Springform 20 cm (8 Zoll), Backpapier, kleiner Zerkleinerer oder Gefrierbeutel + Nudelholz, kleiner Topf, Tortenring, Tortenplatte.",
-    "ingredients_headline": "Das gute Zeug",
+    "equipment": "20-cm-Springform (8 Zoll), Backpapier, kleiner Zerkleinerer oder Gefrierbeutel + Nudelwalker, kleiner Topf, Tortenring, Tortenplatte.",
+    "ingredients_headline": "Die guten Sachen",
     "groups": [
       {
         "title": "Der Boden",
@@ -207,24 +207,24 @@
             "amount": "¾ Tasse (12 EL)",
             "metric": "200 g",
             "name": "Lotus Biscoff Creme",
-            "note": "gekauft oder selbstgemacht"
+            "note": "gekauft oder selbst gemacht"
           },
           {
             "amount": "knapp ½ Tasse (7 EL)",
             "metric": "50 g",
-            "name": "Puderzucker",
+            "name": "Staubzucker",
             "note": null
           }
         ]
       },
       {
-        "title": "Topping & Deko",
+        "title": "Guss & Deko",
         "items": [
           {
             "amount": "¾ Tasse (12 EL)",
             "metric": "200 g",
             "name": "Lotus Biscoff Creme",
-            "note": "gekauft oder selbstgemacht"
+            "note": "gekauft oder selbst gemacht"
           },
           {
             "amount": "6",
@@ -235,45 +235,45 @@
         ]
       }
     ],
-    "method_headline": "Jetzt wird's chaotisch.",
+    "method_headline": "Ärmel hoch und los.",
     "steps": [
       {
         "title": "Zerbröseln + schmelzen.",
-        "text": "Die 200 g Kekse im kleinen Zerkleinerer fein mahlen (oder im Gefrierbeutel mit dem Nudelholz zerdrücken). Die Butter in einem kleinen Topf bei schwacher Hitze schmelzen. Die Krümel unterrühren.",
-        "cue": "Feine Krümel, gleichmäßig von Butter durchfeuchtet."
+        "text": "Mahle die 200 g Kekse in einem kleinen Zerkleinerer zu feinen Krümeln (oder zerdrücke sie in einem Gefrierbeutel mit dem Nudelwalker). Lass die Butter in einem kleinen Topf bei schwacher Hitze schmelzen und rühre die Krümel unter.",
+        "cue": "Feine Krümel, gleichmäßig mit Butter durchzogen."
       },
       {
         "title": "Boden andrücken.",
-        "text": "Eine 20-cm-Springform mit Backpapier auslegen. Die Krümelmasse hineingeben und mit einem Löffel oder dem Boden eines Glases glatt drücken.",
+        "text": "Lege eine 20-cm-Springform mit Backpapier aus. Gib die Krümelmasse hinein und drücke sie mit einem Löffel oder dem Boden eines Glases glatt an.",
         "cue": "Gleichmäßiger, kompakter Boden ohne Lücken."
       },
       {
         "title": "Füllen + erstes Kühlen.",
-        "text": "Frischkäse mit den 200 g Creme und dem Puderzucker verrühren. Auf den Boden streichen und glattziehen. Mindestens 1 Stunde kaltstellen. Mit einem heißen Messer vom Rand lösen, auf eine Tortenplatte setzen und einen Tortenring darum spannen.",
+        "text": "Verrühre den Frischkäse mit den 200 g Creme und dem Staubzucker. Verteile die Masse auf dem Boden und streiche sie glatt. Stelle den Kuchen mindestens 1 Stunde kalt. Löse ihn mit einem heißen Messer vom Rand, setze ihn auf eine Tortenplatte und spanne einen Tortenring darum.",
         "cue": "Glatte Füllung, vor dem Ausformen gut durchgekühlt."
       },
       {
-        "title": "Topping schmelzen.",
-        "text": "Die restlichen 200 g Creme in einem Topf unter Rühren bei schwacher Hitze schmelzen. Zu heiß und sie brennt an. Über den gekühlten Cheesecake gießen und glattstreichen. Noch mindestens 1 Stunde kaltstellen.",
-        "cue": "Gießfähig, nicht blubbernd oder gebräunt."
+        "title": "Guss schmelzen.",
+        "text": "Lass die restlichen 200 g Creme in einem Topf bei schwacher Hitze unter Rühren schmelzen — wird sie zu heiß, brennt sie an. Gieße sie über den gekühlten Cheesecake und streiche sie glatt. Stelle ihn noch mindestens 1 Stunde kalt.",
+        "cue": "Schön flüssig, ohne Blasen und nicht gebräunt."
       },
       {
         "title": "Deko, dann anschneiden.",
-        "text": "Kurz vor dem Servieren 5 der 6 Kekse zerbröseln und die Krümel am Rand des Toppings verteilen. Den letzten Keks in die Mitte setzen. Den Tortenring vorsichtig abnehmen (vorher mit einem heißen Messer am Rand entlangfahren). Ergibt ca. 12 Stücke. Hält gekühlt 3–4 Tage.",
+        "text": "Zerbrösle kurz vor dem Servieren 5 der 6 Kekse und streue die Krümel rund um den Rand des Gusses. Setze den letzten Keks in die Mitte. Nimm den Tortenring vorsichtig ab (fahre vorher mit einem heißen Messer am Rand entlang). Ergibt ca. 12 Stücke. Hält gekühlt 3–4 Tage.",
         "cue": "Ring löst sich sauber; Krümel nur am Rand."
       }
     ],
     "tips": [
       {
         "title": "Tassen sind Schätzwerte.",
-        "text": "Krümel ~100 g/Tasse (~32 Kekse für den Boden; 1 Lotus ≈ 6,25 g). Frischkäse ~232 g/Tasse, damit sind 700 g fast genau 3 Tassen. Lotus-Creme ~16–17 g/EL, ¾ Tasse kommt also gut hin. Puderzucker nach King Arthur 113 g/Tasse."
+        "text": "Krümel ~100 g/Tasse (~32 Kekse für den Boden; 1 Lotus ≈ 6,25 g). Frischkäse ~232 g/Tasse, damit sind 700 g fast genau 3 Tassen. Lotus-Creme ~16–17 g/EL, ¾ Tasse kommt also gut hin. Staubzucker liegt bei 113 g/Tasse (King Arthur)."
       },
       {
-        "title": "Kein Ofen, keine Gelatine.",
-        "text": "Er wird im Kühlschrank fest. Ein Tortenring hält die Seiten nach dem Ausformen in Form. Einfach Backen schlägt außerdem frische Beeren obendrauf vor oder Zitronenabrieb in der Füllung. 4354 kcal für den ganzen Kuchen (deren Angabe)."
+        "title": "Kein Backrohr, keine Gelatine.",
+        "text": "Er wird einfach im Kühlschrank fest. Ein Tortenring hält den Rand nach dem Ausformen schön in Form. Einfach Backen schlägt außerdem frische Beeren obendrauf oder Zitronenabrieb in der Füllung vor. 4354 kcal für den ganzen Kuchen (laut Originalrezept)."
       }
     ],
-    "conversions": "Ungefähre Tassenangaben; Krümel ~100 g/Tasse, Frischkäse ~232 g/Tasse, Lotus-Creme ~16–17 g/EL, Puderzucker 113 g/Tasse"
+    "conversions": "Ungefähre Tassenangaben; Krümel ~100 g/Tasse, Frischkäse ~232 g/Tasse, Lotus-Creme ~16–17 g/EL, Staubzucker 113 g/Tasse"
   },
   "fr": {
     "title": "Cheesecake au Lotus",

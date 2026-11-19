@@ -15,7 +15,7 @@
     },
     "de": {
       "label": "Tassenumrechnung",
-      "src": "ungefähr (King Arthur + Quark ~240 g/Tasse)"
+      "src": "ca. (King Arthur + Topfen ~240 g/Tasse)"
     },
     "fr": {
       "label": "Conversions en tasses",
@@ -173,12 +173,12 @@
       "Wölkchen-",
       "kuchen"
     ],
-    "tagline": "Fluffig, leicht, eiweißreich. Ohne Boden, ohne Aufwand.",
+    "tagline": "Flaumig, leicht, eiweißreich. Ohne Boden, ohne Aufwand.",
     "sticker": [
       "8 Stücke",
-      "Fluffig!"
+      "Flaumig!"
     ],
-    "intro": "LECKERs viraler Wölkchenkuchen: Quark und Eischnee, sanft im Wasserbad gebacken.",
+    "intro": "LECKERs viraler Wölkchenkuchen: Topfen und Eischnee, sanft im Wasserbad gebacken.",
     "stats": [
       {
         "value": "~1 h 15 min",
@@ -186,15 +186,15 @@
       },
       {
         "value": "10 + 45 min",
-        "label": "im Ofen"
+        "label": "im Backrohr"
       },
       {
         "value": "~100 kcal · 8 g Eiweiß",
         "label": "pro Stück (Schätzung von LECKER)"
       }
     ],
-    "equipment": "Springform 18 cm (7 Zoll), Backpapier, Alufolie, große Bratform, Handmixer, kleiner Zerkleinerer.",
-    "ingredients_headline": "Das gute Zeug",
+    "equipment": "18-cm-Springform (7 Zoll), Backpapier, Alufolie, großer Bräter, Handmixer, kleiner Zerkleinerer.",
+    "ingredients_headline": "Die guten Sachen",
     "groups": [
       {
         "title": "Der Teig",
@@ -221,19 +221,19 @@
             "amount": "Prise + ¼ TL",
             "metric": "",
             "name": "Backpulver",
-            "note": "die Prise kommt zum Eischnee"
+            "note": "die Prise kommt zum Eiklar"
           },
           {
             "amount": "¾ Tasse + 1 EL",
             "metric": "200 g",
-            "name": "Magerquark",
+            "name": "Magertopfen",
             "note": null
           },
           {
             "amount": "3½ EL",
             "metric": "50 g",
             "name": "fettreduzierter Frischkäse",
-            "note": "~10% Fett"
+            "note": "~10 % Fett"
           },
           {
             "amount": "5 EL",
@@ -261,44 +261,44 @@
           },
           {
             "amount": "zum Bestäuben",
-            "metric": "wahlweise",
-            "name": "Puderzucker",
+            "metric": "nach Belieben",
+            "name": "Staubzucker",
             "note": null
           }
         ]
       }
     ],
-    "method_headline": "Jetzt wird's chaotisch.",
+    "method_headline": "Ärmel hoch und los.",
     "steps": [
       {
         "title": "Ein Bad einlassen.",
-        "text": "Ofen auf 170 °C (150 °C Umluft), Rost auf die mittlere Schiene. Bratform daraufstellen und ~3 cm heißes Wasser einfüllen. Boden und Rand der Springform mit Backpapier auslegen; außen fest mit Alufolie umwickeln.",
-        "cue": "Folie rundherum dicht anlegen, damit kein Wasser eindringt."
+        "text": "Heize das Backrohr auf 170 °C (150 °C Umluft) vor und schiebe den Rost auf die mittlere Schiene. Stelle den Bräter darauf und fülle ihn etwa 3 cm hoch mit heißem Wasser. Lege Boden und Rand der Springform mit Backpapier aus und wickle sie außen dicht in Alufolie ein.",
+        "cue": "Die Folie liegt rundherum dicht an — kein Spalt fürs Wasser."
       },
       {
         "title": "Mahlen und aufschlagen.",
-        "text": "Die 5 EL und 3 EL Erythrit getrennt zu Pulver mahlen. Eier trennen. Eiweiß mit Salz und der Prise Backpulver steif schlagen, dabei das Pulver aus den 5 EL einrieseln lassen.",
+        "text": "Mahle die 5 EL und die 3 EL Erythrit getrennt zu feinem Pulver. Trenne die Eier. Schlage das Eiklar mit Salz und der Prise Backpulver steif und lass dabei die 5 EL Erythritpulver langsam einrieseln.",
         "cue": "Feste, glänzende Spitzen, die stehen bleiben."
       },
       {
         "title": "Die cremige Basis.",
-        "text": "Eigelb, das Pulver aus den 3 EL, Quark, Frischkäse, Milch und Vanille verrühren. Mehl, Maisstärke und ¼ TL Backpulver mischen und unterrühren.",
+        "text": "Verrühre die Dotter mit den 3 EL Erythritpulver, Topfen, Frischkäse, Milch und Vanille. Mische Mehl, Maisstärke und ¼ TL Backpulver und rühre die Mischung unter.",
         "cue": "Glatt, ohne Klümpchen."
       },
       {
         "title": "Die Wolke unterheben.",
-        "text": "Eischnee mit einem Teigschaber in drei Portionen unterheben. In die Form füllen.",
-        "cue": "Keine weißen Schlieren, immer noch luftig."
+        "text": "Hebe den Eischnee mit einem Teigschaber in drei Portionen unter und fülle die Masse in die Form.",
+        "cue": "Keine weißen Schlieren mehr, aber noch schön luftig."
       },
       {
         "title": "Ab ins Wasserbad.",
-        "text": "Form ins Wasserbad stellen. 10 min backen, auf 150 °C (130 °C Umluft) herunterschalten und weitere ~45 min backen. Tür nicht öffnen!",
+        "text": "Stelle die Form ins Wasserbad. Backe den Kuchen 10 min, schalte dann auf 150 °C (130 °C Umluft) herunter und backe ihn weitere ~45 min. Öffne die Backrohrtür nicht!",
         "cue": "Die Tür bleibt die ganze Zeit zu."
       },
       {
         "title": "Abkühlen, lösen, schneiden.",
-        "text": "Komplett auskühlen lassen und aus der Form lösen. Nach Lust dünn mit Puderzucker bestäuben und in 8 Stücke schneiden.",
-        "cue": "Vor dem Schneiden ganz auskühlen lassen."
+        "text": "Lass den Kuchen vollständig auskühlen und löse ihn aus der Form. Bestäube ihn, wenn du magst, dünn mit Staubzucker und schneide ihn in 8 Stücke.",
+        "cue": "Vor dem Schneiden ganz ausgekühlt."
       }
     ],
     "tips": [
@@ -308,10 +308,10 @@
       },
       {
         "title": "Lieber Zucker?",
-        "text": "Laut LECKER lässt sich Erythrit 1:1 durch normalen Zucker ersetzen, ohne Mahlen. Dann hat ein Stück ~150 kcal und 8 g Eiweiß (deren Schätzung)."
+        "text": "Laut LECKER lässt sich Erythrit 1:1 durch normalen Zucker ersetzen und muss nicht gemahlen werden. Dann hat ein Stück ~150 kcal und 8 g Eiweiß (Schätzung von LECKER)."
       }
     ],
-    "conversions": "Ungefähre Tassenangaben; Quark ~240 g/Tasse, Maisstärke ~8 g/EL"
+    "conversions": "Ungefähre Tassenangaben; Topfen ~240 g/Tasse, Maisstärke ~8 g/EL"
   },
   "fr": {
     "title": "Cheesecake nuage protéiné",

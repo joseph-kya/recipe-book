@@ -3,7 +3,8 @@
 // PRECACHE_URLS (app shell, EN/DE/FR recipe bundles, fonts, icons, photos, PDFs).
 const CACHE_PREFIX = 'recipe-book-';
 const CACHE_VERSION = 'dev';
-const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
+// Epoch invalidates every pre-revert cache while preserving offline support.
+const CACHE_NAME = `${CACHE_PREFIX}v2-${CACHE_VERSION}`;
 const HTML_NETWORK_TIMEOUT_MS = 3000;
 const PRECACHE_URLS = [
   './',
@@ -88,11 +89,11 @@ function isHtmlRequest(request, url) {
 }
 
 async function fetchWithTimeout(request, ms) {
-  if (typeof AbortController === 'undefined') return fetch(request);
+  if (typeof AbortController === 'undefined') return fetch(request, { cache: 'no-store' });
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
-    return await fetch(request, { signal: controller.signal });
+    return await fetch(request, { signal: controller.signal, cache: 'no-store' });
   } finally {
     clearTimeout(timer);
   }

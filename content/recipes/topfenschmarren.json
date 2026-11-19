@@ -15,7 +15,7 @@
     },
     "de": {
       "label": "Tassenumrechnung",
-      "src": "ungefähr (Topfen ~240 g/Tasse, Mehl ~120 g/Tasse)"
+      "src": "ca. (Topfen ~240 g/Tasse, Mehl ~120 g/Tasse)"
     },
     "fr": {
       "label": "Conversions en tasses",
@@ -177,7 +177,7 @@
       "1 großer",
       "Teller!"
     ],
-    "intro": "Magertopfen und Eischnee, langsam bei mäßiger Hitze gebraten und in fluffige Stücke gezupft.",
+    "intro": "Magertopfen und Eischnee, langsam bei mäßiger Hitze gebraten und in flaumige Stücke gezupft.",
     "stats": [
       {
         "value": "5 + 5 + 5 min",
@@ -193,7 +193,7 @@
       }
     ],
     "equipment": "Beschichtete Pfanne mit Deckel, zwei Schüsseln, Schneebesen oder Handmixer, Pfannenwender.",
-    "ingredients_headline": "Das gute Zeug",
+    "ingredients_headline": "Die guten Sachen",
     "groups": [
       {
         "title": "Der Teig",
@@ -208,7 +208,7 @@
             "amount": "3 EL",
             "metric": "3 EL",
             "name": "Sauerrahm",
-            "note": "wahlweise"
+            "note": "nach Belieben"
           },
           {
             "amount": "knapp ½ Tasse",
@@ -237,12 +237,12 @@
           {
             "amount": "nach Geschmack",
             "metric": "",
-            "name": "geriebene Zitronenschale",
+            "name": "abgeriebene Zitronenschale",
             "note": null
           },
           {
             "amount": "ein Schuss",
-            "metric": "wahlweise",
+            "metric": "nach Bedarf",
             "name": "Wasser",
             "note": "falls der Teig zu fest ist"
           }
@@ -266,43 +266,43 @@
         ]
       }
     ],
-    "method_headline": "Jetzt wird's chaotisch.",
+    "method_headline": "Ärmel hoch und los.",
     "steps": [
       {
-        "title": "Eigelb trifft Topfen.",
-        "text": "Eier trennen. Topfen mit den 2 Eigelb (und dem Sauerrahm, falls du ihn verwendest) gut verrühren.",
+        "title": "Dotter treffen Topfen.",
+        "text": "Trenne die Eier. Verrühre den Topfen mit den 2 Dottern (und dem Sauerrahm, falls du ihn verwendest) gründlich.",
         "cue": "Glatt und cremig."
       },
       {
-        "title": "Geschmack rein.",
-        "text": "Mehl, Süßungsmittel, Zitronenschale und Salz dazugeben. Zu fest? Ein Schuss Wasser hilft.",
-        "cue": "Dick, aber cremig."
+        "title": "Teig verfeinern.",
+        "text": "Gib Mehl, Süßungsmittel, Zitronenschale und Salz dazu. Zu fest? Ein Schuss Wasser hilft.",
+        "cue": "Dickflüssig, aber cremig."
       },
       {
         "title": "Aufschlagen und unterheben.",
-        "text": "Eiweiß steif schlagen und langsam unterheben.",
+        "text": "Schlage das Eiklar steif und hebe es langsam unter.",
         "cue": "Ein ziemlich fester Teig: Das ist normal."
       },
       {
         "title": "Langsam braten.",
-        "text": "Fett bei MITTLERER Hitze schmelzen. Teig 0.5–1 cm dick verstreichen. ~5 min braten, bis er anfängt zu stocken, wenden und weitere ~5 min braten.",
+        "text": "Lass das Fett bei MITTLERER Hitze schmelzen und verstreiche den Teig 0,5–1 cm dick in der Pfanne. Brate ihn ~5 min, bis er anfängt zu stocken, wende ihn und brate ihn weitere ~5 min.",
         "cue": "Höchstens goldbraun, niemals dunkel."
       },
       {
         "title": "Deckel drauf, Pause machen.",
-        "text": "Hitze aus, Deckel drauf, 5 min ruhen lassen.",
+        "text": "Schalte die Hitze aus, lege den Deckel auf und lass den Schmarren 5 min ruhen.",
         "cue": "Bis in die Mitte gestockt."
       },
       {
-        "title": "Zupfen und belegen.",
-        "text": "Deckel abnehmen, in Stücke zupfen und Obst oder Kompott daraufgeben.",
-        "cue": "Fluffige, goldbraune Stücke."
+        "title": "Zupfen und anrichten.",
+        "text": "Nimm den Deckel ab, zupfe den Schmarren in Stücke und gib Obst oder Kompott darüber.",
+        "cue": "Flaumige, goldbraune Stücke."
       }
     ],
     "tips": [
       {
         "title": "Unsere Anpassungen.",
-        "text": "Am Rezept keine: Mengen und Schritte stammen von Susanna. Die Tassenangaben sind unsere ungefähren Umrechnungen. Süßungsmittel, Fett und Zitronenschale lässt sie nach Geschmack dosieren."
+        "text": "Am Rezept selbst keine: Mengen und Schritte stammen von Susanna. Die Tassenangaben sind unsere ungefähren Umrechnungen. Süßungsmittel, Fett und Zitronenschale lässt sie nach Geschmack dosieren."
       },
       {
         "title": "Auf die Hitze achten.",

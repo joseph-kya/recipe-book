@@ -16,6 +16,7 @@ import Ingredients from './Ingredients.jsx';
 import Method from './Method.jsx';
 import Photo from './Photo.jsx';
 import Macros from './Macros.jsx';
+import { ShareButton } from './Share.jsx';
 
 export { useRecipeText } from './recipeUI.jsx';
 export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
@@ -207,14 +208,17 @@ function RunningHead({ recipe, lang }) {
   );
 }
 
-function RecipeHero({ recipe, lang }) {
+function RecipeHero({ recipe, lang, measure = false }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
   const { factor, custom } = useScale(recipe);
   return (
     <header className="hero" data-unit="hero">
-      <p className="eyebrow">
-        {t.recipeNo} {recipe.no}
-      </p>
+      <div className="hero-top">
+        <p className="eyebrow">
+          {t.recipeNo} {recipe.no}
+        </p>
+        <ShareButton recipe={recipe} lang={lang} measure={measure} />
+      </div>
       {/* Phones break the title at its title_lines; wide pages run it on one line
           where it fits, so a "Topfen-" line break joins back to "Topfenschmarren". */}
       <h1 className="recipe-title" lang={textLang}>
@@ -372,7 +376,7 @@ export function RecipeMeasure({ recipe, lang, units }) {
   return (
     <div data-src={recipe.slug}>
       <RunningHead recipe={recipe} lang={lang} />
-      <RecipeHero recipe={recipe} lang={lang} />
+      <RecipeHero recipe={recipe} lang={lang} measure />
       <Ingredients recipe={recipe} lang={lang} units={units} measure />
       <Method recipe={recipe} lang={lang} measure />
       <Tips recipe={recipe} lang={lang} />

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
-import { buildSpreads, firstIndexFor, routeOfHash } from './layout.js';
+import { buildSpreads, firstIndexFor, hashForSpread, routeOfHash, spreadMatchesRoute } from './layout.js';
 import { paginate } from './paginate.js';
 import { useScales } from './useScale.js';
 import { getDoneSteps, RecipeMeasure, renderFace } from './pages.jsx';
 import { animateSpring, makeSpring, project, rubberband, unRubberband, rubberbandVelocity } from './spring.js';
 import Controls from './Controls.jsx';
 import CookMode from './CookMode.jsx';
+import { PrintRecipe } from './Share.jsx';
 import { enterPage, swapContent, transition } from './motion.js';
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
@@ -138,16 +139,17 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   /* ---------- settling and the URL ---------- */
 
-  // Hash names the recipe; history.state remembers which of its spreads.
+  // Hash names the recipe (#/r/<slug>); history.state remembers which of its spreads.
   const syncHash = useCallback(
     (k) => {
       const sp = s.spreads[k];
-      const url = `#/${sp.route}`;
+      const url = hashForSpread(sp);
+      const curRoute = routeOfHash(location.hash);
       const st = history.state;
-      if (routeOfHash(location.hash) !== sp.route) {
+      if (!spreadMatchesRoute(sp, curRoute)) {
         history.pushState({ k, key: s.key }, '', url);
       } else {
-        const known = st && st.key === s.key ? st.k : firstIndexFor(s.spreads, sp.route);
+        const known = st && st.key === s.key ? st.k : firstIndexFor(s.spreads, curRoute);
         if (known !== k) history.pushState({ k, key: s.key }, '', url);
       }
     },
@@ -427,7 +429,9 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const route = routeOfHash(location.hash);
       const st = history.state;
       const k =
-        st && st.key === s.key && s.spreads[st.k]?.route === route ? st.k : firstIndexFor(s.spreads, route);
+        st && st.key === s.key && spreadMatchesRoute(s.spreads[st.k], route)
+          ? st.k
+          : firstIndexFor(s.spreads, route);
       setCookState((cur) => (cur && s.spreads[k]?.recipe?.slug === cur.recipe.slug ? cur : null));
       navigate(k, { instant: s.keyboardNavigation });
       s.keyboardNavigation = false;
@@ -804,11 +808,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const t = ui[lang];
   const atRest = !turn;
   const activeIndex = turn ? (turn.target === 1 ? turn.hi : turn.lo) : index;
+  const activeRecipe = spreads[activeIndex]?.recipe || null;
 
   return (
     <>
       <div
         className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}
+        data-has-print={activeRecipe ? 'true' : undefined}
         inert={cookOpen}
         aria-hidden={cookOpen || undefined}
         onClickCapture={(e) => {
@@ -879,6 +885,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
           {announce}
         </p>
       </div>
+      {activeRecipe && <PrintRecipe recipe={activeRecipe} lang={lang} units={units} />}
       {cookState && (
         <CookMode
           recipe={cookState.recipe}

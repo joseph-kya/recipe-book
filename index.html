@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Joseph's Recipe Book</title>
+    <meta name="description" content="Joseph's baking recipes in a book you flip through: cups and spoons first, grams beside, a printable sheet for every recipe." />
+    <meta name="theme-color" content="#fff4df" />
+    <!-- The saved colourway, before first paint (src/theme.js keeps it in step). -->
+    <script>
+      try {
+        var grounds = { blueplate: '#fbf4e4', soda: '#fdf5e6', butterscotch: '#fff2e0', paper: '#ffffff', ink: '#181818' };
+        var saved = localStorage.getItem('recipe-book:theme');
+        if (grounds[saved]) {
+          document.documentElement.setAttribute('data-theme', saved);
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', grounds[saved]);
+        }
+      } catch (e) {}
+    </script>
+    <!-- Minimal runtime shims for old iOS Safari (12-15); no-op on modern browsers. -->
+    <script>
+      (function () {
+        if (typeof globalThis === 'undefined') window.globalThis = window;
+        if (!Object.hasOwn) {
+          Object.hasOwn = function (o, k) {
+            return Object.prototype.hasOwnProperty.call(o, k);
+          };
+        }
+        function at(n) {
+          n = Math.trunc ? Math.trunc(n) : n < 0 ? Math.ceil(n) : Math.floor(n);
+          n = n || 0;
+          if (n < 0) n += this.length;
+          return n < 0 || n >= this.length ? undefined : this[n];
+        }
+        if (!Array.prototype.at) Array.prototype.at = at;
+        if (!String.prototype.at) String.prototype.at = at;
+        if (typeof Promise !== 'undefined' && !Promise.allSettled) {
+          Promise.allSettled = function (ps) {
+            return Promise.all(
+              Array.prototype.slice.call(ps).map(function (p) {
+                return Promise.resolve(p).then(
+                  function (v) { return { status: 'fulfilled', value: v }; },
+                  function (r) { return { status: 'rejected', reason: r }; },
+                );
+              }),
+            );
+          };
+        }
+        if (
+          typeof MediaQueryList !== 'undefined' &&
+          !MediaQueryList.prototype.addEventListener &&
+          MediaQueryList.prototype.addListener
+        ) {
+          MediaQueryList.prototype.addEventListener = function (t, fn) {
+            if (t === 'change') this.addListener(fn);
+          };
+          MediaQueryList.prototype.removeEventListener = function (t, fn) {
+            if (t === 'change') this.removeListener(fn);
+          };
+        }
+        if (typeof window.ResizeObserver === 'undefined') {
+          window.ResizeObserver = function (cb) {
+            this._cb = cb;
+            this._on = function () { cb([]); };
+          };
+          window.ResizeObserver.prototype.observe = function () {
+            window.addEventListener('resize', this._on);
+            this._cb([]);
+          };
+          window.ResizeObserver.prototype.unobserve = function () {};
+          window.ResizeObserver.prototype.disconnect = function () {
+            window.removeEventListener('resize', this._on);
+          };
+        }
+        if (typeof Element !== 'undefined' && !Element.prototype.animate) {
+          Element.prototype.animate = function () {
+            return { finished: Promise.resolve(), cancel: function () {}, finish: function () {}, playState: 'finished' };
+          };
+        }
+        if (/OS 1[0-4]_|Version\/1[0-4]\./.test(navigator.userAgent || '')) {
+          document.addEventListener('DOMContentLoaded', function () {
+            try {
+              var f = document.createElement('div');
+              f.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';
+              f.appendChild(document.createElement('div'));
+              f.appendChild(document.createElement('div'));
+              document.body.appendChild(f);
+              var ok = f.scrollHeight === 1;
+              document.body.removeChild(f);
+              if (!ok) document.documentElement.classList.add('no-flex-gap');
+            } catch (e) {}
+          });
+        }
+      })();
+    </script>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Recipe Book" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta property="og:title" content="Joseph's Recipe Book" />
+    <meta property="og:description" content="Joseph's baking recipes, cups and spoons first." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <!-- The two display faces paint the first screen: fetch them with the HTML. -->
+    <link rel="preload" href="./assets/Shrikhand-Regular-BEzUR0JX.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./assets/LilitaOne-Regular-D7nIaIyc.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" crossorigin src="./assets/index-DUXEd5wo.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/react-BsRzY1GF.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-AdTTisp7.css">
+    <script>(function(){try{var langs={"en":"./assets/en-CDSBfP4B.js","de":"./assets/de-Brh_KxIM.js","fr":"./assets/fr-CjL0pfqf.js"};var saved=localStorage.getItem("recipe-book:lang");var nav=(navigator.language||"").toLowerCase();var l=langs[saved]?saved:nav.indexOf("de")===0?"de":nav.indexOf("fr")===0?"fr":"en";function hint(rel,href,as,type){if(!href)return;var el=document.createElement("link");el.rel=rel;el.href=href;el.crossOrigin="";if(as)el.as=as;if(type)el.type=type;document.head.appendChild(el);}hint("modulepreload",langs[l]);if(location.hash&&location.hash!=="#"&&location.hash!=="#/"){hint("preload","./assets/Nunito-VariableFont_wght-BEAd3XN2.woff2","font","font/woff2");}if("serviceWorker"in navigator){var last=Date.now();document.addEventListener("visibilitychange",function(){if(document.visibilityState!=="visible"||Date.now()-last<300000)return;last=Date.now();navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});}).catch(function(){});});}}catch(e){}})();</script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

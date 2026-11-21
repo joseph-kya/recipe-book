@@ -1,21 +1,19 @@
 // Offline-first service worker for Joseph's Recipe Book.
+// Written in Safari 12+ compatible ES2017 (no optional chaining or nullish coalescing) because public/sw.js is not transpiled.
 // During `vite build`, vite.config.js injects CACHE_VERSION (content hash) and
-// PRECACHE_URLS (app shell, EN/DE/FR recipe bundles, fonts, icons, photos, PDFs).
+// a slim PRECACHE_URLS (app shell, EN/DE/FR recipe chunks, CSS, and fonts).
+// Photos, PDFs, and secondary PWA icons are cached on demand by cacheFirstAsset.
 const CACHE_PREFIX = 'recipe-book-';
 const CACHE_VERSION = 'dev';
 // Epoch invalidates every pre-revert cache while preserving offline support.
 const CACHE_NAME = `${CACHE_PREFIX}v2-${CACHE_VERSION}`;
 const HTML_NETWORK_TIMEOUT_MS = 3000;
+const PRECACHE_CONCURRENCY = 4;
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './favicon.svg',
-  './apple-touch-icon.png',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-192-maskable.png',
-  './icon-512-maskable.png',
 ];
 
 function scopeUrl(rel) {
@@ -41,14 +39,17 @@ async function precacheAll() {
     return null;
   }
 
-  await Promise.all(
-    PRECACHE_URLS.map(async (rel) => {
+  // Bound concurrent fetches/writes so slow devices do not stall during install.
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < PRECACHE_URLS.length) {
+      const rel = PRECACHE_URLS[nextIndex++];
       const url = scopeUrl(rel);
       if (isImmutableAsset(rel)) {
         const reused = await findInOldCaches(url);
         if (reused) {
           await cache.put(url, reused.clone());
-          return;
+          continue;
         }
       }
       const req = isImmutableAsset(rel)
@@ -56,11 +57,17 @@ async function precacheAll() {
         : new Request(url, { cache: 'reload' });
       const res = await fetch(req);
       if (!res || !res.ok || res.status !== 200) {
-        throw new Error(`Precache failed (${res?.status ?? 'network'}) for ${rel}`);
+        const status = res ? res.status : 'network';
+        throw new Error(`Precache failed (${status}) for ${rel}`);
       }
       await cache.put(url, res);
-    }),
-  );
+    }
+  }
+
+  const workers = [];
+  const count = Math.min(PRECACHE_CONCURRENCY, PRECACHE_URLS.length);
+  for (let i = 0; i < count; i++) workers.push(worker());
+  await Promise.all(workers);
 }
 
 self.addEventListener('install', (event) => {
@@ -85,7 +92,8 @@ self.addEventListener('activate', (event) => {
 function isHtmlRequest(request, url) {
   if (url.pathname.endsWith('.pdf')) return false;
   if (request.mode === 'navigate' || request.destination === 'document') return true;
-  return request.headers.get('accept')?.includes('text/html') ?? false;
+  const accept = request.headers.get('accept');
+  return accept ? accept.indexOf('text/html') !== -1 : false;
 }
 
 async function fetchWithTimeout(request, ms) {
@@ -120,7 +128,7 @@ async function networkFirstHtml(request) {
       cache.put(request, response.clone()).catch(() => {});
       return response;
     }
-  } catch {
+  } catch (e) {
     /* offline or timed out: serve cached shell below */
   }
   return matchCachedHtml(request);
@@ -175,7 +183,7 @@ async function cacheFirstAsset(request) {
       cache.put(url, response.clone()).catch(() => {});
     }
     return response;
-  } catch {
+  } catch (e) {
     return Response.error();
   }
 }

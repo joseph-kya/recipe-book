@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "a11y": "node scripts/a11y.mjs",
+    "perf": "node scripts/perf.mjs",
     "deploy": "sh scripts/deploy.sh",
     "test": "node --test scripts/*.test.mjs"
   },

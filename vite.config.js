@@ -137,9 +137,145 @@ function recipeContent() {
   };
 }
 
-// Inject the built app-shell, recipe chunks, fonts, icons, photos and PDFs
-// plus a content hash into dist/sw.js so the whole book works offline in the
-// kitchen and auto-updates without prompts whenever any file changes.
+// Build-time compatibility layer for old iOS Safari (12-15) without touching
+// component sources owned by other workstreams:
+// 1. Eliminates top-level await in src/content.js (unsupported before Safari 15)
+//    so build.target ['es2017', 'safari12'] compiles cleanly into one lean bundle.
+// 2. Injects cascade-preserving CSS fallbacks (vh before dvh, physical before
+//    inset-inline/block & padding/margin-inline/block, -webkit-user-select,
+//    opaque base colors before color-mix, and html.no-flex-gap spacing) that
+//    modern browsers override identically while Safari 12-15 avoids broken layout.
+export function addSafariCssFallbacks(css) {
+  let out = css;
+
+  // 1. dvh/svh/lvh -> emit vh fallback declaration before it (Safari < 15.4).
+  out = out.replace(
+    /([;{])((?:--)?[a-z-]+)\s*:\s*([^;{}]*?\d(?:d|s|l)vh[^;{}]*)/g,
+    (match, sep, prop, val) => {
+      const fallback = val.replace(/(\d)(?:d|s|l)vh\b/g, '$1vh');
+      return `${sep}${prop}:${fallback};${prop}:${val}`;
+    },
+  );
+
+  // 2. inset-inline / inset-block -> physical left/right or top/bottom before it (Safari < 14.1).
+  out = out.replace(/([;{])inset-inline\s*:\s*([^;{}]+)/g, (_, sep, val) => {
+    const parts = splitCssValues(val);
+    const l = parts[0];
+    const r = parts[1] || parts[0];
+    return `${sep}left:${l};right:${r};inset-inline:${val}`;
+  });
+  out = out.replace(/([;{])inset-block\s*:\s*([^;{}]+)/g, (_, sep, val) => {
+    const parts = splitCssValues(val);
+    const t = parts[0];
+    const b = parts[1] || parts[0];
+    return `${sep}top:${t};bottom:${b};inset-block:${val}`;
+  });
+
+  // 3. padding/margin-inline/block shorthands -> physical fallbacks before them (Safari < 14.1).
+  out = out.replace(/([;{])(padding|margin)-(inline|block)\s*:\s*([^;{}]+)/g, (_, sep, prop, axis, val) => {
+    const parts = splitCssValues(val);
+    const a = parts[0];
+    const b = parts[1] || parts[0];
+    const [p1, p2] = axis === 'inline' ? [`${prop}-left`, `${prop}-right`] : [`${prop}-top`, `${prop}-bottom`];
+    return `${sep}${p1}:${a};${p2}:${b};${prop}-${axis}:${val}`;
+  });
+
+  // 4. user-select:none -> ensure -webkit-user-select:none precedes it.
+  out = out.replace(/([;{])user-select\s*:\s*none(?![^;{}]*-webkit-user-select)/g, '$1-webkit-user-select:none;user-select:none');
+
+  // 5. Opaque color-mix backgrounds mixed with a solid theme token -> keep base token on Safari < 16.2.
+  out = out.replace(
+    /([;{])background\s*:\s*(color-mix\(\s*in srgb\s*,\s*var\(--[a-z0-9-]+\)\s+\d+%\s*,\s*(var\((?:[^()]|\([^()]*\))*\))\s*\))/g,
+    '$1background:$3;background:$2',
+  );
+
+  // 6. Page-turn .shade gradient color-mix -> neutral translucent shadow fallback on Safari < 16.2.
+  out = out.replace(
+    /([;{])background\s*:\s*(linear-gradient\(to (left|right),\s*color-mix\(in srgb,\s*var\(--shadow\) 65%,\s*transparent\),\s*color-mix\(in srgb,\s*var\(--shadow\) 12%,\s*transparent\) 70%\))/g,
+    '$1background:linear-gradient(to $3,rgba(0,0,0,.45),rgba(0,0,0,.08) 70%);background:$2',
+  );
+
+  // 7. Flex-gap fallback for Safari < 14.1 (only active when index.html sets html.no-flex-gap).
+  const noFlexGap =
+    'html.no-flex-gap .controls-group>*+*,html.no-flex-gap .ctl-middle>*+*,html.no-flex-gap .stats>*+*,html.no-flex-gap .scaler-chips>*+*,html.no-flex-gap .hero-actions>*+*,html.no-flex-gap .method-actions>*+*,html.no-flex-gap .cook-nav>*+*,html.no-flex-gap .recipe-glance>*+*{margin-left:.45rem}' +
+    'html.no-flex-gap .toc-list>*+*{margin-top:.35rem}';
+
+  return `${out}\n${noFlexGap}\n`;
+}
+
+function splitCssValues(val) {
+  const parts = [];
+  let cur = '';
+  let depth = 0;
+  for (const ch of val.trim()) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth = Math.max(0, depth - 1);
+    if (/\s/.test(ch) && depth === 0) {
+      if (cur) {
+        parts.push(cur);
+        cur = '';
+      }
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur) parts.push(cur);
+  return parts;
+}
+
+function safariCompat() {
+  return {
+    name: 'safari-compat',
+    apply: 'build',
+    enforce: 'pre',
+    transform(code, id) {
+      const normalized = id.replace(/\\/g, '/');
+      if (normalized.endsWith('/src/content.js')) {
+        const replaced = code.replace(
+          /await\s+ensureRecipeLang\(detectInitialLang\(\)\);/,
+          'export const initialLangReady = ensureRecipeLang(detectInitialLang());',
+        );
+        if (replaced === code) {
+          throw new Error('safari-compat: expected top-level await in src/content.js');
+        }
+        return { code: replaced, map: null };
+      }
+      if (normalized.endsWith('/src/main.jsx')) {
+        const target = "createRoot(document.getElementById('root')).render(<App />);";
+        if (!code.includes(target)) {
+          throw new Error('safari-compat: expected root render call in src/main.jsx');
+        }
+        const replaced =
+          "import { initialLangReady } from './content.js';\n" +
+          code.replace(
+            target,
+            "initialLangReady.catch(() => {}).then(() => {\n  createRoot(document.getElementById('root')).render(<App />);\n});",
+          );
+        return { code: replaced, map: null };
+      }
+      return null;
+    },
+    generateBundle(_, bundle) {
+      for (const item of Object.values(bundle)) {
+        if (item.type === 'asset' && item.fileName.endsWith('.css') && typeof item.source === 'string') {
+          item.source = addSafariCssFallbacks(item.source);
+        }
+      }
+    },
+  };
+}
+
+// Keep the SW precache small: app shell, JS/CSS bundles (including EN/DE/FR chunks),
+// and fonts. Photos, PDFs, and secondary install icons cache on demand via cacheFirstAsset
+// so old iPads do not stall downloading ~850 KB of unused media on first open.
+export function shouldPrecache(relPath) {
+  if (relPath === 'sw.js' || relPath.startsWith('.') || relPath.includes('/.')) return false;
+  if (relPath.startsWith('photos/')) return false;
+  if (relPath.endsWith('.pdf')) return false;
+  if (/^(apple-touch-icon|icon-\d+).*\.png$/.test(relPath)) return false;
+  return true;
+}
+
 function serviceWorkerPrecache() {
   let outDir = 'dist';
   return {
@@ -152,15 +288,16 @@ function serviceWorkerPrecache() {
       const swPath = join(outDir, 'sw.js');
       if (!existsSync(swPath)) return;
       const swSource = readFileSync(swPath, 'utf8');
-      const files = walkFiles(outDir)
+      const allFiles = walkFiles(outDir)
         .map((f) => relative(outDir, f).replace(/\\/g, '/'))
         .filter((f) => f !== 'sw.js' && !f.startsWith('.') && !f.includes('/.'))
         .sort();
-      const precacheUrls = ['./', ...files.map((f) => `./${f}`)];
+      const precacheFiles = allFiles.filter(shouldPrecache);
+      const precacheUrls = ['./', ...precacheFiles.map((f) => `./${f}`)];
 
       const hash = createHash('sha256');
       hash.update(swSource);
-      for (const f of files) {
+      for (const f of allFiles) {
         hash.update(f);
         hash.update(readFileSync(join(outDir, f)));
       }
@@ -236,11 +373,15 @@ function preloadHints() {
 // base './' so dist/ works under GitHub Pages (/recipe-book/) and any static host.
 export default defineConfig({
   base: './',
-  plugins: [react(), recipeContent(), preloadHints(), serviceWorkerPrecache()],
+  plugins: [react(), recipeContent(), safariCompat(), preloadHints(), serviceWorkerPrecache()],
   build: {
+    // Support older iPad/iOS Safari (12+) in one lean ES module bundle without
+    // duplicating chunks via plugin-legacy.
+    target: ['es2017', 'safari12'],
+    cssTarget: ['safari12'],
     // PDFs must stay files (never inlined as data URLs).
     assetsInlineLimit: 0,
-    // Baseline target browsers natively support <link rel="modulepreload">.
+    // Modern browsers support <link rel="modulepreload">; older Safari ignores it cleanly.
     modulePreload: { polyfill: false },
     rollupOptions: {
       output: {

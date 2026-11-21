@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { decrementBaked, getBakedCount, incrementBaked, isFavorite, subscribeFav, toggleFavorite } from './fav.js';
+import {
+  decrementBaked,
+  getBakedCount,
+  incrementBaked,
+  isFavorite,
+  resetBaked,
+  setBakedCount,
+  subscribeFav,
+  toggleFavorite,
+} from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { cx } from './recipeUI.jsx';
 import './idea-fav.css';
@@ -13,6 +22,23 @@ function HeartIcon({ filled, className }) {
       <path
         d={HEART_PATH}
         fill={filled ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const UNDO_MS = 5000;
+
+function ResetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="hero-reset-icon">
+      <path
+        d="M5.2 12a6.8 6.8 0 1 0 2-4.8M5 4.6v3.8h3.8"
+        fill="none"
         stroke="currentColor"
         strokeWidth="2.1"
         strokeLinecap="round"
@@ -49,17 +75,53 @@ export function RecipeFav({ recipe, lang, title, measure = false }) {
   const [pop, setPop] = useState(false);
   const [bump, setBump] = useState(0);
   const [announced, setAnnounced] = useState('');
+  const [undoFrom, setUndoFrom] = useState(0);
   const holdRef = useRef(0);
   const heldRef = useRef(false);
+  const undoTimerRef = useRef(0);
+  const resetRef = useRef(null);
+  const bakedRef = useRef(null);
   const copyRef = useRef(copy);
   copyRef.current = copy;
 
-  useEffect(() => () => clearTimeout(holdRef.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(holdRef.current);
+      clearTimeout(undoTimerRef.current);
+    },
+    [],
+  );
   useEffect(() => {
     setPop(false);
     setBump(0);
     setAnnounced('');
+    setUndoFrom(0);
+    clearTimeout(undoTimerRef.current);
   }, [recipe.slug]);
+
+  // The undo chip vanishes after a few seconds; keep keyboard focus on the
+  // counter instead of dropping it to the page.
+  const endUndo = () => {
+    clearTimeout(undoTimerRef.current);
+    if (resetRef.current && document.activeElement === resetRef.current) bakedRef.current?.focus();
+    setUndoFrom(0);
+  };
+
+  const onReset = () => {
+    if (undoFrom > 0) {
+      const next = setBakedCount(recipe.slug, undoFrom);
+      endUndo();
+      setBump((n) => n + 1);
+      setAnnounced(copy.bakedAnnounce(next));
+      return;
+    }
+    const prev = resetBaked(recipe.slug);
+    if (prev <= 0) return;
+    setUndoFrom(prev);
+    setAnnounced(copy.resetDone(prev));
+    clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = setTimeout(endUndo, UNDO_MS);
+  };
 
   const onToggleFav = () => {
     const next = toggleFavorite(recipe.slug);
@@ -72,6 +134,7 @@ export function RecipeFav({ recipe, lang, title, measure = false }) {
       heldRef.current = false;
       return;
     }
+    if (undoFrom > 0) endUndo();
     if (e.shiftKey && baked > 0) {
       const next = decrementBaked(recipe.slug);
       setBump((n) => n + 1);
@@ -103,7 +166,19 @@ export function RecipeFav({ recipe, lang, title, measure = false }) {
 
   return (
     <div className="hero-fav">
+      {(baked > 0 || undoFrom > 0) && (
+        <button
+          ref={resetRef}
+          type="button"
+          className={cx('hero-reset-btn', undoFrom > 0 && 'hero-reset-btn--undo')}
+          aria-label={undoFrom > 0 ? copy.undoLabel(undoFrom) : copy.resetLabel(title)}
+          onClick={onReset}
+        >
+          {undoFrom > 0 ? <span aria-hidden="true">{copy.undo}</span> : <ResetIcon />}
+        </button>
+      )}
       <button
+        ref={bakedRef}
         type="button"
         className={cx('hero-baked-btn', baked > 0 && 'hero-baked-btn--done')}
         aria-label={copy.bakedLabel(title, baked)}

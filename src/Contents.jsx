@@ -11,6 +11,7 @@ import { contentsText, filterRecipes } from './contents-find.js';
 import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { FavMark } from './RecipeFav.jsx';
+import { SyncEntry } from './auth/SyncEntry.jsx';
 import { recipeHash } from './share.js';
 import './cover-contents.css';
 
@@ -93,6 +94,7 @@ export function ContentsLeft({ lang }) {
         <h1 className="contents-title">{t.contents}</h1>
         <p className="contents-count">{copy.recipeCount(recipes.length)}</p>
         <ServiceBell lang={lang} />
+        <SyncEntry lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -218,6 +220,7 @@ export function ContentsList({ lang, withTitle = false }) {
             </button>
           </div>
         )}
+        {withTitle && <SyncEntry lang={lang} className="sync-entry--list" />}
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

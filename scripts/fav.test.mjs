@@ -36,11 +36,14 @@ test('favorites and baked counts persist per recipe, survive reload, and ignore 
   assert.equal(incrementBaked('fudge-brownies', storage), 2);
   assert.equal(incrementBaked('lotus-cheesecake', storage), 1);
 
-  const saved = JSON.parse(storage.getItem(FAV_KEY));
+  const { favAt, ...saved } = JSON.parse(storage.getItem(FAV_KEY));
   assert.deepEqual(saved, {
     favs: ['fudge-brownies'],
     baked: { 'fudge-brownies': 2, 'lotus-cheesecake': 1 },
   });
+  // Toggles are time-stamped for cloud merging; plain counting is not.
+  assert.deepEqual(Object.keys(favAt), ['fudge-brownies']);
+  assert.ok(favAt['fudge-brownies'] > 0);
 
   reloadFav(storage);
   assert.equal(isFavorite('fudge-brownies'), true);

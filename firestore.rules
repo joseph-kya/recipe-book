@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Joseph's Recipe Book: one small doc per signed-in user holding their
+// favorites and "baked it" counts (written by src/auth/sync.js).
+// Paste into Firebase console > Firestore Database > Rules > Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{uid} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+
+      // Shape check keeps the doc small and stops it being used as free storage.
+      function validDoc() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['v', 'favorites', 'favAt', 'baked', 'resetAt', 'updatedAt'])
+          && d.favorites is list && d.favorites.size() <= 500
+          && d.favAt is map && d.favAt.size() <= 500
+          && d.baked is map && d.baked.size() <= 500
+          && d.resetAt is map && d.resetAt.size() <= 500
+          && d.updatedAt is int;
+      }
+
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner() && validDoc();
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,17 +1,29 @@
-// Per-recipe favorites and "baked it" tap counter persisted in localStorage.
+// Per-recipe favorites and "baked it" tap counter persisted in localStorage,
+// kept separately for each profile ("who's baking?") on this device.
 // Pure JS (no React import) so unit tests and Contents sorting can share it cleanly.
 // localStorage is the source of truth; optional cloud sync (src/auth/) merges
-// through getFavState()/applyFavState(). Two tiny timestamp maps make that
-// merge respect intent: favAt = when a heart was last toggled (on or off),
-// resetAt = when a count last went *down* (reset, undo, hold-to-undo).
+// through getBookState()/applyBookState(). Two tiny timestamp maps per profile
+// make that merge respect intent: favAt = when a heart was last toggled (on or
+// off), resetAt = when a count last went *down* (reset, undo, hold-to-undo).
+//
+// Stored under BOOK_KEY:
+//   { v: 2, profiles: [{ id, name, color, n, at, favs, favAt, baked, resetAt }], gone: {id: ms} }
+// n = created at (sort order), at = last rename, gone = deleted profile ids.
+// The active profile is per device (ACTIVE_KEY) and never synced.
 
-export const FAV_KEY = 'recipe-book:fav:v1';
+export const FAV_KEY = 'recipe-book:fav:v1'; // pre-profiles store: read once, then migrated
+export const BOOK_KEY = 'recipe-book:fav:v2';
+export const ACTIVE_KEY = 'recipe-book:profile';
+export const MAIN_ID = 'main'; // the migrated default profile (same id on every device)
+export const MAX_PROFILES = 6;
+const AUTH_KEY = 'recipe-book:auth:v1'; // = PROFILE_KEY in auth/config.js (cached Google profile)
 const MAX_BAKED = 999;
+const ID_RE = /^[a-z0-9]{1,16}$/;
 
-const favorites = new Set();
-const bakedCounts = new Map();
-const favAt = new Map();
-const resetAt = new Map();
+let book = [];
+let gone = new Map();
+let cur = null;
+let view = null;
 const listeners = new Set();
 let lastStamp = 0;
 
@@ -29,6 +41,8 @@ function defaultStorage() {
   }
 }
 
+const isObj = (v) => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+
 function validSlug(slug) {
   return typeof slug === 'string' && slug.trim().length > 0;
 }
@@ -42,63 +56,127 @@ function validStamp(value) {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
+// Trimmed, single-spaced, at most 24 characters (emoji-safe).
+export function cleanName(name) {
+  return typeof name === 'string' ? Array.from(name.replace(/\s+/g, ' ').trim()).slice(0, 24).join('').trim() : '';
+}
+
 function readStamps(source, into) {
-  if (!source || typeof source !== 'object' || Array.isArray(source)) return;
-  for (const [slug, at] of Object.entries(source)) {
+  if (!isObj(source)) return;
+  for (const [key, at] of Object.entries(source)) {
     const t = validStamp(at);
-    if (validSlug(slug) && t) into.set(slug, t);
+    if (validSlug(key) && t) {
+      into.set(key, t);
+      lastStamp = Math.max(lastStamp, t);
+    }
   }
 }
 
-function clearAll() {
-  favorites.clear();
-  bakedCounts.clear();
-  favAt.clear();
-  resetAt.clear();
+// One profile from (possibly legacy, hostile or cloud-merged) plain data.
+function makeProfile(src, id = src?.id) {
+  const s = isObj(src) ? src : {};
+  const p = {
+    id,
+    name: cleanName(s.name),
+    color: Math.min(5, clampCount(s.color)),
+    n: validStamp(s.n),
+    at: validStamp(s.at),
+    favorites: new Set(),
+    bakedCounts: new Map(),
+    favAt: new Map(),
+    resetAt: new Map(),
+  };
+  if (Array.isArray(s.favs)) for (const slug of s.favs) if (validSlug(slug)) p.favorites.add(slug);
+  if (isObj(s.baked)) {
+    for (const [slug, count] of Object.entries(s.baked)) {
+      const n = clampCount(count);
+      if (validSlug(slug) && n > 0) p.bakedCounts.set(slug, n);
+    }
+  }
+  readStamps(s.favAt, p.favAt);
+  readStamps(s.resetAt, p.resetAt);
+  lastStamp = Math.max(lastStamp, p.n, p.at);
+  return p;
 }
 
-export function reloadFav(storage = defaultStorage()) {
-  clearAll();
+const plain = (p) => ({
+  favs: [...p.favorites],
+  favAt: Object.fromEntries(p.favAt),
+  baked: Object.fromEntries(p.bakedCounts),
+  resetAt: Object.fromEntries(p.resetAt),
+});
+
+const full = (p) => ({ id: p.id, name: p.name, color: p.color, n: p.n, at: p.at, ...plain(p) });
+
+const newId = () => stamp().toString(36) + Math.random().toString(36).slice(2, 6);
+
+// Replace every profile; keeps the active one when it still exists.
+function setBook(list, goneSrc, activeId = cur?.id) {
+  gone = new Map();
+  readStamps(goneSrc, gone);
+  const seen = new Set();
+  book = [];
+  for (const src of Array.isArray(list) ? list : []) {
+    const id = src?.id;
+    if (typeof id !== 'string' || !ID_RE.test(id) || seen.has(id) || gone.has(id)) continue;
+    seen.add(id);
+    book.push(makeProfile(src));
+  }
+  book.sort((a, b) => a.n - b.n || (a.id < b.id ? -1 : 1));
+  // Never zero profiles (e.g. two devices each deleted "the other" one).
+  if (!book.length) book.push(makeProfile({ n: stamp() }, gone.has(MAIN_ID) ? newId() : MAIN_ID));
+  cur = book.find((p) => p.id === activeId) || book[0];
+  view = null;
+}
+
+function read(storage, key) {
   try {
-    const raw = storage?.getItem(FAV_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return;
-
-    if (Array.isArray(parsed.favs)) {
-      for (const slug of parsed.favs) {
-        if (validSlug(slug)) favorites.add(slug);
-      }
-    }
-
-    if (parsed.baked && typeof parsed.baked === 'object' && !Array.isArray(parsed.baked)) {
-      for (const [slug, count] of Object.entries(parsed.baked)) {
-        if (!validSlug(slug)) continue;
-        const n = clampCount(count);
-        if (n > 0) bakedCounts.set(slug, n);
-      }
-    }
-    readStamps(parsed.favAt, favAt);
-    readStamps(parsed.resetAt, resetAt);
-    for (const t of [...favAt.values(), ...resetAt.values()]) lastStamp = Math.max(lastStamp, t);
+    return storage?.getItem(key) ?? null;
   } catch {
-    /* storage blocked or malformed: start clean in memory */
+    return null;
+  }
+}
+
+function parse(raw) {
+  try {
+    const v = raw ? JSON.parse(raw) : null;
+    return isObj(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+// Google first name from the cached sign-in (email name as a fallback).
+const firstName = (name) => cleanName(typeof name === 'string' ? name.split(/[\s@]/)[0] : '');
+
+export function reloadFav(storage = defaultStorage()) {
+  const saved = parse(read(storage, BOOK_KEY));
+  const activeId = read(storage, ACTIVE_KEY);
+  if (saved && Array.isArray(saved.profiles)) {
+    setBook(saved.profiles, saved.gone, activeId);
+    return;
+  }
+  // First visit since profiles: everything so far becomes the default profile.
+  const legacy = parse(read(storage, FAV_KEY)) || {};
+  const name = firstName(parse(read(storage, AUTH_KEY))?.name);
+  setBook([{ ...legacy, id: MAIN_ID, name, at: name ? 1 : 0 }], null, activeId);
+  if (persistFav(storage) && read(storage, BOOK_KEY)) {
+    try {
+      storage.removeItem?.(FAV_KEY);
+    } catch {
+      /* ignore: the new store already holds everything */
+    }
   }
 }
 
 function persistFav(storage = defaultStorage()) {
   try {
-    if (!storage) return;
-    const baked = {};
-    for (const [slug, n] of bakedCounts) {
-      if (n > 0) baked[slug] = n;
-    }
-    const data = { favs: [...favorites], baked };
-    if (favAt.size) data.favAt = Object.fromEntries(favAt);
-    if (resetAt.size) data.resetAt = Object.fromEntries(resetAt);
-    storage.setItem(FAV_KEY, JSON.stringify(data));
+    if (!storage) return false;
+    storage.setItem(BOOK_KEY, JSON.stringify({ v: 2, ...getBookState() }));
+    return true;
   } catch {
     /* storage blocked: state still works for this visit */
+    return false;
   }
 }
 
@@ -112,19 +190,19 @@ export function subscribeFav(fn) {
 }
 
 export function isFavorite(slug) {
-  return validSlug(slug) && favorites.has(slug);
+  return validSlug(slug) && cur.favorites.has(slug);
 }
 
 export function getBakedCount(slug) {
-  return validSlug(slug) ? bakedCounts.get(slug) || 0 : 0;
+  return validSlug(slug) ? cur.bakedCounts.get(slug) || 0 : 0;
 }
 
 export function toggleFavorite(slug, storage = defaultStorage()) {
   if (!validSlug(slug)) return false;
-  const next = !favorites.has(slug);
-  if (next) favorites.add(slug);
-  else favorites.delete(slug);
-  favAt.set(slug, stamp());
+  const next = !cur.favorites.has(slug);
+  if (next) cur.favorites.add(slug);
+  else cur.favorites.delete(slug);
+  cur.favAt.set(slug, stamp());
   persistFav(storage);
   notify(slug);
   return next;
@@ -132,8 +210,8 @@ export function toggleFavorite(slug, storage = defaultStorage()) {
 
 export function incrementBaked(slug, storage = defaultStorage()) {
   if (!validSlug(slug)) return 0;
-  const next = Math.min(MAX_BAKED, (bakedCounts.get(slug) || 0) + 1);
-  bakedCounts.set(slug, next);
+  const next = Math.min(MAX_BAKED, (cur.bakedCounts.get(slug) || 0) + 1);
+  cur.bakedCounts.set(slug, next);
   persistFav(storage);
   notify(slug);
   return next;
@@ -141,9 +219,9 @@ export function incrementBaked(slug, storage = defaultStorage()) {
 
 export function decrementBaked(slug, storage = defaultStorage()) {
   if (!validSlug(slug)) return 0;
-  const cur = bakedCounts.get(slug) || 0;
-  if (cur <= 0) return 0;
-  return setBakedCount(slug, cur - 1, storage);
+  const n = cur.bakedCounts.get(slug) || 0;
+  if (n <= 0) return 0;
+  return setBakedCount(slug, n - 1, storage);
 }
 
 // Set a count directly (reset to 0, or undo a reset). Any explicit set counts
@@ -151,9 +229,9 @@ export function decrementBaked(slug, storage = defaultStorage()) {
 export function setBakedCount(slug, count, storage = defaultStorage()) {
   if (!validSlug(slug)) return 0;
   const next = clampCount(count);
-  if (next > 0) bakedCounts.set(slug, next);
-  else bakedCounts.delete(slug);
-  resetAt.set(slug, stamp());
+  if (next > 0) cur.bakedCounts.set(slug, next);
+  else cur.bakedCounts.delete(slug);
+  cur.resetAt.set(slug, stamp());
   persistFav(storage);
   notify(slug);
   return next;
@@ -166,32 +244,99 @@ export function resetBaked(slug, storage = defaultStorage()) {
   return prev;
 }
 
-// Plain snapshot for cloud sync / merging (see src/auth/merge.js).
-export function getFavState() {
-  return {
-    favs: [...favorites],
-    favAt: Object.fromEntries(favAt),
-    baked: Object.fromEntries(bakedCounts),
-    resetAt: Object.fromEntries(resetAt),
-  };
+// Plain snapshot of the active profile.
+export const getFavState = () => plain(cur);
+
+// ---------- profiles ----------
+
+// Stable snapshot for useSyncExternalStore: { profiles: [{id, name, color}], active }.
+export function getProfileView() {
+  return (view ||= { profiles: book.map(({ id, name, color }) => ({ id, name, color })), active: cur.id });
 }
 
-// Replace everything with a (merged) state, persist, and refresh all views.
-export function applyFavState(state, storage = defaultStorage()) {
-  clearAll();
-  const src = state && typeof state === 'object' ? state : {};
-  if (Array.isArray(src.favs)) {
-    for (const slug of src.favs) if (validSlug(slug)) favorites.add(slug);
+function changed(storage) {
+  view = null;
+  persistFav(storage);
+  notify(null);
+}
+
+export function switchProfile(id, storage = defaultStorage()) {
+  const p = book.find((q) => q.id === id);
+  if (!p) return false;
+  try {
+    storage?.setItem(ACTIVE_KEY, id);
+  } catch {
+    /* per-visit only */
   }
-  if (src.baked && typeof src.baked === 'object') {
-    for (const [slug, count] of Object.entries(src.baked)) {
-      const n = clampCount(count);
-      if (validSlug(slug) && n > 0) bakedCounts.set(slug, n);
-    }
+  if (p !== cur) {
+    cur = p;
+    view = null;
+    notify(null);
   }
-  readStamps(src.favAt, favAt);
-  readStamps(src.resetAt, resetAt);
-  for (const t of [...favAt.values(), ...resetAt.values()]) lastStamp = Math.max(lastStamp, t);
+  return true;
+}
+
+// New profile (switched to straight away); returns its id, or '' when the
+// name is empty or the book is full.
+export function addProfile(name, storage = defaultStorage()) {
+  const clean = cleanName(name);
+  if (!clean || book.length >= MAX_PROFILES) return '';
+  const used = new Set(book.map((p) => p.color));
+  const color = [0, 1, 2, 3, 4, 5].find((c) => !used.has(c)) ?? book.length % 6;
+  const t = stamp();
+  const p = makeProfile({ name: clean, color, n: t, at: t }, newId());
+  book.push(p);
+  changed(storage);
+  switchProfile(p.id, storage);
+  return p.id;
+}
+
+export function renameProfile(id, name, storage = defaultStorage()) {
+  const p = book.find((q) => q.id === id);
+  const clean = cleanName(name);
+  if (!p || !clean) return false;
+  if (clean !== p.name) {
+    p.name = clean;
+    p.at = stamp();
+    changed(storage);
+  }
+  return true;
+}
+
+// Deletes a profile with its hearts and counts (never the last one). The
+// tombstone in `gone` keeps other synced devices from bringing it back.
+export function deleteProfile(id, storage = defaultStorage()) {
+  const i = book.findIndex((p) => p.id === id);
+  if (i < 0 || book.length < 2) return false;
+  const [p] = book.splice(i, 1);
+  gone.set(id, stamp());
+  if (p === cur) switchProfile(book[0].id, storage);
+  changed(storage);
+  return true;
+}
+
+// After Google sign-in: an unnamed default profile takes the first name. The
+// tiny stamp means any deliberate rename (on any device) still wins.
+export function nameMainProfile(name, storage = defaultStorage()) {
+  const p = book.find((q) => q.id === MAIN_ID);
+  const clean = firstName(name);
+  if (p && !p.name && !p.at && clean) {
+    p.name = clean;
+    p.at = 1;
+    changed(storage);
+  }
+}
+
+// ---------- cloud sync (see src/auth/merge.js) ----------
+
+export function getBookState() {
+  return { profiles: book.map(full), gone: Object.fromEntries(gone) };
+}
+
+// Replace everything with a (merged) book, persist, and refresh all views.
+export function applyBookState(state, storage = defaultStorage()) {
+  const s = isObj(state) ? state : {};
+  setBook(s.profiles, s.gone);
   persistFav(storage);
   notify(null);
 }
@@ -203,7 +348,7 @@ export function sortFavoritesFirst(entries) {
   const rest = [];
   for (const entry of entries) {
     const slug = entry?.recipe?.slug ?? entry?.slug;
-    if (slug && favorites.has(slug)) favs.push(entry);
+    if (slug && cur.favorites.has(slug)) favs.push(entry);
     else rest.push(entry);
   }
   return favs.length ? [...favs, ...rest] : entries;

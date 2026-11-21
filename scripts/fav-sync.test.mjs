@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
+  BOOK_KEY,
   FAV_KEY,
-  applyFavState,
+  applyBookState,
   decrementBaked,
   getBakedCount,
   getFavState,
@@ -15,7 +16,7 @@ import {
   subscribeFav,
   toggleFavorite,
 } from '../src/fav.js';
-import { fromCloudDoc, mergeFavStates, normalizeFavState, sameFavState, toCloudDoc } from '../src/auth/merge.js';
+import { fromCloudDoc, mergeFavStates, normalizeFavState, sameBook, sameFavState, toCloudDoc } from '../src/auth/merge.js';
 import { favText, syncText } from '../src/fav-i18n.js';
 
 function makeStorage(initial = {}) {
@@ -53,7 +54,7 @@ test('resetBaked clears one recipe, returns the old count for undo, and survives
 
     reloadFav(storage);
     assert.equal(getBakedCount('fudge-brownies'), 0);
-    const saved = JSON.parse(storage.getItem(FAV_KEY));
+    const saved = JSON.parse(storage.getItem(BOOK_KEY)).profiles[0];
     assert.equal(saved.baked['fudge-brownies'], undefined);
     assert.ok(saved.resetAt['fudge-brownies'] > 0, 'reset is time-stamped so sync respects it');
     assert.equal(saved.resetAt.topfenschmarren, undefined);
@@ -90,6 +91,7 @@ test('legacy v1 storage without timestamps still loads, and stamps are strictly 
   assert.ok(b > a, 'two edits in the same millisecond still order');
 
   // Bad stamps are dropped on load.
+  storage.map.clear();
   storage.setItem(
     FAV_KEY,
     JSON.stringify({ favs: [], baked: {}, favAt: { x: 'nope', y: -1, z: 5 }, resetAt: [1, 2] }),
@@ -99,7 +101,7 @@ test('legacy v1 storage without timestamps still loads, and stamps are strictly 
   reloadFav(makeStorage());
 });
 
-test('applyFavState replaces local state, persists it, and refreshes every view', () => {
+test('applyBookState replaces local state, persists it, and refreshes every view', () => {
   const storage = makeStorage();
   reloadFav(storage);
   toggleFavorite('fudge-brownies', storage);
@@ -107,8 +109,12 @@ test('applyFavState replaces local state, persists it, and refreshes every view'
   const events = [];
   const off = subscribeFav((slug) => events.push(slug));
   try {
-    applyFavState(
-      state({ favs: ['lotus-cheesecake', ''], favAt: { 'lotus-cheesecake': 10 }, baked: { 'lotus-cheesecake': 4, bad: -1 } }),
+    applyBookState(
+      {
+        profiles: [
+          { id: 'main', ...state({ favs: ['lotus-cheesecake', ''], favAt: { 'lotus-cheesecake': 10 }, baked: { 'lotus-cheesecake': 4, bad: -1 } }) },
+        ],
+      },
       storage,
     );
     assert.deepEqual(events, [null], 'null = every subscriber re-renders');
@@ -191,21 +197,23 @@ test('cloud doc round-trips, carries updatedAt, and hostile data is sanitized', 
     baked: { a: 2 },
     resetAt: { a: 9 },
   });
-  const docData = toCloudDoc(s, 1234);
+  const book = { profiles: [{ id: 'main', name: 'Jo', color: 0, n: 0, at: 1, ...s }], gone: {} };
+  const docData = toCloudDoc(book, 1234);
   assert.deepEqual(docData, {
-    v: 1,
-    favorites: ['a', 'b'],
-    favAt: { a: 5 },
-    baked: { a: 2 },
-    resetAt: { a: 9 },
+    v: 2,
+    profiles: {
+      p0: { id: 'main', name: 'Jo', color: 0, n: 0, at: 1, favorites: ['a', 'b'], favAt: { a: 5 }, baked: { a: 2 }, resetAt: { a: 9 } },
+    },
+    gone: {},
     updatedAt: 1234,
   });
-  assert.ok(sameFavState(fromCloudDoc(docData), s));
-  assert.deepEqual(fromCloudDoc(undefined), state());
-  assert.deepEqual(
-    fromCloudDoc({ favorites: 'x', baked: { a: 1e9, b: 'x', '': 3 }, favAt: { a: Infinity }, resetAt: null }),
-    state({ baked: { a: 999 } }),
-  );
+  assert.ok(sameBook(fromCloudDoc(docData), book));
+  assert.deepEqual(fromCloudDoc(undefined), { profiles: [], gone: {} });
+  const hostile = fromCloudDoc({
+    profiles: { p0: { id: 'main', favorites: 'x', baked: { a: 1e9, b: 'x', '': 3 }, favAt: { a: Infinity }, resetAt: null } },
+  });
+  assert.deepEqual(hostile.profiles[0].baked, { a: 999 });
+  assert.deepEqual(hostile.profiles[0].favs, []);
 });
 
 // ---------- copy & wiring contracts ----------

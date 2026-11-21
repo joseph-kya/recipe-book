@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
+  BOOK_KEY,
   FAV_KEY,
   decrementBaked,
   getBakedCount,
@@ -36,8 +37,8 @@ test('favorites and baked counts persist per recipe, survive reload, and ignore 
   assert.equal(incrementBaked('fudge-brownies', storage), 2);
   assert.equal(incrementBaked('lotus-cheesecake', storage), 1);
 
-  const { favAt, ...saved } = JSON.parse(storage.getItem(FAV_KEY));
-  assert.deepEqual(saved, {
+  const { favAt, favs, baked } = JSON.parse(storage.getItem(BOOK_KEY)).profiles[0];
+  assert.deepEqual({ favs, baked }, {
     favs: ['fudge-brownies'],
     baked: { 'fudge-brownies': 2, 'lotus-cheesecake': 1 },
   });
@@ -56,11 +57,14 @@ test('favorites and baked counts persist per recipe, survive reload, and ignore 
   assert.equal(decrementBaked('fudge-brownies', storage), 0);
   assert.equal(toggleFavorite('fudge-brownies', storage), false);
 
+  // Corrupt or hostile pre-profiles data migrates into a clean default profile.
+  storage.map.clear();
   storage.setItem(FAV_KEY, '{not-json');
   reloadFav(storage);
   assert.equal(isFavorite('fudge-brownies'), false);
   assert.equal(getBakedCount('lotus-cheesecake'), 0);
 
+  storage.map.clear();
   storage.setItem(
     FAV_KEY,
     JSON.stringify({

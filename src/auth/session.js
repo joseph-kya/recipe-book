@@ -1,7 +1,7 @@
 // Tiny always-loaded sign-in state. Firebase itself lives in ./sync.js and is
 // only fetched when someone taps "sign in" (or presses/focuses it first), or
 // in the background after page load when this device already has a session.
-import { applyFavState, getFavState, subscribeFav } from '../fav.js';
+import { applyBookState, getBookState, nameMainProfile, subscribeFav } from '../fav.js';
 import { PROFILE_KEY, REDIRECT_KEY, authEnabled, firebaseConfig } from './config.js';
 
 const listeners = new Set();
@@ -47,6 +47,7 @@ export function subscribeSession(fn) {
 const handlers = {
   onUser(profile) {
     store(PROFILE_KEY, profile ? JSON.stringify(profile) : null);
+    if (profile) nameMainProfile(profile.name);
     set(profile ? { status: 'in', profile, note: '' } : { status: 'out', profile: null, sync: '' });
   },
   onSync: (sync) => set({ sync }),
@@ -55,7 +56,7 @@ const handlers = {
 
 export function loadSync() {
   loading ||= import('./sync.js').then((m) => {
-    m.start(firebaseConfig, handlers, { applyFavState, getFavState, subscribeFav, redirectKey: REDIRECT_KEY });
+    m.start(firebaseConfig, handlers, { applyBookState, getBookState, subscribeFav, redirectKey: REDIRECT_KEY });
     return (mod = m);
   });
   loading.catch(() => (loading = null)); // offline on first try: allow a retry

@@ -66,6 +66,13 @@ These rules let each signed-in user read and write only their own
 `users/{uid}` document, check its shape and size, and deny access to
 everything else.
 
+> **Profiles update: republish the rules.** The "who's baking?" profiles
+> changed the doc shape (up to six profiles in one `users/{uid}` doc). Paste
+> the current [`firestore.rules`](firestore.rules) and click **Publish** again
+> *before* deploying that build, or every sync fails with "Not synced". The
+> new rules still accept docs written by the previous version, so nothing
+> needs migrating by hand.
+
 ## 6. Put the config into the build
 
 ### Local builds (`npm run build`, `npm run deploy`)
@@ -114,6 +121,14 @@ a phone it sits at the end of the recipe list.
   combine (union) and baked counts take the higher number. Deliberate changes
   win when they are newer: removing a heart, resetting a count, undo, and
   hold-to-undo are timestamped, so they don't get "re-added" by another device.
+- **Profiles ("who's baking?"):** each profile has its own hearts and baked
+  counts, and the merge above runs per profile. Everything the book stored
+  before profiles moves into a default profile (named after your Google first
+  name, or "Me"). Renames sync (newest wins) and deleted profiles stay deleted
+  on every device. Which profile is active is remembered per device and never
+  synced. Up to six profiles fit in the cloud doc. An app version from before
+  profiles can't overwrite a doc that has profiles (the rules refuse it), so
+  that version shows "Not synced" until its service worker updates.
 - **Sign out** only stops syncing. This device keeps its favorites and counts.
 - **iOS Safari:** sign-in uses a popup. If the browser blocks it, the book
   falls back to a full-page redirect. Safari's tracking prevention can break

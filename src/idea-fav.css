@@ -61,7 +61,8 @@
 .hero-reset-btn:focus-visible,
 .hero-baked-btn:focus-visible,
 .hero-fav-btn:focus-visible,
-.sync-btn:focus-visible {
+.sync-btn:focus-visible,
+.who-input:focus-visible {
   outline: 3px solid var(--choc);
   outline-offset: -3px;
   box-shadow: none;
@@ -304,6 +305,121 @@
 }
 
 .sync-status {
+  font-weight: 600;
+}
+
+/* ---------- Contents: quiet "who's baking?" profile switcher ----------
+   Reuses .sync-btn for every button (44px pill, hover tint, press, focus).
+   Chips are flat theme-token fills; the active profile is a soft tint. */
+
+.who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.who-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 var(--sp-1);
+  margin: 0;
+}
+
+.who--list {
+  align-items: flex-start;
+  margin: calc(var(--sp-2) * -1) 0 var(--sp-2) -0.625rem;
+}
+
+.who--list .who-row {
+  justify-content: flex-start;
+}
+
+.who-ask {
+  font-weight: 600;
+}
+
+.who-name {
+  color: var(--choc);
+}
+
+.who-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--cherry);
+  color: var(--cream);
+  font-family: var(--badge);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.who-chip--1 {
+  background: var(--mustard);
+  color: var(--choc);
+}
+
+.who-chip--2 {
+  background: var(--mint);
+  color: var(--choc);
+}
+
+.who-chip--3 {
+  background: var(--choc);
+  color: var(--cream);
+}
+
+.who-chip--4 {
+  background: var(--frosting);
+  color: #fff4df;
+}
+
+.who-chip--5 {
+  background: var(--pink);
+  color: var(--choc);
+}
+
+.who-pick[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--choc);
+}
+
+.who-act {
+  font-weight: 600;
+}
+
+.who-act--go {
+  color: var(--cherry-ink);
+}
+
+.who-input {
+  width: 9.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--choc);
+  font: inherit;
+  font-size: 1rem; /* 16px: no iOS zoom-on-focus */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.who-confirm {
+  flex: 1 0 100%;
+  max-width: 17rem;
+  margin: 0;
+  padding: var(--sp-1) 0.625rem;
   font-weight: 600;
 }
 

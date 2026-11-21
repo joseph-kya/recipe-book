@@ -40,10 +40,12 @@ export function spinCupcake(el, stateRef) {
       stopped = true;
       cancelAnimationFrame(state.raf);
       el.style.transform = '';
+      el.style.willChange = '';
       if (stateRef?.current === state) stateRef.current = null;
     },
   };
   if (stateRef) stateRef.current = state;
+  el.style.willChange = 'transform';
 
   const paint = () => {
     const sx = (1 - qx).toFixed(4);
@@ -53,8 +55,8 @@ export function spinCupcake(el, stateRef) {
 
   const frame = (now) => {
     if (stopped) return;
-    let dt = Math.min((now - last) / 1000, 1 / 20);
-    last = now;
+    let dt = now > last ? Math.min((now - last) / 1000, 1 / 20) : 0;
+    if (now > last) last = now;
     while (dt > 0) {
       const h = Math.min(STEP, dt);
       const ra = -CUPCAKE_SPIN_SPRING.k * (rx - target) - CUPCAKE_SPIN_SPRING.c * rv;
@@ -77,6 +79,7 @@ export function spinCupcake(el, stateRef) {
       Math.abs(qv) < 0.02
     ) {
       el.style.transform = '';
+      el.style.willChange = '';
       if (stateRef?.current === state) stateRef.current = null;
       return;
     }
@@ -410,8 +413,8 @@ export function enterPage(root, kind) {
     root.removeEventListener('pointerdown', finish, true);
     root.removeEventListener('focusin', finish, true);
   };
-  root.addEventListener('pointerdown', finish, true);
-  root.addEventListener('focusin', finish, true);
+  root.addEventListener('pointerdown', finish, { capture: true, passive: true });
+  root.addEventListener('focusin', finish, { capture: true, passive: true });
   Promise.allSettled(animations.map((animation) => animation.finished)).then(finish);
   return finish;
 }
@@ -572,10 +575,13 @@ export function transition(update) {
     commit();
     return;
   }
+  const rootEl = document.documentElement;
+  rootEl?.classList.add('is-vt');
   const record = { commit, view: null };
   try {
     record.view = document.startViewTransition(commit);
   } catch {
+    rootEl?.classList.remove('is-vt');
     commit();
     return;
   }
@@ -583,7 +589,10 @@ export function transition(update) {
   // ready rejects when capture is skipped (including rapid repeated toggles).
   record.view.ready.catch(() => {});
   record.view.finished.catch(() => {}).finally(() => {
-    if (activeTransition === record) activeTransition = undefined;
+    if (activeTransition === record) {
+      activeTransition = undefined;
+      rootEl?.classList.remove('is-vt');
+    }
   });
   return record.view;
 }

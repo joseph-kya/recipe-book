@@ -77,5 +77,6 @@
 }
 
 .macros-note {
+  margin-top: var(--sp-1);
   font-style: italic;
 }

@@ -21,7 +21,6 @@ export default function Macros({ recipe, lang }) {
         <p className="macros-basis">
           <span className="macros-serving">{basis}</span>
           {nutrition.servings > 1 && nutrition.total?.kcal != null && <> · {t.macroTotal} {number.format(nutrition.total.kcal)} kcal</>}
-          {' · '}<span className="macros-note">{t.macroNote}</span>
         </p>
       </div>
       <dl className="macros-strip">
@@ -32,6 +31,7 @@ export default function Macros({ recipe, lang }) {
           </div>
         ))}
       </dl>
+      <p className="macros-note">{t.macroNote}</p>
     </section>
   );
 }

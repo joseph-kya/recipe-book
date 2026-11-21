@@ -101,14 +101,7 @@ const RecipeGlance = memo(function RecipeGlance({ recipe, lang }) {
       )}
       <div className="recipe-glance-cell">
         <dt className="recipe-glance-label">{rt.effort}</dt>
-        <dd className="recipe-glance-value">
-          <span>{diffLabel}</span>
-          <span className="effort-dots" aria-hidden="true">
-            {[1, 2, 3].map((dot) => (
-              <span key={dot} className={cx('effort-dot', dot <= difficulty.level && 'effort-dot--on')} />
-            ))}
-          </span>
-        </dd>
+        <dd className="recipe-glance-value">{diffLabel}</dd>
       </div>
     </dl>
   );

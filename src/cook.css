@@ -149,8 +149,11 @@
 
 .cook-progress {
   white-space: nowrap;
-  padding: 3px 0.65rem;
-  font-size: var(--fs-xs);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--choc-soft);
+  font-size: var(--fs-s);
 }
 
 /* Flat crisp close button: 44px+ target, no ring shadow on focus */
@@ -317,10 +320,10 @@
   width: 100%;
   max-width: 44rem;
   min-height: 44px;
-  padding: 0.55rem 0.9rem;
-  border: 2.5px solid var(--choc);
+  padding: 0.5rem 0.85rem;
+  border: 0;
   border-radius: var(--r-m, var(--r-s));
-  background: var(--paper);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--choc);
   text-align: left;
   cursor: pointer;
@@ -330,6 +333,7 @@
 }
 
 .cook-upnext:active {
+  background: color-mix(in srgb, var(--ink) 11%, transparent);
   transform: scale(0.98);
 }
 
@@ -356,11 +360,7 @@
 
 .cook-upnext-time {
   flex: none;
-  padding: 2px 0.5rem;
-  border: 2px solid var(--choc);
-  border-radius: var(--r-pill);
-  background: var(--cream);
-  color: var(--choc);
+  color: var(--choc-soft);
   font-family: var(--badge);
   font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
@@ -368,7 +368,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .cook-upnext:hover {
-    background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+    background: color-mix(in srgb, var(--ink) 9%, transparent);
   }
   .cook-dock-btn:hover {
     background: color-mix(in srgb, var(--ink) 8%, var(--mustard));

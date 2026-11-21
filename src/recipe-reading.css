@@ -90,47 +90,32 @@
   transform: scale(1);
 }
 
-/* ---------- At-a-glance recipe stub (total time + effort) ---------- */
+/* ---------- At-a-glance recipe summary (quiet inline total time + effort) ---------- */
 
 .recipe-glance {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--sp-4);
   margin: 0;
-  border: 2px solid var(--choc);
-  border-radius: var(--r-s);
-  background: var(--cream);
   color: var(--choc);
-}
-
-.recipe-glance--single {
-  grid-template-columns: minmax(0, 1fr);
 }
 
 .recipe-glance-cell {
   min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 2px var(--sp-2);
-  padding: 0.375rem var(--sp-3);
-}
-
-.recipe-glance-cell + .recipe-glance-cell {
-  border-left: 1.5px dashed color-mix(in srgb, var(--ink) 55%, transparent);
+  gap: 0.35rem;
 }
 
 .recipe-glance-label {
   font-size: var(--fs-xs);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.25;
   color: var(--choc-soft);
 }
 
 .recipe-glance-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
   margin: 0;
   font-family: var(--badge);
   font-size: var(--fs-s);
@@ -138,24 +123,6 @@
   line-height: 1.25;
   color: var(--choc);
   font-variant-numeric: tabular-nums;
-}
-
-.effort-dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.effort-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: 1.5px solid var(--choc);
-  background: transparent;
-}
-
-.effort-dot--on {
-  background: var(--choc);
 }
 
 /* ---------- Ingredients: crisp, instant-feedback rows ---------- */
@@ -197,12 +164,13 @@
 
 .ticket .equipment {
   margin: var(--sp-2) 0 var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
-  border-left: 3px solid var(--choc);
-  background: color-mix(in srgb, var(--ground) 65%, var(--paper));
-  border-radius: 0 var(--r-s) var(--r-s) 0;
   font-size: var(--fs-s);
   line-height: 1.45;
+  color: var(--choc-soft);
+}
+
+.ticket .equipment b {
+  color: var(--choc);
 }
 
 .ticket .step {
@@ -321,8 +289,6 @@
 
 .ticket .step-body .cue {
   margin-top: var(--sp-2);
-  padding-left: var(--sp-2);
-  border-left: 2.5px solid color-mix(in srgb, var(--cue) 55%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -341,10 +307,6 @@
   margin-bottom: var(--sp-2);
 }
 
-.book--wide .recipe-glance-cell {
-  padding: 0.25rem var(--sp-2);
-}
-
 .book--wide .recipe-glance-value {
   font-size: var(--fs-xs);
 }
@@ -357,7 +319,6 @@
 
 .book--wide .ticket .equipment {
   margin: var(--sp-1) 0 var(--sp-2);
-  padding: 0.3rem var(--sp-2);
   font-size: var(--fs-xs);
 }
 
@@ -375,9 +336,6 @@
     gap: 0.25rem;
     margin-bottom: var(--sp-1);
   }
-  .book--wide .recipe-glance-cell {
-    padding: 0.2rem var(--sp-2);
-  }
   .book--wide .menu .ing-btn {
     padding: 3px 0.25rem;
   }
@@ -387,16 +345,6 @@
   }
   .book--wide .ticket .step-body .cue {
     margin-top: var(--sp-1);
-  }
-}
-
-/* Narrow phones (<= 390px): keep the glance stub crisp with no awkward wrapping. */
-@media (max-width: 420px) {
-  .recipe-glance-cell {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-    padding: 0.375rem var(--sp-2);
   }
 }
 

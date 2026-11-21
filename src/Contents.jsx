@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { recipes } from './content.js';
 import { ui } from './i18n.js';
 import { Bell, Checkers, CloseIcon } from './ornaments.jsx';
@@ -24,7 +24,7 @@ function SearchIcon({ className }) {
 }
 
 // A service bell by the contents heading: tap to ding, hold to keep ringing.
-function ServiceBell({ lang }) {
+const ServiceBell = memo(function ServiceBell({ lang }) {
   const copy = themeText[lang] || themeText.en;
   const [ring, setRing] = useState(''); // '' | 'ding' | 'held'
   const [announced, setAnnounced] = useState('');
@@ -80,10 +80,57 @@ function ServiceBell({ lang }) {
       </span>
     </>
   );
-}
+});
+
+const ContentsRow = memo(function ContentsRow({
+  recipe,
+  title,
+  textLang,
+  matchCue,
+  doneCount,
+  totalSteps,
+  fav,
+  recipeNoLabel,
+  favoriteBadge,
+}) {
+  return (
+    <li>
+      <a href={recipeHash(recipe)} className="toc-link">
+        <span className="toc-no" aria-hidden="true">
+          {recipe.no}
+        </span>
+        <span className="toc-text">
+          <span className="sr-only">
+            {recipeNoLabel} {recipe.no}:{' '}
+          </span>
+          <span className="toc-title" lang={textLang}>
+            {title}
+          </span>
+          {fav && (
+            <span className="sr-only">
+              {', '}
+              {favoriteBadge}
+            </span>
+          )}
+          {matchCue && (
+            <span className="toc-match" lang={textLang}>
+              {matchCue}
+            </span>
+          )}
+        </span>
+        {(doneCount > 0 || fav) && (
+          <span className="toc-trail">
+            <StepProgress className="toc-progress" doneCount={doneCount} totalSteps={totalSteps} />
+            {fav && <FavMark />}
+          </span>
+        )}
+      </a>
+    </li>
+  );
+});
 
 // Wide: clean editorial title page for the contents spread.
-export function ContentsLeft({ lang }) {
+export const ContentsLeft = memo(function ContentsLeft({ lang }) {
   const t = ui[lang];
   const copy = contentsText[lang] || contentsText.en;
   return (
@@ -97,9 +144,9 @@ export function ContentsLeft({ lang }) {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});
 
-export function ContentsList({ lang, withTitle = false }) {
+export const ContentsList = memo(function ContentsList({ lang, withTitle = false }) {
   const t = ui[lang];
   const copy = contentsText[lang] || contentsText.en;
   const favCopy = favCopyFor(lang);
@@ -118,20 +165,23 @@ export function ContentsList({ lang, withTitle = false }) {
   );
   const trimmed = query.trim();
 
-  const clearQuery = () => {
+  const clearQuery = useCallback(() => {
     setQuery('');
     inputRef.current?.focus();
-  };
+  }, []);
 
-  const onSearchKeyDown = (e) => {
-    if (e.key === 'Escape' && query) {
-      e.preventDefault();
-      setQuery('');
-    } else if (e.key === 'Enter' && matches.length > 0) {
-      e.preventDefault();
-      listRef.current?.querySelector('.toc-link')?.click();
-    }
-  };
+  const onSearchKeyDown = useCallback(
+    (e) => {
+      if (e.key === 'Escape' && query) {
+        e.preventDefault();
+        setQuery('');
+      } else if (e.key === 'Enter' && matches.length > 0) {
+        e.preventDefault();
+        listRef.current?.querySelector('.toc-link')?.click();
+      }
+    },
+    [query, matches.length],
+  );
 
   return (
     <div className="page-body contents">
@@ -170,45 +220,20 @@ export function ContentsList({ lang, withTitle = false }) {
         </p>
         {matches.length > 0 ? (
           <ol ref={listRef} className="toc" aria-label={withTitle ? undefined : t.contents}>
-            {matches.map(({ recipe: r, text, textLang, matchCue }) => {
-              const totalSteps = text.steps.length;
-              const doneCount = getDoneStepCount(r.slug);
-              const fav = isFavorite(r.slug);
-              return (
-                <li key={r.slug}>
-                  <a href={recipeHash(r)} className="toc-link">
-                    <span className="toc-no" aria-hidden="true">
-                      {r.no}
-                    </span>
-                    <span className="toc-text">
-                      <span className="sr-only">
-                        {t.recipeNo} {r.no}:{' '}
-                      </span>
-                      <span className="toc-title" lang={textLang}>
-                        {text.title}
-                      </span>
-                      {fav && (
-                        <span className="sr-only">
-                          {', '}
-                          {favCopy.favoriteBadge}
-                        </span>
-                      )}
-                      {matchCue && (
-                        <span className="toc-match" lang={textLang}>
-                          {matchCue}
-                        </span>
-                      )}
-                    </span>
-                    {(doneCount > 0 || fav) && (
-                      <span className="toc-trail">
-                        <StepProgress className="toc-progress" doneCount={doneCount} totalSteps={totalSteps} />
-                        {fav && <FavMark />}
-                      </span>
-                    )}
-                  </a>
-                </li>
-              );
-            })}
+            {matches.map(({ recipe: r, text, textLang, matchCue }) => (
+              <ContentsRow
+                key={r.slug}
+                recipe={r}
+                title={text.title}
+                textLang={textLang}
+                matchCue={matchCue}
+                doneCount={getDoneStepCount(r.slug)}
+                totalSteps={text.steps.length}
+                fav={isFavorite(r.slug)}
+                recipeNoLabel={t.recipeNo}
+                favoriteBadge={favCopy.favoriteBadge}
+              />
+            ))}
           </ol>
         ) : (
           <div className="toc-empty">
@@ -222,4 +247,4 @@ export function ContentsList({ lang, withTitle = false }) {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});

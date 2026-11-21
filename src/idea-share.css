@@ -152,12 +152,17 @@
   .book,
   .face,
   .face-scroll,
-  .page-body {
+  .page-body,
+  .ticket,
+  .step,
+  .macros {
     position: static !important;
     width: auto !important;
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
+    contain: none !important;
+    content-visibility: visible !important;
     transform: none !important;
     background: #fff !important;
     color: #111 !important;

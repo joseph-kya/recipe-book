@@ -144,7 +144,6 @@ body {
   color: var(--choc);
   font: 400 1rem/1.55 var(--body);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   overflow: hidden;
 }
 
@@ -196,6 +195,7 @@ button {
 .stage {
   position: fixed;
   inset: 0;
+  contain: layout style;
 }
 
 .book {
@@ -207,6 +207,7 @@ button {
   cursor: grabbing;
   user-select: none;
   -webkit-user-select: none;
+  will-change: transform;
 }
 
 .face {
@@ -244,6 +245,7 @@ button {
   overflow-y: auto;
   overflow-anchor: none;
   overscroll-behavior: contain;
+  contain: layout paint style;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--ink) 35%, transparent) transparent;
 }
@@ -253,6 +255,21 @@ button {
   inset: 0;
   pointer-events: none;
   opacity: 0;
+  contain: strict;
+}
+
+/* At rest the shade is always 0: skip painting or layering it altogether.
+   While a leaf turns, promote only the shade so opacity updates stay on the
+   compositor without repainting or re-layerizing the underlying recipe page. */
+.face--rest > .shade {
+  display: none;
+}
+
+.face--front > .shade,
+.face--back > .shade,
+.face--under-l > .shade,
+.face--under-r > .shade {
+  will-change: opacity;
 }
 
 .face--R .shade {
@@ -279,6 +296,25 @@ button {
   left: 0;
   width: 100%;
   transform-origin: left center;
+  contain: layout paint style;
+}
+
+/* Skip layout/paint for below-the-fold recipe sections while swiping onto a
+   phone page; only sections without outer shadows or tilt are skipped so no
+   rotated edge or shadow can ever clip. */
+.book--narrow:not(.measure) .recipe .ticket {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+
+.book--narrow:not(.measure) .recipe .step + .step {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 130px;
+}
+
+.book--narrow:not(.measure) .recipe .macros {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
 }
 
 /* Give the turning sheet a crisp paper edge over the page below. */
@@ -286,10 +322,14 @@ button {
   border-right: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
-/* Wide: an open book on a diner-tile table. */
+/* Wide: an open book on a diner-tile table (hardware-accelerated linear gradients
+   instead of CPU-rasterized repeating-conic-gradient). */
 .stage--wide {
   background-color: var(--table);
-  background-image: repeating-conic-gradient(var(--table-tile) 0 25%, var(--table) 0 50%);
+  background-image:
+    linear-gradient(45deg, var(--table-tile) 25%, transparent 25%, transparent 75%, var(--table-tile) 75%),
+    linear-gradient(45deg, var(--table-tile) 25%, transparent 25%, transparent 75%, var(--table-tile) 75%);
+  background-position: 0 0, 32px 32px;
   background-size: 64px 64px;
 }
 
@@ -316,14 +356,24 @@ button {
 
 .book--wide .face {
   width: 50%;
+  contain: paint;
 }
 
+/* Spine vignette painted as a cheap linear-gradient instead of a 26px blurred
+   inset box-shadow on every 3D-rotated book face. The 0px-blur page-edge rules
+   stay as-is for the dark Ink colourway. */
 .book--wide .face--L {
   left: 0;
   transform-origin: right center;
   border-radius: var(--r-m) 0 0 var(--r-m);
+  background-image: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--shadow) 22%, transparent) 0,
+    color-mix(in srgb, var(--shadow) 11%, transparent) 6px,
+    color-mix(in srgb, var(--shadow) 4%, transparent) 14px,
+    transparent 24px
+  );
   box-shadow:
-    inset -22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent),
     inset 1px 1px 0 var(--page-edge, transparent),
     inset 0 -1px 0 var(--page-edge, transparent);
 }
@@ -332,8 +382,14 @@ button {
   left: 50%;
   transform-origin: left center;
   border-radius: 0 var(--r-m) var(--r-m) 0;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--shadow) 22%, transparent) 0,
+    color-mix(in srgb, var(--shadow) 11%, transparent) 6px,
+    color-mix(in srgb, var(--shadow) 4%, transparent) 14px,
+    transparent 24px
+  );
   box-shadow:
-    inset 22px 0 26px -18px color-mix(in srgb, var(--shadow) 35%, transparent),
     inset -1px 1px 0 var(--page-edge, transparent),
     inset 0 -1px 0 var(--page-edge, transparent);
 }
@@ -364,6 +420,7 @@ button {
   visibility: hidden;
   pointer-events: none;
   transform: none;
+  contain: layout style;
 }
 
 /* Running head on a recipe's later pages, after the printed sheet's page two. */
@@ -431,9 +488,15 @@ button {
   padding: 2rem 2.25rem 3rem;
 }
 
+/* Exact 2-row 7px checkerboard using axis-aligned 1D linear gradients instead
+   of CPU-rasterized repeating-conic-gradient (identical pixels on every GPU). */
 .checkers {
   height: 14px;
-  background: repeating-conic-gradient(var(--c) 0 25%, var(--cream) 0 50%) 0 0 / 14px 14px;
+  --checker-alt: var(--cream);
+  background:
+    linear-gradient(90deg, var(--checker-alt) 0 7px, var(--c) 7px 14px) 0 0 / 14px 7px repeat-x,
+    linear-gradient(90deg, var(--c) 0 7px, var(--checker-alt) 7px 14px) 0 7px / 14px 7px repeat-x;
+  contain: layout paint style;
 }
 
 .checkers--choc {
@@ -539,7 +602,7 @@ button {
 
 .cover .checkers {
   --c: var(--cover-checker);
-  background: repeating-conic-gradient(var(--c) 0 25%, var(--cover-checker-alt) 0 50%) 0 0 / 14px 14px;
+  --checker-alt: var(--cover-checker-alt);
   flex: none;
 }
 
@@ -2260,6 +2323,7 @@ button {
   border: var(--rule) solid var(--choc);
   border-radius: var(--r-pill);
   box-shadow: 4px 4px 0 var(--shadow);
+  contain: layout style;
 }
 
 /* Reading down a recipe: the bar slides below the screen edge (its own height,
@@ -2482,6 +2546,7 @@ button {
   background: var(--cream);
   color: var(--choc);
   outline: none;
+  contain: layout paint style;
 }
 
 .cook-modal .checkers--top,
@@ -2584,6 +2649,7 @@ button {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--ink) 14%, transparent);
   overflow: hidden;
+  contain: layout paint;
 }
 
 .cook-bar-fill {

@@ -5,6 +5,7 @@
   margin-top: var(--sp-5);
   color: var(--choc);
   text-align: left;
+  contain: layout style;
 }
 
 .macros-title {

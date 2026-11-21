@@ -105,3 +105,11 @@ export const syncText = {
 export const syncCopyFor = (lang) => syncText[lang] || syncText.en;
 
 export const favCopyFor = (lang) => favText[lang] || favText.en;
+
+// Collapsed "who's baking?" switcher line (src/ProfileSwitch.jsx). The rest of
+// its copy only loads with the panel (src/profile-i18n.js).
+export const whoText = {
+  en: { ask: 'Who\u2019s baking?', me: 'Me' },
+  de: { ask: 'Wer backt?', me: 'Ich' },
+  fr: { ask: 'Qui cuisine\u00a0?', me: 'Moi' },
+};

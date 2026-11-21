@@ -2,7 +2,7 @@
 // favorites and baked counts to users/{uid}. Never imported statically.
 //
 // localStorage (src/fav.js) stays the source of truth. Each sync runs a small
-// transaction: read the cloud doc, merge it with this device (merge.js),
+// transaction: read the cloud doc, merge every profile with this device (merge.js),
 // write the result back if it changed, then apply it locally. Syncs run on
 // sign-in, ~1s after any local change, when the tab becomes visible again and
 // when the device comes back online. Firestore Lite (REST, no offline cache,
@@ -21,12 +21,12 @@ import {
   signOut as firebaseSignOut,
 } from 'firebase/auth';
 import { doc, getFirestore, runTransaction } from 'firebase/firestore/lite';
-import { fromCloudDoc, mergeFavStates, sameFavState, toCloudDoc } from './merge.js';
+import { cloudBook, fromCloudDoc, mergeBooks, sameBook, toCloudDoc } from './merge.js';
 
 // fav.js and the storage keys are handed in by session.js (instead of
 // imported) so this chunk shares no modules with the main bundle and Rollup
 // doesn't split a shared chunk out of the initial load.
-let applyFavState, getFavState, subscribeFav, REDIRECT_KEY;
+let applyBookState, getBookState, subscribeFav, REDIRECT_KEY;
 
 const CHANGE_DELAY_MS = 1000;
 const VISIBLE_RESYNC_MS = 20000;
@@ -83,23 +83,23 @@ async function syncNow() {
     const merged = await runTransaction(db, async (tx) => {
       const snap = await tx.get(ref);
       const remote = snap.exists() ? fromCloudDoc(snap.data()) : null;
-      const next = mergeFavStates(getFavState(), remote || {});
-      if (!remote || !sameFavState(next, remote)) tx.set(ref, toCloudDoc(next));
+      const next = mergeBooks(getBookState(), remote || {});
+      if (!remote || !sameBook(cloudBook(next), remote)) tx.set(ref, toCloudDoc(next));
       return next;
     });
     if (!user || user.uid !== uid) return;
     // Fold in anything tapped while the request was in flight.
-    const local = getFavState();
-    const next = mergeFavStates(local, merged);
-    if (!sameFavState(next, local)) {
+    const local = getBookState();
+    const next = mergeBooks(local, merged);
+    if (!sameBook(next, local)) {
       applying = true;
       try {
-        applyFavState(next);
+        applyBookState(next);
       } finally {
         applying = false;
       }
     }
-    if (!sameFavState(next, merged)) again = true;
+    if (!sameBook(next, merged)) again = true;
     lastSync = Date.now();
     handlers.onSync('synced');
   } catch (err) {
@@ -133,7 +133,7 @@ function attach() {
 
 export function start(config, h, deps) {
   handlers = h;
-  ({ applyFavState, getFavState, subscribeFav, redirectKey: REDIRECT_KEY } = deps);
+  ({ applyBookState, getBookState, subscribeFav, redirectKey: REDIRECT_KEY } = deps);
   const app = initializeApp(config);
   auth = initializeAuth(app, {
     persistence: [indexedDBLocalPersistence, browserLocalPersistence],

@@ -1,8 +1,8 @@
 rules_version = '2';
 
-// Joseph's Recipe Book: one small doc per signed-in user holding their
-// favorites and "baked it" counts (written by src/auth/sync.js).
-// Paste into Firebase console > Firestore Database > Rules > Publish.
+// Joseph's Recipe Book: one small doc per signed-in user holding each
+// profile's ("who's baking?") favorites and "baked it" counts (written by
+// src/auth/sync.js). Paste into Firebase console > Firestore Database > Rules > Publish.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -11,19 +11,55 @@ service cloud.firestore {
         return request.auth != null && request.auth.uid == uid;
       }
 
-      // Shape check keeps the doc small and stops it being used as free storage.
+      // Shape checks keep the doc small and stop it being used as free storage.
+      function smallData(p) {
+        return p.favorites is list && p.favorites.size() <= 500
+          && p.favAt is map && p.favAt.size() <= 500
+          && p.baked is map && p.baked.size() <= 500
+          && p.resetAt is map && p.resetAt.size() <= 500;
+      }
+
+      // Before profiles (v1): one person's data at the top level.
+      function legacyDoc(d) {
+        return d.keys().hasOnly(['v', 'favorites', 'favAt', 'baked', 'resetAt', 'updatedAt'])
+          && smallData(d);
+      }
+
+      function validProfile(p) {
+        return p is map
+          && p.keys().hasOnly(['id', 'name', 'color', 'n', 'at', 'favorites', 'favAt', 'baked', 'resetAt'])
+          && p.id is string && p.id.size() > 0 && p.id.size() <= 16
+          && p.name is string && p.name.size() <= 64
+          && p.color is int && p.n is int && p.at is int
+          && smallData(p);
+      }
+
+      function slot(ps, k) {
+        return !(k in ps) || validProfile(ps[k]);
+      }
+
+      // Profiles (v2): at most six fixed slots plus the ids of deleted profiles.
+      function profilesDoc(d) {
+        return d.keys().hasOnly(['v', 'profiles', 'gone', 'updatedAt'])
+          && d.profiles is map && d.profiles.size() <= 6
+          && d.profiles.keys().hasOnly(['p0', 'p1', 'p2', 'p3', 'p4', 'p5'])
+          && slot(d.profiles, 'p0') && slot(d.profiles, 'p1') && slot(d.profiles, 'p2')
+          && slot(d.profiles, 'p3') && slot(d.profiles, 'p4') && slot(d.profiles, 'p5')
+          && d.gone is map && d.gone.size() <= 50;
+      }
+
       function validDoc() {
         let d = request.resource.data;
-        return d.keys().hasOnly(['v', 'favorites', 'favAt', 'baked', 'resetAt', 'updatedAt'])
-          && d.favorites is list && d.favorites.size() <= 500
-          && d.favAt is map && d.favAt.size() <= 500
-          && d.baked is map && d.baked.size() <= 500
-          && d.resetAt is map && d.resetAt.size() <= 500
-          && d.updatedAt is int;
+        return d.updatedAt is int
+          && (('profiles' in d && profilesDoc(d)) || (!('profiles' in d) && legacyDoc(d)));
       }
 
       allow read, delete: if isOwner();
-      allow create, update: if isOwner() && validDoc();
+      allow create: if isOwner() && validDoc();
+      // Docs from before profiles stay valid and writable, but an older app
+      // version can't replace a profiles doc with the old shape and drop them.
+      allow update: if isOwner() && validDoc()
+        && (!('profiles' in resource.data) || 'profiles' in request.resource.data);
     }
 
     // Everything else is closed.

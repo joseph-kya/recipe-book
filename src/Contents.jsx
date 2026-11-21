@@ -12,6 +12,7 @@ import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { FavMark } from './RecipeFav.jsx';
 import { SyncEntry } from './auth/SyncEntry.jsx';
+import { ProfileSwitch } from './ProfileSwitch.jsx';
 import { recipeHash } from './share.js';
 import './cover-contents.css';
 
@@ -141,6 +142,7 @@ export const ContentsLeft = memo(function ContentsLeft({ lang }) {
         <h1 className="contents-title">{t.contents}</h1>
         <p className="contents-count">{copy.recipeCount(recipes.length)}</p>
         <ServiceBell lang={lang} />
+        <ProfileSwitch lang={lang} />
         <SyncEntry lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
@@ -195,6 +197,7 @@ export const ContentsList = memo(function ContentsList({ lang, withTitle = false
             <ServiceBell lang={lang} />
           </div>
         )}
+        {withTitle && <ProfileSwitch lang={lang} className="who--list" />}
         <div className="toc-find" role="search" aria-label={copy.findLabel}>
           <SearchIcon className="toc-find-icon" />
           <input

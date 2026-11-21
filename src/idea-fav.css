@@ -62,6 +62,11 @@
 .hero-baked-btn:focus-visible,
 .hero-fav-btn:focus-visible,
 .sync-btn:focus-visible,
+.who-trigger:focus-visible,
+.who-chip-btn:focus-visible,
+.who-add-btn:focus-visible,
+.who-pill-btn:focus-visible,
+.who-icon-btn:focus-visible,
 .who-input:focus-visible {
   outline: 3px solid var(--choc);
   outline-offset: -3px;
@@ -309,13 +314,15 @@
 }
 
 /* ---------- Contents: quiet "who's baking?" profile switcher ----------
-   Reuses .sync-btn for every button (44px pill, hover tint, press, focus).
-   Chips are flat theme-token fills; the active profile is a soft tint. */
+   One compact retro-diner element: closed shows handwritten cue + vivid diner
+   chip; open replaces it in place with profile chips (active marked by solid
+   fill) plus a "+" chip. Tap active chip again to rename or delete inline. */
 
 .who {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 100%;
   color: var(--ink-soft);
   font-family: var(--body);
   font-size: var(--fs-xs);
@@ -323,107 +330,365 @@
   line-height: 1.2;
 }
 
-.who-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0 var(--sp-1);
-  margin: 0;
-}
-
 .who--list {
   align-items: flex-start;
-  margin: calc(var(--sp-2) * -1) 0 var(--sp-2) -0.625rem;
+  margin: calc(var(--sp-2) * -1) 0 var(--sp-2);
 }
 
-.who--list .who-row {
-  justify-content: flex-start;
+/* Theme-aware flat diner palette per profile slot (all WCAG AA across 6 colourways) */
+.who-tone--0 {
+  --who-bg: var(--cherry);
+  --who-fg: var(--cream);
 }
 
-.who-ask {
-  font-weight: 600;
+.who-tone--1 {
+  --who-bg: var(--mustard);
+  --who-fg: var(--choc);
 }
 
-.who-name {
+.who-tone--2 {
+  --who-bg: var(--mint);
+  --who-fg: var(--choc);
+}
+
+.who-tone--3 {
+  --who-bg: var(--choc);
+  --who-fg: var(--cream);
+}
+
+.who-tone--4 {
+  --who-bg: var(--pink);
+  --who-fg: var(--choc);
+}
+
+.who-tone--5 {
+  --who-bg: var(--primary-deep);
+  --who-fg: var(--cream);
+}
+
+/* Closed single-line trigger: 44px touch target, no background wrapper */
+.who-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.who--list .who-trigger {
+  padding: 0 0.25rem 0 0;
+}
+
+.who-lead {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: var(--fs-s);
+  line-height: 1.1;
+  color: var(--cue);
+  white-space: nowrap;
+}
+
+/* Visual diner chip: concentric 22px monogram dot inside a 32px pill */
+.who-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  height: 2rem;
+  padding: 0 0.75rem 0 0.3125rem;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--who-bg) 16%, var(--paper));
   color: var(--choc);
+  white-space: nowrap;
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
 }
 
-.who-chip {
+.who-pill--active {
+  background: var(--who-bg);
+  color: var(--who-fg);
+}
+
+.who-dot {
   display: inline-grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.375rem;
+  height: 1.375rem;
   flex: none;
   border-radius: 50%;
-  background: var(--cherry);
-  color: var(--cream);
+  background: var(--who-bg);
+  color: var(--who-fg);
   font-family: var(--badge);
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1;
 }
 
-.who-chip--1 {
-  background: var(--mustard);
-  color: var(--choc);
+.who-pill--active .who-dot {
+  background: var(--who-fg);
+  color: var(--who-bg);
 }
 
-.who-chip--2 {
-  background: var(--mint);
-  color: var(--choc);
+.who-dot--solo {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: var(--fs-xs);
 }
 
-.who-chip--3 {
-  background: var(--choc);
+.who-name {
+  font-family: var(--body);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.who-edit-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
+  margin-left: 0.0625rem;
+  opacity: 0.82;
+}
+
+/* Open inline chip row & forms */
+.who-panel {
+  max-width: 100%;
+  transform-origin: center top;
+  animation: who-panel-in 180ms var(--ease-out) both;
+}
+
+.who--list .who-panel {
+  transform-origin: left center;
+}
+
+.who-row,
+.who-form,
+.who-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 0.4375rem;
+  margin: 0;
+}
+
+.who--list .who-row,
+.who--list .who-form,
+.who--list .who-confirm-actions {
+  justify-content: flex-start;
+}
+
+.who-chip-btn,
+.who-add-btn,
+.who-pill-btn,
+.who-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.who-add-btn,
+.who-icon-btn {
+  min-width: 2.75rem;
+}
+
+.who-chip-btn,
+.who-add-btn {
+  animation: who-chip-in 170ms var(--ease-out) calc(var(--who-i, 0) * 22ms) both;
+}
+
+.who-add-circle,
+.who-icon-circle {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 13%, var(--paper));
+  color: var(--primary-ink);
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.who-icon-btn .who-icon-circle {
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  color: var(--ink-soft);
+}
+
+.who-icon-btn--danger .who-icon-circle {
+  background: color-mix(in srgb, var(--primary) 13%, var(--paper));
+  color: var(--primary-ink);
+}
+
+.who-svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  display: block;
+}
+
+.who-btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.125rem;
+  padding: 0 0.875rem;
+  border-radius: var(--r-pill);
+  background: var(--primary);
   color: var(--cream);
+  font-family: var(--body);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    opacity 140ms var(--ease-out);
 }
 
-.who-chip--4 {
-  background: var(--frosting);
-  color: #fff4df;
-}
-
-.who-chip--5 {
-  background: var(--pink);
+.who-btn-pill--soft {
+  background: color-mix(in srgb, var(--accent) 22%, var(--paper));
   color: var(--choc);
 }
 
-.who-pick[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-  color: var(--choc);
+.who-pill-btn[aria-disabled='true'] {
+  cursor: default;
 }
 
-.who-act {
-  font-weight: 600;
-}
-
-.who-act--go {
-  color: var(--cherry-ink);
+.who-pill-btn[aria-disabled='true'] .who-btn-pill {
+  opacity: 0.45;
 }
 
 .who-input {
-  width: 9.5rem;
+  width: 8.75rem;
   min-height: 2.75rem;
   padding: 0 0.875rem;
   border: 0;
   border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--paper));
   color: var(--choc);
-  font: inherit;
+  font-family: var(--body);
+  font-weight: 700;
   font-size: 1rem; /* 16px: no iOS zoom-on-focus */
+  line-height: 1.2;
   -webkit-appearance: none;
   appearance: none;
 }
 
-.who-confirm {
-  flex: 1 0 100%;
-  max-width: 17rem;
-  margin: 0;
-  padding: var(--sp-1) 0.625rem;
+.who-input::placeholder {
+  color: var(--cue);
+  opacity: 1;
   font-weight: 600;
 }
 
+.who-confirm-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  max-width: 17.5rem;
+  text-align: center;
+}
+
+.who--list .who-confirm-box {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.who-confirm {
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* Instant tactile press feedback on inner chips */
+.who-trigger:active .who-pill,
+.who-chip-btn:active .who-pill,
+.who-add-btn:active .who-add-circle,
+.who-icon-btn:active .who-icon-circle,
+.who-pill-btn:not([aria-disabled='true']):active .who-btn-pill {
+  transform: scale(0.94);
+  transition-duration: 55ms;
+}
+
+/* Fine-pointer hover gated off touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .who-trigger:hover .who-pill,
+  .who-chip-btn:hover .who-pill {
+    transform: scale(1.03);
+  }
+  .who-chip-btn:hover .who-pill:not(.who-pill--active) {
+    background: color-mix(in srgb, var(--who-bg) 28%, var(--paper));
+  }
+  .who-add-btn:hover .who-add-circle,
+  .who-icon-btn--danger:hover .who-icon-circle {
+    background: color-mix(in srgb, var(--primary) 22%, var(--paper));
+    transform: scale(1.06);
+  }
+  .who-icon-btn:hover .who-icon-circle {
+    background: color-mix(in srgb, var(--ink) 14%, var(--paper));
+    color: var(--choc);
+    transform: scale(1.06);
+  }
+  .who-pill-btn:not([aria-disabled='true']):hover .who-btn-pill {
+    transform: scale(1.03);
+  }
+  .who-trigger:active .who-pill,
+  .who-chip-btn:active .who-pill,
+  .who-add-btn:active .who-add-circle,
+  .who-icon-btn:active .who-icon-circle,
+  .who-pill-btn:not([aria-disabled='true']):active .who-btn-pill {
+    transform: scale(0.94);
+    transition-duration: 55ms;
+  }
+}
+
 /* ---------- Keyframes (transform + opacity only) ---------- */
+
+@keyframes who-panel-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes who-chip-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 @keyframes fav-heart-pop {
   0% {
@@ -456,17 +721,29 @@
   .hero-fav-icon,
   .hero-reset-btn,
   .hero-reset-icon,
-  .sync-btn {
+  .sync-btn,
+  .who-pill,
+  .who-add-circle,
+  .who-icon-circle,
+  .who-btn-pill {
     transition: none;
   }
   .hero-baked-btn:active .hero-baked-pill,
   .hero-fav-btn:active .hero-fav-icon,
   .hero-reset-btn:active .hero-reset-icon,
-  .sync-btn:active {
+  .sync-btn:active,
+  .who-trigger:is(:hover, :active) .who-pill,
+  .who-chip-btn:is(:hover, :active) .who-pill,
+  .who-add-btn:is(:hover, :active) .who-add-circle,
+  .who-icon-btn:is(:hover, :active) .who-icon-circle,
+  .who-pill-btn:is(:hover, :active) .who-btn-pill {
     transform: none;
   }
   .hero-fav-icon--pop,
-  .hero-baked-num--bump {
+  .hero-baked-num--bump,
+  .who-panel,
+  .who-chip-btn,
+  .who-add-btn {
     animation: none;
   }
 }

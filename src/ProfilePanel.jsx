@@ -1,22 +1,53 @@
-// Lazily loaded body of the "who's baking?" switcher (src/ProfileSwitch.jsx):
-// pick a profile, add one, rename or delete the active one (with a confirm).
-import { useState } from 'react';
+// Lazily loaded open state of the "who's baking?" switcher (src/ProfileSwitch.jsx):
+// inline row of profile chips (tap active chip again to rename/delete) plus "+" to add.
+import { useEffect, useRef, useState } from 'react';
 import { MAX_PROFILES, addProfile, deleteProfile, renameProfile, switchProfile } from './fav.js';
 import { profileCopyFor } from './profile-i18n.js';
-import { Chip } from './ProfileSwitch.jsx';
+import { ProfilePill } from './ProfileSwitch.jsx';
 
-export default function ProfilePanel({ lang, me, profiles, cur, close }) {
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="who-svg">
+      <path d="M8 3.25v9.5M3.25 8h9.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseMark() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="who-svg">
+      <path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className="who-svg">
+      <path
+        d="M3.2 4.5h9.6M6.2 4.5V3.1a.9.9 0 0 1 .9-.9h1.8a.9.9 0 0 1 .9.9v1.4M4.8 4.5l.6 8.3a1 1 0 0 0 1 .9h3.2a1 1 0 0 0 1-.9l.6-8.3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function ProfilePanel({ lang, me, profiles, cur, close, focusActive }) {
   const copy = profileCopyFor(lang);
   const [mode, setMode] = useState(''); // '' | 'add' | 'rename' | 'delete'
   const [draft, setDraft] = useState('');
+  const activeRef = useRef(null);
   const nameOf = (p) => p.name || me;
   const curName = nameOf(cur);
+  const canDelete = profiles.length > 1;
 
-  const act = (label, onClick, extra) => (
-    <button type="button" className="sync-btn who-act" onClick={onClick} {...extra}>
-      {label}
-    </button>
-  );
+  useEffect(() => {
+    if (focusActive && mode === '') activeRef.current?.focus({ preventScroll: true });
+  }, [focusActive, mode]);
 
   const edit = (m) => {
     setDraft(m === 'rename' ? cur.name : '');
@@ -26,12 +57,19 @@ export default function ProfilePanel({ lang, me, profiles, cur, close }) {
   const submit = (e) => {
     e.preventDefault();
     const name = draft.trim();
+    if (!name) return;
     if (mode === 'add' ? addProfile(name) : renameProfile(cur.id, name)) close(copy.now(name));
   };
 
   if (mode === 'add' || mode === 'rename') {
+    const initial = (Array.from(draft.trim() || curName)[0] || '?').toUpperCase();
     return (
-      <form className="who-row" onSubmit={submit}>
+      <form className="who-form" onSubmit={submit}>
+        {mode === 'rename' && (
+          <span className={`who-dot who-dot--solo who-tone--${cur.color}`} aria-hidden="true">
+            {initial}
+          </span>
+        )}
         <input
           className="who-input"
           value={draft}
@@ -43,50 +81,99 @@ export default function ProfilePanel({ lang, me, profiles, cur, close }) {
           enterKeyHint="done"
           autoFocus
         />
-        <button type="submit" className="sync-btn who-act who-act--go" aria-disabled={!draft.trim() || undefined}>
-          {copy.save}
+        <button type="submit" className="who-pill-btn who-pill-btn--primary" aria-disabled={!draft.trim() || undefined}>
+          <span className="who-btn-pill">{copy.save}</span>
         </button>
-        {act(copy.cancel, () => close())}
+        {mode === 'rename' && canDelete && (
+          <button
+            type="button"
+            className="who-icon-btn who-icon-btn--danger"
+            aria-label={copy.remove}
+            title={copy.remove}
+            onClick={() => setMode('delete')}
+          >
+            <span className="who-icon-circle" aria-hidden="true">
+              <TrashIcon />
+            </span>
+          </button>
+        )}
+        <button
+          type="button"
+          className="who-icon-btn"
+          aria-label={copy.cancel}
+          title={copy.cancel}
+          onClick={() => close()}
+        >
+          <span className="who-icon-circle" aria-hidden="true">
+            <CloseMark />
+          </span>
+        </button>
       </form>
     );
   }
 
   if (mode === 'delete') {
     return (
-      <div className="who-row">
+      <div className="who-confirm-box">
         <p className="who-confirm">{copy.confirm(curName)}</p>
-        {act(copy.remove, () => deleteProfile(cur.id) && close(copy.removed(curName)), {
-          className: 'sync-btn who-act who-act--go',
-        })}
-        {act(copy.keep, () => close(), { autoFocus: true })}
+        <div className="who-confirm-actions">
+          <button
+            type="button"
+            className="who-pill-btn who-pill-btn--primary"
+            onClick={() => deleteProfile(cur.id) && close(copy.removed(curName))}
+          >
+            <span className="who-btn-pill">{copy.remove}</span>
+          </button>
+          <button type="button" className="who-pill-btn" autoFocus onClick={() => close()}>
+            <span className="who-btn-pill who-btn-pill--soft">{copy.keep}</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="who-row">
-        {profiles.map((p) => (
+    <div className="who-row">
+      {profiles.map((p, idx) => {
+        const name = nameOf(p);
+        const isActive = p.id === cur.id;
+        return (
           <button
             key={p.id}
+            ref={isActive ? activeRef : undefined}
             type="button"
-            className="sync-btn who-pick"
-            aria-pressed={p.id === cur.id}
+            className="who-chip-btn"
+            style={{ '--who-i': idx }}
+            aria-pressed={isActive}
+            aria-label={isActive ? copy.editChip(name, canDelete) : undefined}
+            title={isActive ? copy.editChip(name, canDelete) : undefined}
             onClick={() => {
-              switchProfile(p.id);
-              close(p.id === cur.id ? '' : copy.now(nameOf(p)));
+              if (isActive) {
+                edit('rename');
+              } else {
+                switchProfile(p.id);
+                close(copy.now(name));
+              }
             }}
           >
-            <Chip name={nameOf(p)} color={p.color} />
-            {nameOf(p)}
+            <ProfilePill name={name} color={p.color} active={isActive} editable={isActive} />
           </button>
-        ))}
-      </div>
-      <div className="who-row">
-        {profiles.length < MAX_PROFILES && act(copy.add, () => edit('add'))}
-        {act(copy.rename, () => edit('rename'))}
-        {profiles.length > 1 && act(copy.remove, () => setMode('delete'))}
-      </div>
-    </>
+        );
+      })}
+      {profiles.length < MAX_PROFILES && (
+        <button
+          type="button"
+          className="who-add-btn"
+          style={{ '--who-i': profiles.length }}
+          aria-label={copy.add}
+          title={copy.add}
+          onClick={() => edit('add')}
+        >
+          <span className="who-add-circle" aria-hidden="true">
+            <PlusIcon />
+          </span>
+        </button>
+      )}
+    </div>
   );
 }

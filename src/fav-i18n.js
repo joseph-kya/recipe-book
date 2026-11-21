@@ -109,7 +109,7 @@ export const favCopyFor = (lang) => favText[lang] || favText.en;
 // Collapsed "who's baking?" switcher line (src/ProfileSwitch.jsx). The rest of
 // its copy only loads with the panel (src/profile-i18n.js).
 export const whoText = {
-  en: { ask: 'Who\u2019s baking?', me: 'Me' },
-  de: { ask: 'Wer backt?', me: 'Ich' },
-  fr: { ask: 'Qui cuisine\u00a0?', me: 'Moi' },
+  en: { ask: 'Who\u2019s baking?', lead: 'baking as', me: 'Me' },
+  de: { ask: 'Wer backt?', lead: 'am Backen', me: 'Ich' },
+  fr: { ask: 'Qui cuisine\u00a0?', lead: 'en cuisine', me: 'Moi' },
 };

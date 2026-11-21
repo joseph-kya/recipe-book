@@ -1,10 +1,12 @@
-/* Capture only the reading surface. Controls stay live during a text swap. */
+/* Capture only the reading surface, and only while a view transition is live.
+   Leaving view-transition-name off at rest avoids permanent stacking/backdrop
+   isolation on weak GPUs during 3D page turns. */
 :root {
   view-transition-name: none;
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.book:not(.measure) {
+:root.is-vt .book:not(.measure) {
   view-transition-name: recipe-content;
 }
 
@@ -65,6 +67,68 @@
     opacity 150ms var(--ease-out);
 }
 
+/* Contain each face to its viewport box so 3D turns and shade opacity updates
+   never invalidate layout or paint outside the face. */
+.face {
+  contain: layout style paint;
+}
+
+/* Pre-mounted neighbour faces stay laid out in DOM for zero-jank swipe start,
+   but skip painting and compositing at rest. */
+.face--standby {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Promote GPU layers strictly while a turn or edge flex is actively moving. */
+.face--front,
+.face--back {
+  will-change: auto;
+}
+
+.book.is-turning .face--front,
+.book.is-turning .face--back {
+  will-change: transform;
+}
+
+.book.is-turning .face--front > .shade,
+.book.is-turning .face--back > .shade,
+.book.is-turning .face--under-r > .shade,
+.book.is-turning .face--under-l > .shade {
+  will-change: opacity;
+}
+
+.book.is-book-moving {
+  will-change: transform;
+}
+
+.book.is-dragging {
+  touch-action: none;
+}
+
+.book.is-turning .face {
+  pointer-events: none;
+}
+
+/* Keep the crisp 1px paper edge on narrow turns via a non-layout overlay
+   instead of border-right so activating .face--front never shrinks inner width
+   by 1px and triggers a full recipe reflow + ResizeObserver flush. */
+.book--narrow .face--front {
+  border-right: 0;
+}
+
+.book--narrow .face--front::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  pointer-events: none;
+}
+
 /* A static gradient paints once; only its opacity follows the moving leaf.
    Front (right page) has its spine on the left (90deg); back (left page) has its spine on the right (270deg). */
 .book--wide .face--front > .shade,
@@ -118,8 +182,8 @@
 }
 
 /* The control bar is its own layer during a text swap: it never ghosts. */
-.controls--narrow,
-.controls--wide .ctl-middle {
+:root.is-vt .controls--narrow,
+:root.is-vt .controls--wide .ctl-middle {
   view-transition-name: book-controls;
 }
 ::view-transition-group(book-controls),
@@ -150,7 +214,7 @@
 
 /* Keep the wide portion scaler on its own layer during a spread crossfade so
    the sliding pill never ghosts beneath the outgoing recipe snapshot. */
-.book--wide:not(.measure) .face--rest .scaler-row {
+:root.is-vt .book--wide:not(.measure) .face--rest .scaler-row {
   view-transition-name: recipe-scaler;
 }
 ::view-transition-group(recipe-scaler),
@@ -166,7 +230,7 @@
 
 /* Keep the cover cupcake on its own layer during a theme crossfade so it
    spins cleanly without ghosting against the outgoing cover snapshot. */
-.book:not(.measure) .face--rest .cover-cupcake-btn {
+:root.is-vt .book:not(.measure) .face--rest .cover-cupcake-btn {
   view-transition-name: cover-cupcake;
 }
 ::view-transition-group(cover-cupcake),

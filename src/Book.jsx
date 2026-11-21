@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { buildSpreads, firstIndexFor, hashForSpread, routeOfHash, spreadMatchesRoute } from './layout.js';
@@ -51,6 +51,47 @@ function anchorSelectorFor(el) {
   return null;
 }
 
+const MemoFaceContent = memo(function MemoFaceContent({ desc, lang, units, onStartCooking }) {
+  return renderFace(desc, lang, units, onStartCooking);
+});
+
+const MemoMeasureSource = memo(function MemoMeasureSource({ lang, units }) {
+  return (
+    <div className="measure-src" hidden>
+      {recipes.map((r) => (
+        <RecipeMeasure key={r.slug} recipe={r} lang={lang} units={units} />
+      ))}
+    </div>
+  );
+});
+
+const MemoPrintSheet = memo(function MemoPrintSheet({ recipe, lang, units }) {
+  return <PrintRecipe recipe={recipe} lang={lang} units={units} />;
+});
+
+const MemoControls = memo(Controls);
+
+function setFaceRole(rec, role, live, force = false) {
+  if (force || rec.role !== role) {
+    rec.el.className = `face face--${rec.side} face--${role}`;
+    rec.el.dataset.role = role;
+    rec.role = role;
+    if (role !== 'front' && role !== 'back' && rec.lastTransform !== '') {
+      rec.el.style.transform = '';
+      rec.lastTransform = '';
+    }
+    if ((role === 'rest' || role === 'standby' || role === 'fading') && rec.lastShade !== '0') {
+      rec.shade.style.opacity = '0';
+      rec.lastShade = '0';
+    }
+  }
+  if (force || rec.live !== live) {
+    rec.el.inert = !live;
+    rec.el.setAttribute('aria-hidden', live ? 'false' : 'true');
+    rec.live = live;
+  }
+}
+
 export default function Book({ lang, setLang, units, setUnits }) {
   const wide = useMedia(WIDE_QUERY);
   const reduce = useMedia(REDUCE_QUERY);
@@ -60,11 +101,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const spreads = useMemo(() => buildSpreads(wide, plans), [wide, plans]);
   const layoutKey = wide ? `w${planVersion}` : 'n';
   const [index, setIndex] = useState(() => firstIndexFor(spreads, routeOfHash(location.hash)));
-  const [turn, setTurn] = useState(null); // { lo, hi } while a leaf is moving
+  const [turn, setTurn] = useState(null); // { lo, hi } only when React needs to mount missing faces
+  const [warmed, setWarmed] = useState(null); // index whose neighbour faces are pre-mounted
   const [fade, setFade] = useState(null); // { from } during a reduced-motion crossfade
   const [announce, setAnnounce] = useState('');
   const [barAway, setBarAway] = useState(false); // phone: control bar tucked away while reading
   const [cookState, setCookState] = useState(null); // { recipe, initialStep } | null
+  const [printRecipe, setPrintRecipe] = useState(() => spreads[index]?.recipe || null);
   const bookRef = useRef(null);
   const measureRef = useRef(null);
   const faceEls = useRef(new Map());
@@ -79,15 +122,27 @@ export default function Book({ lang, setLang, units, setUnits }) {
   // The engine's live state. React state above only decides which faces exist.
   const s = useRef({
     index,
+    renderedIndex: index,
     turn: null,
+    reactTurn: false,
+    activeTurn: null,
+    isTurning: false,
+    isBookMoving: false,
+    lastBookTransform: '',
     p: 0,
     target: 0,
     anim: null,
+    dragRaf: 0,
+    scrollRaf: 0,
     pendingTarget: null,
     drag: null,
+    detachMove: null,
     didDrag: false,
     rb: 0,
     rbAnim: null,
+    pageWidth: 0,
+    viewportHeight: typeof innerHeight === 'number' ? innerHeight : 0,
+    barAway: false,
     spreads,
     key: layoutKey,
     plans: null,
@@ -101,40 +156,187 @@ export default function Book({ lang, setLang, units, setUnits }) {
   s.lang = lang;
   s.scales = scales;
   s.cookOpen = Boolean(cookState);
+  s.renderedIndex = index;
+  s.barAway = barAway;
   const last = () => s.spreads.length - 1;
 
-  /* ---------- painting: transform + opacity only, straight onto the faces ---------- */
+  /* ---------- geometry cache: zero layout reads during drag ---------- */
+
+  useLayoutEffect(() => {
+    const book = bookRef.current;
+    if (!book) return;
+    const updateGeometry = () => {
+      const w = book.clientWidth || innerWidth;
+      s.pageWidth = s.wide ? w / 2 : w;
+      s.viewportHeight = innerHeight;
+    };
+    updateGeometry();
+    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(updateGeometry) : null;
+    ro?.observe(book);
+    addEventListener('resize', updateGeometry, { passive: true });
+    return () => {
+      ro?.disconnect();
+      removeEventListener('resize', updateGeometry);
+    };
+  }, [wide, s]);
+
+  const pageWidth = useCallback(
+    () => s.pageWidth || (s.wide ? innerWidth / 2 : innerWidth),
+    [s],
+  );
+
+  /* ---------- face role & painting: transform + opacity only ---------- */
+
+  const syncFacesDOM = useCallback(
+    (force = false) => {
+      const book = bookRef.current;
+      const active = s.turn;
+      if (active) {
+        const activeTurn = { front: null, back: null, underL: null, underR: null };
+        for (const rec of faceEls.current.values()) {
+          if (rec.isFading) {
+            setFaceRole(rec, 'fading', false, force);
+          } else if (rec.idx === active.lo && rec.side === 'R') {
+            setFaceRole(rec, 'front', false, force);
+            activeTurn.front = rec;
+          } else if (rec.idx === active.hi && rec.side === 'R') {
+            setFaceRole(rec, 'under-r', false, force);
+            activeTurn.underR = rec;
+          } else if (s.wide && rec.idx === active.lo && rec.side === 'L') {
+            setFaceRole(rec, 'under-l', false, force);
+            activeTurn.underL = rec;
+          } else if (s.wide && rec.idx === active.hi && rec.side === 'L') {
+            setFaceRole(rec, 'back', false, force);
+            activeTurn.back = rec;
+          } else {
+            setFaceRole(rec, 'standby', false, force);
+          }
+        }
+        s.activeTurn = activeTurn;
+        if (book && !s.isTurning) {
+          book.classList.add('is-turning');
+          s.isTurning = true;
+        }
+      } else {
+        s.activeTurn = null;
+        if (book && s.isTurning) {
+          book.classList.remove('is-turning');
+          s.isTurning = false;
+        }
+        for (const rec of faceEls.current.values()) {
+          if (rec.isFading) {
+            setFaceRole(rec, 'fading', false, force);
+          } else if (rec.idx === s.index && (rec.side === 'R' || (s.wide && rec.side === 'L'))) {
+            setFaceRole(rec, 'rest', true, force);
+          } else {
+            setFaceRole(rec, 'standby', false, force);
+          }
+        }
+      }
+    },
+    [s],
+  );
+
+  const hasMountedFacesForTurn = useCallback(
+    (lo, hi) => {
+      const spLo = s.spreads[lo];
+      const spHi = s.spreads[hi];
+      if (!spLo || !spHi) return false;
+      const has = (idx, side) => {
+        if (!s.spreads[idx]?.[side]) return true;
+        for (const rec of faceEls.current.values()) {
+          if (!rec.isFading && rec.idx === idx && rec.side === side) return true;
+        }
+        return false;
+      };
+      if (!has(lo, 'R') || !has(hi, 'R')) return false;
+      if (s.wide && (!has(lo, 'L') || !has(hi, 'L'))) return false;
+      return true;
+    },
+    [s],
+  );
 
   const paint = useCallback(() => {
     const book = bookRef.current;
     if (!book) return;
+    const active = s.activeTurn;
     const p = clamp(s.p, 0, 1);
-    const maxDeg = s.wide ? 180 : NARROW_MAX_DEG;
-    for (const el of faceEls.current.values()) {
-      const role = el.dataset.role;
-      const shade = el.lastElementChild;
-      if (role === 'front') {
-        el.style.transform = `rotateY(${-maxDeg * p}deg)`;
-        shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
-      } else if (role === 'back') {
-        el.style.transform = `rotateY(${180 - 180 * p}deg)`;
-        shade.style.opacity = String(0.36 * Math.sin(Math.PI * p));
-      } else if (role === 'under-r') {
-        el.style.transform = '';
-        shade.style.opacity = String(0.4 * (1 - p));
-      } else if (role === 'under-l') {
-        el.style.transform = '';
-        shade.style.opacity = String(0.4 * p);
-      } else {
-        el.style.transform = '';
-        shade.style.opacity = '0';
+    if (active) {
+      const maxDeg = s.wide ? 180 : NARROW_MAX_DEG;
+      const leafShade = (0.36 * Math.sin(Math.PI * p)).toFixed(3);
+      if (active.front) {
+        const tf = `rotateY(${(-maxDeg * p).toFixed(2)}deg)`;
+        if (active.front.lastTransform !== tf) {
+          active.front.el.style.transform = tf;
+          active.front.lastTransform = tf;
+        }
+        if (active.front.lastShade !== leafShade) {
+          active.front.shade.style.opacity = leafShade;
+          active.front.lastShade = leafShade;
+        }
+      }
+      if (active.back) {
+        const tf = `rotateY(${(180 - 180 * p).toFixed(2)}deg)`;
+        if (active.back.lastTransform !== tf) {
+          active.back.el.style.transform = tf;
+          active.back.lastTransform = tf;
+        }
+        if (active.back.lastShade !== leafShade) {
+          active.back.shade.style.opacity = leafShade;
+          active.back.lastShade = leafShade;
+        }
+      }
+      if (active.underR) {
+        const op = (0.4 * (1 - p)).toFixed(3);
+        if (active.underR.lastShade !== op) {
+          active.underR.shade.style.opacity = op;
+          active.underR.lastShade = op;
+        }
+      }
+      if (active.underL) {
+        const op = (0.4 * p).toFixed(3);
+        if (active.underL.lastShade !== op) {
+          active.underL.shade.style.opacity = op;
+          active.underL.lastShade = op;
+        }
       }
     }
     // A closed book sits centred on its cover; it slides over as it opens.
     let shift = 0;
     if (s.wide) shift = s.turn ? (s.turn.lo === 0 ? 1 - p : 0) : s.index === 0 ? 1 : 0;
     const rbX = s.wide ? s.rb : s.rb * 0.7;
-    book.style.transform = `translateX(${-25 * shift}%) translateX(${rbX}px)`;
+    const bookMoving = Boolean((s.wide && s.turn && s.turn.lo === 0) || s.rb !== 0 || s.rbAnim || s.drag?.mode === 'edge');
+    if (s.isBookMoving !== bookMoving) {
+      book.classList.toggle('is-book-moving', bookMoving);
+      s.isBookMoving = bookMoving;
+    }
+    let bookTf = '';
+    if (shift !== 0 && rbX !== 0) {
+      bookTf = `translate3d(${(-25 * shift).toFixed(3)}%, 0, 0) translate3d(${rbX.toFixed(2)}px, 0, 0)`;
+    } else if (shift !== 0) {
+      bookTf = `translate3d(${(-25 * shift).toFixed(3)}%, 0, 0)`;
+    } else if (rbX !== 0) {
+      bookTf = `translate3d(${rbX.toFixed(2)}px, 0, 0)`;
+    }
+    if (s.lastBookTransform !== bookTf) {
+      book.style.transform = bookTf;
+      s.lastBookTransform = bookTf;
+    }
+  }, [s]);
+
+  const scheduleDragPaint = useCallback(() => {
+    if (s.dragRaf) return;
+    s.dragRaf = requestAnimationFrame(() => {
+      s.dragRaf = 0;
+      paint();
+    });
+  }, [s, paint]);
+
+  const cancelDragPaint = useCallback(() => {
+    if (s.dragRaf) {
+      cancelAnimationFrame(s.dragRaf);
+      s.dragRaf = 0;
+    }
   }, [s]);
 
   /* ---------- settling and the URL ---------- */
@@ -174,24 +376,35 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   const settle = useCallback(
     (k, { push = true } = {}) => {
+      cancelDragPaint();
       s.anim = null;
       s.turn = null;
       s.index = k;
       s.p = 0;
-      setTurn(null);
-      setIndex(k);
-      if (push) syncHash(k);
-      announceFor(k);
+      syncFacesDOM();
+      paint();
+      if (s.reactTurn) {
+        s.reactTurn = false;
+        setTurn(null);
+      }
+      if (k !== s.renderedIndex) {
+        setIndex(k);
+        if (push) syncHash(k);
+        announceFor(k);
+      }
     },
-    [s, syncHash, announceFor],
+    [s, cancelDragPaint, syncFacesDOM, paint, syncHash, announceFor],
   );
 
   const runSpring = useCallback(
     (target, velocity = 0) => {
+      cancelDragPaint();
       if (s.anim) s.anim.stop();
       s.pendingTarget = null;
       s.target = target;
-      setTurn((prev) => (prev && prev.target !== target ? { ...prev, target } : prev));
+      if (s.reactTurn) {
+        setTurn((prev) => (prev && prev.target !== target ? { ...prev, target } : prev));
+      }
       s.anim = animateSpring({
         from: s.p,
         to: target,
@@ -202,12 +415,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
           paint();
         },
         onDone: () => {
+          if (!s.turn) return;
           const { lo, hi } = s.turn;
           settle(target === 1 ? hi : lo);
         },
       });
     },
-    [s, paint, settle],
+    [s, cancelDragPaint, paint, settle],
   );
 
   const destination = () => (s.turn ? (s.target === 1 ? s.turn.hi : s.turn.lo) : s.index);
@@ -215,6 +429,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   /* ---------- navigation: every route into the book ends here ---------- */
 
   const finishNow = useCallback(() => {
+    cancelDragPaint();
     s.pendingTarget = null;
     if (!s.turn) return;
     if (s.anim) s.anim.stop();
@@ -222,7 +437,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
     s.index = s.target === 1 ? s.turn.hi : s.turn.lo;
     s.turn = null;
     s.p = 0;
-  }, [s]);
+  }, [s, cancelDragPaint]);
 
   const navigate = useCallback(
     (to, { instant = false, connected = false } = {}) => {
@@ -250,7 +465,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
         const from = s.index;
         if (t === from) return;
         s.index = t;
-        setTurn(null);
+        if (s.reactTurn) {
+          s.reactTurn = false;
+          setTurn(null);
+        }
         setFade({ from, key: Date.now() });
         setIndex(t);
         syncHash(t);
@@ -267,15 +485,26 @@ export default function Book({ lang, setLang, units, setUnits }) {
       // Anywhere else: land the current leaf instantly, then turn from there.
       finishNow();
       const k = s.index;
-      s.turn = { lo: Math.min(k, t), hi: Math.max(k, t) };
+      const lo = Math.min(k, t);
+      const hi = Math.max(k, t);
+      s.turn = { lo, hi };
       s.p = t > k ? 0 : 1;
       s.target = t > k ? 1 : 0;
+      if (hasMountedFacesForTurn(lo, hi)) {
+        // Fast path: neighbours are already pre-mounted, so turn immediately with zero React work.
+        s.pendingTarget = null;
+        syncFacesDOM();
+        paint();
+        runSpring(s.target, TURN_OMEGA * (s.target - s.p));
+        return;
+      }
       s.pendingTarget = s.target;
+      s.reactTurn = true;
       setFade(null);
       setIndex(k);
       setTurn({ ...s.turn, target: s.pendingTarget });
     },
-    [s, finishNow, runSpring, syncHash, announceFor, settle],
+    [s, finishNow, runSpring, syncHash, announceFor, settle, hasMountedFacesForTurn, syncFacesDOM, paint],
   );
 
   /* ---------- pagination (wide) ---------- */
@@ -285,12 +514,16 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const old = s.spreads;
       if (old === nextSpreads || s.key === nextKey) return;
       const oldIndex = destination();
+      cancelDragPaint();
       if (s.anim) s.anim.stop();
       s.anim = null;
       s.pendingTarget = null;
       s.drag = null;
+      s.detachMove?.();
       bookRef.current?.classList.remove('is-dragging');
       s.turn = null;
+      s.reactTurn = false;
+      s.activeTurn = null;
       s.p = 0;
       const was = old[oldIndex] || old[0];
       s.spreads = nextSpreads;
@@ -300,12 +533,13 @@ export default function Book({ lang, setLang, units, setUnits }) {
       const k = base + Math.min(was.offset || 0, count - 1);
       s.index = k;
       setTurn(null);
+      setWarmed(null);
       setFade(null);
       setIndex(k);
       if (history.state) history.replaceState({ k, key: nextKey }, '', location.hash || '#/');
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [s],
+    [s, cancelDragPaint],
   );
 
   const runPaginate = useCallback(() => {
@@ -345,7 +579,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
       clearTimeout(timer);
       timer = setTimeout(runPaginate, 120);
     };
-    addEventListener('resize', onResize);
+    addEventListener('resize', onResize, { passive: true });
     return () => {
       alive = false;
       clearTimeout(timer);
@@ -359,15 +593,45 @@ export default function Book({ lang, setLang, units, setUnits }) {
     applySpreads(spreads, layoutKey);
   }, [spreads, layoutKey, applySpreads]);
 
-  // Faces changed: repaint at the current progress, start any pending turn.
+  // Pre-mount immediate neighbour pages once the settled page has been calm
+  // briefly so swipes and turns start with zero DOM creation, zero layout, and
+  // zero React reconciliation — without competing with settle or entrance motion.
+  useEffect(() => {
+    if (reduce || turn || fade || (wide && !plans)) return;
+    if (warmed === index) return;
+    let timer = 0;
+    let idle = 0;
+    const commitWarm = () => {
+      if (s.turn || s.drag) {
+        timer = setTimeout(scheduleIdle, 120);
+        return;
+      }
+      setWarmed(index);
+    };
+    const scheduleIdle = () => {
+      if (typeof requestIdleCallback === 'function') {
+        idle = requestIdleCallback(commitWarm, { timeout: 220 });
+      } else {
+        commitWarm();
+      }
+    };
+    timer = setTimeout(scheduleIdle, 140);
+    return () => {
+      if (idle && typeof cancelIdleCallback === 'function') cancelIdleCallback(idle);
+      clearTimeout(timer);
+    };
+  }, [index, warmed, reduce, turn, fade, wide, plans, s]);
+
+  // Faces changed: sync roles with live engine state, repaint, start any pending turn.
   useLayoutEffect(() => {
+    syncFacesDOM(true);
     paint();
     if (s.pendingTarget !== null && s.turn) {
       const target = s.pendingTarget;
       s.pendingTarget = null;
       runSpring(target, TURN_OMEGA * (target - s.p));
     }
-  }, [turn, index, wide, fade, spreads, paint, runSpring, s]);
+  }, [turn, index, wide, fade, spreads, warmed, syncFacesDOM, paint, runSpring, s]);
 
   // A first entry belongs to the visit, not a language, layout or face mount.
   // Parent turns finish before the children enter; subsequent visits stay still.
@@ -415,12 +679,15 @@ export default function Book({ lang, setLang, units, setUnits }) {
       } else {
         scrollAnchorRef.current = null;
       }
-      setBarAway(false);
+      if (s.barAway) {
+        s.barAway = false;
+        setBarAway(false);
+      }
     } else {
       scrollAnchorRef.current = null;
     }
 
-    if (turn) return;
+    if (turn || s.turn) return;
     const restFaces = [...(bookRef.current?.querySelectorAll('.face--rest') || [])];
     swapContent(restFaces, kind, swapAnimRef);
   }, [lang, units, spreads, index, wide, turn, reduce, s]);
@@ -467,18 +734,16 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   /* ---------- the swipe: 1:1 while the finger is down, spring after ---------- */
 
-  const pageWidth = () => {
-    const w = bookRef.current?.getBoundingClientRect().width || innerWidth;
-    return s.wide ? w / 2 : w;
-  };
-
   // Progress from finger travel. The free edge of the page follows the finger.
-  const progressFor = (pStart, dx, W = pageWidth()) => {
-    const A = s.wide ? Math.PI : (NARROW_MAX_DEG * Math.PI) / 180;
-    const e0 = Math.cos(A * pStart);
-    const e = clamp(e0 + dx / W, Math.cos(A), 1);
-    return Math.acos(e) / A;
-  };
+  const progressFor = useCallback(
+    (pStart, dx, W = pageWidth()) => {
+      const A = s.wide ? Math.PI : (NARROW_MAX_DEG * Math.PI) / 180;
+      const e0 = Math.cos(A * pStart);
+      const e = clamp(e0 + dx / W, Math.cos(A), 1);
+      return Math.acos(e) / A;
+    },
+    [s, pageWidth],
+  );
 
   // The tab names the page you are on, in the current language.
   useEffect(() => {
@@ -494,186 +759,269 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
   // Every new page starts with the bar in view.
   useEffect(() => {
-    setBarAway(false);
-    s.scrollMark = 0;
+    if (s.barAway) {
+      s.barAway = false;
+      setBarAway(false);
+    }
+    const scroller = !s.wide ? bookRef.current?.querySelector('.face--rest .face-scroll') : null;
+    s.scrollMark = scroller ? scroller.scrollTop : 0;
   }, [index, s]);
 
-  const onFaceScroll = (e) => {
-    const el = e.currentTarget;
-    const y = el.scrollTop;
-    if (s.suppressScrollUntil && performance.now() < s.suppressScrollUntil) {
-      s.scrollMark = y;
-      return;
-    }
-    const atEnd = y + el.clientHeight >= el.scrollHeight - 24;
-    if (atEnd || y < 64) {
-      s.scrollMark = y;
-      setBarAway(false);
-      return;
-    }
-    // Only a deliberate move counts: small jitters accumulate until 8px.
-    const dy = y - (s.scrollMark || 0);
-    if (Math.abs(dy) < 8) return;
-    s.scrollMark = y;
-    setBarAway(dy > 0);
-  };
+  const onFaceScroll = useCallback(
+    (e) => {
+      if (s.turn || s.drag?.decided) return;
+      const el = e.currentTarget;
+      if (s.scrollRaf) return;
+      s.scrollRaf = requestAnimationFrame(() => {
+        s.scrollRaf = 0;
+        if (s.turn || s.drag?.decided) return;
+        const y = el.scrollTop;
+        if (s.suppressScrollUntil && performance.now() < s.suppressScrollUntil) {
+          s.scrollMark = y;
+          return;
+        }
+        const atEnd = y + el.clientHeight >= el.scrollHeight - 24;
+        if (atEnd || y < 64) {
+          s.scrollMark = y;
+          if (s.barAway) {
+            s.barAway = false;
+            setBarAway(false);
+          }
+          return;
+        }
+        // Only a deliberate move counts: small jitters accumulate until 8px.
+        const dy = y - (s.scrollMark || 0);
+        if (Math.abs(dy) < 8) return;
+        s.scrollMark = y;
+        const nextAway = dy > 0;
+        if (s.barAway !== nextAway) {
+          s.barAway = nextAway;
+          setBarAway(nextAway);
+        }
+      });
+    },
+    [s],
+  );
 
-  const onPointerDown = (e) => {
-    if (s.cookOpen) return;
-    // A tap near the bottom edge asks for the bar.
-    if (!s.wide && e.clientY > innerHeight - 96) setBarAway(false);
-    if (!e.isPrimary || e.button !== 0 || s.drag) return;
-    s.didDrag = false;
-    if (e.target.closest?.('button, input, select, textarea, [contenteditable]')) return;
-    s.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0,
-      width: pageWidth(), decided: false, samples: [{ x: e.clientX, t: performance.now() }] };
-  };
-
-  const returnEdge = (velocity = 0) => {
-    s.rbAnim?.stop();
-    s.rbAnim = animateSpring({
-      from: s.rb,
-      to: 0,
-      velocity,
-      spring: EDGE_SPRING,
-      restDelta: 0.15,
-      restSpeed: 2,
-      onUpdate: (x) => { s.rb = x; paint(); },
-      onDone: () => { s.rbAnim = null; },
-    });
-  };
-
-  const beginDrag = (dir) => {
-    const d = s.drag;
-    if (s.reduce) {
-      d.mode = 'fade';
-      d.dir = dir;
-      return;
-    }
-    let edgeVelocity = 0;
-    if (s.rbAnim) {
-      edgeVelocity = s.rbAnim.velocity;
-      s.rbAnim.stop();
-      s.rbAnim = null;
-    }
-    if (s.turn) {
-      // Grab the leaf mid-flight.
-      if (s.anim) s.anim.stop();
-      s.anim = null;
-      d.mode = 'turn';
-      d.pStart = s.p;
-      d.returnTarget = s.target;
-      return;
-    }
-    const k = s.index;
-    if ((dir < 0 && k < last()) || (dir > 0 && k > 0)) {
-      // A swipe into the book can catch an edge rebound too. Let its remaining
-      // offset settle continuously alongside the newly grabbed leaf.
-      if (s.rb) returnEdge(edgeVelocity);
-      s.turn = dir < 0 ? { lo: k, hi: k + 1 } : { lo: k - 1, hi: k };
-      s.p = dir < 0 ? 0 : 1;
-      s.target = s.p;
-      d.mode = 'turn';
-      d.pStart = s.p;
-      d.returnTarget = s.p;
-      setFade(null);
-      setTurn({ ...s.turn, target: s.target });
-    } else {
-      d.mode = 'edge';
-      d.rb0 = unRubberband(s.rb, d.width);
-    }
-  };
-
-  const onPointerMove = (e) => {
-    const d = s.drag;
-    if (!d || e.pointerId !== d.id) return;
-    const dxRaw = e.clientX - d.x0;
-    const dyRaw = e.clientY - d.y0;
-    d.dx = dxRaw;
-    d.dy = dyRaw;
-    if (!d.decided) {
-      // The first ~10px pick the axis; after that the other axis is ignored.
-      if (Math.abs(dxRaw) < 10 && Math.abs(dyRaw) < 10) return;
-      if (Math.abs(dyRaw) >= Math.abs(dxRaw)) {
-        s.drag = null; // vertical: let the page scroll
-        return;
-      }
-      d.decided = true;
-      d.x0 = e.clientX; // start tracking from here, no jump
-      s.didDrag = true;
-      bookRef.current.setPointerCapture(e.pointerId);
-      bookRef.current.classList.add('is-dragging');
-      beginDrag(Math.sign(dxRaw));
-    }
-    const now = performance.now();
-    d.samples.push({ x: e.clientX, t: now });
-    while (d.samples.length > 2 && now - d.samples[0].t > 100) d.samples.shift();
-    const dx = e.clientX - d.x0;
-    if (d.mode === 'turn') {
-      s.p = progressFor(d.pStart, dx, d.width);
-      paint();
-    } else if (d.mode === 'edge') {
-      s.rb = rubberband(d.rb0 + dx, d.width);
-      paint();
-    }
-  };
-
-  const onPointerUp = (e) => {
-    const d = s.drag;
-    if (!d || e.pointerId !== d.id) return;
-    s.drag = null;
-    bookRef.current.classList.remove('is-dragging');
-    if (!d.decided) return;
-    if (bookRef.current.hasPointerCapture(e.pointerId)) bookRef.current.releasePointerCapture(e.pointerId);
-    const sm = d.samples;
-    const cancelled = e.type === 'pointercancel';
-    const stale = !sm.length || performance.now() - sm[sm.length - 1].t > 80;
-    // Include release coordinates: even a one-move flick has a useful history.
-    const now = performance.now();
-    if (!cancelled && !stale) sm.push({ x: e.clientX, t: now });
-    while (sm.length > 2 && now - sm[0].t > 100) sm.shift();
-    const elapsed = sm.length > 1 ? (sm.at(-1).t - sm[0].t) / 1000 : 0;
-    const v = cancelled || stale || elapsed === 0 ? 0 : (sm.at(-1).x - sm[0].x) / elapsed;
-    const dx = (cancelled ? (sm.at(-1)?.x ?? d.x0) : e.clientX) - d.x0;
-
-    if (d.mode === 'fade') {
-      if (!cancelled && (Math.abs(dx) > 50 || Math.abs(v) > 300)) {
-        navigate(s.index - (Math.abs(v) > 300 ? Math.sign(v) : Math.sign(dx)));
-      }
-      return;
-    }
-    if (d.mode === 'edge') {
-      s.rb = rubberband(d.rb0 + dx, d.width);
-      paint();
-      returnEdge(rubberbandVelocity(d.rb0 + dx, v, d.width));
-      return;
-    }
-    // Throw: project where the finger was heading, and let a fast flick decide on its own.
-    if (cancelled) {
-      runSpring(d.returnTarget, 0);
-      return;
-    }
-    const pProjected = progressFor(d.pStart, dx + project(v), d.width);
-    let target = pProjected > 0.5 ? 1 : 0;
-    if (Math.abs(v) > 250) target = v < 0 ? 1 : 0;
-    const dpdx = (progressFor(d.pStart, dx + 1, d.width) - progressFor(d.pStart, dx - 1, d.width)) / 2;
-    s.p = progressFor(d.pStart, dx, d.width);
-    paint();
-    runSpring(target, clamp(dpdx * v, -10, 10));
-  };
-
-  // Once a swipe is horizontal, the page must not also scroll vertically.
+  // Passive pointer listeners with rAF-batched drag painting and zero React
+  // updates during pointermove. Vertical scroll stays on the compositor thread.
   useEffect(() => {
     const book = bookRef.current;
-    const onTouchMove = (e) => {
-      const d = s.drag;
-      if (!d) return;
-      const horizontal = d.decided || (Math.abs(d.dx) > 3 && Math.abs(d.dx) > Math.abs(d.dy));
-      if (horizontal && e.cancelable) e.preventDefault();
+    if (!book) return;
+    let moveAttached = false;
+
+    const returnEdge = (velocity = 0) => {
+      s.rbAnim?.stop();
+      s.rbAnim = animateSpring({
+        from: s.rb,
+        to: 0,
+        velocity,
+        spring: EDGE_SPRING,
+        restDelta: 0.15,
+        restSpeed: 2,
+        onUpdate: (x) => {
+          s.rb = x;
+          paint();
+        },
+        onDone: () => {
+          s.rbAnim = null;
+          paint();
+        },
+      });
     };
-    book.addEventListener('touchmove', onTouchMove, { passive: false });
-    return () => book.removeEventListener('touchmove', onTouchMove);
-  }, [s]);
+
+    const beginDrag = (dir) => {
+      const d = s.drag;
+      if (s.reduce) {
+        d.mode = 'fade';
+        d.dir = dir;
+        return;
+      }
+      let edgeVelocity = 0;
+      if (s.rbAnim) {
+        edgeVelocity = s.rbAnim.velocity;
+        s.rbAnim.stop();
+        s.rbAnim = null;
+      }
+      if (s.turn) {
+        // Grab the leaf mid-flight.
+        if (s.anim) s.anim.stop();
+        s.anim = null;
+        d.mode = 'turn';
+        d.pStart = s.p;
+        d.returnTarget = s.target;
+        return;
+      }
+      const k = s.index;
+      if ((dir < 0 && k < last()) || (dir > 0 && k > 0)) {
+        // A swipe into the book can catch an edge rebound too. Let its remaining
+        // offset settle continuously alongside the newly grabbed leaf.
+        if (s.rb) returnEdge(edgeVelocity);
+        const lo = dir < 0 ? k : k - 1;
+        const hi = dir < 0 ? k + 1 : k;
+        s.turn = { lo, hi };
+        s.p = dir < 0 ? 0 : 1;
+        s.target = s.p;
+        d.mode = 'turn';
+        d.pStart = s.p;
+        d.returnTarget = s.p;
+        if (hasMountedFacesForTurn(lo, hi)) {
+          // Neighbour already mounted: activate turn roles directly on DOM, zero React re-render.
+          syncFacesDOM();
+        } else {
+          s.reactTurn = true;
+          setFade(null);
+          setTurn({ ...s.turn, target: s.target });
+        }
+      } else {
+        d.mode = 'edge';
+        d.rb0 = unRubberband(s.rb, d.width);
+      }
+    };
+
+    const detachMove = () => {
+      if (!moveAttached) return;
+      moveAttached = false;
+      book.removeEventListener('pointermove', onPointerMove);
+      book.removeEventListener('pointerup', onPointerUp);
+      book.removeEventListener('pointercancel', onPointerUp);
+      removeEventListener('pointerup', onPointerUp);
+      removeEventListener('pointercancel', onPointerUp);
+    };
+    s.detachMove = detachMove;
+
+    const attachMove = () => {
+      if (moveAttached) return;
+      moveAttached = true;
+      book.addEventListener('pointermove', onPointerMove, { passive: true });
+      book.addEventListener('pointerup', onPointerUp, { passive: true });
+      book.addEventListener('pointercancel', onPointerUp, { passive: true });
+      addEventListener('pointerup', onPointerUp, { passive: true });
+      addEventListener('pointercancel', onPointerUp, { passive: true });
+    };
+
+    const onPointerDown = (e) => {
+      if (s.cookOpen) return;
+      // A tap near the bottom edge asks for the bar.
+      if (!s.wide && s.barAway && e.clientY > s.viewportHeight - 96) {
+        s.barAway = false;
+        setBarAway(false);
+      }
+      if (!e.isPrimary || e.button !== 0 || s.drag) return;
+      s.didDrag = false;
+      if (e.target.closest?.('button, input, select, textarea, [contenteditable]')) return;
+      s.drag = {
+        id: e.pointerId,
+        x0: e.clientX,
+        y0: e.clientY,
+        dx: 0,
+        dy: 0,
+        width: pageWidth(),
+        decided: false,
+        samples: [{ x: e.clientX, t: performance.now() }],
+      };
+      attachMove();
+    };
+
+    const onPointerMove = (e) => {
+      const d = s.drag;
+      if (!d || e.pointerId !== d.id) return;
+      const dxRaw = e.clientX - d.x0;
+      const dyRaw = e.clientY - d.y0;
+      d.dx = dxRaw;
+      d.dy = dyRaw;
+      if (!d.decided) {
+        // The first ~10px pick the axis; after that the other axis is ignored.
+        if (Math.abs(dxRaw) < 10 && Math.abs(dyRaw) < 10) return;
+        if (Math.abs(dyRaw) >= Math.abs(dxRaw)) {
+          s.drag = null; // vertical: let the page scroll natively
+          detachMove();
+          return;
+        }
+        d.decided = true;
+        d.x0 = e.clientX; // start tracking from here, no jump
+        s.didDrag = true;
+        try {
+          book.setPointerCapture(e.pointerId);
+        } catch {
+          /* Synthetic pointer events may not have an active browser pointer to capture. */
+        }
+        book.classList.add('is-dragging');
+        beginDrag(Math.sign(dxRaw));
+      }
+      const now = performance.now();
+      d.samples.push({ x: e.clientX, t: now });
+      while (d.samples.length > 2 && now - d.samples[0].t > 100) d.samples.shift();
+      const dx = e.clientX - d.x0;
+      if (d.mode === 'turn') {
+        s.p = progressFor(d.pStart, dx, d.width);
+        scheduleDragPaint();
+      } else if (d.mode === 'edge') {
+        s.rb = rubberband(d.rb0 + dx, d.width);
+        scheduleDragPaint();
+      }
+    };
+
+    const onPointerUp = (e) => {
+      const d = s.drag;
+      if (!d || e.pointerId !== d.id) return;
+      s.drag = null;
+      detachMove();
+      cancelDragPaint();
+      book.classList.remove('is-dragging');
+      if (!d.decided) return;
+      if (book.hasPointerCapture?.(e.pointerId)) {
+        try {
+          book.releasePointerCapture(e.pointerId);
+        } catch {
+          /* Ignore if capture was already released. */
+        }
+      }
+      const sm = d.samples;
+      const cancelled = e.type === 'pointercancel';
+      const stale = !sm.length || performance.now() - sm[sm.length - 1].t > 80;
+      // Include release coordinates: even a one-move flick has a useful history.
+      const now = performance.now();
+      if (!cancelled && !stale) sm.push({ x: e.clientX, t: now });
+      while (sm.length > 2 && now - sm[0].t > 100) sm.shift();
+      const elapsed = sm.length > 1 ? (sm.at(-1).t - sm[0].t) / 1000 : 0;
+      const v = cancelled || stale || elapsed === 0 ? 0 : (sm.at(-1).x - sm[0].x) / elapsed;
+      const dx = (cancelled ? (sm.at(-1)?.x ?? d.x0) : e.clientX) - d.x0;
+
+      if (d.mode === 'fade') {
+        if (!cancelled && (Math.abs(dx) > 50 || Math.abs(v) > 300)) {
+          navigate(s.index - (Math.abs(v) > 300 ? Math.sign(v) : Math.sign(dx)));
+        }
+        return;
+      }
+      if (d.mode === 'edge') {
+        s.rb = rubberband(d.rb0 + dx, d.width);
+        paint();
+        returnEdge(rubberbandVelocity(d.rb0 + dx, v, d.width));
+        return;
+      }
+      // Throw: project where the finger was heading, and let a fast flick decide on its own.
+      if (cancelled) {
+        runSpring(d.returnTarget, 0);
+        return;
+      }
+      const pProjected = progressFor(d.pStart, dx + project(v), d.width);
+      let target = pProjected > 0.5 ? 1 : 0;
+      if (Math.abs(v) > 250) target = v < 0 ? 1 : 0;
+      const dpdx = (progressFor(d.pStart, dx + 1, d.width) - progressFor(d.pStart, dx - 1, d.width)) / 2;
+      s.p = progressFor(d.pStart, dx, d.width);
+      paint();
+      runSpring(target, clamp(dpdx * v, -10, 10));
+    };
+
+    book.addEventListener('pointerdown', onPointerDown, { passive: true });
+    return () => {
+      detachMove();
+      s.detachMove = null;
+      book.removeEventListener('pointerdown', onPointerDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s, pageWidth, progressFor, paint, scheduleDragPaint, cancelDragPaint, hasMountedFacesForTurn, syncFacesDOM, runSpring, navigate]);
 
   // A drag must never also count as a tap on a link underneath.
   const onClickCapture = (e) => {
@@ -697,20 +1045,24 @@ export default function Book({ lang, setLang, units, setUnits }) {
       finishNow();
       settle(k);
     }
+    cancelDragPaint();
     s.rbAnim?.stop();
     s.rbAnim = null;
     s.rb = 0;
     s.drag = null;
+    s.detachMove?.();
     bookRef.current?.classList.remove('is-dragging');
     paint();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce]);
 
   useEffect(() => () => {
+    cancelDragPaint();
+    if (s.scrollRaf) cancelAnimationFrame(s.scrollRaf);
     s.anim?.stop();
     s.rbAnim?.stop();
     swapAnimRef.current?.cancel();
-  }, [s]);
+  }, [s, cancelDragPaint]);
 
   const captureScrollAnchor = useCallback(() => {
     if (s.wide) return;
@@ -766,6 +1118,16 @@ export default function Book({ lang, setLang, units, setUnits }) {
     setCookState(null);
   }, []);
 
+  const handleShowBar = useCallback(() => {
+    if (s.barAway) {
+      s.barAway = false;
+      setBarAway(false);
+    }
+  }, [s]);
+
+  const handlePrev = useCallback((instant = false) => navigate(destination() - 1, { instant }), [navigate]);
+  const handleNext = useCallback((instant = false) => navigate(destination() + 1, { instant }), [navigate]);
+
   const cookOpen = Boolean(cookState);
 
   useEffect(() => {
@@ -782,14 +1144,18 @@ export default function Book({ lang, setLang, units, setUnits }) {
   /* ---------- which faces exist right now ---------- */
 
   const faces = [];
+  const seen = new Set();
   const add = (idx, side, role) => {
     const sp = spreads[idx];
-    const content = sp && renderFace(sp[side], lang, units, openCookMode);
+    const desc = sp?.[side];
+    if (!desc) return;
     // Key recipe faces by recipe + spread offset + side (not layoutKey or idx) so
     // EN/DE/FR or cups<->g repagination updates content in-place without remounting.
-    const baseKey = sp?.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp?.kind}-${side}`;
+    const baseKey = sp.kind === 'recipe' ? `${wide}-${sp.recipe.slug}-${sp.offset}-${side}` : `${wide}-${sp.kind}-${side}`;
     const key = role === 'fading' ? `fade-${baseKey}` : baseKey;
-    if (content) faces.push({ key, idx, side, role, content });
+    if (seen.has(key)) return;
+    seen.add(key);
+    faces.push({ key, idx, side, role, desc });
   };
   if (turn) {
     if (wide) add(turn.lo, 'L', 'under-l');
@@ -803,6 +1169,20 @@ export default function Book({ lang, setLang, units, setUnits }) {
     }
     if (wide) add(index, 'L', 'rest');
     add(index, 'R', 'rest');
+    if (!reduce && !fade && (!wide || plans)) {
+      const addStandby = (idx) => {
+        if (idx < 0 || idx >= spreads.length || idx === index) return;
+        if (wide) add(idx, 'L', 'standby');
+        add(idx, 'R', 'standby');
+      };
+      if (warmed === index) {
+        addStandby(index - 1);
+        addStandby(index + 1);
+      } else if (warmed !== null && Math.abs(warmed - index) === 1) {
+        // Keep the just-departed page mounted without synchronously mounting the far neighbour on settle.
+        addStandby(warmed);
+      }
+    }
   }
   // Stable DOM order (index, then side) so React never moves a node and loses its scroll.
   faces.sort((a, b) => a.idx - b.idx || (a.side < b.side ? -1 : 1));
@@ -810,13 +1190,40 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const t = ui[lang];
   const atRest = !turn;
   const activeIndex = turn ? (turn.target === 1 ? turn.hi : turn.lo) : index;
-  const activeRecipe = spreads[activeIndex]?.recipe || null;
+  const settledRecipe = spreads[index]?.recipe || null;
+
+  // Defer mounting the hidden print-only sheet until idle (or immediately on
+  // beforeprint) so settling onto a recipe never mounts a duplicate recipe tree.
+  useEffect(() => {
+    if (!settledRecipe) {
+      setPrintRecipe(null);
+      return;
+    }
+    if (printRecipe === settledRecipe) return;
+    let idle = 0;
+    let timer = 0;
+    const syncPrint = () => setPrintRecipe(settledRecipe);
+    const onBeforePrint = () => syncPrint();
+    addEventListener('beforeprint', onBeforePrint);
+    timer = setTimeout(() => {
+      if (typeof requestIdleCallback === 'function') {
+        idle = requestIdleCallback(syncPrint, { timeout: 250 });
+      } else {
+        syncPrint();
+      }
+    }, 180);
+    return () => {
+      removeEventListener('beforeprint', onBeforePrint);
+      if (idle && typeof cancelIdleCallback === 'function') cancelIdleCallback(idle);
+      clearTimeout(timer);
+    };
+  }, [settledRecipe, printRecipe]);
 
   return (
     <>
       <div
         className={`stage ${wide ? 'stage--wide' : 'stage--narrow'}`}
-        data-has-print={activeRecipe ? 'true' : undefined}
+        data-has-print={settledRecipe ? 'true' : undefined}
         inert={cookOpen}
         aria-hidden={cookOpen || undefined}
         onClickCapture={(e) => {
@@ -828,10 +1235,6 @@ export default function Book({ lang, setLang, units, setUnits }) {
           ref={bookRef}
           aria-label={t.bookLabel}
           role="region"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
           onClickCapture={onClickCapture}
         >
           {faces.map((f) => {
@@ -840,8 +1243,28 @@ export default function Book({ lang, setLang, units, setUnits }) {
               <div
                 key={f.key}
                 ref={(el) => {
-                  if (el) faceEls.current.set(f.key, el);
-                  else faceEls.current.delete(f.key);
+                  if (el) {
+                    const prev = faceEls.current.get(f.key);
+                    if (prev && prev.el === el) {
+                      prev.idx = f.idx;
+                      prev.side = f.side;
+                      prev.isFading = f.role === 'fading';
+                    } else {
+                      faceEls.current.set(f.key, {
+                        el,
+                        shade: el.lastElementChild,
+                        idx: f.idx,
+                        side: f.side,
+                        role: f.role,
+                        live,
+                        isFading: f.role === 'fading',
+                        lastTransform: '',
+                        lastShade: '0',
+                      });
+                    }
+                  } else {
+                    faceEls.current.delete(f.key);
+                  }
                 }}
                 data-role={f.role}
                 className={`face face--${f.side} face--${f.role}`}
@@ -853,7 +1276,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
                   className="face-scroll"
                   onScroll={live && !wide && spreads[f.idx]?.kind === 'recipe' ? onFaceScroll : undefined}
                 >
-                  {f.content}
+                  <MemoFaceContent desc={f.desc} lang={lang} units={units} onStartCooking={openCookMode} />
                 </div>
                 <div className="shade" aria-hidden="true" />
               </div>
@@ -863,14 +1286,10 @@ export default function Book({ lang, setLang, units, setUnits }) {
         {wide && (
           // Off-screen copy of every recipe for the paginator to measure against.
           <div className="book book--wide measure" ref={measureRef} aria-hidden="true" inert>
-            <div className="measure-src" hidden>
-              {recipes.map((r) => (
-                <RecipeMeasure key={r.slug} recipe={r} lang={lang} units={units} />
-              ))}
-            </div>
+            <MemoMeasureSource lang={lang} units={units} />
           </div>
         )}
-        <Controls
+        <MemoControls
           lang={lang}
           setLang={handleSetLang}
           units={units}
@@ -879,15 +1298,15 @@ export default function Book({ lang, setLang, units, setUnits }) {
           last={spreads.length - 1}
           wide={wide}
           away={!wide && barAway}
-          onShow={() => setBarAway(false)}
-          onPrev={(instant = false) => navigate(destination() - 1, { instant })}
-          onNext={(instant = false) => navigate(destination() + 1, { instant })}
+          onShow={handleShowBar}
+          onPrev={handlePrev}
+          onNext={handleNext}
         />
         <p className="sr-only" aria-live="polite">
           {announce}
         </p>
       </div>
-      {activeRecipe && <PrintRecipe recipe={activeRecipe} lang={lang} units={units} />}
+      {printRecipe && <MemoPrintSheet recipe={printRecipe} lang={lang} units={units} />}
       {cookState && (
         <CookMode
           recipe={cookState.recipe}

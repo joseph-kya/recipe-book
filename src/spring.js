@@ -19,8 +19,8 @@ export function animateSpring({ from, to, velocity = 0, spring, onUpdate, onDone
 
   const frame = (now) => {
     if (stopped) return;
-    let dt = Math.min((now - last) / 1000, 1 / 20);
-    last = now;
+    let dt = now > last ? Math.min((now - last) / 1000, 1 / 20) : 0;
+    if (now > last) last = now;
     while (dt > 0) {
       const h = Math.min(STEP, dt);
       const a = -spring.k * (x - to) - spring.c * v;

@@ -20,7 +20,7 @@ import {
   signInWithRedirect,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
-import { doc, getFirestore, runTransaction } from 'firebase/firestore/lite';
+import { addDoc, collection, doc, getFirestore, runTransaction, serverTimestamp } from 'firebase/firestore/lite';
 import { cloudBook, fromCloudDoc, mergeBooks, sameBook, toCloudDoc } from './merge.js';
 
 // fav.js and the storage keys are handed in by session.js (instead of
@@ -198,4 +198,14 @@ export function signOut() {
   detach = null;
   user = null;
   return firebaseSignOut(auth).catch(() => {});
+}
+
+// "Send feedback" / "suggest a recipe" (src/auth/FeedbackSheet.jsx): one
+// create-only doc in `feedback` or `suggestions`; see firestore.rules. Works
+// signed out (uid null). Waits for the saved session so a signed-in visitor's
+// uid is attached even right after this chunk loads.
+export async function submit(collectionName, data) {
+  await auth.authStateReady();
+  const uid = auth.currentUser?.uid || null;
+  return addDoc(collection(db, collectionName), { ...data, uid, createdAt: serverTimestamp() });
 }

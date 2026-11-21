@@ -313,6 +313,16 @@
   font-weight: 600;
 }
 
+/* "Send feedback" / "suggest a recipe": the same quiet text buttons, one row
+   under the sync entry (src/auth/FeedbackEntry.jsx). */
+.fb-entry {
+  font-weight: 600;
+}
+
+.fb-entry--list {
+  justify-content: flex-start;
+}
+
 /* ---------- Contents: quiet "who's baking?" profile switcher ----------
    One compact retro-diner element: closed shows handwritten cue + vivid diner
    chip; open replaces it in place with profile chips (active marked by solid

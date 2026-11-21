@@ -12,6 +12,7 @@ import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { FavMark } from './RecipeFav.jsx';
 import { SyncEntry } from './auth/SyncEntry.jsx';
+import { FeedbackEntry } from './auth/FeedbackEntry.jsx';
 import { ProfileSwitch } from './ProfileSwitch.jsx';
 import { recipeHash } from './share.js';
 import './cover-contents.css';
@@ -144,6 +145,7 @@ export const ContentsLeft = memo(function ContentsLeft({ lang }) {
         <ServiceBell lang={lang} />
         <ProfileSwitch lang={lang} />
         <SyncEntry lang={lang} />
+        <FeedbackEntry lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -249,6 +251,7 @@ export const ContentsList = memo(function ContentsList({ lang, withTitle = false
           </div>
         )}
         {withTitle && <SyncEntry lang={lang} className="sync-entry--list" />}
+        {withTitle && <FeedbackEntry lang={lang} className="fb-entry--list" />}
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

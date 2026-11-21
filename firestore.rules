@@ -62,6 +62,39 @@ service cloud.firestore {
         && (!('profiles' in resource.data) || 'profiles' in request.resource.data);
     }
 
+    // "Send feedback" and "suggest a recipe" (src/auth/FeedbackSheet.jsx,
+    // written by submit() in src/auth/sync.js). Anyone may add one doc, signed
+    // in or not; nobody can read, change or delete them from the app. Read them
+    // in the Firebase console (see AUTH_SETUP.md).
+    function validMeta(d) {
+      return d.route is string && d.route.size() <= 200
+        && d.lang is string && d.lang in ['en', 'de', 'fr']
+        && (d.uid == null || (request.auth != null && d.uid == request.auth.uid))
+        && d.createdAt == request.time;
+    }
+
+    match /feedback/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['type', 'text', 'route', 'lang', 'uid', 'createdAt'])
+        && request.resource.data.keys().hasAll(['type', 'text', 'route', 'lang', 'uid', 'createdAt'])
+        && request.resource.data.type == 'feedback'
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && validMeta(request.resource.data);
+    }
+
+    match /suggestions/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['type', 'url', 'note', 'route', 'lang', 'uid', 'createdAt'])
+        && request.resource.data.keys().hasAll(['type', 'url', 'note', 'route', 'lang', 'uid', 'createdAt'])
+        && request.resource.data.type == 'suggestion'
+        && request.resource.data.url is string
+        && request.resource.data.url.size() <= 500
+        && request.resource.data.url.matches('^https?://[^\\s]+$')
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 500
+        && validMeta(request.resource.data);
+    }
+
     // Everything else is closed.
     match /{document=**} {
       allow read, write: if false;

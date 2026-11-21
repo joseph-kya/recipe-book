@@ -113,3 +113,12 @@ export const whoText = {
   de: { ask: 'Wer backt?', lead: 'am Backen', me: 'Ich' },
   fr: { ask: 'Qui cuisine\u00a0?', lead: 'en cuisine', me: 'Moi' },
 };
+
+// Quiet "send feedback" / "suggest a recipe" entries under the sync entry
+// (src/auth/FeedbackEntry.jsx). The sheet's copy loads with the sheet
+// (src/auth/feedback-i18n.js).
+export const noteText = {
+  en: { feedback: 'Send feedback', suggest: 'Suggest a recipe' },
+  de: { feedback: 'Feedback geben', suggest: 'Rezept vorschlagen' },
+  fr: { feedback: 'Donner mon avis', suggest: 'Proposer une recette' },
+};

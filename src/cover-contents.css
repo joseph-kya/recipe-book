@@ -16,7 +16,7 @@
   padding: 0 2rem;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+  transition: transform 140ms var(--ease-out);
 }
 
 .book .cover .cover-open .btn:active {

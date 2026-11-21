@@ -68,6 +68,7 @@
   min-width: 44px;
   padding: 0 0.6rem;
   overflow: hidden;
+  contain: paint;
 }
 
 .step-timer-adj {
@@ -93,6 +94,10 @@
   transform-origin: left center;
   transition: transform 420ms linear;
   pointer-events: none;
+}
+
+.step-timer--running .step-timer-bar {
+  will-change: transform;
 }
 
 .step-timer--done {

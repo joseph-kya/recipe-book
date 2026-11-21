@@ -33,6 +33,7 @@
   overflow: hidden;
   border-radius: 4px;
   background: var(--mint);
+  contain: layout paint;
 }
 
 .photo-frame img {

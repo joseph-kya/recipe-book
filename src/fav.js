@@ -146,8 +146,10 @@ function parse(raw) {
   }
 }
 
-// Google first name from the cached sign-in (email name as a fallback).
-const firstName = (name) => cleanName(typeof name === 'string' ? name.split(/[\s@]/)[0] : '');
+// First word of a Google displayName (no email fallback), capped at 64 like
+// firestore.rules; cleanName() then applies the usual profile-name limit.
+const firstName = (displayName) =>
+  cleanName(typeof displayName === 'string' ? Array.from(displayName.trim().split(/\s+/)[0]).slice(0, 64).join('') : '');
 
 export function reloadFav(storage = defaultStorage()) {
   const saved = parse(read(storage, BOOK_KEY));
@@ -158,7 +160,7 @@ export function reloadFav(storage = defaultStorage()) {
   }
   // First visit since profiles: everything so far becomes the default profile.
   const legacy = parse(read(storage, FAV_KEY)) || {};
-  const name = firstName(parse(read(storage, AUTH_KEY))?.name);
+  const name = firstName(parse(read(storage, AUTH_KEY))?.displayName);
   setBook([{ ...legacy, id: MAIN_ID, name, at: name ? 1 : 0 }], null, activeId);
   if (persistFav(storage) && read(storage, BOOK_KEY)) {
     try {
@@ -315,12 +317,14 @@ export function deleteProfile(id, storage = defaultStorage()) {
   return true;
 }
 
-// After Google sign-in: an unnamed default profile takes the first name. The
-// tiny stamp means any deliberate rename (on any device) still wins.
-export function nameMainProfile(name, storage = defaultStorage()) {
+// After Google sign-in: the default profile, while still unnamed (empty or the
+// default "Me") and never renamed (at 0), takes the account's first name. It
+// syncs like a rename, but the tiny stamp means any deliberate rename (on any
+// device) still wins.
+export function nameMainProfile(displayName, storage = defaultStorage()) {
   const p = book.find((q) => q.id === MAIN_ID);
-  const clean = firstName(name);
-  if (p && !p.name && !p.at && clean) {
+  const clean = firstName(displayName);
+  if (p && (!p.name || p.name === 'Me') && !p.at && clean && clean !== p.name) {
     p.name = clean;
     p.at = 1;
     changed(storage);

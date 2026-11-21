@@ -74,7 +74,7 @@ test('migration names the default profile from a cached Google sign-in, else lea
   try {
     const storage = makeStorage({
       [FAV_KEY]: JSON.stringify(legacy),
-      'recipe-book:auth:v1': JSON.stringify({ name: 'Joseph Kyamakya', photo: '', initial: 'J' }),
+      'recipe-book:auth:v1': JSON.stringify({ name: 'Joseph Kyamakya', displayName: 'Joseph Kyamakya', photo: '', initial: 'J' }),
     });
     reloadFav(storage);
     assert.equal(getProfileView().profiles[0].name, 'Joseph');
@@ -88,6 +88,46 @@ test('migration names the default profile from a cached Google sign-in, else lea
     renameProfile(MAIN_ID, 'Oma');
     nameMainProfile('Anna Muster');
     assert.equal(getProfileView().profiles[0].name, 'Oma');
+  } finally {
+    reloadFav(makeStorage());
+  }
+});
+
+test('Google sign-in names an unnamed default profile once, synced like a rename', () => {
+  try {
+    const storage = makeStorage();
+    reloadFav(storage);
+    // No display name (email-only account): nothing to take, stays "Me".
+    nameMainProfile('', storage);
+    nameMainProfile(undefined, storage);
+    assert.equal(getProfileView().profiles[0].name, '');
+
+    nameMainProfile('  Joseph   Kyamakya ', storage);
+    assert.equal(getProfileView().profiles[0].name, 'Joseph');
+    // Persisted with a rename stamp, so the cloud merge carries it over an unnamed copy...
+    const saved = JSON.parse(storage.getItem(BOOK_KEY)).profiles.find((p) => p.id === MAIN_ID);
+    assert.equal(saved.name, 'Joseph');
+    assert.ok(saved.at > 0);
+    const unnamed = { profiles: [{ id: MAIN_ID, name: '', n: 1, at: 0 }], gone: {} };
+    const merged = mergeBooks(getBookState(), unnamed);
+    assert.equal(merged.profiles.find((p) => p.id === MAIN_ID).name, 'Joseph');
+    // ...while a deliberate rename on another device still wins.
+    const renamed = { profiles: [{ id: MAIN_ID, name: 'Oma', n: 1, at: Date.now() }], gone: {} };
+    assert.equal(mergeBooks(getBookState(), renamed).profiles.find((p) => p.id === MAIN_ID).name, 'Oma');
+
+    // A later sign-in with another account doesn't overwrite it.
+    nameMainProfile('Anna Muster', storage);
+    assert.equal(getProfileView().profiles[0].name, 'Joseph');
+
+    // Legacy stored default "Me" (never renamed) counts as unnamed.
+    applyBookState({ profiles: [{ id: MAIN_ID, name: 'Me', n: 1, at: 0 }], gone: {} }, storage);
+    nameMainProfile('Anna Muster', storage);
+    assert.equal(getProfileView().profiles[0].name, 'Anna');
+
+    // Only the default profile is ever named; other profiles are left alone.
+    applyBookState({ profiles: [{ id: MAIN_ID, name: 'Oma', n: 1, at: 5 }, { id: 'kid', name: '', n: 2, at: 0 }] }, storage);
+    nameMainProfile('Anna Muster', storage);
+    assert.deepEqual(getProfileView().profiles.map((p) => p.name), ['Oma', '']);
   } finally {
     reloadFav(makeStorage());
   }

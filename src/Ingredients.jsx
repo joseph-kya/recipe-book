@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { CheckIcon, ResetIcon, ShoppingListIcon } from './ornaments.jsx';
 import { ContMark, cx, StepProgress, useRecipeText } from './recipeUI.jsx';
 import { readingCopyFor } from './recipe-reading-i18n.js';
@@ -51,7 +51,27 @@ const scaleIngredient = (raw, factor, textLang, custom) =>
         metric: scaleAmount(raw.metric, factor, textLang, custom),
       };
 
-const allItems = (r) => r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
+const allItemsCache = new WeakMap();
+const allItems = (r) => {
+  let list = allItemsCache.get(r);
+  if (!list) {
+    list = r.groups.flatMap((g, gi) => g.items.map((_, ii) => [gi, ii]));
+    allItemsCache.set(r, list);
+  }
+  return list;
+};
+
+const summaryCache = new WeakMap();
+function cachedRecipeSummary(recipe) {
+  const key = recipe?.en || recipe?.de || recipe?.fr;
+  if (!key) return recipeSummary(recipe);
+  let summary = summaryCache.get(key);
+  if (!summary) {
+    summary = recipeSummary(recipe);
+    summaryCache.set(key, summary);
+  }
+  return summary;
+}
 
 const EMPTY_GOT = new Set();
 const noopSubscribe = () => () => {};
@@ -63,9 +83,9 @@ function useGotItems(slug, measure = false) {
   );
 }
 
-function RecipeGlance({ recipe, lang }) {
+const RecipeGlance = memo(function RecipeGlance({ recipe, lang }) {
   const rt = readingCopyFor(lang);
-  const { totalTimeLabel, difficulty } = recipeSummary(recipe);
+  const { totalTimeLabel, difficulty } = cachedRecipeSummary(recipe);
   const diffLabel = rt.difficulty[difficulty.key];
   return (
     <dl
@@ -92,25 +112,92 @@ function RecipeGlance({ recipe, lang }) {
       </div>
     </dl>
   );
-}
+});
 
-export default function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
+const IngredientRow = memo(function IngredientRow({
+  slug,
+  itemId,
+  raw,
+  factor,
+  textLang,
+  custom,
+  units,
+  isGot,
+  measure,
+}) {
+  // display-only: the JSON amounts, scaled in the language they are written in
+  const it = useMemo(
+    () => scaleIngredient(raw, factor, textLang, custom),
+    [raw, factor, textLang, custom],
+  );
+  const current = amountsFor(it, units);
+  const alt = current.secondary ? amountsFor(it, units === 'cups' ? 'metric' : 'cups') : null;
+  return (
+    <li className={cx('ing', isGot && 'ing--got')} data-item={itemId}>
+      <button
+        type="button"
+        className="ing-btn"
+        aria-pressed={isGot}
+        onClick={measure ? undefined : () => toggleGotItem(slug, itemId)}
+      >
+        <span className="ing-tick" aria-hidden="true">
+          <CheckIcon className="ing-tick-svg" />
+        </span>
+        <span className="ing-main">
+          <span className="ing-what">
+            <span className="ing-name">{it.name}</span>
+            {it.note && (
+              <span className="ing-note">
+                <span className="sr-only">, </span>
+                {it.note}
+              </span>
+            )}
+          </span>
+          <span className="ing-how">
+            <span className="ing-how-live" data-swappable={current.secondary ? 'true' : undefined}>
+              <AmountPair amounts={current} comma />
+            </span>
+            {alt && (
+              <span className="ing-how-sizer" aria-hidden="true">
+                <AmountPair amounts={alt} />
+              </span>
+            )}
+          </span>
+        </span>
+      </button>
+    </li>
+  );
+});
+
+const IngredientsInner = memo(function IngredientsInner({
+  recipe,
+  lang,
+  units,
+  items,
+  cont = false,
+  measure = false,
+  factor,
+  custom,
+}) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
-  const { factor, custom } = useScale(recipe);
   const gotItems = useGotItems(recipe.slug, measure);
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef(0);
 
   useEffect(() => {
+    if (measure) return;
     setCopied(false);
     clearTimeout(copyTimerRef.current);
-  }, [recipe.slug]);
+  }, [recipe.slug, measure]);
 
   useEffect(() => () => clearTimeout(copyTimerRef.current), []);
 
   const itemsList = allItems(r);
   const totalItems = itemsList.length;
-  const gotCount = itemsList.filter(([gi, ii]) => gotItems.has(`${gi}:${ii}`)).length;
+  const gotCount =
+    measure || gotItems.size === 0
+      ? 0
+      : itemsList.reduce((n, [gi, ii]) => n + (gotItems.has(`${gi}:${ii}`) ? 1 : 0), 0);
   const remainingCount = totalItems - gotCount;
 
   const handleCopy = async () => {
@@ -126,14 +213,22 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
   };
 
   const shown = items || itemsList;
-  const byGroup = new Map();
-  for (const [gi, ii] of shown) {
-    if (!byGroup.has(gi)) byGroup.set(gi, []);
-    byGroup.get(gi).push(ii);
-  }
+  const groupEntries = useMemo(() => {
+    const byGroup = new Map();
+    for (const [gi, ii] of shown) {
+      let arr = byGroup.get(gi);
+      if (!arr) {
+        arr = [];
+        byGroup.set(gi, arr);
+      }
+      arr.push(ii);
+    }
+    return [...byGroup];
+  }, [shown]);
+
   // The first piece of the card pairs title + shopping actions on one bar,
   // followed by the at-a-glance stub and portion scaler.
-  const normalHead = (
+  const normalHead = (measure || !cont) && (
     <div className="menu-head" data-head="normal">
       <div className="menu-bar">
         <h2 className="menu-title" lang={textLang}>
@@ -175,11 +270,11 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
         </div>
       </div>
       <RecipeGlance recipe={recipe} lang={lang} />
-      <Scaler recipe={recipe} text={r} textLang={textLang} t={t} />
+      <Scaler recipe={recipe} text={r} textLang={textLang} t={t} measure={measure} />
       {factor !== 1 && <p className="scale-note">{t.scaleNote}</p>}
     </div>
   );
-  const contHead = (
+  const contHead = (measure || cont) && (
     <div className="menu-head--cont" data-head="cont">
       <h2 className="menu-title" lang={textLang}>
         {r.ingredients_headline}
@@ -200,7 +295,7 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
       ) : (
         normalHead
       )}
-      {[...byGroup].map(([gi, iis]) => {
+      {groupEntries.map(([gi, iis]) => {
         const g = r.groups[gi];
         return (
           <div className="ing-group" key={gi} data-group={gi}>
@@ -211,46 +306,20 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
             )}
             <ul className="ing-list" lang={textLang}>
               {iis.map((ii) => {
-                // display-only: the JSON amounts, scaled in the language they are written in
-                const it = scaleIngredient(g.items[ii], factor, textLang, custom);
-                const current = amountsFor(it, units);
-                const alt = current.secondary ? amountsFor(it, units === 'cups' ? 'metric' : 'cups') : null;
                 const itemId = `${gi}:${ii}`;
-                const isGot = !measure && gotItems.has(itemId);
                 return (
-                  <li className={cx('ing', isGot && 'ing--got')} key={ii} data-item={itemId}>
-                    <button
-                      type="button"
-                      className="ing-btn"
-                      aria-pressed={isGot}
-                      onClick={() => !measure && toggleGotItem(recipe.slug, itemId)}
-                    >
-                      <span className="ing-tick" aria-hidden="true">
-                        <CheckIcon className="ing-tick-svg" />
-                      </span>
-                      <span className="ing-main">
-                        <span className="ing-what">
-                          <span className="ing-name">{it.name}</span>
-                          {it.note && (
-                            <span className="ing-note">
-                              <span className="sr-only">, </span>
-                              {it.note}
-                            </span>
-                          )}
-                        </span>
-                        <span className="ing-how">
-                          <span className="ing-how-live" data-swappable={current.secondary ? 'true' : undefined}>
-                            <AmountPair amounts={current} comma />
-                          </span>
-                          {alt && (
-                            <span className="ing-how-sizer" aria-hidden="true">
-                              <AmountPair amounts={alt} />
-                            </span>
-                          )}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
+                  <IngredientRow
+                    key={ii}
+                    slug={recipe.slug}
+                    itemId={itemId}
+                    raw={g.items[ii]}
+                    factor={factor}
+                    textLang={textLang}
+                    custom={custom}
+                    units={units}
+                    isGot={!measure && gotItems.has(itemId)}
+                    measure={measure}
+                  />
                 );
               })}
             </ul>
@@ -259,4 +328,20 @@ export default function Ingredients({ recipe, lang, units, items, cont = false, 
       })}
     </section>
   );
-}
+});
+
+export default memo(function Ingredients({ recipe, lang, units, items, cont = false, measure = false }) {
+  const { factor, custom } = useScale(recipe);
+  return (
+    <IngredientsInner
+      recipe={recipe}
+      lang={lang}
+      units={units}
+      items={items}
+      cont={cont}
+      measure={measure}
+      factor={factor}
+      custom={custom}
+    />
+  );
+});

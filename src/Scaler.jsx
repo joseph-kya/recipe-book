@@ -1,19 +1,22 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { slidePill } from './motion.js';
 import { clampFactor, CUSTOM_MAX, CUSTOM_MIN, factorLabel, scaleStat, yieldStat } from './scale.js';
-import { useScale } from './useScale.js';
+import { useScale, useScales } from './useScale.js';
 
 const round1 = (x) => Math.round(x * 10) / 10;
 const parse = (s) => Number(String(s).replace(',', '.').trim());
 
-// A small row of diner chips on the ingredient card's head, offering only the
-// factors at which every amount can really be measured (see offeredFactors).
-// With a plain-number yield the chips read as that yield ("12 24 48"), and the
-// stat's own label sits beside them once; otherwise as factors ("1× 2× 4×").
-// The last chip, "custom", opens a stepper that scales exactly as entered:
-// in servings when there is a yield, else as a free factor (0.1–10×).
-export default function Scaler({ recipe, text, textLang, t }) {
-  const { factor, custom, offered, setFactor, setCustom } = useScale(recipe);
+const ScalerInner = memo(function ScalerInner({
+  slug,
+  factor,
+  custom,
+  offered,
+  setScale,
+  text,
+  textLang,
+  t,
+  measure = false,
+}) {
   const y = yieldStat(text);
   const base = y ? Number(y.value) : 1; // servings per 1×, or 1 for a plain factor
   const shown = round1(factor * base);
@@ -32,6 +35,7 @@ export default function Scaler({ recipe, text, textLang, t }) {
   }, []);
 
   useLayoutEffect(() => {
+    if (measure) return;
     const group = groupRef.current;
     if (!group) return;
     const indicator = group.querySelector('.scaler-indicator');
@@ -41,40 +45,72 @@ export default function Scaler({ recipe, text, textLang, t }) {
     prevSelection.current = { factor, custom };
     const animate = !custom && (prev.custom || prev.factor !== factor);
 
-    const measure = (shouldAnimate = false) => {
+    let lastGroupW = -1;
+    let lastActiveW = -1;
+    let lastActiveX = -1;
+
+    const measureIndicator = (shouldAnimate = false, fromResize = false) => {
       if (disposed || !indicator) return;
       const active = group.querySelector('[aria-pressed="true"]');
+      if (fromResize) {
+        const gw = group.offsetWidth;
+        const aw = active ? active.offsetWidth : -1;
+        const ax = active ? active.offsetLeft : -1;
+        if (gw === lastGroupW && aw === lastActiveW && ax === lastActiveX) return;
+        lastGroupW = gw;
+        lastActiveW = aw;
+        lastActiveX = ax;
+      } else {
+        lastGroupW = group.offsetWidth;
+        lastActiveW = active ? active.offsetWidth : -1;
+        lastActiveX = active ? active.offsetLeft : -1;
+      }
       slidePill(group, indicator, active, { animate: shouldAnimate, animRef });
     };
-    measure(animate);
-    const observer = new ResizeObserver(() => measure(false));
+
+    measureIndicator(animate, false);
+    let initialized = false;
+    const observer = new ResizeObserver(() => {
+      if (!initialized) {
+        initialized = true;
+        return;
+      }
+      measureIndicator(false, true);
+    });
     observer.observe(group);
     buttons.forEach((b) => observer.observe(b));
-    const onFonts = () => measure(false);
-    document.fonts?.ready.then(onFonts);
+    const onFonts = () => measureIndicator(false, true);
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(onFonts);
+    }
     document.fonts?.addEventListener('loadingdone', onFonts);
     return () => {
       disposed = true;
       observer.disconnect();
       document.fonts?.removeEventListener('loadingdone', onFonts);
     };
-  }, [factor, custom, labels]);
+  }, [factor, custom, labels, measure]);
 
   // keep the field in step with the saved value unless someone is typing in it
   useEffect(() => {
+    if (measure) return;
     if (document.activeElement !== field.current) setDraft(String(shown));
-  }, [shown]);
+  }, [shown, measure]);
 
   // focus the field when the custom chip opens it
   useEffect(() => {
+    if (measure) return;
     if (custom && opening.current) {
       opening.current = false;
       field.current?.focus();
       field.current?.select();
     }
-  }, [custom]);
+  }, [custom, measure]);
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  const setFactor = (f) => offered.includes(f) && setScale(slug, f);
+  const setCustom = (f, opts) => setScale(slug, { custom: f }, opts);
 
   const commit = (value) => {
     const v = parse(value);
@@ -113,7 +149,7 @@ export default function Scaler({ recipe, text, textLang, t }) {
               type="button"
               className="scaler-chip"
               aria-pressed={!custom && factor === f}
-              onClick={() => setFactor(f)}
+              onClick={measure ? undefined : () => setFactor(f)}
             >
               {textLabel}
               <span className="scaler-label-active" aria-hidden="true">{textLabel}</span>
@@ -171,10 +207,14 @@ export default function Scaler({ recipe, text, textLang, t }) {
           type="button"
           className="scaler-chip scaler-chip--custom"
           aria-pressed="false"
-          onClick={() => {
-            opening.current = true;
-            setCustom(factor, { animate: false });
-          }}
+          onClick={
+            measure
+              ? undefined
+              : () => {
+                  opening.current = true;
+                  setCustom(factor, { animate: false });
+                }
+          }
         >
           {t.custom}
         </button>
@@ -186,4 +226,28 @@ export default function Scaler({ recipe, text, textLang, t }) {
       )}
     </div>
   );
-}
+});
+
+// A small row of diner chips on the ingredient card's head, offering only the
+// factors at which every amount can really be measured (see offeredFactors).
+// With a plain-number yield the chips read as that yield ("12 24 48"), and the
+// stat's own label sits beside them once; otherwise as factors ("1× 2× 4×").
+// The last chip, "custom", opens a stepper that scales exactly as entered:
+// in servings when there is a yield, else as a free factor (0.1–10×).
+export default memo(function Scaler({ recipe, text, textLang, t, measure = false }) {
+  const { factor, custom, offered } = useScale(recipe);
+  const { setScale } = useScales();
+  return (
+    <ScalerInner
+      slug={recipe.slug}
+      factor={factor}
+      custom={custom}
+      offered={offered}
+      setScale={setScale}
+      text={text}
+      textLang={textLang}
+      t={t}
+      measure={measure}
+    />
+  );
+});

@@ -1,8 +1,14 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { amountsCreditFor } from './content.js';
 import { ui } from './i18n.js';
 import { spinCupcake } from './motion.js';
-import { CUPCAKE_BITES, Checkers, Cupcake, CupcakeCrumbs, DownloadIcon } from './ornaments.jsx';
+import {
+  CUPCAKE_BITES,
+  Checkers as CheckersBase,
+  Cupcake as CupcakeBase,
+  CupcakeCrumbs,
+  DownloadIcon,
+} from './ornaments.jsx';
 import { isClosing } from './paginate.js';
 import { scaleStat } from './scale.js';
 import { useScale } from './useScale.js';
@@ -14,11 +20,18 @@ import { cx, useRecipeText } from './recipeUI.jsx';
 import { ContentsLeft, ContentsList } from './Contents.jsx';
 import Ingredients from './Ingredients.jsx';
 import Method from './Method.jsx';
-import Photo from './Photo.jsx';
-import Macros from './Macros.jsx';
+import PhotoBase from './Photo.jsx';
+import MacrosBase from './Macros.jsx';
 import CoverRandom from './CoverRandom.jsx';
-import { RecipeFav } from './RecipeFav.jsx';
-import { ShareButton } from './Share.jsx';
+import { RecipeFav as RecipeFavBase } from './RecipeFav.jsx';
+import { ShareButton as ShareButtonBase } from './Share.jsx';
+
+const Checkers = memo(CheckersBase);
+const Cupcake = memo(CupcakeBase);
+const Photo = memo(PhotoBase);
+const Macros = memo(MacrosBase);
+const RecipeFav = memo(RecipeFavBase);
+const ShareButton = memo(ShareButtonBase);
 
 export { useRecipeText } from './recipeUI.jsx';
 export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps, StepDot, StepTimer, StepBody } from './Method.jsx';
@@ -28,7 +41,7 @@ export { clearDoneSteps, getDoneSteps, setStepDone, toggleStepDone, useDoneSteps
 const lastGoneByTier = Array(MUFFIN_TIER_COUNT).fill(-1);
 const lastReplyByTier = Array(MUFFIN_TIER_COUNT).fill(-1);
 
-export function Cover({ lang }) {
+export const Cover = memo(function Cover({ lang }) {
   const t = ui[lang];
   const themeCopy = themeText[lang] || themeText.en;
   const [theme, setTheme] = useTheme();
@@ -58,6 +71,21 @@ export function Cover({ lang }) {
     clearTimeout(respawnRef.current);
     clearTimeout(replyTimerRef.current);
   }, []);
+
+  const titleLines = useMemo(
+    () =>
+      t.bookTitle.map((line, i) => (
+        <span key={i}>
+          {line.split(' ').map((word, j) => (
+            <Fragment key={j}>
+              {j > 0 && ' '}
+              <span className="w">{word}</span>
+            </Fragment>
+          ))}
+        </span>
+      )),
+    [t.bookTitle],
+  );
 
   const cycleTheme = () => {
     if (heldRef.current) {
@@ -127,18 +155,7 @@ export function Cover({ lang }) {
     <div className="page-body cover">
       <Checkers tone="choc" edge="top" />
       <div className="cover-inner">
-        <h1 className="cover-title">
-          {t.bookTitle.map((line, i) => (
-            <span key={i}>
-              {line.split(' ').map((word, j) => (
-                <Fragment key={j}>
-                  {j > 0 && ' '}
-                  <span className="w">{word}</span>
-                </Fragment>
-              ))}
-            </span>
-          ))}
-        </h1>
+        <h1 className="cover-title">{titleLines}</h1>
         <div className="cover-cupcake-stage">
           <button
             type="button"
@@ -184,7 +201,7 @@ export function Cover({ lang }) {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});
 
 /* ---------- Recipe parts ----------
    Each part can render a slice (some ingredient rows, some steps), so a recipe
@@ -197,7 +214,7 @@ function FallbackNote({ fallback, t }) {
 }
 
 // Book pages after a recipe's first carry its name, like the printed sheet's page two.
-function RunningHead({ recipe, lang }) {
+const RunningHead = memo(function RunningHead({ recipe, lang }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   return (
     <p className="running-head" data-unit="running">
@@ -209,11 +226,10 @@ function RunningHead({ recipe, lang }) {
       </span>
     </p>
   );
-}
+});
 
-function RecipeHero({ recipe, lang, measure = false }) {
+const RecipeHeroInner = memo(function RecipeHeroInner({ recipe, lang, factor, custom, measure = false }) {
   const { r, textLang, fallback, t } = useRecipeText(recipe, lang);
-  const { factor, custom } = useScale(recipe);
   return (
     <header className="hero" data-unit="hero">
       <div className="hero-top">
@@ -259,9 +275,14 @@ function RecipeHero({ recipe, lang, measure = false }) {
       )}
     </header>
   );
-}
+});
 
-function Tips({ recipe, lang, items }) {
+const RecipeHero = memo(function RecipeHero({ recipe, lang, measure = false }) {
+  const { factor, custom } = useScale(recipe);
+  return <RecipeHeroInner recipe={recipe} lang={lang} factor={factor} custom={custom} measure={measure} />;
+});
+
+const Tips = memo(function Tips({ recipe, lang, items }) {
   const { r, textLang, t } = useRecipeText(recipe, lang);
   if (!r.tips?.length) return null;
   const shown = items || r.tips.map((_, i) => i);
@@ -275,9 +296,9 @@ function Tips({ recipe, lang, items }) {
       ))}
     </section>
   );
-}
+});
 
-function Credits({ recipe, lang, units }) {
+const Credits = memo(function Credits({ recipe, lang, units }) {
   const { r, t } = useRecipeText(recipe, lang);
   const credit = amountsCreditFor(recipe, lang);
   const s = recipe.source;
@@ -316,12 +337,12 @@ function Credits({ recipe, lang, units }) {
       ) : null}
     </footer>
   );
-}
+});
 
 /* ---------- Recipe pages ---------- */
 
 // Phone: the whole recipe on one scrolling page.
-function RecipeFull({ recipe, lang, units, onStartCooking }) {
+const RecipeFull = memo(function RecipeFull({ recipe, lang, units, onStartCooking }) {
   return (
     <div className="page-body recipe">
       <Checkers tone="choc" edge="top" />
@@ -337,10 +358,10 @@ function RecipeFull({ recipe, lang, units, onStartCooking }) {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});
 
 // Wide: one fixed-height book page holding the segments the paginator gave it.
-function RecipePage({ recipe, lang, units, segs, first, onStartCooking }) {
+const RecipePage = memo(function RecipePage({ recipe, lang, units, segs, first, onStartCooking }) {
   const closing = !first && isClosing(segs);
   // the photo, when the paginator found room for it, stands in for the cupcake
   const hasPhoto = segs.some((seg) => seg.kind === 'photo');
@@ -364,10 +385,10 @@ function RecipePage({ recipe, lang, units, segs, first, onStartCooking }) {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});
 
 // The quiet right-hand page when a recipe ends on a left page.
-function BlankPage() {
+const BlankPage = memo(function BlankPage() {
   return (
     <div className="page-body blank-page">
       <Checkers tone="choc" edge="top" />
@@ -375,24 +396,35 @@ function BlankPage() {
       <Checkers tone="cherry" edge="bottom" />
     </div>
   );
-}
+});
 
-// Hidden source for the paginator: every block of one recipe, in book order.
-export function RecipeMeasure({ recipe, lang, units }) {
+const RecipeMeasureInner = memo(function RecipeMeasureInner({ recipe, lang, sig }) {
   return (
-    <div data-src={recipe.slug}>
+    <div data-src={recipe.slug} data-sig={sig}>
       <RunningHead recipe={recipe} lang={lang} />
       <RecipeHero recipe={recipe} lang={lang} measure />
-      <Ingredients recipe={recipe} lang={lang} units={units} measure />
+      <Ingredients recipe={recipe} lang={lang} units="cups" measure />
       <Method recipe={recipe} lang={lang} measure />
       <Tips recipe={recipe} lang={lang} />
       <Macros recipe={recipe} lang={lang} />
-      <Credits recipe={recipe} lang={lang} units={units} />
+      <Credits recipe={recipe} lang={lang} units="cups" />
       <Cupcake className="closing-cupcake" />
       <Photo recipe={recipe} lang={lang} height={160} />
     </div>
   );
-}
+});
+
+// Hidden source for the paginator: every block of one recipe, in book order.
+// Units (cups <-> g) reserve both widths in CSS and never alter pagination, so
+// RecipeMeasure skips unit-only updates and caches per recipe + lang + scale.
+export const RecipeMeasure = memo(
+  function RecipeMeasure({ recipe, lang }) {
+    const { factor, custom } = useScale(recipe);
+    const sig = `${lang}|${factor}|${custom ? 1 : 0}`;
+    return <RecipeMeasureInner recipe={recipe} lang={lang} sig={sig} />;
+  },
+  (prev, next) => prev.recipe === next.recipe && prev.lang === next.lang,
+);
 
 /* ---------- One face of the book from its layout descriptor ---------- */
 

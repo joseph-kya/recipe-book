@@ -47,7 +47,7 @@ export function subscribeSession(fn) {
 const handlers = {
   onUser(profile) {
     store(PROFILE_KEY, profile ? JSON.stringify(profile) : null);
-    if (profile) nameMainProfile(profile.name);
+    if (profile) nameMainProfile(profile.displayName);
     set(profile ? { status: 'in', profile, note: '' } : { status: 'out', profile: null, sync: '' });
   },
   onSync: (sync) => set({ sync }),

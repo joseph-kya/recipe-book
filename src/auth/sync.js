@@ -48,7 +48,12 @@ const isOffline = () => typeof navigator !== 'undefined' && navigator.onLine ===
 
 function profileOf(u) {
   const name = u.displayName || u.email || '';
-  return { name, photo: u.photoURL || '', initial: (name.trim()[0] || '•').toUpperCase() };
+  return {
+    name,
+    displayName: u.displayName || '',
+    photo: u.photoURL || '',
+    initial: (name.trim()[0] || '•').toUpperCase(),
+  };
 }
 
 function clearRedirectFlag() {

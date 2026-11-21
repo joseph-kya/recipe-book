@@ -308,6 +308,16 @@
   font-weight: 600;
 }
 
+/* "Send feedback" / "suggest a recipe": the same quiet text buttons, one row
+   under the sync entry (src/auth/FeedbackEntry.jsx). */
+.fb-entry {
+  font-weight: 600;
+}
+
+.fb-entry--list {
+  justify-content: flex-start;
+}
+
 /* ---------- Contents: quiet "who's baking?" profile switcher ----------
    Reuses .sync-btn for every button (44px pill, hover tint, press, focus).
    Chips are flat theme-token fills; the active profile is a soft tint. */

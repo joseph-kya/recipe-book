@@ -63,8 +63,14 @@ JavaScript, as Firebase intends. Your data is protected by the Firestore rules
 2. Click **Publish**.
 
 These rules let each signed-in user read and write only their own
-`users/{uid}` document, check its shape and size, and deny access to
+`users/{uid}` document, check its shape and size, let anyone add (but never
+read, change or delete) feedback and recipe suggestions, and deny access to
 everything else.
+
+> **Feedback update: republish the rules.** "Send feedback" and "Suggest a
+> recipe" write to two new collections. Paste the current
+> [`firestore.rules`](firestore.rules) and click **Publish** again before
+> deploying that build, or sending shows "Couldn't send".
 
 > **Profiles update: republish the rules.** The "who's baking?" profiles
 > changed the doc shape (up to six profiles in one `users/{uid}` doc). Paste
@@ -72,6 +78,35 @@ everything else.
 > *before* deploying that build, or every sync fails with "Not synced". The
 > new rules still accept docs written by the previous version, so nothing
 > needs migrating by hand.
+
+## Reading feedback and recipe suggestions
+
+The Contents page has **Send feedback** and **Suggest a recipe** (both hidden
+when the Firebase config is missing). Each send adds one document; the app can
+never read them back, so you read them in the console:
+
+1. Open [console.firebase.google.com](https://console.firebase.google.com),
+   pick the project, then **Firestore Database → Data**.
+2. Click the **`feedback`** or **`suggestions`** collection. Each document is
+   one submission (the ID is random).
+3. Fields:
+   - `type`: `feedback` or `suggestion`
+   - `text` (feedback, up to 2000 characters), or `url` + `note` (suggestion;
+     the link is stored as typed and never opened or fetched by the app, so
+     check it before you click it)
+   - `route`: the page it was sent about, for example `r/apple-pie` or
+     `contents` (the sender can edit or clear it)
+   - `lang`: `en`, `de` or `fr`
+   - `uid`: the sender's Firebase user ID when signed in, otherwise `null`.
+     Look it up under **Authentication → Users** if you need to know who it was.
+   - `createdAt`: server time of the send
+4. To see the newest first, use the filter icon above the document list and
+   sort by `createdAt`, descending.
+5. Delete a document with its **⋮** menu once you've dealt with it. The rules
+   stop the app from deleting anything, so cleanup only happens here.
+
+Anyone can send, signed in or not, so expect the odd bit of spam. The rules cap
+sizes and shapes; if it ever gets noisy, turn on App Check for Firestore.
 
 ## 6. Put the config into the build
 

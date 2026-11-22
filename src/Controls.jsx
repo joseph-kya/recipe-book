@@ -1,8 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { nextLang, ui } from './i18n.js';
+import { ui } from './i18n.js';
 import { createTapHandlers, flipLabel } from './motion.js';
-import { Arrow, ListIcon } from './ornaments.jsx';
+import { Arrow, ListIcon, SlidersIcon } from './ornaments.jsx';
 import { AwakeToggle } from './Awake.jsx';
+import { openSettings } from './settings-store.js';
+import { settingsCopyFor } from './settings-i18n.js';
+
+const warmSettings = () => {
+  import('./Settings.jsx').catch(() => {});
+};
 
 function TapToggle({ value, text, label, className, onToggle }) {
   const btnRef = useRef(null);
@@ -59,8 +65,9 @@ function TapToggle({ value, text, label, className, onToggle }) {
   );
 }
 
-export default function Controls({ lang, setLang, units, setUnits, index, last, wide, away, onShow, onPrev, onNext }) {
+export default function Controls({ lang, units, setUnits, index, last, wide, away, onShow, onPrev, onNext }) {
   const t = ui[lang];
+  const copy = settingsCopyFor(lang);
   return (
     <nav
       className={`controls ${wide ? 'controls--wide' : 'controls--narrow'}${away ? ' controls--away' : ''}`}
@@ -87,13 +94,18 @@ export default function Controls({ lang, setLang, units, setUnits, index, last, 
         <span className="ctl-count" aria-hidden="true">
           {index + 1}/{last + 1}
         </span>
-        <TapToggle
-          value={lang}
-          text={lang.toUpperCase()}
-          label={t.switchLang}
-          className="lang-btn"
-          onToggle={() => setLang(nextLang(lang))}
-        />
+        <button
+          type="button"
+          className="ctl ctl--settings"
+          aria-label={copy.open}
+          title={copy.open}
+          aria-haspopup="dialog"
+          onPointerDown={warmSettings}
+          onFocus={warmSettings}
+          onClick={(e) => openSettings(e.currentTarget)}
+        >
+          <SlidersIcon className="ctl-icon" />
+        </button>
         <TapToggle
           value={units}
           text={units === 'cups' ? t.unitCups : t.unitMetric}

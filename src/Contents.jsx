@@ -1,7 +1,7 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { recipes } from './content.js';
 import { ui } from './i18n.js';
-import { Bell, Checkers, CloseIcon } from './ornaments.jsx';
+import { Bell, Checkers, CloseIcon, SlidersIcon } from './ornaments.jsx';
 import { primeAudio } from './timer.js';
 import { ring as ringDing } from './audio.js';
 import { themeText } from './theme-i18n.js';
@@ -11,11 +11,39 @@ import { contentsText, filterRecipes } from './contents-find.js';
 import { isFavorite, sortFavoritesFirst, subscribeFav } from './fav.js';
 import { favCopyFor } from './fav-i18n.js';
 import { FavMark } from './RecipeFav.jsx';
-import { SyncEntry } from './auth/SyncEntry.jsx';
-import { FeedbackEntry } from './auth/FeedbackEntry.jsx';
 import { ProfileSwitch } from './ProfileSwitch.jsx';
 import { recipeHash } from './share.js';
+import { openSettings } from './settings-store.js';
+import { settingsCopyFor } from './settings-i18n.js';
 import './cover-contents.css';
+
+const warmSettings = () => {
+  import('./Settings.jsx').catch(() => {});
+};
+
+function SettingsEntry({ lang, className = '' }) {
+  const copy = settingsCopyFor(lang);
+  const hintId = useId();
+  return (
+    <div className={cx('settings-entry-box', className)}>
+      <button
+        type="button"
+        className="settings-entry"
+        aria-haspopup="dialog"
+        aria-describedby={hintId}
+        onPointerDown={warmSettings}
+        onFocus={warmSettings}
+        onClick={(e) => openSettings(e.currentTarget)}
+      >
+        <SlidersIcon className="settings-entry-icon" />
+        <span>{copy.open}</span>
+      </button>
+      <p id={hintId} className="settings-entry-hint">
+        {copy.openHint}
+      </p>
+    </div>
+  );
+}
 
 function SearchIcon({ className }) {
   return (
@@ -144,8 +172,7 @@ export const ContentsLeft = memo(function ContentsLeft({ lang }) {
         <p className="contents-count">{copy.recipeCount(recipes.length)}</p>
         <ServiceBell lang={lang} />
         <ProfileSwitch lang={lang} />
-        <SyncEntry lang={lang} />
-        <FeedbackEntry lang={lang} />
+        <SettingsEntry lang={lang} />
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>
@@ -250,8 +277,7 @@ export const ContentsList = memo(function ContentsList({ lang, withTitle = false
             </button>
           </div>
         )}
-        {withTitle && <SyncEntry lang={lang} className="sync-entry--list" />}
-        {withTitle && <FeedbackEntry lang={lang} className="fb-entry--list" />}
+        {withTitle && <SettingsEntry lang={lang} className="settings-entry-box--list" />}
       </div>
       <Checkers tone="cherry" edge="bottom" />
     </div>

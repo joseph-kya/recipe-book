@@ -516,6 +516,44 @@ for (const vp of VIEWPORTS) {
           await context.close();
         }
       });
+
+      test('Settings agrees with the cupcake and the bar, and clears the device in two taps', async () => {
+        const { context, page, errors } = await newViewportPage(vp);
+        try {
+          await page.goto(baseURL);
+          await waitForRest(page);
+
+          // The cover cupcake cycles the colourway; Settings shows the same one.
+          await page.locator('.face--rest .cover-cupcake-btn').click();
+          await page.waitForFunction(() => document.documentElement.dataset.theme === 'blueplate');
+          await page.locator('.ctl--settings').click();
+          const dialog = page.locator('[role="dialog"].settings-sheet');
+          await dialog.waitFor({ state: 'visible' });
+          assert.equal(await dialog.getByRole('radio', { name: 'Blue plate', exact: true }).getAttribute('aria-checked'), 'true');
+
+          // The keep-awake switch and the bar's sun are one setting.
+          const awake = dialog.getByRole('switch');
+          if (await awake.count()) {
+            await awake.click();
+            assert.equal(await awake.getAttribute('aria-checked'), 'true');
+            assert.equal(await page.locator('.ctl--awake').getAttribute('aria-pressed'), 'true');
+          }
+
+          // First tap only arms; the second clears and reloads to defaults.
+          await dialog.getByRole('button', { name: 'Clear this device', exact: true }).click();
+          assert.ok(await page.evaluate(() => localStorage.getItem('recipe-book:theme') === 'blueplate'));
+          await Promise.all([
+            page.waitForEvent('load'),
+            dialog.getByRole('button', { name: 'Clear everything', exact: true }).click(),
+          ]);
+          await waitForRest(page);
+          assert.equal(await page.evaluate(() => document.documentElement.dataset.theme || 'cherry'), 'cherry');
+          assert.equal(await page.evaluate(() => localStorage.getItem('recipe-book:theme')), null);
+          assert.deepEqual(errors, []);
+        } finally {
+          await context.close();
+        }
+      });
     }
   });
 }

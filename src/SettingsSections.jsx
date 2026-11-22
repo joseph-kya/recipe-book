@@ -17,6 +17,7 @@ const LANG_OPTIONS = [
 ];
 
 const CLEAR_IDLE_MS = 6000;
+const SPLIT = new Set(['paper', 'ink']);
 
 function nextRadioIndex(key, index, length) {
   if (key === 'ArrowRight' || key === 'ArrowDown') return (index + 1) % length;
@@ -99,7 +100,10 @@ function SwatchPicker({ labelledBy, theme, onSelect, names, copy }) {
         {THEME_IDS.map((id, index) => {
           const checked = index === activeIndex;
           const name = names[id] || id;
-          const swatchClass = `st-swatch${id === 'paper' ? ' st-swatch--paper' : ''}${id === 'ink' ? ' st-swatch--ink' : ''}`;
+          const t = THEMES[id];
+          // Paper and Ink covers vanish on a light or dark sheet: show them
+          // split with their accent, flat halves rather than a ring.
+          const fill = SPLIT.has(id) ? `linear-gradient(135deg, ${t.cover} 50%, ${t.accent} 50%)` : t.cover;
           return (
             <button
               key={id}
@@ -112,13 +116,13 @@ function SwatchPicker({ labelledBy, theme, onSelect, names, copy }) {
               aria-label={name}
               title={name}
               tabIndex={checked ? 0 : -1}
-              className={swatchClass}
+              className="st-swatch"
               onClick={() => choose(id)}
               onKeyDown={onKeyDown(index)}
             >
               <span
                 className="st-swatch-fill"
-                style={{ backgroundColor: THEMES[id].cover, color: THEMES[id].coverInk }}
+                style={{ background: fill, color: t.coverInk }}
               >
                 {checked && (
                   <svg viewBox="0 0 20 20" className="st-swatch-check" aria-hidden="true" focusable="false">

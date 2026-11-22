@@ -127,24 +127,6 @@
   transition: transform 120ms var(--ease-out);
 }
 
-/* Paper's cover is near-white: a flat --card disc 4px larger sits behind it. */
-.st-swatch--paper::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  background: var(--card);
-}
-
-/* Ink's cover is near-black on Ink's dark paper: same subtle flat disc. */
-html[data-theme='ink'] .st-swatch--ink::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  background: var(--card);
-}
-
 .st-swatch-fill {
   position: relative;
   display: grid;
@@ -280,6 +262,8 @@ html[data-theme='ink'] .st-switch-row[aria-checked='false'] .st-switch-knob {
 /* ---------- This device: two-step inline confirm ---------- */
 
 .st-clear-row {
+  /* the quiet button's text lines up with the headings; the armed pill bleeds into the gutter */
+  margin-inline-start: calc(var(--sp-3) * -1);
   display: flex;
   flex-wrap: wrap;
   align-items: center;

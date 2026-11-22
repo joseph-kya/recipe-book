@@ -111,8 +111,8 @@ colourways look right; never hard-code cherry.
 - Segmented track: `--card` (mint in Cherry) pill; thumb: `--primary` pill
   with `--paper` text; unselected text `--ink`. Radius `--r-pill`.
 - Swatches: 44px circles filled with each theme's cover colour (literal hex
-  from `THEMES[id].cover`; Paper's is near-white so it gets a flat `--card` disc
-  4px larger behind it, not an outline).
+  from `THEMES[id].cover`). Paper and Ink covers vanish on a light or dark sheet,
+  so those two are split diagonally with their own accent: flat halves, no ring.
 - Switch: 52×32 pill, off `--card`, on `--primary`, knob `--paper` 24px.
 - Clear button: text button in `--primary`; armed state solid `--primary`
   pill with `--paper` text.

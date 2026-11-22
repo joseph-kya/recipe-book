@@ -1,12 +1,12 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { createTapHandlers, flipLabel } from './motion.js';
 import { SunIcon } from './ornaments.jsx';
 
-// Keep-screen-on toggle. Lives in the bottom control bar.
+// Keep-screen-on toggle. Shared by the bottom control bar and Settings.
 const AWAKE_KEY = 'recipe-book:awake';
-const canWake = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
+export const canWake = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
-// Shared ref-counted screen wake lock so the bottom-bar toggle and Cook mode
+// Shared ref-counted screen wake lock so the persisted setting and Cook mode
 // never conflict, leak sentinels, or drop the lock while either still needs it.
 let holdCount = 0;
 let sentinel = null;
@@ -53,46 +53,92 @@ function detachWakeListeners() {
   document.removeEventListener('pointerdown', requestScreenLock);
 }
 
+function acquireHold() {
+  if (!canWake) return;
+  holdCount += 1;
+  if (holdCount === 1) attachWakeListeners();
+  requestScreenLock();
+}
+
+function releaseHold() {
+  if (!canWake) return;
+  holdCount = Math.max(0, holdCount - 1);
+  if (holdCount === 0) {
+    detachWakeListeners();
+    const activeLock = sentinel;
+    sentinel = null;
+    activeLock?.release().catch(() => {});
+  }
+}
+
 // Holds a screen wake lock while active, re-acquiring it on visibility, pageshow, or tap.
 export function useHoldWakeLock(active) {
   useEffect(() => {
     if (!active || !canWake) return;
-    holdCount += 1;
-    if (holdCount === 1) attachWakeListeners();
-    requestScreenLock();
-    return () => {
-      holdCount = Math.max(0, holdCount - 1);
-      if (holdCount === 0) {
-        detachWakeListeners();
-        const activeLock = sentinel;
-        sentinel = null;
-        activeLock?.release().catch(() => {});
-      }
-    };
+    acquireHold();
+    return releaseHold;
   }, [active]);
 }
 
-function useWakeLock() {
-  const [on, setOn] = useState(() => {
-    try {
-      return canWake && localStorage.getItem(AWAKE_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem(AWAKE_KEY, on ? '1' : '0');
-    } catch {
-      /* private mode */
-    }
-  }, [on]);
-  useHoldWakeLock(on);
-  return [on, setOn];
+function readSavedAwake() {
+  try {
+    return canWake && localStorage.getItem(AWAKE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+// Module store so the bar's sun and Settings' switch stay in sync and hold the
+// screen lock at most once regardless of how many components subscribe.
+const awakeListeners = new Set();
+let awakeOn = readSavedAwake();
+let awakeHolding = false;
+
+function syncAwakeHold() {
+  const shouldHold = awakeOn && awakeListeners.size > 0;
+  if (shouldHold && !awakeHolding) {
+    awakeHolding = true;
+    acquireHold();
+  } else if (!shouldHold && awakeHolding) {
+    awakeHolding = false;
+    releaseHold();
+  }
+}
+
+function subscribeAwake(fn) {
+  awakeListeners.add(fn);
+  syncAwakeHold();
+  return () => {
+    awakeListeners.delete(fn);
+    syncAwakeHold();
+  };
+}
+
+function getAwake() {
+  return awakeOn;
+}
+
+function setAwake(next) {
+  const value = Boolean(typeof next === 'function' ? next(awakeOn) : next);
+  if (!canWake && value) return;
+  if (value === awakeOn) return;
+  awakeOn = value;
+  try {
+    localStorage.setItem(AWAKE_KEY, awakeOn ? '1' : '0');
+  } catch {
+    /* private mode */
+  }
+  syncAwakeHold();
+  for (const fn of awakeListeners) fn();
+}
+
+export function useAwake() {
+  const on = useSyncExternalStore(subscribeAwake, getAwake, () => false);
+  return [on, setAwake];
 }
 
 export function AwakeToggle({ label }) {
-  const [on, setOn] = useWakeLock();
+  const [on, setOn] = useAwake();
   const btnRef = useRef(null);
   const inRef = useRef(null);
   const outRef = useRef(null);

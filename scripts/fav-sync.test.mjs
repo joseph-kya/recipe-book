@@ -233,17 +233,29 @@ test('reset/undo and sync copy exist in EN, Austrian DE (du), and FR with label-
   assert.notEqual(syncText.fr.signIn, syncText.en.signIn);
 });
 
-test('Firebase is only ever imported dynamically, and the entry is mounted on Contents', () => {
+test('Firebase is only ever imported dynamically, and SyncEntry is mounted lazily in Settings', () => {
   const read = (p) => readFileSync(new URL(`../src/${p}`, import.meta.url), 'utf8');
   const session = read('auth/session.js');
   assert.match(session, /import\('\.\/sync\.js'\)/);
-  for (const p of ['auth/session.js', 'auth/SyncEntry.jsx', 'auth/config.js', 'auth/merge.js', 'fav.js', 'Contents.jsx', 'RecipeFav.jsx']) {
+  for (const p of [
+    'auth/session.js',
+    'auth/SyncEntry.jsx',
+    'auth/config.js',
+    'auth/merge.js',
+    'fav.js',
+    'Contents.jsx',
+    'RecipeFav.jsx',
+    'Settings.jsx',
+    'SettingsSections.jsx',
+  ]) {
     assert.doesNotMatch(read(p), /from ['"]firebase/, `${p} must not statically import firebase`);
     assert.doesNotMatch(read(p), /from ['"]\.\/sync\.js['"]/, `${p} must not statically import sync.js`);
   }
   assert.match(read('auth/sync.js'), /firebase\/firestore\/lite/);
-  assert.match(read('Contents.jsx'), /<SyncEntry lang=\{lang\} \/>/);
-  assert.match(read('Contents.jsx'), /\{withTitle && <SyncEntry lang=\{lang\} className="sync-entry--list" \/>\}/);
+  assert.doesNotMatch(read('Contents.jsx'), /SyncEntry/);
+  assert.match(read('Book.jsx'), /import\(['"]\.\/Settings\.jsx['"]\)/, 'Settings (and SyncEntry) load lazily');
+  assert.match(read('Settings.jsx'), /SettingsSections/);
+  assert.match(read('SettingsSections.jsx'), /<SyncEntry\b/);
   assert.match(read('auth/SyncEntry.jsx'), /if \(!authEnabled\) return null;/);
 
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');

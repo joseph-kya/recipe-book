@@ -1,8 +1,14 @@
 {
   "name": "recipe-book",
+  "description": "A flip-through retro diner baking recipe book (EN/DE/FR, cups-first, offline PWA).",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": "https://joseph-kya.github.io/recipe-book/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joseph-kya/recipe-book.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

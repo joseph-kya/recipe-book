@@ -54,9 +54,8 @@ Two ways in, both open the same sheet:
  └──────────────────────────────┘
 ```
 
-Left aligned throughout. Section headings in Lilita One (`--display-2` or the
-token the app already uses for small display), body in Nunito, hints in Kalam
-(`--hand`/cue colour). No section cards, no dividers: space separates sections
+Left aligned throughout. Title in Shrikhand (`--display`), section headings in Lilita One
+(`--badge`), body in Nunito (`--body`), hints in Kalam (`--hand`, `--cue` colour). No section cards, no dividers: space separates sections
 (`--sp-5` between, `--sp-2` heading→control). The sheet scrolls inside itself;
 on a 390×844 phone everything up to "Keep the screen on" sits above the fold.
 
@@ -112,8 +111,8 @@ colourways look right; never hard-code cherry.
 - Segmented track: `--card` (mint in Cherry) pill; thumb: `--primary` pill
   with `--paper` text; unselected text `--ink`. Radius `--r-pill`.
 - Swatches: 44px circles filled with each theme's cover colour (literal hex
-  from `THEMES[id].cover`; Paper's is near-white so it gets a `--card` fill
-  ring-free backing disc 2px larger — a flat disc behind, not an outline).
+  from `THEMES[id].cover`; Paper's is near-white so it gets a flat `--card` disc
+  4px larger behind it, not an outline).
 - Switch: 52×32 pill, off `--card`, on `--primary`, knob `--paper` 24px.
 - Clear button: text button in `--primary`; armed state solid `--primary`
   pill with `--paper` text.
@@ -157,19 +156,18 @@ the app already does.
 | grams | Grams | Gramm | Grammes |
 | colours | Colours | Farben | Couleurs |
 | awake | Keep the screen on | Bildschirm anlassen | Garder l’écran allumé |
-| awakeHint | While you bake, your phone won’t dim. | Beim Backen wird dein Handy nicht dunkel. | Pendant que tu cuisines, l’écran reste allumé. |
+| awakeHint | While you bake, your phone won’t dim. | Beim Backen wird dein Handy nicht dunkel. | Pendant que vous cuisinez, l’écran reste allumé. |
 | sync | Sync | Sync | Synchro |
-| syncHint | Sign in to keep favourites and bakers on all your devices. | Melde dich an, damit Favoriten und Bäcker:innen auf all deinen Geräten bleiben. | Connecte-toi pour retrouver tes favoris et tes pâtissiers sur tous tes appareils. |
+| syncHint | Sign in to keep favourites and bakers on all your devices. | Melde dich an, damit Favoriten und Bäcker:innen auf all deinen Geräten bleiben. | Connectez-vous pour retrouver vos favoris et vos pâtissiers sur tous vos appareils. |
 | feedback | Feedback | Feedback | Avis |
 | device | This device | Dieses Gerät | Cet appareil |
 | clear | Clear this device | Gerät zurücksetzen | Effacer cet appareil |
-| clearHint | Removes favourites, ticked steps, timers, bakers and settings here. Nothing in your account is deleted. | Entfernt hier Favoriten, abgehakte Schritte, Timer, Bäcker:innen und Einstellungen. In deinem Konto wird nichts gelöscht. | Supprime ici favoris, étapes cochées, minuteurs, pâtissiers et réglages. Rien n’est supprimé de ton compte. |
+| clearHint | Removes favourites, ticked steps, timers, bakers and settings here. Nothing in your account is deleted. | Entfernt hier Favoriten, abgehakte Schritte, Timer, Bäcker:innen und Einstellungen. In deinem Konto wird nichts gelöscht. | Supprime ici favoris, étapes cochées, minuteurs, pâtissiers et réglages. Rien n’est supprimé de votre compte. |
 | clearConfirm | Clear everything | Alles löschen | Tout effacer |
 | clearCancel | Keep it | Behalten | Garder |
 | themeNow(name) | Colours: {name} | Farben: {name} | Couleurs : {name} |
 
-French uses "tu" as the rest of the app does (check `src/i18n.js` and match
-whichever form it uses; if it uses "vous", convert these lines to "vous").
+French uses "vous", as the rest of the app does.
 Language chip names are endonyms in every language: English, Deutsch, Français.
 
 ## Code contracts (so slices can work in parallel)

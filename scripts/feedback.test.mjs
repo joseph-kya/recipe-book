@@ -155,8 +155,11 @@ test('sheet and entry copy exists in EN, Austrian DE (du), and FR', () => {
 
 test('entries are quiet, lazy and hidden without Firebase; the link is never fetched', () => {
   const contents = read('src/Contents.jsx');
-  assert.match(contents, /<FeedbackEntry lang=\{lang\} \/>/);
-  assert.match(contents, /\{withTitle && <FeedbackEntry lang=\{lang\} className="fb-entry--list" \/>\}/);
+  assert.doesNotMatch(contents, /FeedbackEntry/);
+  const book = read('src/Book.jsx');
+  assert.match(book, /import\(['"]\.\/Settings\.jsx['"]\)/, 'Settings (and FeedbackEntry) stay out of the initial bundle');
+  const sections = read('src/SettingsSections.jsx');
+  assert.match(sections, /<FeedbackEntry\b/);
 
   const entry = read('src/auth/FeedbackEntry.jsx');
   assert.match(entry, /if \(!authEnabled\) return null;/);

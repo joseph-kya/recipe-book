@@ -15,6 +15,8 @@ const expectedTitle = (route, lang) => {
   return page ? `${page} · ${ui[lang].bookTitleFlat}` : ui[lang].bookTitleFlat;
 };
 
+const LANG_ENDONYMS = { en: 'English', de: 'Deutsch', fr: 'Français' };
+
 async function checkDocument(page, route, lang) {
   await page.waitForFunction(({ title, lang }) =>
     document.title === title && document.documentElement.lang === lang,
@@ -36,25 +38,35 @@ try {
       });
       await context.addInitScript((value) => localStorage.setItem('recipe-book:lang', value), lang);
       const page = await context.newPage();
-      for (const route of ['', 'contents', 'brownies', 'cinnamon-rolls']) {
-        await page.goto(new URL(`#/${route}`, baseURL).href);
-        await checkDocument(page, route, lang);
-        await page.evaluate(() => document.fonts.ready);
-        // Let font measurement, pagination and the reduced-motion crossfade settle.
-        await page.waitForTimeout(500);
+      const recordAxe = async (label) => {
         const result = await new AxeBuilder({ page }).analyze();
-        console.log(`${viewport.width}x${viewport.height} ${lang} #/${route}: ${result.violations.length} violations`);
+        console.log(`${viewport.width}x${viewport.height} ${lang} ${label}: ${result.violations.length} violations`);
         for (const violation of result.violations) {
           violations++;
           console.log(`  ${violation.id} [${violation.impact}]: ${violation.nodes.length} nodes`);
           for (const node of violation.nodes) console.log(`    ${node.target.join(' > ')}`);
           if (['serious', 'critical'].includes(violation.impact)) failures++;
         }
+      };
+      for (const route of ['', 'contents', 'brownies', 'cinnamon-rolls']) {
+        await page.goto(new URL(`#/${route}`, baseURL).href);
+        await checkDocument(page, route, lang);
+        await page.evaluate(() => document.fonts.ready);
+        // Let font measurement, pagination and the reduced-motion crossfade settle.
+        await page.waitForTimeout(500);
+        await recordAxe(`#/${route}`);
       }
-      // Verify live language, units and wake-lock controls, plus pushState navigation.
+      // Verify Settings sheet (axe + live language switch), units, wake-lock, and pushState navigation.
       const otherLang = nextLang(lang);
-      await page.locator('.lang-btn').click();
+      await page.locator('.ctl--settings').click();
+      const dialog = page.locator('[role="dialog"].settings-sheet');
+      await dialog.waitFor({ state: 'visible' });
+      await page.waitForTimeout(200);
+      await recordAxe('settings');
+      await dialog.getByRole('radio', { name: LANG_ENDONYMS[otherLang], exact: true }).click();
       await checkDocument(page, 'cinnamon-rolls', otherLang);
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden' });
       await page.locator('.unit-btn').click();
       assert.equal(await page.locator('.unit-btn').innerText(), 'g');
       await page.locator('.ctl--awake').click();

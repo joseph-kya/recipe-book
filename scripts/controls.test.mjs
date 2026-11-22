@@ -13,12 +13,13 @@ const paginateSrc = readFileSync(new URL('../src/paginate.js', import.meta.url),
 const stylesCss = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
 const motionCss = readFileSync(new URL('../src/motion.css', import.meta.url), 'utf8');
 
-test('Controls uses compact single-button tap toggles for language and units instead of sliders', () => {
+test('Controls uses a settings button and compact single-button tap toggle for units instead of sliders', () => {
   assert.doesNotMatch(controlsSrc, /Segments|slidePill|seg-indicator|role="group"/);
+  assert.doesNotMatch(controlsSrc, /lang-btn/);
   assert.match(controlsSrc, /function TapToggle/);
-  assert.match(controlsSrc, /className="lang-btn"/);
+  assert.match(controlsSrc, /ctl--settings/);
+  assert.match(controlsSrc, /openSettings\(/);
   assert.match(controlsSrc, /className="unit-btn"/);
-  assert.match(controlsSrc, /setLang\(nextLang\(lang\)\)/);
   assert.match(controlsSrc, /setUnits\(units === 'cups' \? 'metric' : 'cups'\)/);
 });
 

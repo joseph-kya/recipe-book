@@ -226,22 +226,32 @@ for (const vp of VIEWPORTS) {
         await page.goto(`${baseURL}#/r/fudge-brownies`);
         await waitForRest(page);
 
-        // Switch EN -> DE -> FR -> EN
-        const langBtn = page.locator('.lang-btn');
+        // Switch EN -> DE -> FR -> EN inside the Settings sheet
+        const settingsBtn = page.locator('.ctl--settings');
         assert.equal(await page.evaluate(() => document.documentElement.lang), 'en');
-        await langBtn.click();
+        await settingsBtn.click();
+        const dialog = page.locator('[role="dialog"].settings-sheet');
+        await dialog.waitFor({ state: 'visible' });
+
+        await dialog.getByRole('radio', { name: 'Deutsch', exact: true }).click();
         await page.waitForFunction(() => document.documentElement.lang === 'de');
-        assert.equal((await page.locator('.lang-btn .ctl-flip--in').textContent()).trim(), 'DE');
+        assert.equal(await dialog.getByRole('radio', { name: 'Deutsch', exact: true }).getAttribute('aria-checked'), 'true');
         assert.match(await page.title(), /Josephs Rezeptbuch/);
 
-        await langBtn.click();
+        await dialog.getByRole('radio', { name: 'Français', exact: true }).click();
         await page.waitForFunction(() => document.documentElement.lang === 'fr');
-        assert.equal((await page.locator('.lang-btn .ctl-flip--in').textContent()).trim(), 'FR');
+        assert.equal(await dialog.getByRole('radio', { name: 'Français', exact: true }).getAttribute('aria-checked'), 'true');
         assert.match(await page.title(), /Les recettes de Joseph/);
 
-        await langBtn.click();
+        await dialog.getByRole('radio', { name: 'English', exact: true }).click();
         await page.waitForFunction(() => document.documentElement.lang === 'en');
-        assert.equal((await page.locator('.lang-btn .ctl-flip--in').textContent()).trim(), 'EN');
+        assert.equal(await dialog.getByRole('radio', { name: 'English', exact: true }).getAttribute('aria-checked'), 'true');
+        assert.match(await page.title(), /Joseph's Recipe Book/);
+
+        await page.keyboard.press('Escape');
+        await dialog.waitFor({ state: 'hidden' });
+        const focusReturned = await page.evaluate(() => document.activeElement?.classList.contains('ctl--settings') ?? false);
+        assert.equal(focusReturned, true, 'closing Settings with Escape returns focus to .ctl--settings');
 
         // Cups <-> Grams toggle + reload persistence + PDF download switch
         const firstAmount = page.locator('.face--rest .ing-how-live .ing-amount').first();
@@ -478,5 +488,72 @@ for (const vp of VIEWPORTS) {
         await context.close();
       }
     });
+
+    if (vp.isMobile) {
+      test('open Settings from Contents on 390, change colourway and units', async () => {
+        const { context, page, errors } = await newViewportPage(vp);
+        try {
+          await page.goto(`${baseURL}#/contents`);
+          await waitForRest(page);
+
+          const entryBtn = page.locator('.face--rest button.settings-entry, .face--rest .settings-entry button').first();
+          await ((await entryBtn.count()) > 0 ? entryBtn : page.locator('.face--rest .settings-entry').first()).click();
+          const dialog = page.locator('[role="dialog"].settings-sheet');
+          await dialog.waitFor({ state: 'visible' });
+
+          assert.equal(await page.evaluate(() => document.documentElement.dataset.theme || 'cherry'), 'cherry');
+          await dialog.getByRole('radio', { name: 'Blue plate', exact: true }).click();
+          await page.waitForFunction(() => document.documentElement.dataset.theme === 'blueplate');
+
+          await dialog.getByRole('radio', { name: 'Grams', exact: true }).click();
+          await page.waitForFunction(() => document.querySelector('.unit-btn .ctl-flip--in')?.textContent?.trim() === 'g');
+          assert.equal((await page.locator('.unit-btn .ctl-flip--in').textContent()).trim(), 'g');
+
+          await page.keyboard.press('Escape');
+          await dialog.waitFor({ state: 'hidden' });
+          assert.deepEqual(errors, []);
+        } finally {
+          await context.close();
+        }
+      });
+
+      test('Settings agrees with the cupcake and the bar, and clears the device in two taps', async () => {
+        const { context, page, errors } = await newViewportPage(vp);
+        try {
+          await page.goto(baseURL);
+          await waitForRest(page);
+
+          // The cover cupcake cycles the colourway; Settings shows the same one.
+          await page.locator('.face--rest .cover-cupcake-btn').click();
+          await page.waitForFunction(() => document.documentElement.dataset.theme === 'blueplate');
+          await page.locator('.ctl--settings').click();
+          const dialog = page.locator('[role="dialog"].settings-sheet');
+          await dialog.waitFor({ state: 'visible' });
+          assert.equal(await dialog.getByRole('radio', { name: 'Blue plate', exact: true }).getAttribute('aria-checked'), 'true');
+
+          // The keep-awake switch and the bar's sun are one setting.
+          const awake = dialog.getByRole('switch');
+          if (await awake.count()) {
+            await awake.click();
+            assert.equal(await awake.getAttribute('aria-checked'), 'true');
+            assert.equal(await page.locator('.ctl--awake').getAttribute('aria-pressed'), 'true');
+          }
+
+          // First tap only arms; the second clears and reloads to defaults.
+          await dialog.getByRole('button', { name: 'Clear this device', exact: true }).click();
+          assert.ok(await page.evaluate(() => localStorage.getItem('recipe-book:theme') === 'blueplate'));
+          await Promise.all([
+            page.waitForEvent('load'),
+            dialog.getByRole('button', { name: 'Clear everything', exact: true }).click(),
+          ]);
+          await waitForRest(page);
+          assert.equal(await page.evaluate(() => document.documentElement.dataset.theme || 'cherry'), 'cherry');
+          assert.equal(await page.evaluate(() => localStorage.getItem('recipe-book:theme')), null);
+          assert.deepEqual(errors, []);
+        } finally {
+          await context.close();
+        }
+      });
+    }
   });
 }

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { Suspense, lazy, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { recipes, textFor } from './content.js';
 import { ui } from './i18n.js';
 import { buildSpreads, firstIndexFor, hashForSpread, routeOfHash, spreadMatchesRoute } from './layout.js';
@@ -10,6 +10,9 @@ import Controls from './Controls.jsx';
 import CookMode from './CookMode.jsx';
 import { PrintRecipe } from './Share.jsx';
 import { enterPage, swapContent, transition } from './motion.js';
+import { closeSettings, settingsTrigger, useSettingsOpen } from './settings-store.js';
+
+const SettingsSheet = lazy(() => import('./Settings.jsx'));
 
 const WIDE_QUERY = '(min-width: 960px) and (min-height: 560px)';
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
@@ -107,6 +110,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
   const [announce, setAnnounce] = useState('');
   const [barAway, setBarAway] = useState(false); // phone: control bar tucked away while reading
   const [cookState, setCookState] = useState(null); // { recipe, initialStep } | null
+  const settingsOpen = useSettingsOpen();
   const [printRecipe, setPrintRecipe] = useState(() => spreads[index]?.recipe || null);
   const bookRef = useRef(null);
   const measureRef = useRef(null);
@@ -150,12 +154,14 @@ export default function Book({ lang, setLang, units, setUnits }) {
     repaginating: false,
     planCache: new Map(),
     cookOpen: false,
+    settingsOpen: false,
   }).current;
   s.wide = wide;
   s.reduce = reduce;
   s.lang = lang;
   s.scales = scales;
   s.cookOpen = Boolean(cookState);
+  s.settingsOpen = settingsOpen;
   s.renderedIndex = index;
   s.barAway = barAway;
   const last = () => s.spreads.length - 1;
@@ -713,10 +719,11 @@ export default function Book({ lang, setLang, units, setUnits }) {
     };
   }, [navigate, s]);
 
-  // ← / → turn pages, unless someone is typing or Cook mode is open.
+  // ← / → turn pages, unless someone is typing or Cook mode / Settings is open.
   useEffect(() => {
     const onKey = (e) => {
       if (s.cookOpen) return;
+      if (s.settingsOpen) return;
       if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
       if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
       if (e.key === 'ArrowRight') {
@@ -902,6 +909,7 @@ export default function Book({ lang, setLang, units, setUnits }) {
 
     const onPointerDown = (e) => {
       if (s.cookOpen) return;
+      if (s.settingsOpen) return;
       // A tap near the bottom edge asks for the bar.
       if (!s.wide && s.barAway && e.clientY > s.viewportHeight - 96) {
         s.barAway = false;
@@ -1118,6 +1126,12 @@ export default function Book({ lang, setLang, units, setUnits }) {
     setCookState(null);
   }, []);
 
+  const handleCloseSettings = useCallback(() => {
+    const trigger = settingsTrigger();
+    closeSettings();
+    if (trigger?.isConnected) trigger.focus();
+  }, []);
+
   const handleShowBar = useCallback(() => {
     if (s.barAway) {
       s.barAway = false;
@@ -1291,7 +1305,6 @@ export default function Book({ lang, setLang, units, setUnits }) {
         )}
         <MemoControls
           lang={lang}
-          setLang={handleSetLang}
           units={units}
           setUnits={handleSetUnits}
           index={activeIndex}
@@ -1314,6 +1327,17 @@ export default function Book({ lang, setLang, units, setUnits }) {
           initialStep={cookState.initialStep}
           onClose={closeCookMode}
         />
+      )}
+      {settingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsSheet
+            lang={lang}
+            setLang={handleSetLang}
+            units={units}
+            setUnits={handleSetUnits}
+            onClose={handleCloseSettings}
+          />
+        </Suspense>
       )}
     </>
   );

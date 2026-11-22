@@ -1,0 +1,420 @@
+/* Settings sheet body sections (src/SettingsSections.jsx).
+   Flat retro diner controls using theme tokens only (except the six colourway
+   swatch fills): no outlines, rings, ribbons, chevrons, glows or shadows. */
+
+.st-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  text-align: left;
+  color: var(--ink);
+  font-family: var(--body);
+}
+
+.st-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-2);
+}
+
+.st-heading {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--badge);
+  font-size: var(--fs-m);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.st-hint {
+  margin: 0;
+  color: var(--cue);
+  font-family: var(--hand);
+  font-size: var(--fs-s);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+/* ---------- Segmented radiogroup (Language, Amounts) ---------- */
+
+.st-seg {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--st-seg-count, 2), minmax(0, 1fr));
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+}
+
+.st-seg-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--st-seg-count, 2));
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  transform: translateX(calc(var(--st-seg-index, 0) * 100%));
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+}
+
+.st-seg-btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-2);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: var(--fs-s);
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 180ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.st-seg-btn[aria-checked='true'] {
+  color: var(--on-primary, var(--paper));
+}
+
+.st-seg-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Colourway swatches ---------- */
+
+.st-colours {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.st-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.st-swatch {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms var(--ease-out);
+}
+
+.st-swatch-fill {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+}
+
+.st-swatch-check {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+}
+
+.st-swatch:active {
+  transform: scale(0.97);
+}
+
+.st-theme-name {
+  margin: 0;
+  color: var(--cue);
+  font-family: var(--hand);
+  font-size: var(--fs-m);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* ---------- Keep the screen on switch ---------- */
+
+.st-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-m);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms var(--ease-out);
+}
+
+.st-switch-row:active {
+  transform: scale(0.97);
+}
+
+.st-switch-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.st-switch-label {
+  display: block;
+}
+
+.st-switch {
+  display: flex;
+  align-items: center;
+  width: 3.25rem;
+  height: 2rem;
+  flex: none;
+  padding: 0.25rem;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  transition: background-color 180ms ease;
+}
+
+.st-switch-row[aria-checked='true'] .st-switch {
+  background: var(--primary);
+}
+
+.st-switch-knob {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--paper);
+  transform: translateX(0);
+  transition:
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 180ms ease;
+}
+
+.st-switch-row[aria-checked='true'] .st-switch-knob {
+  transform: translateX(1.25rem);
+}
+
+/* Paper's --paper is very close to --card; --ground is crisp white on both states. */
+html[data-theme='paper'] .st-switch-knob {
+  background: var(--ground);
+}
+
+/* Ink's --paper is close to --card when off; keep the off knob legible. */
+html[data-theme='ink'] .st-switch-row[aria-checked='false'] .st-switch-knob {
+  background: var(--ink-soft);
+}
+
+/* ---------- Sync & Feedback entries inside Settings ---------- */
+
+.sync-entry--settings,
+.fb-entry--settings {
+  justify-content: flex-start;
+  gap: var(--sp-2);
+  color: var(--ink);
+  font-size: var(--fs-s);
+}
+
+.sync-entry--settings .sync-btn,
+.fb-entry--settings .sync-btn {
+  padding: 0 var(--sp-4);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 800;
+  transition:
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.sync-entry--settings .sync-btn:active,
+.fb-entry--settings .sync-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---------- This device: two-step inline confirm ---------- */
+
+.st-clear-row {
+  /* the quiet button's text lines up with the headings; the armed pill bleeds into the gutter */
+  margin-inline-start: calc(var(--sp-3) * -1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.st-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--primary);
+  font-family: var(--body);
+  font-size: var(--fs-s);
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+.st-clear-btn--armed {
+  background: var(--primary);
+  color: var(--on-primary, var(--paper));
+}
+
+.st-clear-btn:active {
+  transform: scale(0.97);
+}
+
+.st-clear-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.st-clear-cancel:active {
+  transform: scale(0.97);
+}
+
+.st-clear-hint:empty {
+  display: none;
+}
+
+/* ---------- Keyboard-only focus (matches .sync-btn) ---------- */
+
+.st-seg-btn:focus-visible,
+.st-swatch:focus-visible,
+.st-switch-row:focus-visible,
+.st-clear-btn:focus-visible,
+.st-clear-cancel:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---------- Fine-pointer hover only ---------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .st-seg-btn[aria-checked='false']:hover {
+    color: var(--primary-ink);
+  }
+  .st-swatch:hover {
+    transform: scale(1.05);
+  }
+  .st-swatch:active {
+    transform: scale(0.97);
+  }
+  .sync-entry--settings .sync-btn:hover,
+  .fb-entry--settings .sync-btn:hover {
+    background: color-mix(in srgb, var(--ink) 8%, var(--card));
+    color: var(--ink);
+  }
+  .st-clear-btn:not(.st-clear-btn--armed):hover {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+  .st-clear-btn--armed:hover {
+    background: var(--primary-ink);
+  }
+  .st-clear-cancel:hover {
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    color: var(--ink);
+  }
+}
+
+/* ---------- Reduced motion: no transforms, colour transitions stay ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .st-seg-thumb {
+    transition: none;
+  }
+  .st-seg-btn {
+    transition: color 180ms var(--ease-out);
+  }
+  .st-swatch {
+    transition: none;
+  }
+  .st-switch-row {
+    transition: none;
+  }
+  .st-switch-knob {
+    transition: background-color 180ms ease;
+  }
+  .sync-entry--settings .sync-btn,
+  .fb-entry--settings .sync-btn {
+    transition:
+      background-color 140ms var(--ease-out),
+      color 140ms var(--ease-out);
+  }
+  .st-clear-btn {
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+  .st-clear-cancel {
+    transition:
+      background-color 140ms var(--ease-out),
+      color 140ms var(--ease-out);
+  }
+  .st-seg-btn:active,
+  .st-swatch:is(:hover, :active),
+  .st-switch-row:active,
+  .sync-entry--settings .sync-btn:active,
+  .fb-entry--settings .sync-btn:active,
+  .st-clear-btn:active,
+  .st-clear-cancel:active {
+    transform: none;
+  }
+}

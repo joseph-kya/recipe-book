@@ -2173,6 +2173,21 @@ button {
   gap: 0.35rem;
 }
 
+/* settings: flat round icon button matching the keep-awake slot */
+.ctl--settings {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  color: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, transform var(--press) var(--ease-out);
+}
+
+.ctl--settings .ctl-icon {
+  display: block;
+}
+
 /* keep-awake: a flat round toggle, filled while the screen is held on */
 .ctl--awake {
   width: 3rem;
@@ -2388,7 +2403,7 @@ button {
     min-width: 44px;
     min-height: 44px;
   }
-  .controls--narrow :is(.ctl--turn, .ctl--contents, .ctl--awake) {
+  .controls--narrow :is(.ctl--turn, .ctl--contents, .ctl--settings, .ctl--awake) {
     width: 44px;
     height: 44px;
   }
@@ -2422,7 +2437,7 @@ button {
   .controls--narrow .ctl--next {
     order: 3;
   }
-  .controls--narrow :is(.ctl--toggle, .ctl--awake) {
+  .controls--narrow :is(.ctl--settings, .ctl--toggle, .ctl--awake) {
     order: 4;
   }
 }
@@ -2530,10 +2545,10 @@ button {
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
   }
-  .controls--wide :is(.ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
+  .controls--wide :is(.ctl--settings, .ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
     background-color: color-mix(in srgb, var(--table-ink) 14%, transparent);
   }
-  .controls--narrow :is(.ctl--contents:not([aria-current='page']), .ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
+  .controls--narrow :is(.ctl--contents:not([aria-current='page']), .ctl--settings, .ctl--toggle, .ctl--awake:not([aria-pressed='true'])):hover {
     background-color: color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
@@ -2841,6 +2856,7 @@ button {
   .btn,
   .toc-text,
   .ctl--turn,
+  .ctl--settings,
   .ctl--toggle,
   .ctl--awake,
   .ctl--awake .ctl-icon,

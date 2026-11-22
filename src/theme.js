@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { transition } from './motion.js';
 
 // Six colourways: four diner palettes plus two restrained monochrome themes
@@ -117,6 +117,21 @@ const current = () => {
   return THEME_IDS.includes(t) ? t : DEFAULT_THEME;
 };
 
+// Shared store so the cover cupcake and Settings always agree.
+const listeners = new Set();
+let activeTheme = current();
+
+function subscribeTheme(fn) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+function getTheme() {
+  const dom = current();
+  if (dom !== activeTheme) activeTheme = dom;
+  return activeTheme;
+}
+
 // Set the attribute the CSS reads and the browser bar colour. index.html does
 // the same before first paint, so a saved colourway never flashes the default.
 function applyTheme(id) {
@@ -127,21 +142,23 @@ function applyTheme(id) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', GROUNDS[safe]);
 }
 
+function setTheme(id) {
+  if (!THEME_IDS.includes(id) || id === getTheme()) return;
+  // The shared crossfade: the whole book changes colour in one fade,
+  // interruptible, instant under reduced motion.
+  transition(() => {
+    applyTheme(id);
+    activeTheme = id;
+    for (const fn of listeners) fn();
+  });
+  try {
+    localStorage.setItem(KEY, id);
+  } catch {
+    /* storage blocked: the choice lasts this visit */
+  }
+}
+
 export function useTheme() {
-  const [theme, setThemeState] = useState(current);
-  const setTheme = useCallback((id) => {
-    if (!THEME_IDS.includes(id) || id === current()) return;
-    // The shared crossfade: the whole book changes colour in one fade,
-    // interruptible, instant under reduced motion.
-    transition(() => {
-      applyTheme(id);
-      setThemeState(id);
-    });
-    try {
-      localStorage.setItem(KEY, id);
-    } catch {
-      /* storage blocked: the choice lasts this visit */
-    }
-  }, []);
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, () => DEFAULT_THEME);
   return [theme, setTheme];
 }
